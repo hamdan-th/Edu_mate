@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "251441781427",
+    "project_id": "edu-mate12",
+    "storage_bucket": "edu-mate12.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251441781427:android:1773c2289d1c6b5607eec6",
+        "android_client_info": {
+          "package_name": "com.example.edu_mate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBI8ya3anshxSdj8LZIEqOl7AxEyoaulxA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
