@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../home/groups_screen.dart';
+import '../../services/app_link_handler.dart';
+import '../groups/groups_screen.dart';
 import '../library/library_main_screen.dart';
 import 'feed_screen.dart';
 
@@ -22,6 +23,22 @@ class _MainNavScreenState extends State<MainNavScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        AppLinkHandler.init(context);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    AppLinkHandler.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -32,10 +49,12 @@ class _MainNavScreenState extends State<MainNavScreen> {
           final offsetAnimation = Tween<Offset>(
             begin: const Offset(0.06, 0),
             end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          ));
+          ).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            ),
+          );
 
           return FadeTransition(
             opacity: animation,

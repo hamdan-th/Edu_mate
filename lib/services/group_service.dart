@@ -1,109 +1,244 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/group_model.dart';
+import '../models/group_message_model.dart';
+
 class GroupService {
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  GroupService._();
+
+  static final FirebaseFirestore _db = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  static User get _currentUser {
+  static String get currentUid {
     final user = _auth.currentUser;
     if (user == null) {
       throw Exception('المستخدم غير مسجل دخول');
     }
-    return user;
+    return user.uid;
   }
 
-  static String get uid => _currentUser.uid;
-
   static CollectionReference<Map<String, dynamic>> get _groups =>
-      _firestore.collection('groups');
+      _db.collection('groups');
 
   static CollectionReference<Map<String, dynamic>> get _users =>
-      _firestore.collection('users');
+      _db.collection('users');
 
-  static Future<DocumentReference<Map<String, dynamic>>> _findUserDocRefByUid(
-      String userId,
+  static Future<DocumentReference<Map<String, dynamic>>> _userRefByUid(
+      String uid,
       ) async {
-    final byIdRef = _users.doc(userId);
-    final byIdSnap = await byIdRef.get();
+    final directRef = _users.doc(uid);
+    final directSnap = await directRef.get();
 
-    if (byIdSnap.exists) return byIdRef;
+    if (directSnap.exists) return directRef;
 
-    final query = await _users.where('uid', isEqualTo: userId).limit(1).get();
+    final query = await _users.where('uid', isEqualTo: uid).limit(1).get();
     if (query.docs.isNotEmpty) {
       return query.docs.first.reference;
     }
 
-    return byIdRef;
+    return directRef;
   }
 
-  static Future<String> _getUserDisplayName(String userId) async {
-    final userRef = await _findUserDocRefByUid(userId);
-    final snap = await userRef.get();
+  static Future<String> _userDisplayName(String uid) async {
+    final ref = await _userRefByUid(uid);
+    final snap = await ref.get();
     final data = snap.data() ?? {};
 
     return (data['displayName'] ??
         data['fullName'] ??
         data['username'] ??
-        (userId == uid ? _currentUser.displayName : null) ??
-        (userId == uid ? _currentUser.email : null) ??
+        _auth.currentUser?.displayName ??
+        _auth.currentUser?.email ??
         'User')
         .toString();
+  }
+
+  static String _generateInviteCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final rand = Random();
+    return List.generate(8, (_) => chars[rand.nextInt(chars.length)]).join();
+  }
+
+  static String buildInviteLink({
+    required String groupId,
+    required String inviteCode,
+  }) {
+    return 'edumate://invite?groupId=$groupId&code=$inviteCode';
+  }
+
+  static Stream<List<GroupModel>> streamMyGroups() {
+    final stream = Stream.fromFuture(_userRefByUid(currentUid)).asyncExpand(
+          (userRef) {
+        return userRef.collection('joined_groups').snapshots().asyncMap(
+              (joinedSnap) async {
+            final ids = joinedSnap.docs.map((e) => e.id).toSet();
+
+            if (ids.isEmpty) return <GroupModel>[];
+
+            final docs = await Future.wait(ids.map((id) => _groups.doc(id).get()));
+
+            final result = <GroupModel>[];
+            for (final doc in docs) {
+              try {
+                if (!doc.exists) continue;
+                final group = GroupModel.fromDoc(doc);
+                if (group.id.isNotEmpty && group.isActive) {
+                  result.add(group);
+                }
+              } catch (_) {}
+            }
+
+            result.sort((a, b) {
+              final aTime = a.createdAt?.millisecondsSinceEpoch ?? 0;
+              final bTime = b.createdAt?.millisecondsSinceEpoch ?? 0;
+              return bTime.compareTo(aTime);
+            });
+
+            return result;
+          },
+        );
+      },
+    );
+
+    return stream.asBroadcastStream();
+  }
+
+  static Stream<List<GroupModel>> streamDiscoverGroups({String search = ''}) {
+    final queryText = search.trim().toLowerCase();
+
+    final stream = Stream.fromFuture(_userRefByUid(currentUid)).asyncExpand(
+          (userRef) {
+        return userRef.collection('joined_groups').snapshots().asyncExpand(
+              (joinedSnap) {
+            final joinedIds = joinedSnap.docs.map((e) => e.id).toSet();
+
+            return _groups.snapshots().map((snapshot) {
+              final result = <GroupModel>[];
+
+              for (final doc in snapshot.docs) {
+                try {
+                  final group = GroupModel.fromDoc(doc);
+
+                  if (!group.isActive) continue;
+                  if (!group.isPublic) continue;
+                  if (joinedIds.contains(group.id)) continue;
+                  if (group.ownerId == currentUid) continue;
+
+                  if (queryText.isNotEmpty) {
+                    final matches = group.name.toLowerCase().contains(queryText) ||
+                        group.description.toLowerCase().contains(queryText) ||
+                        group.specializationName.toLowerCase().contains(queryText) ||
+                        group.collegeName.toLowerCase().contains(queryText);
+
+                    if (!matches) continue;
+                  }
+
+                  result.add(group);
+                } catch (_) {}
+              }
+
+              result.sort((a, b) {
+                final aTime = a.createdAt?.millisecondsSinceEpoch ?? 0;
+                final bTime = b.createdAt?.millisecondsSinceEpoch ?? 0;
+                return bTime.compareTo(aTime);
+              });
+
+              return result;
+            });
+          },
+        );
+      },
+    );
+
+    return stream.asBroadcastStream();
   }
 
   static Future<void> createGroup({
     required String name,
     required String description,
+    required String type,
+    required String collegeId,
+    required String collegeName,
     required String specializationId,
     required String specializationName,
-    String type = 'public',
-    String? groupImageUrl,
+    String imageUrl = '',
   }) async {
     final cleanName = name.trim();
     final cleanDescription = description.trim();
+    final nameLowercase = cleanName.toLowerCase();
 
     if (cleanName.isEmpty) {
       throw Exception('اسم المجموعة مطلوب');
     }
 
+    if (collegeId.trim().isEmpty || collegeName.trim().isEmpty) {
+      throw Exception('الكلية مطلوبة');
+    }
+
+    if (specializationId.trim().isEmpty || specializationName.trim().isEmpty) {
+      throw Exception('التخصص مطلوب');
+    }
+
+    final duplicate = await _groups
+        .where('nameLowercase', isEqualTo: nameLowercase)
+        .limit(1)
+        .get();
+
+    if (duplicate.docs.isNotEmpty) {
+      throw Exception('اسم المجموعة مستخدم بالفعل');
+    }
+
+    final userRef = await _userRefByUid(currentUid);
+    final displayName = await _userDisplayName(currentUid);
     final groupRef = _groups.doc();
-    final userRef = await _findUserDocRefByUid(uid);
-    final displayName = await _getUserDisplayName(uid);
-    final inviteCode = groupRef.id.substring(0, 6).toUpperCase();
 
-    final memberRef = groupRef.collection('members').doc(uid);
-    final joinedGroupRef = userRef.collection('joined_groups').doc(groupRef.id);
+    final inviteCode = _generateInviteCode();
+    final inviteLink = buildInviteLink(
+      groupId: groupRef.id,
+      inviteCode: inviteCode,
+    );
 
-    final batch = _firestore.batch();
+    final batch = _db.batch();
 
     batch.set(groupRef, {
       'groupId': groupRef.id,
       'name': cleanName,
       'groupName': cleanName,
+      'nameLowercase': nameLowercase,
       'description': cleanDescription,
+      'type': type,
+      'collegeId': collegeId,
+      'collegeName': collegeName,
       'specializationId': specializationId,
       'specializationName': specializationName,
-      'ownerId': uid,
-      'groupImageUrl': groupImageUrl ?? '',
+      'ownerId': currentUid,
+      'imageUrl': imageUrl,
+      'groupImageUrl': imageUrl,
+      'membersCanChat': true,
+      'bannedUserIds': <String>[],
+      'inviteCode': inviteCode,
+      'inviteLink': inviteLink,
       'membersCounts': 1,
       'adminsCount': 1,
       'messagesCount': 0,
       'lastMessageText': '',
-      'inviteCode': inviteCode,
-      'type': type,
       'status': 'active',
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
-    batch.set(memberRef, {
-      'uid': uid,
+    batch.set(groupRef.collection('members').doc(currentUid), {
+      'uid': currentUid,
       'displayName': displayName,
       'role': 'owner',
       'joinedAt': FieldValue.serverTimestamp(),
+      'isMuted': false,
     });
 
-    batch.set(joinedGroupRef, {
+    batch.set(userRef.collection('joined_groups').doc(groupRef.id), {
       'groupId': groupRef.id,
       'groupName': cleanName,
       'roleInGroup': 'owner',
@@ -114,46 +249,52 @@ class GroupService {
     await batch.commit();
   }
 
-  static Future<void> joinGroup(String groupId) async {
+  static Future<void> joinPublicGroup(String groupId) async {
     final groupRef = _groups.doc(groupId);
-    final userRef = await _findUserDocRefByUid(uid);
-    final displayName = await _getUserDisplayName(uid);
+    final userRef = await _userRefByUid(currentUid);
+    final displayName = await _userDisplayName(currentUid);
 
-    await _firestore.runTransaction((tx) async {
+    await _db.runTransaction((tx) async {
       final groupSnap = await tx.get(groupRef);
       if (!groupSnap.exists) {
         throw Exception('المجموعة غير موجودة');
       }
 
-      final groupData = groupSnap.data() ?? {};
-      final status = (groupData['status'] ?? 'active').toString();
-      final type = (groupData['type'] ?? 'public').toString();
+      final data = groupSnap.data() ?? {};
+      final status = (data['status'] ?? 'active').toString();
+      final type = (data['type'] ?? 'public').toString();
+      final banned = (data['bannedUserIds'] as List?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          <String>[];
 
       if (status != 'active') {
         throw Exception('لا يمكن الانضمام إلى هذه المجموعة');
       }
 
-      if (type == 'private') {
-        throw Exception('هذه مجموعة خاصة - الانضمام عبر دعوة فقط');
+      if (type != 'public') {
+        throw Exception('هذه المجموعة ليست عامة');
       }
 
-      final memberRef = groupRef.collection('members').doc(uid);
-      final joinedGroupRef = userRef.collection('joined_groups').doc(groupId);
+      if (banned.contains(currentUid)) {
+        throw Exception('أنت محظور من هذه المجموعة');
+      }
 
+      final memberRef = groupRef.collection('members').doc(currentUid);
       final memberSnap = await tx.get(memberRef);
       if (memberSnap.exists) return;
 
-      final groupName =
-      (groupData['name'] ?? groupData['groupName'] ?? '').toString();
+      final groupName = (data['name'] ?? data['groupName'] ?? '').toString();
 
       tx.set(memberRef, {
-        'uid': uid,
+        'uid': currentUid,
         'displayName': displayName,
         'role': 'member',
         'joinedAt': FieldValue.serverTimestamp(),
+        'isMuted': false,
       });
 
-      tx.set(joinedGroupRef, {
+      tx.set(userRef.collection('joined_groups').doc(groupId), {
         'groupId': groupId,
         'groupName': groupName,
         'roleInGroup': 'member',
@@ -168,59 +309,91 @@ class GroupService {
     });
   }
 
-  static Future<void> joinPrivateGroupWithInvite({
+  static Future<GroupModel> getGroupByInvite({
     required String groupId,
-    required String inviteCode,
+    required String code,
   }) async {
-    final groupRef = _groups.doc(groupId);
-    final userRef = await _findUserDocRefByUid(uid);
-    final displayName = await _getUserDisplayName(uid);
+    final doc = await _groups.doc(groupId).get();
 
-    await _firestore.runTransaction((tx) async {
+    if (!doc.exists) {
+      throw Exception('المجموعة غير موجودة');
+    }
+
+    final group = GroupModel.fromDoc(doc);
+
+    if (!group.isPrivate) {
+      throw Exception('هذه ليست مجموعة خاصة');
+    }
+
+    if (!group.isActive) {
+      throw Exception('هذه المجموعة غير متاحة');
+    }
+
+    if (group.inviteCode != code.trim().toUpperCase()) {
+      throw Exception('رابط الدعوة غير صحيح');
+    }
+
+    return group;
+  }
+
+  static Future<void> joinPrivateGroupByLink(String inviteLink) async {
+    final uri = Uri.tryParse(inviteLink.trim());
+    if (uri == null) {
+      throw Exception('رابط الدعوة غير صالح');
+    }
+
+    final groupId = uri.queryParameters['groupId'];
+    final code = uri.queryParameters['code'];
+
+    if ((groupId ?? '').isEmpty || (code ?? '').isEmpty) {
+      throw Exception('رابط الدعوة ناقص');
+    }
+
+    final group = await getGroupByInvite(groupId: groupId!, code: code!);
+    await _joinPrivateGroup(group);
+  }
+
+  static Future<void> _joinPrivateGroup(GroupModel group) async {
+    final groupRef = _groups.doc(group.id);
+    final userRef = await _userRefByUid(currentUid);
+    final displayName = await _userDisplayName(currentUid);
+
+    await _db.runTransaction((tx) async {
       final groupSnap = await tx.get(groupRef);
       if (!groupSnap.exists) {
         throw Exception('المجموعة غير موجودة');
       }
 
-      final groupData = groupSnap.data() ?? {};
-      final status = (groupData['status'] ?? 'active').toString();
-      final type = (groupData['type'] ?? 'public').toString();
-      final realInviteCode = (groupData['inviteCode'] ?? '').toString();
+      final data = groupSnap.data() ?? {};
+      final banned = (data['bannedUserIds'] as List?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          <String>[];
 
-      if (status != 'active') {
-        throw Exception('لا يمكن الانضمام إلى هذه المجموعة');
+      if (banned.contains(currentUid)) {
+        throw Exception('أنت محظور من هذه المجموعة');
       }
 
-      if (type != 'private') {
-        throw Exception('هذه المجموعة ليست خاصة');
-      }
-
-      if (realInviteCode.isEmpty || realInviteCode != inviteCode.trim()) {
-        throw Exception('كود الدعوة غير صحيح');
-      }
-
-      final memberRef = groupRef.collection('members').doc(uid);
-      final joinedGroupRef = userRef.collection('joined_groups').doc(groupId);
-
+      final memberRef = groupRef.collection('members').doc(currentUid);
       final memberSnap = await tx.get(memberRef);
       if (memberSnap.exists) return;
 
-      final groupName =
-      (groupData['name'] ?? groupData['groupName'] ?? '').toString();
+      final groupName = (data['name'] ?? data['groupName'] ?? '').toString();
 
       tx.set(memberRef, {
-        'uid': uid,
+        'uid': currentUid,
         'displayName': displayName,
         'role': 'member',
         'joinedAt': FieldValue.serverTimestamp(),
+        'isMuted': false,
       });
 
-      tx.set(joinedGroupRef, {
-        'groupId': groupId,
+      tx.set(userRef.collection('joined_groups').doc(group.id), {
+        'groupId': group.id,
         'groupName': groupName,
         'roleInGroup': 'member',
         'joinedAt': FieldValue.serverTimestamp(),
-        'type': type,
+        'type': 'private',
       });
 
       tx.update(groupRef, {
@@ -232,16 +405,12 @@ class GroupService {
 
   static Future<void> leaveGroup(String groupId) async {
     final groupRef = _groups.doc(groupId);
-    final userRef = await _findUserDocRefByUid(uid);
+    final userRef = await _userRefByUid(currentUid);
 
-    await _firestore.runTransaction((tx) async {
-      final groupSnap = await tx.get(groupRef);
-      if (!groupSnap.exists) return;
-
-      final memberRef = groupRef.collection('members').doc(uid);
-      final joinedGroupRef = userRef.collection('joined_groups').doc(groupId);
-
+    await _db.runTransaction((tx) async {
+      final memberRef = groupRef.collection('members').doc(currentUid);
       final memberSnap = await tx.get(memberRef);
+
       if (!memberSnap.exists) return;
 
       final memberData = memberSnap.data() ?? {};
@@ -252,18 +421,12 @@ class GroupService {
       }
 
       tx.delete(memberRef);
-      tx.delete(joinedGroupRef);
+      tx.delete(userRef.collection('joined_groups').doc(groupId));
 
-      final updates = <String, dynamic>{
+      tx.update(groupRef, {
         'membersCounts': FieldValue.increment(-1),
         'updatedAt': FieldValue.serverTimestamp(),
-      };
-
-      if (role == 'admin') {
-        updates['adminsCount'] = FieldValue.increment(-1);
-      }
-
-      tx.update(groupRef, updates);
+      });
     });
   }
 
@@ -277,24 +440,52 @@ class GroupService {
     }
 
     final groupRef = _groups.doc(groupId);
-    final memberRef = groupRef.collection('members').doc(uid);
+    final groupSnap = await groupRef.get();
+
+    if (!groupSnap.exists) {
+      throw Exception('المجموعة غير موجودة');
+    }
+
+    final groupData = groupSnap.data() ?? {};
+    final membersCanChat = (groupData['membersCanChat'] ?? true) == true;
+    final banned = (groupData['bannedUserIds'] as List?)
+        ?.map((e) => e.toString())
+        .toList() ??
+        <String>[];
+
+    if (banned.contains(currentUid)) {
+      throw Exception('أنت محظور من هذه المجموعة');
+    }
+
+    final memberRef = groupRef.collection('members').doc(currentUid);
     final memberSnap = await memberRef.get();
 
     if (!memberSnap.exists) {
       throw Exception('يجب أن تكون عضوًا في المجموعة لإرسال رسالة');
     }
 
-    final displayName = await _getUserDisplayName(uid);
+    final memberData = memberSnap.data() ?? {};
+    final role = (memberData['role'] ?? 'member').toString();
+    final isMuted = (memberData['isMuted'] ?? false) == true;
+
+    if (isMuted) {
+      throw Exception('تم كتمك داخل هذه المجموعة');
+    }
+
+    if (!membersCanChat && role == 'member') {
+      throw Exception('المجموعة للقراءة فقط حاليًا');
+    }
+
+    final displayName = await _userDisplayName(currentUid);
     final messageRef = groupRef.collection('messages').doc();
 
-    final batch = _firestore.batch();
+    final batch = _db.batch();
 
     batch.set(messageRef, {
       'messageId': messageRef.id,
-      'senderId': uid,
+      'senderId': currentUid,
       'senderName': displayName,
       'text': cleanText,
-      'messageType': 'text',
       'createdAt': FieldValue.serverTimestamp(),
     });
 
@@ -307,198 +498,25 @@ class GroupService {
     await batch.commit();
   }
 
-  static Future<void> makeAdmin(String groupId, String userId) async {
-    final groupRef = _groups.doc(groupId);
-    final targetUserRef = await _findUserDocRefByUid(userId);
+  static Stream<List<GroupMessageModel>> streamMessages(String groupId) {
+    final stream = _groups
+        .doc(groupId)
+        .collection('messages')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+          .map((doc) {
+        try {
+          return GroupMessageModel.fromDoc(doc);
+        } catch (_) {
+          return null;
+        }
+      })
+          .whereType<GroupMessageModel>()
+          .toList(),
+    );
 
-    await _firestore.runTransaction((tx) async {
-      final memberRef = groupRef.collection('members').doc(userId);
-      final joinedGroupRef =
-      targetUserRef.collection('joined_groups').doc(groupId);
-
-      final memberSnap = await tx.get(memberRef);
-      if (!memberSnap.exists) {
-        throw Exception('العضو غير موجود في المجموعة');
-      }
-
-      final data = memberSnap.data() ?? {};
-      final currentRole = (data['role'] ?? 'member').toString();
-
-      if (currentRole == 'owner' || currentRole == 'admin') return;
-
-      tx.update(memberRef, {'role': 'admin'});
-      tx.set(
-        joinedGroupRef,
-        {'roleInGroup': 'admin'},
-        SetOptions(merge: true),
-      );
-
-      tx.update(groupRef, {
-        'adminsCount': FieldValue.increment(1),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
-  }
-
-  static Future<void> removeAdmin(String groupId, String userId) async {
-    final groupRef = _groups.doc(groupId);
-    final targetUserRef = await _findUserDocRefByUid(userId);
-
-    await _firestore.runTransaction((tx) async {
-      final memberRef = groupRef.collection('members').doc(userId);
-      final joinedGroupRef =
-      targetUserRef.collection('joined_groups').doc(groupId);
-
-      final memberSnap = await tx.get(memberRef);
-      if (!memberSnap.exists) {
-        throw Exception('العضو غير موجود في المجموعة');
-      }
-
-      final data = memberSnap.data() ?? {};
-      final currentRole = (data['role'] ?? 'member').toString();
-
-      if (currentRole == 'owner') {
-        throw Exception('لا يمكن إزالة صلاحية المالك');
-      }
-
-      if (currentRole != 'admin') return;
-
-      tx.update(memberRef, {'role': 'member'});
-      tx.set(
-        joinedGroupRef,
-        {'roleInGroup': 'member'},
-        SetOptions(merge: true),
-      );
-
-      tx.update(groupRef, {
-        'adminsCount': FieldValue.increment(-1),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
-  }
-
-  static Future<void> transferOwnership({
-    required String groupId,
-    required String newOwnerId,
-  }) async {
-    final groupRef = _groups.doc(groupId);
-    final currentOwnerRef = await _findUserDocRefByUid(uid);
-    final newOwnerUserRef = await _findUserDocRefByUid(newOwnerId);
-
-    await _firestore.runTransaction((tx) async {
-      final groupSnap = await tx.get(groupRef);
-      if (!groupSnap.exists) {
-        throw Exception('المجموعة غير موجودة');
-      }
-
-      final groupData = groupSnap.data() ?? {};
-      final ownerId = (groupData['ownerId'] ?? '').toString();
-
-      if (ownerId != uid) {
-        throw Exception('فقط مالك المجموعة يمكنه نقل الملكية');
-      }
-
-      if (uid == newOwnerId) return;
-
-      final currentOwnerMemberRef = groupRef.collection('members').doc(uid);
-      final newOwnerMemberRef = groupRef.collection('members').doc(newOwnerId);
-
-      final currentOwnerMemberSnap = await tx.get(currentOwnerMemberRef);
-      final newOwnerMemberSnap = await tx.get(newOwnerMemberRef);
-
-      if (!currentOwnerMemberSnap.exists || !newOwnerMemberSnap.exists) {
-        throw Exception('العضو غير موجود داخل المجموعة');
-      }
-
-      tx.update(currentOwnerMemberRef, {'role': 'admin'});
-      tx.update(newOwnerMemberRef, {'role': 'owner'});
-
-      tx.set(
-        currentOwnerRef.collection('joined_groups').doc(groupId),
-        {'roleInGroup': 'admin'},
-        SetOptions(merge: true),
-      );
-
-      tx.set(
-        newOwnerUserRef.collection('joined_groups').doc(groupId),
-        {'roleInGroup': 'owner'},
-        SetOptions(merge: true),
-      );
-
-      tx.update(groupRef, {
-        'ownerId': newOwnerId,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
-  }
-
-  static Future<void> removeMember(String groupId, String userId) async {
-    final groupRef = _groups.doc(groupId);
-    final targetUserRef = await _findUserDocRefByUid(userId);
-
-    await _firestore.runTransaction((tx) async {
-      final memberRef = groupRef.collection('members').doc(userId);
-      final joinedGroupRef =
-      targetUserRef.collection('joined_groups').doc(groupId);
-
-      final memberSnap = await tx.get(memberRef);
-      if (!memberSnap.exists) return;
-
-      final memberData = memberSnap.data() ?? {};
-      final role = (memberData['role'] ?? 'member').toString();
-
-      if (role == 'owner') {
-        throw Exception('لا يمكن طرد مالك المجموعة');
-      }
-
-      tx.delete(memberRef);
-      tx.delete(joinedGroupRef);
-
-      final updates = <String, dynamic>{
-        'membersCounts': FieldValue.increment(-1),
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
-
-      if (role == 'admin') {
-        updates['adminsCount'] = FieldValue.increment(-1);
-      }
-
-      tx.update(groupRef, updates);
-    });
-  }
-
-  static Future<void> deleteGroup(String groupId) async {
-    await _groups.doc(groupId).update({
-      'status': 'deleted',
-      'deletedAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
-  }
-
-  static Future<void> updateGroup({
-    required String groupId,
-    required String name,
-    required String description,
-    String? type,
-    String? groupImageUrl,
-  }) async {
-    final cleanName = name.trim();
-    final cleanDescription = description.trim();
-
-    if (cleanName.isEmpty) {
-      throw Exception('اسم المجموعة مطلوب');
-    }
-
-    final updates = <String, dynamic>{
-      'name': cleanName,
-      'groupName': cleanName,
-      'description': cleanDescription,
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
-
-    if (type != null) updates['type'] = type;
-    if (groupImageUrl != null) updates['groupImageUrl'] = groupImageUrl;
-
-    await _groups.doc(groupId).update(updates);
+    return stream.asBroadcastStream();
   }
 }
