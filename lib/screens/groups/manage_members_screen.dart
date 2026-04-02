@@ -96,6 +96,28 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     }
   }
 
+  Future<void> _updateMemberStatus(String memberId, String status) async {
+    try {
+      await _firestore
+          .collection('groups')
+          .doc(widget.group.id)
+          .collection('members')
+          .doc(memberId)
+          .update({'status': status});
+      if (mounted) {
+        String msg = 'تم تحديث حالة العضو';
+        if (status == 'muted') msg = 'تم كتم العضو';
+        if (status == 'active') msg = 'تم إلغاء الكتم عن العضو';
+        if (status == 'banned') msg = 'تم حظر العضو';
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء التحديث')));
+      }
+    }
+  }
+
   Future<void> _removeMember(String memberId) async {
     try {
       await _firestore
@@ -114,8 +136,35 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     }
   }
 
-  void _showActionPlaceholder(String action) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('إجراء "$action" غير مدعوم حالياً')));
+  Future<void> _transferOwnership(String newOwnerId) async {
+    final oldOwnerId = _auth.currentUser?.uid;
+    if (oldOwnerId == null) return;
+
+    try {
+      WriteBatch batch = _firestore.batch();
+
+      final groupRef = _firestore.collection('groups').doc(widget.group.id);
+      batch.update(groupRef, {'ownerId': newOwnerId});
+
+      final oldOwnerRef = groupRef.collection('members').doc(oldOwnerId);
+      batch.update(oldOwnerRef, {'role': 'admin'});
+
+      final newOwnerRef = groupRef.collection('members').doc(newOwnerId);
+      batch.update(newOwnerRef, {'role': 'owner'});
+
+      await batch.commit();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نقل الملكية بنجاح')));
+        setState(() {
+          _currentUserRole = 'admin'; // update local role to reflect loss of ownership
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء نقل الملكية')));
+      }
+    }
   }
 
   void _handleMemberAction(String action, Map<String, dynamic> memberData, String memberId) {
@@ -129,19 +178,19 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
         _updateMemberRole(memberId, 'member');
         break;
       case 'mute':
-        _showActionPlaceholder('كتم العضو');
+        _updateMemberStatus(memberId, 'muted');
         break;
       case 'unmute':
-        _showActionPlaceholder('إلغاء الكتم');
+        _updateMemberStatus(memberId, 'active');
         break;
       case 'ban':
-        _showActionPlaceholder('حظر العضو');
+        _updateMemberStatus(memberId, 'banned');
         break;
       case 'kick':
         _removeMember(memberId);
         break;
       case 'transfer_owner':
-        _showActionPlaceholder('نقل الملكية');
+        _transferOwnership(memberId);
         break;
     }
   }
@@ -387,6 +436,8 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   }
 
   Widget _buildPopupMenu(String memberId, Map<String, dynamic> data, bool isTargetAdmin) {
+    final status = data['status'] ?? 'active';
+    
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -403,12 +454,20 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
         }
 
         // Mute / Unmute
-        items.add(const PopupMenuItem(value: 'mute', child: Text("كتم العضو", style: TextStyle(fontWeight: FontWeight.bold))));
-        items.add(const PopupMenuItem(value: 'unmute', child: Text("إلغاء الكتم", style: TextStyle(fontWeight: FontWeight.bold))));
+        if (status == 'muted') {
+          items.add(const PopupMenuItem(value: 'unmute', child: Text("إلغاء الكتم", style: TextStyle(fontWeight: FontWeight.bold))));
+        } else {
+          items.add(const PopupMenuItem(value: 'mute', child: Text("كتم العضو", style: TextStyle(fontWeight: FontWeight.bold))));
+        }
 
-        // Ban / Kick
-        items.add(const PopupMenuDivider());
-        items.add(const PopupMenuItem(value: 'ban', child: Text("حظر العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+        // Ban
+        if (status != 'banned') {
+          items.add(const PopupMenuDivider());
+          items.add(const PopupMenuItem(value: 'ban', child: Text("حظر العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+        }
+
+        // Kick
+        if (status == 'banned' && items.isEmpty) items.add(const PopupMenuDivider());
         items.add(const PopupMenuItem(value: 'kick', child: Text("طرد العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
         
         if (_currentUserRole == 'owner') {
