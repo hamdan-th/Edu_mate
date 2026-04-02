@@ -1,0 +1,455 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../core/theme/app_colors.dart';
+import '../../models/group_model.dart';
+
+class ManageMembersScreen extends StatefulWidget {
+  final GroupModel group;
+
+  const ManageMembersScreen({
+    super.key,
+    required this.group,
+  });
+
+  @override
+  State<ManageMembersScreen> createState() => _ManageMembersScreenState();
+}
+
+class _ManageMembersScreenState extends State<ManageMembersScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  String _searchQuery = '';
+  String _currentUserRole = 'member';
+  bool _isLoadingRole = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.trim().toLowerCase();
+      });
+    });
+    _loadCurrentUserRole();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadCurrentUserRole() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      setState(() => _isLoadingRole = false);
+      return;
+    }
+
+    if (widget.group.ownerId == user.uid) {
+      setState(() {
+        _currentUserRole = 'owner';
+        _isLoadingRole = false;
+      });
+      return;
+    }
+
+    try {
+      final doc = await _firestore
+          .collection('groups')
+          .doc(widget.group.id)
+          .collection('members')
+          .doc(user.uid)
+          .get();
+
+      if (doc.exists) {
+        setState(() {
+          _currentUserRole = doc.data()?['role'] ?? 'member';
+        });
+      }
+    } catch (e) {
+      // Ignored
+    } finally {
+      if (mounted) setState(() => _isLoadingRole = false);
+    }
+  }
+
+  Future<void> _updateMemberRole(String memberId, String newRole) async {
+    try {
+      await _firestore
+          .collection('groups')
+          .doc(widget.group.id)
+          .collection('members')
+          .doc(memberId)
+          .update({'role': newRole});
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تحديث صلاحيات العضو')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء التحديث')));
+      }
+    }
+  }
+
+  Future<void> _removeMember(String memberId) async {
+    try {
+      await _firestore
+          .collection('groups')
+          .doc(widget.group.id)
+          .collection('members')
+          .doc(memberId)
+          .delete();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إزالة العضو من المجموعة')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء إزالة العضو')));
+      }
+    }
+  }
+
+  void _showActionPlaceholder(String action) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('إجراء "$action" غير مدعوم حالياً')));
+  }
+
+  void _handleMemberAction(String action, Map<String, dynamic> memberData, String memberId) {
+    if (memberId == _auth.currentUser?.uid) return;
+
+    switch (action) {
+      case 'make_admin':
+        _updateMemberRole(memberId, 'admin');
+        break;
+      case 'remove_admin':
+        _updateMemberRole(memberId, 'member');
+        break;
+      case 'mute':
+        _showActionPlaceholder('كتم العضو');
+        break;
+      case 'unmute':
+        _showActionPlaceholder('إلغاء الكتم');
+        break;
+      case 'ban':
+        _showActionPlaceholder('حظر العضو');
+        break;
+      case 'kick':
+        _removeMember(memberId);
+        break;
+      case 'transfer_owner':
+        _showActionPlaceholder('نقل الملكية');
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          "إدارة الأعضاء",
+          style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+        ),
+        centerTitle: true,
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: _isLoadingRole
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                _buildSearchBar(),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: _firestore
+                        .collection('groups')
+                        .doc(widget.group.id)
+                        .collection('members')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (snapshot.hasError) {
+                        return const Center(child: Text('تعذر تحميل الأعضاء'));
+                      }
+
+                      final docs = snapshot.data?.docs ?? [];
+                      
+                      // Categorize members
+                      final List<DocumentSnapshot> owners = [];
+                      final List<DocumentSnapshot> admins = [];
+                      final List<DocumentSnapshot> members = [];
+
+                      for (var doc in docs) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        
+                        // Local search filter
+                        if (_searchQuery.isNotEmpty) {
+                          final name = (data['name'] ?? 'عضو').toString().toLowerCase();
+                          if (!name.contains(_searchQuery)) continue;
+                        }
+
+                        final role = data['role'] ?? 'member';
+                        if (role == 'owner' || doc.id == widget.group.ownerId) {
+                          owners.add(doc);
+                        } else if (role == 'admin') {
+                          admins.add(doc);
+                        } else {
+                          members.add(doc);
+                        }
+                      }
+
+                      if (owners.isEmpty && admins.isEmpty && members.isEmpty) {
+                        return _buildEmptyState();
+                      }
+
+                      return ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        children: [
+                          if (owners.isNotEmpty) ...[
+                            _buildSectionTitle("المالك"),
+                            ...owners.map((doc) => _buildMemberItem(doc)),
+                            const SizedBox(height: 24),
+                          ],
+                          if (admins.isNotEmpty) ...[
+                            _buildSectionTitle("المشرفون"),
+                            ...admins.map((doc) => _buildMemberItem(doc)),
+                            const SizedBox(height: 24),
+                          ],
+                          if (members.isNotEmpty) ...[
+                            _buildSectionTitle("الأعضاء"),
+                            ...members.map((doc) => _buildMemberItem(doc)),
+                            const SizedBox(height: 48), // Bottom padding
+                          ],
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      color: AppColors.surface,
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.inputFill,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        ),
+        child: TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'ابحث عن عضو...',
+            hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 22),
+            suffixIcon: _searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary, size: 20),
+                    onPressed: () => _searchController.clear(),
+                  )
+                : null,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w900,
+          color: AppColors.textPrimary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMemberItem(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    final memberId = doc.id;
+    final name = data['name'] ?? 'عضو بالمجموعة';
+    final role = data['role'] ?? 'member';
+    final imageUrl = data['imageUrl'] as String?;
+
+    final bool isMe = memberId == _auth.currentUser?.uid;
+    final bool _isTargetOwner = role == 'owner' || memberId == widget.group.ownerId;
+    final bool _isTargetAdmin = role == 'admin';
+
+    // Build specific Role Badge
+    String roleLabel = "عضو";
+    Color roleColor = AppColors.textSecondary;
+
+    if (_isTargetOwner) {
+      roleLabel = "المالك";
+      roleColor = AppColors.error;
+    } else if (_isTargetAdmin) {
+      roleLabel = "مشرف";
+      roleColor = AppColors.warning;
+    } else {
+      roleLabel = "عضو";
+      roleColor = AppColors.primary;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border.withOpacity(0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+            child: imageUrl == null || imageUrl.isEmpty
+                ? Text(
+                    name.isNotEmpty ? name[0].toUpperCase() : 'M',
+                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textPrimary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (isMe) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        "(أنت)",
+                        style: TextStyle(color: AppColors.textSecondary.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold),
+                      )
+                    ]
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: roleColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    roleLabel,
+                    style: TextStyle(color: roleColor, fontSize: 10, fontWeight: FontWeight.w900),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (!isMe && _currentUserRole != 'member' && !_isTargetOwner)
+            _buildPopupMenu(memberId, data, _isTargetAdmin),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPopupMenu(String memberId, Map<String, dynamic> data, bool isTargetAdmin) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      onSelected: (action) => _handleMemberAction(action, data, memberId),
+      itemBuilder: (context) {
+        List<PopupMenuEntry<String>> items = [];
+
+        if (_currentUserRole == 'owner') {
+          if (isTargetAdmin) {
+            items.add(const PopupMenuItem(value: 'remove_admin', child: Text("إزالة من الإشراف", style: TextStyle(fontWeight: FontWeight.bold))));
+          } else {
+            items.add(const PopupMenuItem(value: 'make_admin', child: Text("تعيين كمشرف", style: TextStyle(fontWeight: FontWeight.bold))));
+          }
+        }
+
+        // Mute / Unmute
+        items.add(const PopupMenuItem(value: 'mute', child: Text("كتم العضو", style: TextStyle(fontWeight: FontWeight.bold))));
+        items.add(const PopupMenuItem(value: 'unmute', child: Text("إلغاء الكتم", style: TextStyle(fontWeight: FontWeight.bold))));
+
+        // Ban / Kick
+        items.add(const PopupMenuDivider());
+        items.add(const PopupMenuItem(value: 'ban', child: Text("حظر العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+        items.add(const PopupMenuItem(value: 'kick', child: Text("طرد العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+        
+        if (_currentUserRole == 'owner') {
+          items.add(const PopupMenuDivider());
+          items.add(const PopupMenuItem(value: 'transfer_owner', child: Text("نقل الملكية", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w900))));
+        }
+
+        return items;
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.06),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.person_search_rounded, size: 54, color: AppColors.primary.withOpacity(0.6)),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "لا توجد نتائج",
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "لم نتمكن من العثور على أعضاء يطابقون بحثك.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
