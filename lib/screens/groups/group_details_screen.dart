@@ -108,65 +108,69 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             child: _buildHeader(),
           ),
           SliverToBoxAdapter(
-            child: _buildInfoSection(),
+            child: _buildMainAction(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildSecondaryActions(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildAboutSection(),
           ),
           SliverToBoxAdapter(
             child: _buildMembersSection(),
           ),
           SliverToBoxAdapter(
-            child: _buildRecentActivitySection(),
+            child: _buildBottomAction(),
           ),
           const SliverToBoxAdapter(
             child: SizedBox(height: 60), // Extra bottom padding
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomComposer(),
     );
   }
 
   Widget _buildHeader() {
-    return Container(
-      color: AppColors.surface,
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // Cover Area
-              Container(
-                height: 180,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.primary, AppColors.blueGlow],
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Cover Area
+            Container(
+              height: 160,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.blueGlow],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
                 ),
               ),
-              // Back Button
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 8,
-                right: 16,
-                child: CircleAvatar(
-                  backgroundColor: Colors.black26,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+            ),
+            // Back Button
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              right: 16,
+              child: CircleAvatar(
+                backgroundColor: Colors.black26,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
-              // Group Avatar
-              Positioned(
-                bottom: -46,
-                right: 20,
+            ),
+            // Group Avatar
+            Positioned(
+              bottom: -46,
+              left: 0,
+              right: 0,
+              child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
-                    color: AppColors.surface,
+                    color: AppColors.background,
                     shape: BoxShape.circle,
                   ),
                   child: CircleAvatar(
@@ -190,85 +194,90 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   ),
                 ),
               ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 56), // Space for overlapping avatar
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center, // Center aligned for better symmetry with avatar
+            children: [
+              Text(
+                widget.group.name,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                "${widget.group.collegeName} • ${widget.group.specializationName}",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                widget.group.description,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textPrimary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Badges Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildBadge(
+                    widget.group.isPrivate ? "خاصة" : "عامة",
+                    widget.group.isPrivate ? Icons.lock_rounded : Icons.public_rounded,
+                    color: widget.group.isPrivate ? AppColors.warning : AppColors.success,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildBadge(
+                    widget.group.membersCanChat ? "محادثة نشطة" : "إعلانات فقط",
+                    widget.group.membersCanChat ? Icons.chat_bubble_outline_rounded : Icons.campaign_outlined,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildBadge(
+                    "أعضاء المجموعة",
+                    Icons.group_rounded,
+                  ),
+                ],
+              ),
             ],
           ),
-          const SizedBox(height: 56), // Space for overlapping avatar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.group.name,
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "${widget.group.collegeName} • ${widget.group.specializationName}",
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  widget.group.description,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: AppColors.textPrimary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Badges
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _buildBadge(
-                      widget.group.isPrivate ? "مجموعة خاصة" : "مجموعة عامة",
-                      widget.group.isPrivate ? Icons.lock_rounded : Icons.public_rounded,
-                      color: widget.group.isPrivate ? AppColors.warning : AppColors.success,
-                    ),
-                    _buildBadge(
-                      "أعضاء المجموعة",
-                      Icons.group_rounded,
-                      color: AppColors.textSecondary,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                _buildActionButtons(),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildBadge(String text, IconData icon, {Color? color}) {
     final c = color ?? AppColors.textSecondary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: c.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: c),
-          const SizedBox(width: 6),
+          Icon(icon, size: 14, color: c),
+          const SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               color: c,
             ),
@@ -278,10 +287,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildMainAction() {
     if (_isLoadingRole) {
-      return const SizedBox(
-        height: 48,
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(
           child: SizedBox(
             width: 24,
@@ -292,105 +301,133 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       );
     }
 
-    List<Widget> buttons = [];
+    Widget? actionButton;
 
-    if (!_isMember) {
-      if (widget.group.isPublic) {
-        buttons.add(_buildPrimaryButton("انضمام للمجموعة", Icons.group_add_rounded, _joinGroup));
-      }
-    } else {
-      buttons.add(_buildPrimaryButton("فتح الدردشة", Icons.chat_bubble_rounded, _openChat));
+    if (!_isMember && widget.group.isPublic) {
+      actionButton = _buildPrimaryButton("انضمام للمجموعة", Icons.group_add_rounded, _joinGroup);
+    } else if (_isMember) {
+      actionButton = _buildPrimaryButton("فتح الدردشة", Icons.chat_bubble_rounded, _openChat);
     }
 
-    if (_isOwner || _isAdmin) {
-      buttons.add(_buildSecondaryButton("إدارة الأعضاء", Icons.people_alt_rounded, () {}));
-      buttons.add(_buildSecondaryButton("إعدادات المجموعة", Icons.settings_rounded, () {}));
-      
-      if (widget.group.isPrivate) {
-        buttons.add(_buildIconButton(Icons.copy_rounded, "نسخ رابط المجموعة", () {
-          String link = '';
-          try {
-             link = (widget.group as dynamic).inviteLink ?? 'edu_mate://group/${widget.group.id}';
-          } catch(e) {
-             link = 'edu_mate://group/${widget.group.id}';
-          }
-          Clipboard.setData(ClipboardData(text: link));
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم نسخ رابط الدعوة الخاص')),
-          );
-        }));
-        buttons.add(_buildIconButton(Icons.share_rounded, "مشاركة الرابط", () {
-          ScaffoldMessenger.of(context).showSnackBar(
-             const SnackBar(content: Text('خاصية المشاركة غير متاحة حالياً')),
-          );
-        }));
-      }
-    }
+    if (actionButton == null) return const SizedBox.shrink();
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: buttons.map((b) => Padding(padding: const EdgeInsets.only(left: 10), child: b)).toList(),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      child: actionButton,
     );
   }
 
   Widget _buildPrimaryButton(String text, IconData icon, VoidCallback onPressed) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white, size: 20),
-      label: Text(
-        text,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 0,
-      ),
-    );
-  }
-
-  Widget _buildSecondaryButton(String text, IconData icon, VoidCallback onPressed) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: AppColors.primary, size: 18),
-      label: Text(
-        text,
-        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
-      ),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: BorderSide(color: AppColors.primary.withOpacity(0.3), width: 1.5),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-    );
-  }
-
-  Widget _buildIconButton(IconData icon, String tooltip, VoidCallback onPressed) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppColors.inputFill,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border.withOpacity(0.5)),
-          ),
-          child: Icon(icon, color: AppColors.textPrimary, size: 20),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white, size: 22),
+        label: Text(
+          text,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 0,
         ),
       ),
     );
   }
 
-  Widget _buildInfoSection() {
+  Widget _buildSecondaryActions() {
+    if (_isLoadingRole) return const SizedBox.shrink();
+
+    List<Widget> items = [];
+
+    items.add(_buildSecondaryActionItem(
+      icon: Icons.people_outline_rounded,
+      label: "الأعضاء",
+      onTap: () {},
+    ));
+
+    if (_isOwner || _isAdmin) {
+      items.add(_buildSecondaryActionItem(
+        icon: Icons.settings_outlined,
+        label: "الإعدادات",
+        onTap: () {},
+      ));
+
+      if (widget.group.isPrivate) {
+        items.add(_buildSecondaryActionItem(
+          icon: Icons.link_rounded,
+          label: "رابط المجموعة",
+          onTap: () {
+            String link = '';
+            try {
+               link = (widget.group as dynamic).inviteLink ?? 'edu_mate://group/${widget.group.id}';
+            } catch(e) {
+               link = 'edu_mate://group/${widget.group.id}';
+            }
+            Clipboard.setData(ClipboardData(text: link));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('تم نسخ رابط الدعوة الخاص')),
+            );
+          },
+        ));
+      }
+    }
+
+    if (items.isEmpty) return const SizedBox.shrink();
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: items,
+      ),
+    );
+  }
+
+  Widget _buildSecondaryActionItem({required IconData icon, required String label, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border.withOpacity(0.5)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: AppColors.primary, size: 22),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAboutSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -437,8 +474,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 ),
                 _buildInfoRow(
                   Icons.chat_outlined,
-                  "الدردشة",
-                  widget.group.membersCanChat ? "متاحة لجميع الأعضاء" : "متاحة للردود من قبل المشرفين فقط (للقراءة فقط)",
+                  "حالة الدردشة",
+                  widget.group.membersCanChat ? "متاحة لجميع الأعضاء" : "إعلانات فقط (للقراءة)",
                 ),
                 if (widget.group.createdAt != null) ...[
                   const Padding(
@@ -499,29 +536,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   Widget _buildMembersSection() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "الأعضاء",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(foregroundColor: AppColors.primary),
-                child: const Text("عرض كل الأعضاء", style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ],
+          const Text(
+            "الأعضاء",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -538,7 +565,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             ),
             child: Column(
               children: [
-                _buildMemberPreview("مالك المجموعة", "المالك", AppColors.error),
+                _buildMemberPreview("مالك المجموعة", "مالك", AppColors.error),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: Divider(color: AppColors.border),
@@ -549,6 +576,20 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   child: Divider(color: AppColors.border),
                 ),
                 _buildMemberPreview("طالب نشط", "عضو", AppColors.textSecondary),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: BorderSide(color: AppColors.border.withOpacity(0.8)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text("عرض كل الأعضاء", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ),
               ],
             ),
           ),
@@ -561,14 +602,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     return Row(
       children: [
         CircleAvatar(
-          radius: 20,
+          radius: 18,
           backgroundColor: AppColors.inputFill,
           child: Text(
             name[0],
-            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 13),
           ),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: 12),
         Expanded(
           child: Text(
             name,
@@ -579,7 +620,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
             color: roleColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             role,
@@ -590,155 +631,26 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     );
   }
 
-  Widget _buildRecentActivitySection() {
-    if (!_isMember) return const SizedBox.shrink();
+  Widget _buildBottomAction() {
+    if (_isLoadingRole || !_isMember) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "آخر النشاط",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
-            ),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: _openChat,
+          icon: const Icon(Icons.forum_rounded, color: Colors.white, size: 20),
+          label: const Text(
+            "فتح غرفة الدردشة",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          const SizedBox(height: 16),
-          InkWell(
-            onTap: _openChat,
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.border.withOpacity(0.5)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primary, size: 24),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "انتقل إلى غرفة المحادثة",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          "شارك في التحديثات والنقاشات الأخيرة لهذه المجموعة.",
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textSecondary),
-                ],
-              ),
-            ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 0,
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomComposer() {
-    if (_isLoadingRole) return const SizedBox.shrink();
-
-    if (!_isMember) return const SizedBox.shrink();
-
-    final bool canChat = widget.group.membersCanChat || _isOwner || _isAdmin;
-
-    if (!canChat) {
-      return SafeArea(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.campaign_rounded, color: AppColors.textSecondary, size: 20),
-              SizedBox(width: 10),
-              Flexible(
-                child: Text(
-                  'المجموعة للإعلانات فقط. المشرفون هم من يمكنهم الإرسال.',
-                  style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.border)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: _openChat,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: AppColors.inputFill,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.border.withOpacity(0.5)),
-                  ),
-                  child: const Text(
-                    'اكتب رسالة...',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(24),
-                  onTap: _openChat,
-                  child: const Center(
-                    child: Icon(Icons.send_rounded, color: Colors.white, size: 22),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
