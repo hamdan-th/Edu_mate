@@ -22,6 +22,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   bool _isOwner = false;
   bool _isAdmin = false;
   bool _isEditing = false;
+  bool _isMuted = false;
   
   late String _groupName;
   late String _groupDescription;
@@ -130,6 +131,43 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     }
   }
 
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(_isMuted ? 'تم كتم الإشعارات' : 'تم تفعيل الإشعارات')),
+    );
+  }
+
+  Future<void> _leaveGroup() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    if (_isOwner) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('المالك لا يمكنه المغادرة قبل نقل الملكية')));
+      return;
+    }
+
+    try {
+      await _firestore
+          .collection('groups')
+          .doc(widget.group.id)
+          .collection('members')
+          .doc(user.uid)
+          .delete();
+          
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لقد غادرت المجموعة')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء مغادرة المجموعة')));
+      }
+    }
+  }
+
   void _openMoreMenu() {
     showModalBottomSheet(
       context: context,
@@ -174,7 +212,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('غير متاح حالياً')));
                 }),
               ] else ...[
-                _buildMenuItem(Icons.notifications_off_outlined, "كتم الإشعارات", () => Navigator.pop(context)),
+                _buildMenuItem(_isMuted ? Icons.notifications_active_outlined : Icons.notifications_off_outlined, _isMuted ? "تفعيل الإشعارات" : "كتم الإشعارات", () {
+                  Navigator.pop(context);
+                  _toggleMute();
+                }),
               ],
               
               const Padding(
@@ -183,6 +224,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               ),
               _buildMenuItem(Icons.exit_to_app_rounded, "مغادرة المجموعة", () {
                 Navigator.pop(context);
+                _leaveGroup();
               }, color: AppColors.error),
               const SizedBox(height: 24),
             ],
@@ -245,7 +287,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                     dividerColor: Colors.transparent,
                     labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                     unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    isScrollable: false,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.center,
                     tabs: const [
                       Tab(text: "الأعضاء"),
                       Tab(text: "الوسائط"),
@@ -402,11 +445,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildSquareButton(Icons.notifications_off_outlined, "كتم", () {}),
+                    _buildSquareButton(
+                      _isMuted ? Icons.notifications_off_outlined : Icons.notifications_none_rounded, 
+                      _isMuted ? "تفعيل" : "كتم", 
+                      _toggleMute
+                    ),
                     const SizedBox(width: 16),
                     _buildSquareButton(Icons.search_rounded, "بحث", () {}),
                     const SizedBox(width: 16),
-                    _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", () {}, iconColor: AppColors.error),
+                    _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup, iconColor: AppColors.error),
                     const SizedBox(width: 16),
                     _buildSquareButton(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
                   ],
