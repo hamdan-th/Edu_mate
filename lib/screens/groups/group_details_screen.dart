@@ -23,6 +23,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   bool _isAdmin = false;
   bool _isEditing = false;
   
+  late String _groupName;
+  late String _groupDescription;
+  int _membersCount = 0;
+  
   late TabController _tabController;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
@@ -40,9 +44,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   @override
   void initState() {
     super.initState();
+    _groupName = widget.group.name;
+    _groupDescription = widget.group.description;
+    
     _tabController = TabController(length: 4, vsync: this);
-    _nameController.text = widget.group.name;
-    _descController.text = widget.group.description;
+    _nameController.text = _groupName;
+    _descController.text = _groupDescription;
     _loadMembershipState();
   }
 
@@ -64,18 +71,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     bool member = false;
     bool owner = widget.group.ownerId == user.uid;
     bool admin = false;
+    int count = 0;
 
     if (owner) {
       member = true;
     }
 
     try {
-      final doc = await _firestore
-          .collection('groups')
-          .doc(widget.group.id)
-          .collection('members')
-          .doc(user.uid)
-          .get();
+      final membersCol = _firestore.collection('groups').doc(widget.group.id).collection('members');
+      
+      final doc = await membersCol.doc(user.uid).get();
 
       if (doc.exists) {
         member = true;
@@ -83,6 +88,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
         if (role == 'admin') admin = true;
         if (role == 'owner') owner = true;
       }
+      
+      final membersSnap = await membersCol.get();
+      count = membersSnap.docs.length;
+      
     } catch (e) {
       // Gracefully continue
     }
@@ -92,6 +101,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
         _isMember = member;
         _isOwner = owner;
         _isAdmin = admin;
+        _membersCount = count;
         _isLoadingRole = false;
       });
     }
@@ -111,16 +121,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
         'name': newName,
         'description': newDesc,
       });
-      // In a real app we might update widget.group or rely on stream.
-      // Here we just toggle UI.
-      widget.group.name = newName;
-      widget.group.description = newDesc;
-      setState(() {
-        _isEditing = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الحفظ بنجاح')));
+
+      if (mounted) {
+        setState(() {
+          _groupName = newName;
+          _groupDescription = newDesc;
+          _isEditing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الحفظ بنجاح')));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء الحفظ')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء الحفظ')));
+      }
     }
   }
 
@@ -146,7 +159,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               if (_isOwner || _isAdmin) ...[
                 _buildMenuItem(Icons.link_rounded, "رابط المجموعة", () {
                   Navigator.pop(context);
-                  Clipboard.setData(ClipboardData(text: 'edu_mate://group/${widget.group.id}'));
+                  String inviteLink = '';
+                  try {
+                    inviteLink = (widget.group as dynamic).inviteLink ?? 'edu_mate://group/${widget.group.id}';
+                  } catch (e) {
+                    inviteLink = 'edu_mate://group/${widget.group.id}';
+                  }
+                  Clipboard.setData(ClipboardData(text: inviteLink));
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ الرابط')));
                 }),
                 _buildMenuItem(Icons.people_outline_rounded, "إدارة الأعضاء", () {
@@ -169,7 +188,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Divider(color: _darkSurface, height: 1),
               ),
-              _buildMenuItem(Icons.exit_to_app_rounded, "مغادرة المجموعة", () => Navigator.pop(context), color: AppColors.error),
+              _buildMenuItem(Icons.exit_to_app_rounded, "مغادرة المجموعة", () {
+                Navigator.pop(context);
+              }, color: AppColors.error),
               const SizedBox(height: 20),
             ],
           ),
@@ -274,7 +295,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
               child: widget.group.imageUrl.isEmpty
                   ? Text(
-                      widget.group.name.isNotEmpty ? widget.group.name.substring(0, 1).toUpperCase() : 'M',
+                      _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
                       style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
                     )
                   : null,
@@ -283,31 +304,44 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
           const SizedBox(height: 16),
           
           // Name and Details
-          Text(
-            widget.group.name,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: _whiteText),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              _groupName,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: _whiteText),
+            ),
           ),
           const SizedBox(height: 6),
-          if (widget.group.description.isNotEmpty) ...[
+          
+          if (_membersCount > 0)
+            Text(
+              "$_membersCount عضو",
+              style: const TextStyle(fontSize: 13, color: _grayText, fontWeight: FontWeight.w600),
+            )
+          else
+            const SizedBox(
+              width: 16, height: 16, 
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+            ),
+          
+          const SizedBox(height: 12),
+
+          if (_groupDescription.isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                widget.group.description,
+                _groupDescription,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14, color: _grayText),
+                style: const TextStyle(fontSize: 14, color: _grayText, height: 1.4),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 24),
+          ] else ...[
+             const SizedBox(height: 12),
           ],
-          
-          Text(
-            "${widget.group.membersCount} عضو",
-            style: const TextStyle(fontSize: 13, color: _grayText),
-          ),
-          
-          const SizedBox(height: 24),
           
           // Action Buttons
           Padding(
@@ -358,7 +392,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                 backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
                 child: widget.group.imageUrl.isEmpty
                     ? Text(
-                        widget.group.name.isNotEmpty ? widget.group.name.substring(0, 1).toUpperCase() : 'M',
+                        _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
                         style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
                       )
                     : null,
@@ -440,7 +474,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
       stream: _firestore.collection('groups').doc(widget.group.id).collection('members').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+           return const Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
         if (snapshot.hasError) {
           return const Center(child: Text('خطأ في التحميل', style: TextStyle(color: _grayText)));
@@ -454,10 +488,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final data = docs[index].data() as Map<String, dynamic>;
-            final name = data['name'] ?? 'عضو بالمجموعة';
-            final role = data['role'] ?? 'member';
-            final imageUrl = data['imageUrl'] as String?;
-
+            
+            // Safe fallback logic for name
+            final String name = data['name'] ?? data['displayName'] ?? data['username'] ?? 'عضو بالمجموعة';
+            final String? imageUrl = data['imageUrl'] ?? data['photoUrl'];
+            final String role = data['role'] ?? 'member';
+            
             String roleLabel = "";
             Color roleColor = Colors.transparent;
 
@@ -481,7 +517,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                     : null,
               ),
               title: Text(name, style: const TextStyle(color: _whiteText, fontWeight: FontWeight.bold, fontSize: 15)),
-              subtitle: const Text("عضو بالمجموعة", style: TextStyle(color: _grayText, fontSize: 12)),
+              subtitle: Text(
+                roleLabel.isNotEmpty ? roleLabel : "عضو", 
+                style: const TextStyle(color: _grayText, fontSize: 12)
+              ),
               trailing: roleLabel.isNotEmpty
                   ? Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -503,7 +542,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   }
 
   Widget _buildMediaTab() {
-    // Placeholder grid
     return _buildEmptyState(Icons.photo_library_rounded, "لا توجد وسائط");
   }
 
