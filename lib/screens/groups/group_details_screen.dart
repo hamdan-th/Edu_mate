@@ -144,8 +144,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(4))),
-              const SizedBox(height: 20),
+              Container(width: 48, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))),
+              const SizedBox(height: 24),
               
               _buildMenuItem(Icons.info_outline_rounded, "معلومات المجموعة", () => Navigator.pop(context)),
               
@@ -184,7 +184,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               _buildMenuItem(Icons.exit_to_app_rounded, "مغادرة المجموعة", () {
                 Navigator.pop(context);
               }, color: AppColors.error),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
             ],
           ),
         );
@@ -195,8 +195,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap, {Color? color}) {
     final c = color ?? AppColors.textPrimary;
     return ListTile(
-      leading: Icon(icon, color: c),
-      title: Text(title, style: TextStyle(color: c, fontWeight: FontWeight.w600, fontSize: 15)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: c.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: c, size: 22),
+      ),
+      title: Text(title, style: TextStyle(color: c, fontWeight: FontWeight.w700, fontSize: 16)),
       onTap: onTap,
     );
   }
@@ -215,15 +223,28 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               pinned: true,
               delegate: _SliverAppBarDelegate(
                 Container(
-                  color: AppColors.surface,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        offset: const Offset(0, 4),
+                        blurRadius: 8,
+                      )
+                    ]
+                  ),
                   child: TabBar(
                     controller: _tabController,
-                    indicatorColor: AppColors.primary,
-                    indicatorWeight: 3,
+                    indicator: UnderlineTabIndicator(
+                      borderSide: const BorderSide(width: 3.0, color: AppColors.primary),
+                      borderRadius: BorderRadius.circular(3),
+                      insets: const EdgeInsets.symmetric(horizontal: 32),
+                    ),
                     labelColor: AppColors.primary,
                     unselectedLabelColor: AppColors.textSecondary,
-                    dividerColor: AppColors.border,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    dividerColor: Colors.transparent,
+                    labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                     isScrollable: false,
                     tabs: const [
                       Tab(text: "الأعضاء"),
@@ -256,190 +277,251 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
       return _buildEditHeader();
     }
 
-    return SafeArea(
-      child: Container(
+    return Container(
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        padding: const EdgeInsets.only(bottom: 24),
-        child: Column(
-          children: [
-            // Top Actions Row
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  if (_isOwner || _isAdmin)
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: Column(
+            children: [
+              // Top Actions Row
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     IconButton(
-                      icon: const Icon(Icons.edit_rounded, color: AppColors.textPrimary),
-                      onPressed: () => setState(() => _isEditing = true),
-                    )
-                  else
-                    const SizedBox(width: 48), // Balance centering
-                ],
-              ),
-            ),
-            
-            // Avatar
-            Center(
-              child: CircleAvatar(
-                radius: 54,
-                backgroundColor: AppColors.inputFill,
-                backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                child: widget.group.imageUrl.isEmpty
-                    ? Text(
-                        _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
-                        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 22),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    if (_isOwner || _isAdmin)
+                      IconButton(
+                        icon: const Icon(Icons.edit_rounded, color: AppColors.textPrimary, size: 24),
+                        onPressed: () => setState(() => _isEditing = true),
                       )
-                    : null,
+                    else
+                      const SizedBox(width: 48), // Balance centering
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Name and Details
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                _groupName,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+              
+              // Avatar
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 16,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 58,
+                    backgroundColor: AppColors.inputFill,
+                    backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
+                    child: widget.group.imageUrl.isEmpty
+                        ? Text(
+                            _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
+                            style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: AppColors.primary),
+                          )
+                        : null,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            
-            if (_membersCount > 0)
-              Text(
-                "$_membersCount عضو",
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-              )
-            else
-              const SizedBox(
-                width: 16, height: 16, 
-                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-              ),
-            
-            const SizedBox(height: 12),
-
-            if (_groupDescription.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              
+              // Name and Details
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Text(
-                  _groupDescription,
+                  _groupName,
                   textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.4),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -0.5),
                 ),
               ),
-              const SizedBox(height: 24),
-            ] else ...[
-               const SizedBox(height: 12),
-            ],
-            
-            // Action Buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildSquareButton(Icons.volume_off_rounded, "كتم", () {}),
-                  _buildSquareButton(Icons.search_rounded, "بحث", () {}),
-                  _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", () {}, iconColor: AppColors.error),
-                  _buildSquareButton(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
-                ],
+              const SizedBox(height: 8),
+              
+              if (_membersCount > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    "$_membersCount عضو",
+                    style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w800),
+                  ),
+                )
+              else
+                const SizedBox(
+                  width: 16, height: 16, 
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                ),
+              
+              const SizedBox(height: 16),
+
+              if (_groupDescription.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    _groupDescription,
+                    textAlign: TextAlign.center,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                const SizedBox(height: 28),
+              ] else ...[
+                 const SizedBox(height: 12),
+              ],
+              
+              // Action Buttons
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildSquareButton(Icons.notifications_off_outlined, "كتم", () {}),
+                    const SizedBox(width: 16),
+                    _buildSquareButton(Icons.search_rounded, "بحث", () {}),
+                    const SizedBox(width: 16),
+                    _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", () {}, iconColor: AppColors.error),
+                    const SizedBox(width: 16),
+                    _buildSquareButton(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildEditHeader() {
-    return SafeArea(
-      child: Container(
-        color: AppColors.surface,
-        padding: const EdgeInsets.only(bottom: 24),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => setState(() => _isEditing = false),
-                    child: const Text("إلغاء", style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
-                  ),
-                  const Text("تعديل المجموعة", style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
-                  TextButton(
-                    onPressed: _saveEdits,
-                    child: const Text("حفظ", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
-                  ),
-                ],
+    return Container(
+      color: AppColors.surface,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => setState(() => _isEditing = false),
+                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                      child: const Text("إلغاء", style: TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w600)),
+                    ),
+                    const Text("تعديل المجموعة", style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w800)),
+                    TextButton(
+                      onPressed: _saveEdits,
+                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                      child: const Text("حفظ", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: 54,
-                  backgroundColor: AppColors.inputFill,
-                  backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                  child: widget.group.imageUrl.isEmpty
-                      ? Text(
-                          _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
-                          style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
-                        )
-                      : null,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                    child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
+              const SizedBox(height: 16),
+              Stack(
                 children: [
-                  TextField(
-                    controller: _nameController,
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
-                    decoration: InputDecoration(
-                      labelText: "اسم المجموعة",
-                      labelStyle: const TextStyle(color: AppColors.textSecondary),
-                      filled: true,
-                      fillColor: AppColors.inputFill,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 4),
+                    ),
+                    child: CircleAvatar(
+                      radius: 56,
+                      backgroundColor: AppColors.inputFill,
+                      backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
+                      child: widget.group.imageUrl.isEmpty
+                          ? Text(
+                              _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
+                              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
+                            )
+                          : null,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _descController,
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: "الوصف",
-                      labelStyle: const TextStyle(color: AppColors.textSecondary),
-                      filled: true,
-                      fillColor: AppColors.inputFill,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.surface, width: 3),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 6),
+                        ]
+                      ),
+                      child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 32),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+                      decoration: InputDecoration(
+                        labelText: "اسم المجموعة",
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                        filled: true,
+                        fillColor: AppColors.inputFill,
+                        contentPadding: const EdgeInsets.all(16),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _descController,
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        labelText: "الوصف",
+                        alignLabelWithHint: true,
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                        filled: true,
+                        fillColor: AppColors.inputFill,
+                        contentPadding: const EdgeInsets.all(16),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -451,17 +533,26 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            width: 58,
+            height: 58,
             decoration: BoxDecoration(
-              color: AppColors.inputFill,
-              borderRadius: BorderRadius.circular(16),
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+              border: Border.all(color: AppColors.border.withOpacity(0.5)),
             ),
-            child: Icon(icon, color: iconColor, size: 22),
+            child: Icon(icon, color: iconColor, size: 26),
           ),
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -482,16 +573,20 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) return _buildEmptyState(Icons.group_rounded, "لا يوجد أعضاء");
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+        return ListView.separated(
+          padding: const EdgeInsets.only(top: 16, bottom: 40),
           itemCount: docs.length,
+          separatorBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.only(left: 80, right: 24),
+            child: Divider(color: AppColors.border.withOpacity(0.5), height: 1),
+          ),
           itemBuilder: (context, index) {
             final data = docs[index].data() as Map<String, dynamic>;
             
-            // Safe fallback logic for name
             final String name = data['name'] ?? data['displayName'] ?? data['username'] ?? 'عضو بالمجموعة';
             final String? imageUrl = data['imageUrl'] ?? data['photoUrl'];
             final String role = data['role'] ?? 'member';
+            final String status = data['status'] ?? 'active';
             
             String roleLabel = "";
             Color roleColor = Colors.transparent;
@@ -504,32 +599,58 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               roleColor = AppColors.warning;
             }
 
+            // Small badge for muted/banned
+            String statusNote = "";
+            if (status == 'muted') statusNote = " (مكتوم)";
+            if (status == 'banned') statusNote = " (محظور)";
+
             return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.primary.withOpacity(0.1),
-                backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-                child: imageUrl == null || imageUrl.isEmpty
-                    ? Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : 'M',
-                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                      )
-                    : null,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              leading: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                ),
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                  child: imageUrl == null || imageUrl.isEmpty
+                      ? Text(
+                          name.isNotEmpty ? name[0].toUpperCase() : 'M',
+                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 18),
+                        )
+                      : null,
+                ),
               ),
-              title: Text(name, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 15)),
-              subtitle: Text(
-                roleLabel.isNotEmpty ? roleLabel : "عضو", 
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)
+              title: Text(
+                name + statusNote, 
+                style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  roleLabel.isNotEmpty ? roleLabel : "عضو", 
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)
+                ),
               ),
               trailing: roleLabel.isNotEmpty
                   ? Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: roleColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
+                        color: roleColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20), // pill shape
+                        border: Border.all(color: roleColor.withOpacity(0.3)),
                       ),
                       child: Text(
                         roleLabel,
-                        style: TextStyle(color: roleColor, fontSize: 10, fontWeight: FontWeight.w900),
+                        style: TextStyle(color: roleColor, fontSize: 11, fontWeight: FontWeight.w900),
                       ),
                     )
                   : null,
@@ -541,7 +662,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   }
 
   Widget _buildMediaTab() {
-    return _buildEmptyState(Icons.photo_library_rounded, "لا توجد وسائط");
+    return _buildEmptyState(Icons.photo_library_outlined, "لا توجد وسائط");
   }
 
   Widget _buildLinksTab() {
@@ -553,9 +674,23 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: AppColors.inputFill),
-          const SizedBox(height: 16),
-          Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w600)),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            ),
+            child: Icon(icon, size: 48, color: AppColors.textSecondary.withOpacity(0.5)),
+          ),
+          const SizedBox(height: 20),
+          Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w700)),
         ],
       ),
     );
@@ -569,9 +704,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate(this.child);
 
   @override
-  double get minExtent => 48;
+  double get minExtent => 52;
   @override
-  double get maxExtent => 48;
+  double get maxExtent => 52;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
