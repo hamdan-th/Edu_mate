@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../models/group_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../../services/group_service.dart';
+import 'group_chat_screen.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final GroupModel group;
@@ -15,15 +21,78 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Mock State Variables - Use your actual state management here
-  bool isMember = true;
-  bool isOwner = true;
-  bool isAdmin = true;
+  bool _isLoadingRole = true;
+  bool _isMember = false;
+  bool _isOwner = false;
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadMembershipState();
+  }
+
+  Future<void> _loadMembershipState() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) setState(() => _isLoadingRole = false);
+      return;
+    }
+
+    bool member = false;
+    bool owner = widget.group.ownerId == user.uid;
+    bool admin = false;
+
+    if (owner) {
+      member = true;
+    }
+
+    try {
+      final memberDoc = await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(widget.group.id)
+          .collection('members')
+          .doc(user.uid)
+          .get();
+
+      if (memberDoc.exists) {
+        member = true;
+        final role = memberDoc.data()?['role'] ?? 'member';
+        if (role == 'admin') admin = true;
+        if (role == 'owner') owner = true;
+      }
+    } catch (e) {
+      // Gracefully continue even if query fails
+    }
+
+    if (mounted) {
+      setState(() {
+        _isMember = member;
+        _isOwner = owner;
+        _isAdmin = admin;
+        _isLoadingRole = false;
+      });
+    }
+  }
+
+  Future<void> _joinGroup() async {
+    setState(() => _isLoadingRole = true);
+    try {
+      await GroupService.joinPublicGroup(widget.group.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم الانضمام بنجاح')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+        );
+      }
+    }
+    _loadMembershipState();
   }
 
   @override
@@ -53,9 +122,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                   indicatorWeight: 3,
                   labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                   tabs: const [
-                    Tab(text: "Chat"),
-                    Tab(text: "Members"),
-                    Tab(text: "Info"),
+                    Tab(text: "الدردشة"),
+                    Tab(text: "الأعضاء"),
+                    Tab(text: "معلومات المجموعة"),
                   ],
                 ),
               ),
@@ -98,11 +167,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
               // Back Button
               Positioned(
                 top: MediaQuery.of(context).padding.top + 8,
-                left: 16,
+                right: 16, // Arabic friendly
                 child: CircleAvatar(
                   backgroundColor: Colors.black38,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
@@ -110,7 +179,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
               // Group Avatar Overlapping
               Positioned(
                 bottom: -40,
-                left: 20,
+                right: 20, // Arabic friendly
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
@@ -127,7 +196,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                         ? Text(
                             widget.group.name.isNotEmpty
                                 ? widget.group.name.substring(0, 1).toUpperCase()
-                                : 'G',
+                                : 'M',
                             style: const TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.bold,
@@ -150,7 +219,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                   widget.group.name,
                   style: const TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w900,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -169,11 +238,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                 Row(
                   children: [
                     _buildBadge(
-                      widget.group.isPrivate ? "Private" : "Public",
-                      widget.group.isPrivate ? Icons.lock : Icons.public,
+                      widget.group.isPrivate ? "خاصة" : "عامة",
+                      widget.group.isPrivate ? Icons.lock_rounded : Icons.public,
                     ),
                     const SizedBox(width: 8),
-                    _buildBadge("1.2k Members", Icons.group),
+                    _buildBadge("أعضاء المجموعة", Icons.group_rounded),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -182,7 +251,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -222,29 +291,61 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
   }
 
   Widget _buildActionButtons() {
-    List<Widget> buttons = [];
-
-    if (!isMember) {
-      if (widget.group.isPublic) {
-        buttons.add(_buildPrimaryButton("Join Group", Icons.add));
-      }
-    } else {
-      buttons.add(_buildPrimaryButton("Open Chat", Icons.chat));
+    if (_isLoadingRole) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
+        ),
+      );
     }
 
-    if (isOwner || isAdmin) {
-      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 10));
-      buttons.add(_buildSecondaryButton("Manage Group", Icons.settings));
-      if (isOwner) {
-        buttons.add(const SizedBox(width: 10));
-        buttons.add(_buildSecondaryButton("Create Post", Icons.edit));
-      }
+    List<Widget> buttons = [];
 
-      if (widget.group.isPrivate || widget.group.isPublic) {
+    if (!_isMember) {
+      if (widget.group.isPublic) {
+        buttons.add(_buildPrimaryButton("انضمام", Icons.group_add_rounded, _joinGroup));
+      }
+    } else {
+      buttons.add(_buildPrimaryButton("فتح الدردشة", Icons.chat_bubble_rounded, () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)),
+        );
+      }));
+    }
+
+    if (_isOwner || _isAdmin) {
+      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 10));
+      buttons.add(_buildSecondaryButton("إدارة المجموعة", Icons.settings_rounded, () {
+        // Placeholder for manage group
+      }));
+
+      // Copy/Share Link ONLY if owner/admin and private group (or general link if preferred)
+      if (widget.group.isPrivate) {
         buttons.add(const SizedBox(width: 10));
-        buttons.add(_buildIconButton(Icons.copy, "Copy Invite Link"));
+        buttons.add(_buildIconButton(Icons.copy_rounded, "نسخ الرابط", () {
+          // Attempt to copy invite link or fallback to app link
+          String link = '';
+          try {
+             link = (widget.group as dynamic).inviteLink ?? 'edu_mate://group/${widget.group.id}';
+          } catch(e) {
+             link = 'edu_mate://group/${widget.group.id}';
+          }
+          Clipboard.setData(ClipboardData(text: link));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('تم نسخ رابط الدعوة الخاص')),
+          );
+        }));
+        
         buttons.add(const SizedBox(width: 10));
-        buttons.add(_buildIconButton(Icons.share, "Share Invite Link"));
+        buttons.add(_buildIconButton(Icons.share_rounded, "مشاركة الرابط", () {
+          ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text('خاصية المشاركة غير متاحة حالياً')),
+          );
+        }));
       }
     }
 
@@ -254,9 +355,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     );
   }
 
-  Widget _buildPrimaryButton(String text, IconData icon) {
+  Widget _buildPrimaryButton(String text, IconData icon, VoidCallback onPressed) {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: onPressed,
       icon: Icon(icon, color: Colors.white, size: 18),
       label: Text(
         text,
@@ -271,9 +372,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     );
   }
 
-  Widget _buildSecondaryButton(String text, IconData icon) {
+  Widget _buildSecondaryButton(String text, IconData icon, VoidCallback onPressed) {
     return OutlinedButton.icon(
-      onPressed: () {},
+      onPressed: onPressed,
       icon: Icon(icon, color: AppColors.primary, size: 18),
       label: Text(
         text,
@@ -288,11 +389,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     );
   }
 
-  Widget _buildIconButton(IconData icon, String tooltip) {
+  Widget _buildIconButton(IconData icon, String tooltip, VoidCallback onPressed) {
     return Tooltip(
       message: tooltip,
       child: InkWell(
-        onTap: () {},
+        onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(12),
@@ -307,11 +408,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
   }
 
   Widget _buildChatTab() {
-    if (!isMember) {
+    if (_isLoadingRole) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (!_isMember) {
       return _buildEmptyState(
-        icon: Icons.lock,
-        title: "Private Conversation",
-        description: "You must be a member to view the chat.",
+        icon: Icons.lock_rounded,
+        title: "محتوى خاص",
+        description: "يجب أن تكون عضواً في المجموعة لرؤية الدردشة.",
       );
     }
 
@@ -321,7 +426,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
       itemBuilder: (context, index) {
         bool isMe = index % 2 == 0;
         return Align(
-          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft, // Still appropriate depending on locale dir
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(14),
@@ -350,7 +455,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
               children: [
                 if (!isMe)
                   const Text(
-                    "Member Name",
+                    "اسم العضو",
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.primary,
@@ -359,7 +464,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                   ),
                 if (!isMe) const SizedBox(height: 4),
                 Text(
-                  "This is a placeholder message for the chat tab.",
+                  "هذه رسالة تجريبية في عرض الدردشة المبسط.",
                   style: TextStyle(
                     fontSize: 14,
                     color: isMe ? Colors.white : AppColors.textPrimary,
@@ -367,7 +472,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  "10:00 AM",
+                  "10:00 ص",
                   style: TextStyle(
                     fontSize: 10,
                     color: isMe ? Colors.white70 : AppColors.textSecondary,
@@ -377,16 +482,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
             ),
           ),
         );
-      },
+      }
     );
   }
 
   Widget _buildMembersTab() {
+    // Keep placeholder content with Arabic structure as instructed
     final List<Map<String, dynamic>> mockMembers = [
-      {"name": "Ahmed Ali", "role": "owner"},
-      {"name": "Sara Khalid", "role": "admin"},
-      {"name": "Omar Hasan", "role": "member"},
-      {"name": "Mona Zaki", "role": "member"},
+      {"name": "أحمد علي", "role": "owner"},
+      {"name": "سارة خالد", "role": "admin"},
+      {"name": "عمر حسن", "role": "member"},
+      {"name": "منى زكي", "role": "member"},
     ];
 
     return ListView.separated(
@@ -395,7 +501,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
       separatorBuilder: (context, index) => const Divider(
         color: AppColors.border,
         height: 1,
-        indent: 70,
+        indent: 70, // Adjust indent based on RTL if needed
       ),
       itemBuilder: (context, index) {
         final member = mockMembers[index];
@@ -419,14 +525,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
             style: const TextStyle(
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
-              fontSize: 16,
+              fontSize: 15,
             ),
           ),
           subtitle: Text(
-            role.toString().toUpperCase(),
+            role == 'owner' ? 'المالك' : (role == 'admin' ? 'مشرف' : 'عضو'),
             style: TextStyle(
               fontSize: 11,
-              letterSpacing: 0.5,
               color: role == "owner"
                   ? AppColors.error
                   : role == "admin"
@@ -435,9 +540,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
               fontWeight: FontWeight.bold,
             ),
           ),
-          trailing: (isOwner || isAdmin) && role != "owner"
+          trailing: (_isOwner || _isAdmin) && role != "owner"
               ? PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
+                  icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -447,17 +552,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                       if (role != "admin")
                         const PopupMenuItem(
                           value: "make_admin",
-                          child: Text("Make Admin"),
+                          child: Text("تعيين كمشرف"),
                         ),
                       if (role == "admin")
                         const PopupMenuItem(
                           value: "remove_admin",
-                          child: Text("Remove Admin"),
+                          child: Text("إزالة من الإشراف"),
                         ),
                       const PopupMenuItem(
                         value: "remove_member",
                         child: Text(
-                          "Remove Member",
+                          "طرد العضو",
                           style: TextStyle(color: AppColors.error),
                         ),
                       ),
@@ -477,17 +582,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildInfoCard(
-            "About Group",
+            "عن المجموعة",
             widget.group.description,
-            Icons.info_outline,
+            Icons.info_outline_rounded,
           ),
           const SizedBox(height: 16),
           _buildInfoCard(
-            "Details",
-            "• Type: ${widget.group.isPrivate ? 'Private' : 'Public'} Group\n"
-            "• College: ${widget.group.collegeName}\n"
-            "• Specialization: ${widget.group.specializationName}\n"
-            "• Created on: ${widget.group.createdAt != null ? '${widget.group.createdAt!.day}/${widget.group.createdAt!.month}/${widget.group.createdAt!.year}' : 'N/A'}",
+            "التفاصيل",
+            "• النوع: ${widget.group.isPrivate ? 'مجموعة خاصة' : 'مجموعة عامة'}\n"
+            "• الكلية: ${widget.group.collegeName}\n"
+            "• التخصص: ${widget.group.specializationName}\n"
+            "• تاريخ الإنشاء: ${widget.group.createdAt != null ? '${widget.group.createdAt!.day}/${widget.group.createdAt!.month}/${widget.group.createdAt!.year}' : 'غير متوفر'}",
             Icons.analytics_outlined,
           ),
         ],
@@ -504,7 +609,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -519,7 +624,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 20),
