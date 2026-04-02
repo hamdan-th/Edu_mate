@@ -17,10 +17,7 @@ class GroupDetailsScreen extends StatefulWidget {
   State<GroupDetailsScreen> createState() => _GroupDetailsScreenState();
 }
 
-class _GroupDetailsScreenState extends State<GroupDetailsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   bool _isLoadingRole = true;
   bool _isMember = false;
   bool _isOwner = false;
@@ -29,7 +26,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
     _loadMembershipState();
   }
 
@@ -95,57 +91,44 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     _loadMembershipState();
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void _openChat() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverToBoxAdapter(
-              child: _buildHeader(),
-            ),
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _SliverAppBarDelegate(
-                TabBar(
-                  controller: _tabController,
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  indicatorColor: AppColors.primary,
-                  indicatorWeight: 3,
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  tabs: const [
-                    Tab(text: "الدردشة"),
-                    Tab(text: "الأعضاء"),
-                    Tab(text: "معلومات المجموعة"),
-                  ],
-                ),
-              ),
-            ),
-          ];
-        },
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildChatTab(),
-            _buildMembersTab(),
-            _buildInfoTab(),
-          ],
-        ),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: _buildHeader(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildInfoSection(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildMembersSection(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildRecentActivitySection(),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 60), // Extra bottom padding
+          ),
+        ],
       ),
+      bottomNavigationBar: _buildBottomComposer(),
     );
   }
 
   Widget _buildHeader() {
     return Container(
       color: AppColors.surface,
+      padding: const EdgeInsets.only(bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -159,27 +142,27 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [AppColors.primary, AppColors.blueGlow],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
                   ),
                 ),
               ),
               // Back Button
               Positioned(
                 top: MediaQuery.of(context).padding.top + 8,
-                right: 16, // Arabic friendly
+                right: 16,
                 child: CircleAvatar(
-                  backgroundColor: Colors.black38,
+                  backgroundColor: Colors.black26,
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
               ),
-              // Group Avatar Overlapping
+              // Group Avatar
               Positioned(
-                bottom: -40,
-                right: 20, // Arabic friendly
+                bottom: -46,
+                right: 20,
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
@@ -199,7 +182,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                                 : 'M',
                             style: const TextStyle(
                               fontSize: 36,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w900,
                               color: AppColors.primary,
                             ),
                           )
@@ -209,7 +192,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
               ),
             ],
           ),
-          const SizedBox(height: 50), // Space for overlapping avatar
+          const SizedBox(height: 56), // Space for overlapping avatar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
@@ -218,45 +201,49 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
                 Text(
                   widget.group.name,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 26,
                     fontWeight: FontWeight.w900,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.group.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                // Badges
-                Row(
-                  children: [
-                    _buildBadge(
-                      widget.group.isPrivate ? "خاصة" : "عامة",
-                      widget.group.isPrivate ? Icons.lock_rounded : Icons.public,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildBadge("أعضاء المجموعة", Icons.group_rounded),
-                  ],
-                ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
                 Text(
                   "${widget.group.collegeName} • ${widget.group.specializationName}",
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 20),
-                _buildActionButtons(),
+                const SizedBox(height: 12),
+                Text(
+                  widget.group.description,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: AppColors.textPrimary,
+                    height: 1.5,
+                  ),
+                ),
                 const SizedBox(height: 16),
+                // Badges
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildBadge(
+                      widget.group.isPrivate ? "مجموعة خاصة" : "مجموعة عامة",
+                      widget.group.isPrivate ? Icons.lock_rounded : Icons.public_rounded,
+                      color: widget.group.isPrivate ? AppColors.warning : AppColors.success,
+                    ),
+                    _buildBadge(
+                      "أعضاء المجموعة",
+                      Icons.group_rounded,
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildActionButtons(),
               ],
             ),
           ),
@@ -265,24 +252,25 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     );
   }
 
-  Widget _buildBadge(String text, IconData icon) {
+  Widget _buildBadge(String text, IconData icon, {Color? color}) {
+    final c = color ?? AppColors.textSecondary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.inputFill,
-        borderRadius: BorderRadius.circular(20),
+        color: c.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: AppColors.textSecondary),
-          const SizedBox(width: 4),
+          Icon(icon, size: 16, color: c),
+          const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              fontWeight: FontWeight.bold,
+              color: c,
             ),
           ),
         ],
@@ -292,12 +280,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
 
   Widget _buildActionButtons() {
     if (_isLoadingRole) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 2.5),
+      return const SizedBox(
+        height: 48,
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
         ),
       );
     }
@@ -306,28 +296,18 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
 
     if (!_isMember) {
       if (widget.group.isPublic) {
-        buttons.add(_buildPrimaryButton("انضمام", Icons.group_add_rounded, _joinGroup));
+        buttons.add(_buildPrimaryButton("انضمام للمجموعة", Icons.group_add_rounded, _joinGroup));
       }
     } else {
-      buttons.add(_buildPrimaryButton("فتح الدردشة", Icons.chat_bubble_rounded, () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)),
-        );
-      }));
+      buttons.add(_buildPrimaryButton("فتح الدردشة", Icons.chat_bubble_rounded, _openChat));
     }
 
     if (_isOwner || _isAdmin) {
-      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 10));
-      buttons.add(_buildSecondaryButton("إدارة المجموعة", Icons.settings_rounded, () {
-        // Placeholder for manage group
-      }));
-
-      // Copy/Share Link ONLY if owner/admin and private group (or general link if preferred)
+      buttons.add(_buildSecondaryButton("إدارة الأعضاء", Icons.people_alt_rounded, () {}));
+      buttons.add(_buildSecondaryButton("إعدادات المجموعة", Icons.settings_rounded, () {}));
+      
       if (widget.group.isPrivate) {
-        buttons.add(const SizedBox(width: 10));
-        buttons.add(_buildIconButton(Icons.copy_rounded, "نسخ الرابط", () {
-          // Attempt to copy invite link or fallback to app link
+        buttons.add(_buildIconButton(Icons.copy_rounded, "نسخ رابط المجموعة", () {
           String link = '';
           try {
              link = (widget.group as dynamic).inviteLink ?? 'edu_mate://group/${widget.group.id}';
@@ -339,8 +319,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
             const SnackBar(content: Text('تم نسخ رابط الدعوة الخاص')),
           );
         }));
-        
-        buttons.add(const SizedBox(width: 10));
         buttons.add(_buildIconButton(Icons.share_rounded, "مشاركة الرابط", () {
           ScaffoldMessenger.of(context).showSnackBar(
              const SnackBar(content: Text('خاصية المشاركة غير متاحة حالياً')),
@@ -351,22 +329,24 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(children: buttons),
+      child: Row(
+        children: buttons.map((b) => Padding(padding: const EdgeInsets.only(left: 10), child: b)).toList(),
+      ),
     );
   }
 
   Widget _buildPrimaryButton(String text, IconData icon, VoidCallback onPressed) {
     return ElevatedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white, size: 18),
+      icon: Icon(icon, color: Colors.white, size: 20),
       label: Text(
         text,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 0,
       ),
     );
@@ -378,13 +358,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
       icon: Icon(icon, color: AppColors.primary, size: 18),
       label: Text(
         text,
-        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.border, width: 1.5),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: BorderSide(color: AppColors.primary.withOpacity(0.3), width: 1.5),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
@@ -394,12 +374,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
       message: tooltip,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: AppColors.inputFill,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border.withOpacity(0.5)),
           ),
           child: Icon(icon, color: AppColors.textPrimary, size: 20),
         ),
@@ -407,246 +388,168 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     );
   }
 
-  Widget _buildChatTab() {
-    if (_isLoadingRole) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (!_isMember) {
-      return _buildEmptyState(
-        icon: Icons.lock_rounded,
-        title: "محتوى خاص",
-        description: "يجب أن تكون عضواً في المجموعة لرؤية الدردشة.",
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 5, // Placeholder count
-      itemBuilder: (context, index) {
-        bool isMe = index % 2 == 0;
-        return Align(
-          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft, // Still appropriate depending on locale dir
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(14),
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.75,
+  Widget _buildInfoSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "نبذة عن المجموعة",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
             ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isMe ? AppColors.primary : AppColors.surface,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
-                bottomLeft: Radius.circular(isMe ? 16 : 4),
-                bottomRight: Radius.circular(isMe ? 4 : 16),
-              ),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.border.withOpacity(0.5)),
               boxShadow: [
-                if (!isMe)
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (!isMe)
-                  const Text(
-                    "اسم العضو",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                if (!isMe) const SizedBox(height: 4),
-                Text(
-                  "هذه رسالة تجريبية في عرض الدردشة المبسط.",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isMe ? Colors.white : AppColors.textPrimary,
-                  ),
+                _buildInfoRow(Icons.description_outlined, "الوصف", widget.group.description.isNotEmpty ? widget.group.description : "لا يوجد وصف لهذه المجموعة."),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(color: AppColors.border),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  "10:00 ص",
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isMe ? Colors.white70 : AppColors.textSecondary,
-                  ),
+                _buildInfoRow(Icons.school_outlined, "الكلية", widget.group.collegeName),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(color: AppColors.border),
                 ),
+                _buildInfoRow(Icons.menu_book_outlined, "التخصص", widget.group.specializationName),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(color: AppColors.border),
+                ),
+                _buildInfoRow(
+                  Icons.chat_outlined,
+                  "الدردشة",
+                  widget.group.membersCanChat ? "متاحة لجميع الأعضاء" : "متاحة للردود من قبل المشرفين فقط (للقراءة فقط)",
+                ),
+                if (widget.group.createdAt != null) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(color: AppColors.border),
+                  ),
+                  _buildInfoRow(Icons.calendar_today_outlined, "تاريخ الإنشاء", "${widget.group.createdAt!.day}/${widget.group.createdAt!.month}/${widget.group.createdAt!.year}"),
+                ],
               ],
             ),
           ),
-        );
-      }
-    );
-  }
-
-  Widget _buildMembersTab() {
-    // Keep placeholder content with Arabic structure as instructed
-    final List<Map<String, dynamic>> mockMembers = [
-      {"name": "أحمد علي", "role": "owner"},
-      {"name": "سارة خالد", "role": "admin"},
-      {"name": "عمر حسن", "role": "member"},
-      {"name": "منى زكي", "role": "member"},
-    ];
-
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: mockMembers.length,
-      separatorBuilder: (context, index) => const Divider(
-        color: AppColors.border,
-        height: 1,
-        indent: 70, // Adjust indent based on RTL if needed
-      ),
-      itemBuilder: (context, index) {
-        final member = mockMembers[index];
-        final role = member["role"];
-        return ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          leading: CircleAvatar(
-            radius: 24,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            child: Text(
-              member["name"][0],
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          title: Text(
-            member["name"],
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-              fontSize: 15,
-            ),
-          ),
-          subtitle: Text(
-            role == 'owner' ? 'المالك' : (role == 'admin' ? 'مشرف' : 'عضو'),
-            style: TextStyle(
-              fontSize: 11,
-              color: role == "owner"
-                  ? AppColors.error
-                  : role == "admin"
-                      ? AppColors.warning
-                      : AppColors.textSecondary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          trailing: (_isOwner || _isAdmin) && role != "owner"
-              ? PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  onSelected: (value) {},
-                  itemBuilder: (context) {
-                    return [
-                      if (role != "admin")
-                        const PopupMenuItem(
-                          value: "make_admin",
-                          child: Text("تعيين كمشرف"),
-                        ),
-                      if (role == "admin")
-                        const PopupMenuItem(
-                          value: "remove_admin",
-                          child: Text("إزالة من الإشراف"),
-                        ),
-                      const PopupMenuItem(
-                        value: "remove_member",
-                        child: Text(
-                          "طرد العضو",
-                          style: TextStyle(color: AppColors.error),
-                        ),
-                      ),
-                    ];
-                  },
-                )
-              : null,
-        );
-      },
-    );
-  }
-
-  Widget _buildInfoTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildInfoCard(
-            "عن المجموعة",
-            widget.group.description,
-            Icons.info_outline_rounded,
-          ),
-          const SizedBox(height: 16),
-          _buildInfoCard(
-            "التفاصيل",
-            "• النوع: ${widget.group.isPrivate ? 'مجموعة خاصة' : 'مجموعة عامة'}\n"
-            "• الكلية: ${widget.group.collegeName}\n"
-            "• التخصص: ${widget.group.specializationName}\n"
-            "• تاريخ الإنشاء: ${widget.group.createdAt != null ? '${widget.group.createdAt!.day}/${widget.group.createdAt!.month}/${widget.group.createdAt!.year}' : 'غير متوفر'}",
-            Icons.analytics_outlined,
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(String title, String content, IconData icon) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildInfoRow(IconData icon, String title, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
           ),
-        ],
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+          child: Icon(icon, size: 18, color: AppColors.primary),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: AppColors.primary, size: 20),
-              ),
-              const SizedBox(width: 12),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
+                  height: 1.4,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            content,
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: AppColors.textSecondary,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMembersSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "الأعضاء",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+                child: const Text("عرض كل الأعضاء", style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.border.withOpacity(0.5)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                _buildMemberPreview("مالك المجموعة", "المالك", AppColors.error),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Divider(color: AppColors.border),
+                ),
+                _buildMemberPreview("عضو פעتد", "مشرف", AppColors.warning),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Divider(color: AppColors.border),
+                ),
+                _buildMemberPreview("طالب نشط", "عضو", AppColors.textSecondary),
+              ],
             ),
           ),
         ],
@@ -654,84 +557,190 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen>
     );
   }
 
-  Widget _buildEmptyState({
-    required IconData icon,
-    required String title,
-    required String description,
-  }) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
+  Widget _buildMemberPreview(String name, String role, Color roleColor) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 20,
+          backgroundColor: AppColors.inputFill,
+          child: Text(
+            name[0],
+            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Text(
+            name,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: roleColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            role,
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: roleColor),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentActivitySection() {
+    if (!_isMember) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "آخر النشاط",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: _openChat,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.border.withOpacity(0.5)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 12,
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Icon(icon, size: 48, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primary, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "انتقل إلى غرفة المحادثة",
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "شارك في التحديثات والنقاشات الأخيرة لهذه المجموعة.",
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textSecondary),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-                height: 1.5,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomComposer() {
+    if (_isLoadingRole) return const SizedBox.shrink();
+
+    if (!_isMember) return const SizedBox.shrink();
+
+    final bool canChat = widget.group.membersCanChat || _isOwner || _isAdmin;
+
+    if (!canChat) {
+      return SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.campaign_rounded, color: AppColors.textSecondary, size: 20),
+              SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  'المجموعة للإعلانات فقط. المشرفون هم من يمكنهم الإرسال.',
+                  style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: _openChat,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.inputFill,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppColors.border.withOpacity(0.5)),
+                  ),
+                  child: const Text(
+                    'اكتب رسالة...',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              height: 48,
+              width: 48,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(24),
+                  onTap: _openChat,
+                  child: const Center(
+                    child: Icon(Icons.send_rounded, color: Colors.white, size: 22),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
     );
-  }
-}
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar _tabBar;
-
-  _SliverAppBarDelegate(this._tabBar);
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height + 1;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height + 1;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: AppColors.surface,
-      child: Column(
-        children: [
-          _tabBar,
-          Container(height: 1, color: AppColors.border),
-        ],
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
   }
 }
