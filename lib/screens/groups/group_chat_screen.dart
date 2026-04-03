@@ -293,90 +293,66 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F7), // Authentic Telegram-like soft background
+      backgroundColor: const Color(0xFFF1F1F1), // Authentic Telegram-like solid background
       appBar: AppBar(
         titleSpacing: 0,
-        backgroundColor: AppColors.surface,
-        elevation: 0.5,
-        shadowColor: Colors.black.withOpacity(0.1),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        shadowColor: Colors.black.withOpacity(0.05),
+        leadingWidth: 44,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: GestureDetector(
           onTap: _openDetails,
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: AppColors.inputFill,
-                backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                child: widget.group.imageUrl.isEmpty
-                    ? Text(
-                        widget.group.name.isNotEmpty ? widget.group.name.substring(0, 1).toUpperCase() : 'M',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      widget.group.name.isEmpty ? 'الدردشة' : widget.group.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary, height: 1.2),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      widget.group.specializationName,
-                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.2),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 4, right: 8),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
+                  child: widget.group.imageUrl.isEmpty
+                      ? Text(
+                          widget.group.name.isNotEmpty ? widget.group.name.substring(0, 1).toUpperCase() : 'M',
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16),
+                        )
+                      : null,
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.group.name.isEmpty ? 'الدردشة' : widget.group.name,
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: Colors.black87, letterSpacing: -0.2),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        "${_membersCount > 0 ? _membersCount : ''} ${widget.group.specializationName}".trim(),
+                        style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93), height: 1.1),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-
       ),
       body: _isLoadingRole
           ? const Center(child: CircularProgressIndicator())
           : !_isMember
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.lock_rounded, size: 54, color: AppColors.textSecondary.withOpacity(0.5)),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'يجب الانضمام أولاً',
-                        style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w900),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'لا يمكنك مشاهدة الرسائل أو التفاعل بدون عضوية في المجتمع.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          elevation: 0,
-                        ),
-                        onPressed: _openDetails,
-                        child: const Text('عرض معلومات المجموعة', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                )
+              ? _buildNonMemberState()
               : Column(
                   children: [
                     Expanded(
@@ -387,40 +363,79 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                             .collection('messages')
                             .orderBy('createdAt', descending: true)
                             .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
 
-                if (snapshot.hasError) {
-                  return const Center(child: Text('تعذر تحميل الرسائل', style: TextStyle(color: AppColors.textSecondary)));
-                }
+                          if (snapshot.hasError) {
+                            return const Center(child: Text('تعذر تحميل الرسائل', style: TextStyle(color: AppColors.textSecondary)));
+                          }
 
-                final docs = snapshot.data?.docs ?? [];
+                          final docs = snapshot.data?.docs ?? [];
 
-                if (docs.isEmpty) {
-                  return const _EmptyChatState();
-                }
+                          if (docs.isEmpty) {
+                            return const _EmptyChatState();
+                          }
 
-                return ListView.separated(
-                  controller: _scrollController,
-                  reverse: true, // Auto scrolls and shows latest at bottom
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-                  itemCount: docs.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final data = docs[index].data() as Map<String, dynamic>;
-                    final myId = _auth.currentUser?.uid;
-                    final senderId = data['senderId'] ?? '';
-                    final isMe = myId != null && myId == senderId;
-                    
-                    return _buildMessageBubble(data, isMe);
-                  },
-                );
-              },
+                          return ListView.builder(
+                            controller: _scrollController,
+                            reverse: true, // Auto scrolls and shows latest at bottom
+                            padding: const EdgeInsets.only(top: 16, bottom: 10, left: 16, right: 16),
+                            itemCount: docs.length,
+                            itemBuilder: (context, index) {
+                              final data = docs[index].data() as Map<String, dynamic>;
+                              final myId = _auth.currentUser?.uid;
+                              final senderId = data['senderId'] ?? '';
+                              final isMe = myId != null && myId == senderId;
+                              
+                              return _buildMessageBubble(data, isMe);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    _buildInputArea(),
+                  ],
+                ),
+    );
+  }
+
+  Widget _buildNonMemberState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
+            child: Icon(Icons.lock_rounded, size: 48, color: AppColors.textSecondary.withOpacity(0.6)),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'يجب الانضمام للمجموعة',
+            style: TextStyle(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'هذا مجتمع خاص بأعضائه، يرجى عرض معلومات المجموعة وطلب الانضمام للمشاركة.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.4),
             ),
           ),
-          _buildInputArea(),
+          const SizedBox(height: 28),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+              elevation: 0,
+            ),
+            onPressed: _openDetails,
+            child: const Text('عرض معلومات المجموعة', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+          ),
         ],
       ),
     );
@@ -435,21 +450,21 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
         margin: const EdgeInsets.only(bottom: 4),
-        padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isMe ? const Color(0xFFE3F2FD) : Colors.white, // Clean soft blue for me, crisp white for others
+          color: isMe ? const Color(0xFFE3F2FD) : Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isMe ? 16 : 2), // Sharper edge corresponding to Telegram
-            bottomRight: Radius.circular(isMe ? 2 : 16),
+            bottomLeft: Radius.circular(isMe ? 16 : 4),
+            bottomRight: Radius.circular(isMe ? 4 : 16),
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
-              blurRadius: 2,
+              blurRadius: 1,
               offset: const Offset(0, 1),
             ),
           ],
@@ -460,14 +475,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           children: [
             if (!isMe)
               Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(senderName, style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                padding: const EdgeInsets.only(bottom: 2, right: 2),
+                child: Text(senderName, style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w700)),
               ),
             if (imageUrl != null && imageUrl.isNotEmpty)
               Padding(
-                padding: EdgeInsets.only(bottom: text.isNotEmpty ? 6.0 : 0.0),
+                padding: EdgeInsets.only(bottom: text.isNotEmpty ? 6.0 : 2.0, top: 2),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   child: Image.network(
                     imageUrl,
                     fit: BoxFit.cover,
@@ -475,7 +490,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       if (loadingProgress == null) return child;
                       return Container(
                         height: 150, width: double.infinity,
-                        color: AppColors.inputFill,
+                        color: Colors.black.withOpacity(0.05),
                         alignment: Alignment.center,
                         child: const CircularProgressIndicator(strokeWidth: 2),
                       );
@@ -484,17 +499,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 ),
               ),
             if (text.isNotEmpty)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.end,
                 children: [
-                  Flexible(
-                    child: Text(text, style: const TextStyle(fontSize: 15, color: AppColors.textPrimary, height: 1.3)),
-                  ),
+                  Text(text, style: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.35)),
                   const SizedBox(width: 8),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 2),
-                    child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 10, color: AppColors.textSecondary.withOpacity(0.8))),
+                    padding: const EdgeInsets.only(bottom: 2, top: 4),
+                    child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 11, color: const Color(0xFF8E8E93).withOpacity(0.8), letterSpacing: 0.1)),
                   ),
                 ],
               ),
@@ -502,8 +515,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               Align(
                 alignment: Alignment.bottomRight,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 10, color: AppColors.textSecondary.withOpacity(0.8))),
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 11, color: const Color(0xFF8E8E93).withOpacity(0.8))),
                 ),
               ),
           ],
@@ -514,162 +527,122 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   Widget _buildInputArea() {
     if (_isBanned) {
-      return SafeArea(
-        top: false,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.block_rounded, color: AppColors.error, size: 20),
-              SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'عذراً، لقد تم حظرك من المشاركة في هذه المجموعة.',
-                  style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 13),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildDisabledState('عذراً، لقد تم حظرك من المشاركة في هذه المجموعة.', Icons.block_rounded, AppColors.error);
     }
-
     if (_isMuted) {
-      return SafeArea(
-        top: false,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.mic_off_rounded, color: AppColors.warning, size: 20),
-              SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'لقد تم كتمك. لا يمكنك الإرسال حالياً.',
-                  style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.bold, fontSize: 13),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+       return _buildDisabledState('لقد تم كتمك. لا يمكنك الإرسال حالياً.', Icons.mic_off_rounded, AppColors.warning);
     }
-
     if (!_canSend) {
-      return SafeArea(
-        top: false,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.campaign_rounded, color: AppColors.textSecondary, size: 20),
-              SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'المجموعة للإعلانات فقط، المشرفون هم من يمكنهم الإرسال.',
-                  style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold, fontSize: 13),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+       return _buildDisabledState('المجموعة للإعلانات فقط، المشرفون هم من يمكنهم الإرسال.', Icons.campaign_rounded, AppColors.textSecondary);
     }
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        color: AppColors.surface,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_selectedImage != null)
-              Container(
-                margin: const EdgeInsets.only(bottom: 8),
+    return Container(
+      padding: EdgeInsets.only(
+        left: 8, right: 8, top: 8,
+        bottom: MediaQuery.of(context).padding.bottom + 8,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F7F8),
+        border: Border(top: BorderSide(color: Colors.black.withOpacity(0.05))),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_selectedImage != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)]),
+              child: Row(
+                children: [
+                  ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(_selectedImage!, height: 44, width: 44, fit: BoxFit.cover)),
+                  const SizedBox(width: 12),
+                  const Expanded(child: Text("صورة مرفقة", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14))),
+                  IconButton(icon: const Icon(Icons.close_rounded, color: AppColors.error), onPressed: () => setState(() => _selectedImage = null)),
+                ],
+              ),
+            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              IconButton(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.attach_file_rounded, color: Color(0xFF8E8E93), size: 28),
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(12)),
-                child: Row(
-                  children: [
-                    ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(_selectedImage!, height: 40, width: 40, fit: BoxFit.cover)),
-                    const SizedBox(width: 12),
-                    const Expanded(child: Text("صورة مرفقة", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))),
-                    IconButton(icon: const Icon(Icons.close_rounded, color: AppColors.error), onPressed: () => setState(() => _selectedImage = null)),
-                  ],
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: Colors.black.withOpacity(0.05)),
+                  ),
+                  child: TextField(
+                    controller: _messageController,
+                    minLines: 1,
+                    maxLines: 5,
+                    textInputAction: TextInputAction.newline,
+                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                    decoration: const InputDecoration(
+                      hintText: 'رسالة',
+                      hintStyle: TextStyle(color: Color(0xFF8E8E93)),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      isDense: true,
+                    ),
+                  ),
                 ),
               ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                IconButton(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.attach_file_rounded, color: AppColors.textSecondary, size: 28), // Telegram attachment placement
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.background, // Contrast against clean white bottom bar
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: TextField(
-                      controller: _messageController,
-                      minLines: 1,
-                      maxLines: 5,
-                      textInputAction: TextInputAction.newline,
-                      style: const TextStyle(fontSize: 16),
-                      decoration: const InputDecoration(
-                        hintText: 'رسالة',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
-                        isDense: true,
-                      ),
-                    ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: _isSending ? null : _send,
+                child: Container(
+                  height: 44,
+                  width: 44,
+                  margin: const EdgeInsets.only(bottom: 0),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
                   ),
+                  child: _isSending
+                      ? const Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)))
+                      : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
                 ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: _isSending ? null : _send,
-                  child: Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: _isSending
-                        ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)))
-                        : const Icon(Icons.send_rounded, color: Colors.white, size: 22),
-                  ),
-                )
-              ],
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDisabledState(String msg, IconData icon, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: 16, bottom: MediaQuery.of(context).padding.bottom + 16,
+        left: 20, right: 20,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.black.withOpacity(0.05))),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              msg,
+              style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 14),
+              textAlign: TextAlign.center,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -682,29 +655,30 @@ class _EmptyChatState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(28),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.06),
+                color: Colors.white,
                 shape: BoxShape.circle,
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 4))],
               ),
               child: Icon(
-                Icons.chat_bubble_outline_rounded,
+                Icons.chat_rounded,
                 size: 54,
-                color: AppColors.primary.withOpacity(0.6),
+                color: AppColors.primary.withOpacity(0.8),
               ),
             ),
             const SizedBox(height: 24),
             const Text(
               'لا توجد رسائل بعد',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: Colors.black87,
                 fontSize: 18,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: 10),
@@ -712,8 +686,9 @@ class _EmptyChatState extends StatelessWidget {
               'كن أول من يبدأ النقاش في هذا المجتمع، وشارك أفكارك مع الأعضاء.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.textSecondary,
-                height: 1.6,
+                color: Color(0xFF8E8E93),
+                height: 1.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
