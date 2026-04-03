@@ -271,20 +271,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       case 'mute':
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم كتم الإشعارات')));
         break;
-      case 'members':
-        Navigator.push(context, MaterialPageRoute(builder: (_) => ManageMembersScreen(group: widget.group)));
-        break;
-      case 'link':
-        String link = widget.group.inviteLink;
-        if (link.isEmpty) {
-          link = 'edu_mate://group/${widget.group.id}';
-        }
-        Clipboard.setData(ClipboardData(text: link));
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ رابط الدعوة الخاص')));
-        break;
-      case 'settings':
-        _openDetails();
-        break;
+
       case 'toggle_chat':
         try {
           final doc = await _firestore.collection('groups').doc(widget.group.id).get();
@@ -366,9 +353,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   const PopupMenuItem(value: 'mute', child: Text("كتم الإشعارات")),
                 ],
                 if (_isOwner || _isAdmin) ...[
-                  const PopupMenuItem(value: 'members', child: Text("إدارة الأعضاء")),
-                  const PopupMenuItem(value: 'link', child: Text("رابط المجموعة")),
-                  const PopupMenuItem(value: 'settings', child: Text("تعديل المجموعة")),
                   const PopupMenuItem(value: 'toggle_chat', child: Text("تفعيل/إيقاف دردشة الأعضاء")),
                 ],
                 if (_isMember) ...[

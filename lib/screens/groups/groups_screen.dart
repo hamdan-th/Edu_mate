@@ -99,56 +99,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     }
   }
 
-  Future<void> _joinGroupFromDiscover(GroupModel group) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      _openGroupDetails(group);
-      return;
-    }
 
-    if (group.ownerId == user.uid) {
-      _openGroupChat(group);
-      return;
-    }
-
-    if (!mounted) return;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.transparent,
-      builder: (_) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-    );
-
-    bool isMember = false;
-    try {
-      final doc = await FirebaseFirestore.instance.collection('groups').doc(group.id).collection('members').doc(user.uid).get();
-      if (doc.exists) isMember = true;
-    } catch (_) {}
-
-    if (isMember) {
-      if (mounted) Navigator.of(context, rootNavigator: true).pop();
-      _openGroupChat(group);
-      return;
-    }
-
-    if (group.isPublic) {
-      try {
-        await GroupService.joinPublicGroup(group.id);
-        if (mounted) {
-          Navigator.of(context, rootNavigator: true).pop();
-          _openGroupChat(group);
-        }
-      } catch (e) {
-        if (mounted) {
-          Navigator.of(context, rootNavigator: true).pop();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
-        }
-      }
-    } else {
-      if (mounted) Navigator.of(context, rootNavigator: true).pop();
-      _openGroupDetails(group);
-    }
-  }
 
   void _openFilterModal() {
     String? tempCollegeId = _selectedCollegeId;
@@ -605,8 +556,8 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    onPressed: () => _joinGroupFromDiscover(group),
-                    child: const Text("انضمام للمجموعة", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+                    onPressed: () => _handleGroupTap(group),
+                    child: const Text("استعراض المجموعة", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
                   ),
                 ),
               ],
