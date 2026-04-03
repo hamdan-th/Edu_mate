@@ -98,12 +98,33 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
   Future<void> _updateMemberStatus(String memberId, String status) async {
     try {
-      await _firestore
+      WriteBatch batch = _firestore.batch();
+      
+      final memberRef = _firestore
           .collection('groups')
           .doc(widget.group.id)
           .collection('members')
-          .doc(memberId)
-          .update({'status': status});
+          .doc(memberId);
+      
+      final groupRef = _firestore.collection('groups').doc(widget.group.id);
+
+      batch.update(memberRef, {
+        'status': status,
+        'isMuted': status == 'muted',
+      });
+
+      if (status == 'banned') {
+         batch.update(groupRef, {
+           'bannedUserIds': FieldValue.arrayUnion([memberId])
+         });
+      } else {
+         batch.update(groupRef, {
+           'bannedUserIds': FieldValue.arrayRemove([memberId])
+         });
+      }
+
+      await batch.commit();
+
       if (mounted) {
         String msg = 'تم تحديث حالة العضو';
         if (status == 'muted') msg = 'تم كتم العضو';
@@ -120,12 +141,18 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
   Future<void> _removeMember(String memberId) async {
     try {
-      await _firestore
-          .collection('groups')
-          .doc(widget.group.id)
-          .collection('members')
-          .doc(memberId)
-          .delete();
+      WriteBatch batch = _firestore.batch();
+      final groupRef = _firestore.collection('groups').doc(widget.group.id);
+      
+      batch.delete(groupRef.collection('members').doc(memberId));
+      batch.delete(_firestore.collection('users').doc(memberId).collection('joined_groups').doc(widget.group.id));
+      
+      batch.update(groupRef, {
+        'membersCounts': FieldValue.increment(-1),
+      });
+
+      await batch.commit();
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إزالة العضو من المجموعة')));
       }

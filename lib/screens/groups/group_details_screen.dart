@@ -220,9 +220,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                   Navigator.pop(context);
                   setState(() => _isEditing = true);
                 }),
-                _buildMenuItem(Icons.chat_bubble_outline_rounded, "تفعيل/إيقاف دردشة الأعضاء", () {
+                _buildMenuItem(Icons.chat_bubble_outline_rounded, "تفعيل/إيقاف دردشة الأعضاء", () async {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('غير متاح حالياً')));
+                  try {
+                    final doc = await _firestore.collection('groups').doc(widget.group.id).get();
+                    if (doc.exists) {
+                      final current = doc.data()?['membersCanChat'] ?? true;
+                      await doc.reference.update({'membersCanChat': !current});
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(!current ? 'تم تفعيل دردشة الأعضاء' : 'تم إيقاف دردشة الأعضاء')));
+                    }
+                  } catch (_) {}
                 }),
               ] else ...[
                 _buildMenuItem(_isMuted ? Icons.notifications_active_outlined : Icons.notifications_off_outlined, _isMuted ? "تفعيل الإشعارات" : "كتم الإشعارات", () {

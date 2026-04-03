@@ -68,6 +68,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     bool muted = false;
     bool member = false;
 
+    // Fetch freshest group data to ensure membersCanChat is strictly accurate real-time
+    try {
+      final grpDoc = await _firestore.collection('groups').doc(widget.group.id).get();
+      if (grpDoc.exists) {
+         canSend = grpDoc.data()?['membersCanChat'] ?? canSend;
+      }
+    } catch (_) {}
+
     if (owner) {
       canSend = true;
       member = true;
@@ -99,7 +107,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           if (role == 'admin') admin = true;
           if (role == 'owner') owner = true;
         } else {
-          if (!widget.group.membersCanChat && !banned && !muted) {
+          // Double verification on real-time canSend vs banned/muted limitations
+          if (!canSend && !banned && !muted) {
+            canSend = false; // it is already false if chat is locked and not admin
+          } else if (banned || muted) {
             canSend = false;
           }
         }
@@ -278,7 +289,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         _openDetails();
         break;
       case 'toggle_chat':
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تحديث الصلاحيات غير متاح حالياً')));
+        try {
+          final doc = await _firestore.collection('groups').doc(widget.group.id).get();
+          if (doc.exists) {
+            final current = doc.data()?['membersCanChat'] ?? true;
+            await doc.reference.update({'membersCanChat': !current});
+            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(!current ? 'تم تفعيل دردشة الأعضاء' : 'تم إيقاف دردشة الأعضاء')));
+            // Force re-check to update text box input area immediately without hot reloading
+            _checkPermissions();
+          }
+        } catch (_) {}
         break;
       case 'leave':
         _leaveGroup();
