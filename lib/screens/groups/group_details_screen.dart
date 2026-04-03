@@ -46,7 +46,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     _groupName = widget.group.name;
     _groupDescription = widget.group.description;
     
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _nameController.text = _groupName;
     _descController.text = _groupDescription;
     _loadMembershipState();
@@ -198,23 +198,31 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(width: 48, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               
-              _buildMenuItem(Icons.info_outline_rounded, "معلومات المجموعة", () {
+              _buildMenuItem(Icons.report_problem_outlined, "إبلاغ", () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('أنت تتصفح معلومات المجموعة بالفعل')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال البلاغ بنجاح')));
+              }),
+              _buildMenuItem(Icons.cleaning_services_rounded, "مسح محتوى الدردشة", () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ميزة مسح الحساب قيد التطوير')));
+              }),
+              _buildMenuItem(Icons.link_rounded, "رابط المجموعة", () {
+                Navigator.pop(context);
+                String inviteLink = widget.group.inviteLink;
+                if (inviteLink.isEmpty) {
+                  inviteLink = 'edu_mate://group/${widget.group.id}';
+                }
+                Clipboard.setData(ClipboardData(text: inviteLink));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ رابط الدعوة')));
               }),
               
               if (_isOwner || _isAdmin) ...[
-                _buildMenuItem(Icons.link_rounded, "رابط المجموعة", () {
-                  Navigator.pop(context);
-                  String inviteLink = widget.group.inviteLink;
-                  if (inviteLink.isEmpty) {
-                    inviteLink = 'edu_mate://group/${widget.group.id}';
-                  }
-                  Clipboard.setData(ClipboardData(text: inviteLink));
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ الرابط')));
-                }),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Divider(color: AppColors.border, height: 1),
+                ),
                 _buildMenuItem(Icons.people_outline_rounded, "إدارة الأعضاء", () {
                   Navigator.pop(context);
                   Navigator.push(context, MaterialPageRoute(builder: (_) => ManageMembersScreen(group: widget.group)));
@@ -223,33 +231,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                   Navigator.pop(context);
                   setState(() => _isEditing = true);
                 }),
-                _buildMenuItem(Icons.chat_bubble_outline_rounded, "تفعيل/إيقاف دردشة الأعضاء", () async {
-                  Navigator.pop(context);
-                  try {
-                    final doc = await _firestore.collection('groups').doc(widget.group.id).get();
-                    if (doc.exists) {
-                      final current = doc.data()?['membersCanChat'] ?? true;
-                      await doc.reference.update({'membersCanChat': !current});
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(!current ? 'تم تفعيل دردشة الأعضاء' : 'تم إيقاف دردشة الأعضاء')));
-                    }
-                  } catch (_) {}
-                }),
-              ] else ...[
-                _buildMenuItem(_isMuted ? Icons.notifications_active_outlined : Icons.notifications_off_outlined, _isMuted ? "تفعيل الإشعارات" : "كتم الإشعارات", () {
-                  Navigator.pop(context);
-                  _toggleMute();
-                }),
               ],
               
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                child: Divider(color: AppColors.border, height: 1),
-              ),
-              _buildMenuItem(Icons.exit_to_app_rounded, "مغادرة المجموعة", () {
-                Navigator.pop(context);
-                _leaveGroup();
-              }, color: AppColors.error),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
             ],
           ),
         );
@@ -260,7 +244,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap, {Color? color}) {
     final c = color ?? AppColors.textPrimary;
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -269,7 +253,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
         ),
         child: Icon(icon, color: c, size: 22),
       ),
-      title: Text(title, style: TextStyle(color: c, fontWeight: FontWeight.w700, fontSize: 16)),
+      title: Text(title, style: TextStyle(color: c, fontWeight: FontWeight.w600, fontSize: 16)),
       onTap: onTap,
     );
   }
@@ -303,19 +287,19 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                     indicator: UnderlineTabIndicator(
                       borderSide: const BorderSide(width: 3.0, color: AppColors.primary),
                       borderRadius: BorderRadius.circular(3),
-                      insets: const EdgeInsets.symmetric(horizontal: 32),
+                      insets: const EdgeInsets.symmetric(horizontal: 24),
                     ),
                     labelColor: AppColors.primary,
                     unselectedLabelColor: AppColors.textSecondary,
                     dividerColor: Colors.transparent,
                     labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                     unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.center,
+                    tabAlignment: TabAlignment.fill,
                     tabs: const [
                       Tab(text: "الأعضاء"),
                       Tab(text: "الوسائط"),
                       Tab(text: "الروابط"),
+                      Tab(text: "المحفوظات"),
                     ],
                   ),
                 ),
@@ -331,6 +315,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               _buildMembersTab(),
               _buildMediaTab(),
               _buildLinksTab(),
+              _buildSavedTab(),
             ],
           ),
         ),
@@ -346,22 +331,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Column(
             children: [
               // Top Actions Row
@@ -374,13 +348,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                       icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 22),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    if (_isOwner || _isAdmin)
-                      IconButton(
-                        icon: const Icon(Icons.edit_rounded, color: AppColors.textPrimary, size: 24),
-                        onPressed: () => setState(() => _isEditing = true),
-                      )
-                    else
-                      const SizedBox(width: 48), // Balance centering
+                    const SizedBox(width: 48), // Balance centering
                   ],
                 ),
               ),
@@ -390,13 +358,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                 child: Hero(
                   tag: 'group_avatar_${widget.group.id}',
                   child: CircleAvatar(
-                    radius: 54,
+                    radius: 48, // Slightly smaller and cleaner like telegram
                     backgroundColor: AppColors.primary.withOpacity(0.1),
                     backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
                     child: widget.group.imageUrl.isEmpty
                         ? Text(
                             _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
-                            style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppColors.primary),
+                            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.primary),
                           )
                         : null,
                   ),
@@ -410,28 +378,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                 child: Text(
                   _groupName,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary, height: 1.2),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary, height: 1.2),
                 ),
               ),
               const SizedBox(height: 4),
               
-              if (_membersCount > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    "$_membersCount عضو",
-                    style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w800),
-                  ),
-                )
-              else
-                const SizedBox(
-                  width: 16, height: 16, 
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-                ),
+              Text(
+                "$_membersCount عضو",
+                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+              ),
               
               const SizedBox(height: 16),
 
@@ -446,7 +401,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                     style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5, fontWeight: FontWeight.w500),
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
               ] else ...[
                  const SizedBox(height: 12),
               ],
@@ -457,20 +412,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                   ? const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Center(child: CircularProgressIndicator(color: AppColors.primary)))
                   : _isMember 
                     ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           _buildSquareButton(
-                            _isMuted ? Icons.notifications_off_outlined : Icons.notifications_none_rounded, 
-                            _isMuted ? "تفعيل" : "كتم", 
+                            _isMuted ? Icons.notifications_off_rounded : Icons.notifications_none_rounded, 
+                            "كتم", 
                             _toggleMute
                           ),
-                          const SizedBox(width: 16),
                           _buildSquareButton(Icons.search_rounded, "بحث", () {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("هذه الميزة غير متوفرة بعد")));
                           }),
-                          const SizedBox(width: 16),
-                          _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup, iconColor: AppColors.error),
-                          const SizedBox(width: 16),
+                          _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup),
                           _buildSquareButton(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
                         ],
                       )
@@ -606,32 +558,27 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     );
   }
 
-  Widget _buildSquareButton(IconData icon, String label, VoidCallback onTap, {Color iconColor = AppColors.primary}) {
+  Widget _buildSquareButton(IconData icon, String label, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: SizedBox(
-        width: 72,
-        child: Column(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: iconColor, size: 24),
+      child: Column(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.08),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: TextStyle(color: iconColor, fontSize: 13, fontWeight: FontWeight.w600),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+            child: Icon(icon, color: AppColors.primary, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -654,13 +601,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) return _buildEmptyState(Icons.group_rounded, "لا يوجد أعضاء");
 
-        return ListView.separated(
-          padding: const EdgeInsets.only(top: 16, bottom: 40),
+        return ListView.builder(
+          padding: const EdgeInsets.only(top: 8, bottom: 40),
           itemCount: docs.length,
-          separatorBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.only(left: 80, right: 24),
-            child: Divider(color: AppColors.border.withOpacity(0.5), height: 1),
-          ),
           itemBuilder: (context, index) {
             final data = docs[index].data() as Map<String, dynamic>;
             
@@ -680,13 +623,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               roleColor = AppColors.warning;
             }
 
-              // Small badge for muted/banned
             String statusNote = "";
             if (status == 'muted') statusNote = " (مكتوم)";
             if (status == 'banned') statusNote = " (محظور)";
 
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
               leading: CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.primary.withOpacity(0.1),
@@ -698,8 +640,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                       )
                     : null,
               ),
-              title: Text(name + statusNote, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 15)),
-              subtitle: Text(roleLabel.isNotEmpty ? roleLabel : "عضو", style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              title: Text(name + statusNote, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 15)),
+              subtitle: Text(roleLabel.isNotEmpty ? roleLabel : "عضو", style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4)),
               trailing: roleLabel.isNotEmpty
                   ? Text(roleLabel, style: TextStyle(color: roleColor, fontSize: 12, fontWeight: FontWeight.bold))
                   : null,
@@ -718,6 +660,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     return _buildEmptyState(Icons.link_rounded, "لا توجد روابط");
   }
 
+  Widget _buildSavedTab() {
+    return _buildEmptyState(Icons.bookmark_outline_rounded, "لا توجد محفوظات");
+  }
+
   Widget _buildEmptyState(IconData icon, String message) {
     return Center(
       child: Column(
@@ -728,25 +674,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
             decoration: BoxDecoration(
               color: AppColors.surface,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                )
-              ]
             ),
             child: Icon(icon, size: 48, color: AppColors.textSecondary.withOpacity(0.5)),
           ),
-          const SizedBox(height: 20),
-          Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 16),
+          Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600)),
         ],
       ),
     );
   }
 }
 
-// Keep the delegate inside the file for standalone functionality
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 

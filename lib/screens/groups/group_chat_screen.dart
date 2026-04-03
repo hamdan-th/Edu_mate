@@ -268,9 +268,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   Future<void> _handleMenuAction(String action) async {
     switch (action) {
-      case 'info':
-        _openDetails();
-        break;
       case 'mute':
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم كتم الإشعارات')));
         break;
@@ -365,7 +362,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             onSelected: _handleMenuAction,
             itemBuilder: (context) {
               return [
-                const PopupMenuItem(value: 'info', child: Text("معلومات المجموعة")),
                 if (_isMember && !_isOwner && !_isAdmin) ...[
                   const PopupMenuItem(value: 'mute', child: Text("كتم الإشعارات")),
                 ],
