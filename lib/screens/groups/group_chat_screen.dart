@@ -8,7 +8,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
+import '../../services/group_service.dart';
 import 'group_details_screen.dart';
+import 'manage_members_screen.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final GroupModel group;
@@ -32,8 +34,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   bool _isSending = false;
   bool _canSend = false;
   bool _isLoadingRole = true;
+  bool _isMember = false;
   bool _isOwner = false;
   bool _isAdmin = false;
+  bool _isBanned = false;
+  bool _isMuted = false;
   File? _selectedImage;
 
   @override
@@ -59,8 +64,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     bool canSend = widget.group.membersCanChat;
     bool owner = widget.group.ownerId == user.uid;
     bool admin = false;
+    bool banned = false;
+    bool muted = false;
+    bool member = false;
 
-    if (owner) canSend = true;
+    if (owner) {
+      canSend = true;
+      member = true;
+    }
 
     try {
       final doc = await _firestore
@@ -71,11 +82,26 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           .get();
 
       if (doc.exists) {
+        member = true;
         final role = doc.data()?['role'];
+        final status = doc.data()?['status'];
+
+        if (status == 'banned') {
+          banned = true;
+          canSend = false;
+        } else if (status == 'muted') {
+          muted = true;
+          canSend = false;
+        }
+
         if (role == 'admin' || role == 'owner') {
-          canSend = true;
+          if (!banned) canSend = true;
           if (role == 'admin') admin = true;
           if (role == 'owner') owner = true;
+        } else {
+          if (!widget.group.membersCanChat && !banned && !muted) {
+            canSend = false;
+          }
         }
       }
     } catch (e) {
@@ -84,9 +110,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     if (mounted) {
       setState(() {
+        _isMember = member;
         _canSend = canSend;
         _isOwner = owner;
         _isAdmin = admin;
+        _isBanned = banned;
+        _isMuted = muted;
         _isLoadingRole = false;
       });
     }
@@ -203,6 +232,29 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     );
   }
 
+  Future<void> _leaveGroup() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    if (_isOwner) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('المالك لا يمكنه المغادرة قبل نقل الملكية')));
+      return;
+    }
+
+    try {
+      await GroupService.leaveGroup(widget.group.id);
+          
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لقد غادرت المجموعة')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء مغادرة المجموعة')));
+      }
+    }
+  }
+
   void _handleMenuAction(String action) {
     switch (action) {
       case 'info':
@@ -212,26 +264,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم كتم الإشعارات')));
         break;
       case 'members':
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('إدارة الأعضاء غير متاحة حالياً')));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => ManageMembersScreen(group: widget.group)));
         break;
       case 'link':
-        String link = '';
-        try {
-          link = (widget.group as dynamic).inviteLink ?? 'edu_mate://group/${widget.group.id}';
-        } catch(e) {
+        String link = widget.group.inviteLink;
+        if (link.isEmpty) {
           link = 'edu_mate://group/${widget.group.id}';
         }
         Clipboard.setData(ClipboardData(text: link));
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ رابط الدعوة الخاص')));
         break;
       case 'settings':
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('إعدادات المجموعة غير متاحة حالياً')));
+        _openDetails();
         break;
       case 'toggle_chat':
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تحديث الصلاحيات غير متاح حالياً')));
         break;
       case 'leave':
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('مغادرة المجموعة غير متاحة حالياً')));
+        _leaveGroup();
         break;
     }
   }
@@ -296,35 +346,70 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             itemBuilder: (context) {
               return [
                 const PopupMenuItem(value: 'info', child: Text("معلومات المجموعة", style: TextStyle(fontWeight: FontWeight.w600))),
-                if (!_isOwner && !_isAdmin) ...[
+                if (_isMember && !_isOwner && !_isAdmin) ...[
                   const PopupMenuItem(value: 'mute', child: Text("كتم الإشعارات", style: TextStyle(fontWeight: FontWeight.w600))),
                 ],
                 if (_isOwner || _isAdmin) ...[
                   const PopupMenuItem(value: 'members', child: Text("إدارة الأعضاء", style: TextStyle(fontWeight: FontWeight.w600))),
                   const PopupMenuItem(value: 'link', child: Text("رابط المجموعة", style: TextStyle(fontWeight: FontWeight.w600))),
-                  const PopupMenuItem(value: 'settings', child: Text("إعدادات المجموعة", style: TextStyle(fontWeight: FontWeight.w600))),
+                  const PopupMenuItem(value: 'settings', child: Text("تعديل المجموعة", style: TextStyle(fontWeight: FontWeight.w600))),
                   const PopupMenuItem(value: 'toggle_chat', child: Text("تفعيل/إيقاف دردشة الأعضاء", style: TextStyle(fontWeight: FontWeight.w600))),
                 ],
-                const PopupMenuDivider(),
-                const PopupMenuItem(
-                  value: 'leave',
-                  child: Text("مغادرة المجموعة", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w600)),
-                ),
+                if (_isMember) ...[
+                  const PopupMenuDivider(),
+                  const PopupMenuItem(
+                    value: 'leave',
+                    child: Text("مغادرة المجموعة", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w600)),
+                  ),
+                ],
               ];
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('groups')
-                  .doc(widget.group.id)
-                  .collection('messages')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots(),
+      body: _isLoadingRole
+          ? const Center(child: CircularProgressIndicator())
+          : !_isMember
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock_rounded, size: 54, color: AppColors.textSecondary.withOpacity(0.5)),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'يجب الانضمام أولاً',
+                        style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w900),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'لا يمكنك مشاهدة الرسائل أو التفاعل بدون عضوية في المجتمع.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          elevation: 0,
+                        ),
+                        onPressed: _openDetails,
+                        child: const Text('عرض معلومات المجموعة', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: _firestore
+                            .collection('groups')
+                            .doc(widget.group.id)
+                            .collection('messages')
+                            .orderBy('createdAt', descending: true)
+                            .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -465,17 +550,57 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   Widget _buildInputArea() {
-    if (_isLoadingRole) {
+    if (_isBanned) {
       return SafeArea(
         top: false,
         child: Container(
-          height: 60,
-          alignment: Alignment.center,
-          color: AppColors.surface,
-          child: const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2.5),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.block_rounded, color: AppColors.error, size: 20),
+              SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'عذراً، لقد تم حظرك من المشاركة في هذه المجموعة.',
+                  style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_isMuted) {
+      return SafeArea(
+        top: false,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            border: Border(top: BorderSide(color: AppColors.border)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.mic_off_rounded, color: AppColors.warning, size: 20),
+              SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'لقد تم كتمك. لا يمكنك الإرسال حالياً.',
+                  style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.bold, fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
         ),
       );

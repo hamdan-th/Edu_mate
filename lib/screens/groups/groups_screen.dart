@@ -4,8 +4,11 @@ import '../../core/theme/app_colors.dart';
 import '../../data/academic_structure.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'create_group_screen.dart';
 import 'group_details_screen.dart';
+import 'group_chat_screen.dart';
 
 class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
@@ -62,6 +65,57 @@ class _GroupsScreenState extends State<GroupsScreen> {
         builder: (_) => GroupDetailsScreen(group: group),
       ),
     );
+  }
+
+  void _openGroupChat(GroupModel group) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GroupChatScreen(group: group),
+      ),
+    );
+  }
+
+  Future<void> _handleGroupTap(GroupModel group) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _openGroupDetails(group);
+      return;
+    }
+
+    if (group.ownerId == user.uid) {
+      _openGroupChat(group);
+      return;
+    }
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    bool isMember = false;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(group.id)
+          .collection('members')
+          .doc(user.uid)
+          .get();
+      if (doc.exists) isMember = true;
+    } catch (e) {
+      // ignore
+    }
+
+    if (!mounted) return;
+    Navigator.pop(context);
+
+    if (isMember) {
+      _openGroupChat(group);
+    } else {
+      _openGroupDetails(group);
+    }
   }
 
   Future<void> _join(GroupModel group) async {
@@ -654,7 +708,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
       builder: (context, constraints) {
         final width = MediaQuery.of(context).size.width * 0.72;
         return GestureDetector(
-          onTap: () => _openGroupDetails(group),
+          onTap: () => _handleGroupTap(group),
           child: Container(
             width: width > 320 ? 320 : width, // Cap width on tablets/very large screens
             margin: const EdgeInsets.only(left: 16),
@@ -785,7 +839,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
   Widget _buildPublicGroupCard(GroupModel group) {
     return GestureDetector(
-      onTap: () => _openGroupDetails(group),
+      onTap: () => _handleGroupTap(group),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -876,7 +930,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
   Widget _buildMyGroupCard(GroupModel group) {
     return GestureDetector(
-      onTap: () => _openGroupDetails(group),
+      onTap: () => _openGroupChat(group),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

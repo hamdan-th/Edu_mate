@@ -5,12 +5,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../models/group_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../../services/group_service.dart';
 import 'manage_members_screen.dart';
+import 'group_chat_screen.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final GroupModel group;
+  final bool startEditing;
 
-  const GroupDetailsScreen({super.key, required this.group});
+  const GroupDetailsScreen({super.key, required this.group, this.startEditing = false});
 
   @override
   State<GroupDetailsScreen> createState() => _GroupDetailsScreenState();
@@ -18,6 +21,7 @@ class GroupDetailsScreen extends StatefulWidget {
 
 class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTickerProviderStateMixin {
   bool _isLoadingRole = true;
+  bool _isJoining = false;
   bool _isMember = false;
   bool _isOwner = false;
   bool _isAdmin = false;
@@ -38,6 +42,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   @override
   void initState() {
     super.initState();
+    _isEditing = widget.startEditing;
     _groupName = widget.group.name;
     _groupDescription = widget.group.description;
     
@@ -101,6 +106,21 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     }
   }
 
+  Future<void> _joinPublicGroup() async {
+    setState(() => _isJoining = true);
+    try {
+      await GroupService.joinPublicGroup(widget.group.id);
+      if (mounted) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
+        setState(() => _isJoining = false);
+      }
+    }
+  }
+
   Future<void> _saveEdits() async {
     final newName = _nameController.text.trim();
     final newDesc = _descController.text.trim();
@@ -150,15 +170,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     }
 
     try {
-      await _firestore
-          .collection('groups')
-          .doc(widget.group.id)
-          .collection('members')
-          .doc(user.uid)
-          .delete();
+      await GroupService.leaveGroup(widget.group.id);
           
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.of(context).popUntil((route) => route.isFirst);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لقد غادرت المجموعة')));
       }
     } catch (e) {
@@ -190,10 +205,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               if (_isOwner || _isAdmin) ...[
                 _buildMenuItem(Icons.link_rounded, "رابط المجموعة", () {
                   Navigator.pop(context);
-                  String inviteLink = '';
-                  try {
-                    inviteLink = (widget.group as dynamic).inviteLink ?? 'edu_mate://group/${widget.group.id}';
-                  } catch (e) {
+                  String inviteLink = widget.group.inviteLink;
+                  if (inviteLink.isEmpty) {
                     inviteLink = 'edu_mate://group/${widget.group.id}';
                   }
                   Clipboard.setData(ClipboardData(text: inviteLink));
@@ -442,22 +455,41 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               // Action Buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildSquareButton(
-                      _isMuted ? Icons.notifications_off_outlined : Icons.notifications_none_rounded, 
-                      _isMuted ? "تفعيل" : "كتم", 
-                      _toggleMute
-                    ),
-                    const SizedBox(width: 16),
-                    _buildSquareButton(Icons.search_rounded, "بحث", () {}),
-                    const SizedBox(width: 16),
-                    _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup, iconColor: AppColors.error),
-                    const SizedBox(width: 16),
-                    _buildSquareButton(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
-                  ],
-                ),
+                child: _isLoadingRole 
+                  ? const SizedBox(height: 58) 
+                  : _isMember 
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildSquareButton(
+                            _isMuted ? Icons.notifications_off_outlined : Icons.notifications_none_rounded, 
+                            _isMuted ? "تفعيل" : "كتم", 
+                            _toggleMute
+                          ),
+                          const SizedBox(width: 16),
+                          _buildSquareButton(Icons.search_rounded, "بحث", () {}),
+                          const SizedBox(width: 16),
+                          _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup, iconColor: AppColors.error),
+                          const SizedBox(width: 16),
+                          _buildSquareButton(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
+                        ],
+                      )
+                    : SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 0,
+                          ),
+                          onPressed: _isJoining ? null : _joinPublicGroup,
+                          child: _isJoining 
+                            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : const Text("انضم للمجتمع الآن", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        ),
+                      ),
               ),
             ],
           ),
