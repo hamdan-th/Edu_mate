@@ -630,7 +630,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final data = docs[index].data() as Map<String, dynamic>;
-            String name = (data['displayName']?.toString() ?? data['username']?.toString() ?? data['fullName']?.toString() ?? data['name']?.toString() ?? 'عضو').trim();
+            String name = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? 'عضو').trim();
             if (name.contains('@')) name = name.split('@').first;
             final imageUrl = data['imageUrl'] ?? data['photoUrl'];
             final role = data['role'] ?? 'member';

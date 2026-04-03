@@ -445,7 +445,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   Widget _buildMessageBubble(Map<String, dynamic> data, bool isMe) {
     final text = data['text'] ?? '';
     final imageUrl = data['imageUrl'] as String?;
-    String senderName = (data['senderName']?.toString() ?? data['displayName']?.toString() ?? data['username']?.toString() ?? data['name']?.toString() ?? 'عضو').trim();
+    String senderName = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? data['senderName']?.toString() ?? 'عضو').trim();
     if (senderName.contains('@')) senderName = senderName.split('@').first;
     final timestamp = data['createdAt'] as Timestamp?;
     final senderAvatarUrl = data['senderAvatar'] as String? ?? data['senderImageUrl'] as String? ?? data['photoUrl'] as String?;
