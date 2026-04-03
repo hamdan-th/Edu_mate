@@ -388,7 +388,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    isMyGroups ? (group.lastMessageText.isNotEmpty ? group.lastMessageText : group.specializationName) : group.description,
+                    isMyGroups ? (group.description.isNotEmpty ? group.description : group.specializationName) : group.description,
                     style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.2),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
