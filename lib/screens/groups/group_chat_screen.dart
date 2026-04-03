@@ -294,7 +294,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F1F1), // Authentic Telegram-like solid background
+      backgroundColor: const Color(0xFFEBEBEB), // Authentic Telegram-like solid background
       appBar: AppBar(
         titleSpacing: 0,
         backgroundColor: Colors.white,
@@ -517,7 +517,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 alignment: Alignment.bottomRight,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 2),
-                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 11, color: const Color(0xFF8E8E93).withOpacity(0.8))),
+                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 10, color: const Color(0xFF8E8E93))),
                 ),
               ),
           ],
