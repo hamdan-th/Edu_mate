@@ -235,7 +235,7 @@ class GroupService {
       'displayName': displayName,
       'role': 'owner',
       'joinedAt': FieldValue.serverTimestamp(),
-      'isMuted': false,
+      'status': 'active',
     });
 
     batch.set(userRef.collection('joined_groups').doc(groupRef.id), {
@@ -291,7 +291,7 @@ class GroupService {
         'displayName': displayName,
         'role': 'member',
         'joinedAt': FieldValue.serverTimestamp(),
-        'isMuted': false,
+        'status': 'active',
       });
 
       tx.set(userRef.collection('joined_groups').doc(groupId), {
@@ -385,7 +385,7 @@ class GroupService {
         'displayName': displayName,
         'role': 'member',
         'joinedAt': FieldValue.serverTimestamp(),
-        'isMuted': false,
+        'status': 'active',
       });
 
       tx.set(userRef.collection('joined_groups').doc(group.id), {
@@ -466,9 +466,13 @@ class GroupService {
 
     final memberData = memberSnap.data() ?? {};
     final role = (memberData['role'] ?? 'member').toString();
-    final isMuted = (memberData['isMuted'] ?? false) == true;
+    final status = (memberData['status'] ?? 'active').toString();
 
-    if (isMuted) {
+    if (status == 'banned' || banned.contains(currentUid)) {
+      throw Exception('أنت محظور من هذه المجموعة');
+    }
+
+    if (status == 'muted') {
       throw Exception('تم كتمك داخل هذه المجموعة');
     }
 

@@ -110,7 +110,6 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
       batch.update(memberRef, {
         'status': status,
-        'isMuted': status == 'muted',
       });
 
       if (status == 'banned') {

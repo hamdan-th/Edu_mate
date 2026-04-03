@@ -20,6 +20,10 @@ class GroupModel {
   final String inviteCode;
   final String inviteLink;
   final String status;
+  final int membersCounts;
+  final int adminsCount;
+  final int messagesCount;
+  final String lastMessageText;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -40,6 +44,10 @@ class GroupModel {
     required this.inviteCode,
     required this.inviteLink,
     required this.status,
+    required this.membersCounts,
+    required this.adminsCount,
+    required this.messagesCount,
+    required this.lastMessageText,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -68,6 +76,10 @@ class GroupModel {
       inviteCode: (data['inviteCode'] ?? '').toString(),
       inviteLink: (data['inviteLink'] ?? '').toString(),
       status: (data['status'] ?? 'active').toString(),
+      membersCounts: (data['membersCounts'] as num?)?.toInt() ?? 0,
+      adminsCount: (data['adminsCount'] as num?)?.toInt() ?? 0,
+      messagesCount: (data['messagesCount'] as num?)?.toInt() ?? 0,
+      lastMessageText: (data['lastMessageText'] ?? '').toString(),
       createdAt: _toDateTime(data['createdAt']),
       updatedAt: _toDateTime(data['updatedAt']),
     );
