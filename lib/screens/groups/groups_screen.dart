@@ -336,7 +336,6 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
         onPressed: _openCreateGroup,
         backgroundColor: AppColors.primary,
         elevation: 4,
-        shadowColor: AppColors.primary.withOpacity(0.4),
         icon: const Icon(Icons.add_rounded, color: Colors.white, size: 24),
         label: const Text("مجموعة جديدة", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
       ),
