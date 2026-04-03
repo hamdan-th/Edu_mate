@@ -384,33 +384,22 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               
               // Avatar
               Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 4),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 16,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
+                child: Hero(
+                  tag: 'group_avatar_${widget.group.id}',
                   child: CircleAvatar(
-                    radius: 58,
-                    backgroundColor: AppColors.inputFill,
+                    radius: 54,
+                    backgroundColor: AppColors.primary.withOpacity(0.1),
                     backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
                     child: widget.group.imageUrl.isEmpty
                         ? Text(
                             _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
-                            style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: AppColors.primary),
+                            style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppColors.primary),
                           )
                         : null,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               
               // Name and Details
               Padding(
@@ -418,10 +407,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                 child: Text(
                   _groupName,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -0.5),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary, height: 1.2),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               
               if (_membersCount > 0)
                 Container(
@@ -616,31 +605,29 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   Widget _buildSquareButton(IconData icon, String label, VoidCallback onTap, {Color iconColor = AppColors.primary}) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-              border: Border.all(color: AppColors.border.withOpacity(0.5)),
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 24),
             ),
-            child: Icon(icon, color: iconColor, size: 26),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w700),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(color: iconColor, fontSize: 13, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -685,60 +672,28 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               roleColor = AppColors.warning;
             }
 
-            // Small badge for muted/banned
+              // Small badge for muted/banned
             String statusNote = "";
             if (status == 'muted') statusNote = " (مكتوم)";
             if (status == 'banned') statusNote = " (محظور)";
 
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              leading: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    )
-                  ]
-                ),
-                child: CircleAvatar(
-                  radius: 24,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                  backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-                  child: imageUrl == null || imageUrl.isEmpty
-                      ? Text(
-                          name.isNotEmpty ? name[0].toUpperCase() : 'M',
-                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 18),
-                        )
-                      : null,
-                ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              leading: CircleAvatar(
+                radius: 22,
+                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                child: imageUrl == null || imageUrl.isEmpty
+                    ? Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : 'M',
+                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
+                      )
+                    : null,
               ),
-              title: Text(
-                name + statusNote, 
-                style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  roleLabel.isNotEmpty ? roleLabel : "عضو", 
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)
-                ),
-              ),
+              title: Text(name + statusNote, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 15)),
+              subtitle: Text(roleLabel.isNotEmpty ? roleLabel : "عضو", style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               trailing: roleLabel.isNotEmpty
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: roleColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20), // pill shape
-                        border: Border.all(color: roleColor.withOpacity(0.3)),
-                      ),
-                      child: Text(
-                        roleLabel,
-                        style: TextStyle(color: roleColor, fontSize: 11, fontWeight: FontWeight.w900),
-                      ),
-                    )
+                  ? Text(roleLabel, style: TextStyle(color: roleColor, fontSize: 12, fontWeight: FontWeight.bold))
                   : null,
             );
           },

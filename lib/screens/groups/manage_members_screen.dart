@@ -290,25 +290,32 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                         return _buildEmptyState();
                       }
 
-                      return ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        children: [
-                          if (owners.isNotEmpty) ...[
-                            _buildSectionTitle("المالك"),
-                            ...owners.map((doc) => _buildMemberItem(doc)),
-                            const SizedBox(height: 24),
-                          ],
-                          if (admins.isNotEmpty) ...[
-                            _buildSectionTitle("المشرفون"),
-                            ...admins.map((doc) => _buildMemberItem(doc)),
-                            const SizedBox(height: 24),
-                          ],
-                          if (members.isNotEmpty) ...[
-                            _buildSectionTitle("الأعضاء"),
-                            ...members.map((doc) => _buildMemberItem(doc)),
-                            const SizedBox(height: 48), // Bottom padding
-                          ],
-                        ],
+                      return ListView.separated(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: owners.length + admins.length + members.length + 3,
+                        separatorBuilder: (context, index) {
+                           // Try not to draw separators directly after section headers
+                           return const Divider(height: 1, indent: 64);
+                        },
+                        itemBuilder: (context, index) {
+                          final List<Widget> items = [];
+                          
+                          if (owners.isNotEmpty) {
+                            items.add(_buildSectionTitle("المالك"));
+                            items.addAll(owners.map((doc) => _buildMemberItem(doc)));
+                          }
+                          if (admins.isNotEmpty) {
+                            items.add(_buildSectionTitle("المشرفون"));
+                            items.addAll(admins.map((doc) => _buildMemberItem(doc)));
+                          }
+                          if (members.isNotEmpty) {
+                            items.add(_buildSectionTitle("الأعضاء"));
+                            items.addAll(members.map((doc) => _buildMemberItem(doc)));
+                          }
+                          
+                          if (index < items.length) return items[index];
+                          return const SizedBox.shrink();
+                        },
                       );
                     },
                   ),
@@ -321,27 +328,29 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   Widget _buildSearchBar() {
     return Container(
       color: AppColors.surface,
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
+        height: 40,
         decoration: BoxDecoration(
           color: AppColors.inputFill,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: TextField(
           controller: _searchController,
+          style: const TextStyle(fontSize: 15),
           decoration: InputDecoration(
-            hintText: 'ابحث عن عضو...',
-            hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 22),
+            hintText: 'بحث...',
+            hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 20),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary, size: 20),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.cancel_rounded, color: AppColors.textSecondary, size: 18),
                     onPressed: () => _searchController.clear(),
                   )
                 : null,
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           ),
         ),
       ),
@@ -350,13 +359,13 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
         title,
         style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w900,
-          color: AppColors.textPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
         ),
       ),
     );
@@ -373,12 +382,11 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     final bool _isTargetOwner = role == 'owner' || memberId == widget.group.ownerId;
     final bool _isTargetAdmin = role == 'admin';
 
-    // Build specific Role Badge
     String roleLabel = "عضو";
     Color roleColor = AppColors.textSecondary;
 
     if (_isTargetOwner) {
-      roleLabel = "المالك";
+      roleLabel = "مالك";
       roleColor = AppColors.error;
     } else if (_isTargetAdmin) {
       roleLabel = "مشرف";
@@ -388,76 +396,64 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       roleColor = AppColors.primary;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border.withOpacity(0.6)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-            child: imageUrl == null || imageUrl.isEmpty
-                ? Text(
-                    name.isNotEmpty ? name[0].toUpperCase() : 'M',
-                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        name,
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textPrimary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (isMe) ...[
-                      const SizedBox(width: 6),
-                      Text(
-                        "(أنت)",
-                        style: TextStyle(color: AppColors.textSecondary.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold),
-                      )
-                    ]
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: roleColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    roleLabel,
-                    style: TextStyle(color: roleColor, fontSize: 10, fontWeight: FontWeight.w900),
-                  ),
-                ),
-              ],
+    // Small badge for muted/banned
+    String statusNote = "";
+    if (data['status'] == 'muted') statusNote = " (مكتوم)";
+    if (data['status'] == 'banned') statusNote = " (محظور)";
+
+    return InkWell(
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.primary.withOpacity(0.1),
+              backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+              child: imageUrl == null || imageUrl.isEmpty
+                  ? Text(
+                      name.isNotEmpty ? name[0].toUpperCase() : 'M',
+                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
+                    )
+                  : null,
             ),
-          ),
-          if (!isMe && _currentUserRole != 'member' && !_isTargetOwner)
-            _buildPopupMenu(memberId, data, _isTargetAdmin),
-        ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name + statusNote,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isMe) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          "(أنت)",
+                          style: TextStyle(color: AppColors.textSecondary.withOpacity(0.8), fontSize: 13),
+                        )
+                      ]
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    roleLabel,
+                    style: TextStyle(color: roleColor, fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+            if (!isMe && _currentUserRole != 'member' && !_isTargetOwner)
+              _buildPopupMenu(memberId, data, _isTargetAdmin),
+          ],
+        ),
       ),
     );
   }
