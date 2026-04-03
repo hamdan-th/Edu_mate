@@ -266,7 +266,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     }
   }
 
-  void _handleMenuAction(String action) {
+  Future<void> _handleMenuAction(String action) async {
     switch (action) {
       case 'info':
         _openDetails();
