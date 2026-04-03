@@ -23,6 +23,9 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
   String _search = '';
   bool _isSearching = false;
 
+  late final Stream<List<GroupModel>> _discoverStream;
+  late final Stream<List<GroupModel>> _myGroupsStream;
+
   // Filters State
   String? _selectedCollegeId;
   String? _selectedSpecializationId;
@@ -32,6 +35,8 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this, initialIndex: 1); // Default to My Groups
+    _discoverStream = GroupService.streamDiscoverGroups(search: '');
+    _myGroupsStream = GroupService.streamMyGroups();
     _searchController.addListener(() {
       setState(() {
         _search = _searchController.text.trim().toLowerCase();
@@ -349,7 +354,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
 
   Widget _buildDiscoverTab() {
     return StreamBuilder<List<GroupModel>>(
-      stream: GroupService.streamDiscoverGroups(search: ''),
+      stream: _discoverStream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
 
@@ -376,7 +381,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
 
   Widget _buildMyGroupsTab() {
     return StreamBuilder<List<GroupModel>>(
-      stream: GroupService.streamMyGroups(),
+      stream: _myGroupsStream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
 
