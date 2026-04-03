@@ -271,8 +271,9 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                         
                         // Local search filter
                         if (_searchQuery.isNotEmpty) {
-                          final name = (data['name'] ?? 'عضو').toString().toLowerCase();
-                          if (!name.contains(_searchQuery)) continue;
+                          String searchableName = (data['displayName']?.toString() ?? data['username']?.toString() ?? data['fullName']?.toString() ?? data['name']?.toString() ?? 'عضو بالمجموعة').trim();
+                          if (searchableName.contains('@')) searchableName = searchableName.split('@').first;
+                          if (!searchableName.toLowerCase().contains(_searchQuery)) continue;
                         }
 
                         final role = data['role'] ?? 'member';
@@ -373,7 +374,8 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   Widget _buildMemberItem(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final memberId = doc.id;
-    final name = data['name'] ?? 'عضو بالمجموعة';
+    String name = (data['displayName']?.toString() ?? data['username']?.toString() ?? data['fullName']?.toString() ?? data['name']?.toString() ?? 'عضو بالمجموعة').trim();
+    if (name.contains('@')) name = name.split('@').first;
     final role = data['role'] ?? 'member';
     final imageUrl = data['imageUrl'] as String?;
 

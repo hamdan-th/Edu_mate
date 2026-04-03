@@ -445,83 +445,103 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   Widget _buildMessageBubble(Map<String, dynamic> data, bool isMe) {
     final text = data['text'] ?? '';
     final imageUrl = data['imageUrl'] as String?;
-    final senderName = data['senderName'] ?? 'عضو';
+    String senderName = (data['senderName']?.toString() ?? data['displayName']?.toString() ?? data['username']?.toString() ?? data['name']?.toString() ?? 'عضو').trim();
+    if (senderName.contains('@')) senderName = senderName.split('@').first;
     final timestamp = data['createdAt'] as Timestamp?;
+    final senderAvatarUrl = data['senderAvatar'] as String? ?? data['senderImageUrl'] as String? ?? data['photoUrl'] as String?;
 
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
-        margin: const EdgeInsets.only(bottom: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isMe ? const Color(0xFFE3F2FD) : Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isMe ? 16 : 4),
-            bottomRight: Radius.circular(isMe ? 4 : 16),
+    final messageContent = Container(
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: isMe ? const Color(0xFFE3F2FD) : Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(16),
+          topRight: const Radius.circular(16),
+          bottomLeft: Radius.circular(isMe ? 16 : 4),
+          bottomRight: Radius.circular(isMe ? 4 : 16),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 1,
+            offset: const Offset(0, 1),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 1,
-              offset: const Offset(0, 1),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isMe)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 2, right: 2),
+              child: Text(senderName, style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w700)),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!isMe)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 2, right: 2),
-                child: Text(senderName, style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w700)),
-              ),
-            if (imageUrl != null && imageUrl.isNotEmpty)
-              Padding(
-                padding: EdgeInsets.only(bottom: text.isNotEmpty ? 6.0 : 2.0, top: 2),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        height: 150, width: double.infinity,
-                        color: Colors.black.withOpacity(0.05),
-                        alignment: Alignment.center,
-                        child: const CircularProgressIndicator(strokeWidth: 2),
-                      );
-                    },
-                  ),
+          if (imageUrl != null && imageUrl.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(bottom: text.isNotEmpty ? 6.0 : 2.0, top: 2),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 150, width: double.infinity,
+                      color: Colors.black.withOpacity(0.05),
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    );
+                  },
                 ),
               ),
-            if (text.isNotEmpty)
-              Wrap(
-                alignment: WrapAlignment.end,
-                crossAxisAlignment: WrapCrossAlignment.end,
-                children: [
-                  Text(text, style: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.35)),
-                  const SizedBox(width: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 2, top: 4),
-                    child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 11, color: const Color(0xFF8E8E93).withOpacity(0.8), letterSpacing: 0.1)),
-                  ),
-                ],
-              ),
-            if (text.isEmpty && imageUrl != null)
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 10, color: const Color(0xFF8E8E93))),
+            ),
+          if (text.isNotEmpty)
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.end,
+              children: [
+                Text(text, style: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.35)),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 2, top: 4),
+                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 11, color: const Color(0xFF8E8E93).withOpacity(0.8), letterSpacing: 0.1)),
                 ),
+              ],
+            ),
+          if (text.isEmpty && imageUrl != null)
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(_formatTimestamp(timestamp), style: const TextStyle(fontSize: 10, color: Color(0xFF8E8E93))),
               ),
+            ),
+        ],
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!isMe) ...[
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: AppColors.primary.withOpacity(0.1),
+              backgroundImage: senderAvatarUrl != null && senderAvatarUrl.isNotEmpty ? NetworkImage(senderAvatarUrl) : null,
+              child: senderAvatarUrl == null || senderAvatarUrl.isEmpty
+                  ? Text(senderName.isNotEmpty ? senderName[0] : 'M', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary))
+                  : null,
+            ),
+            const SizedBox(width: 8),
           ],
-        ),
+          messageContent,
+        ],
       ),
     );
   }

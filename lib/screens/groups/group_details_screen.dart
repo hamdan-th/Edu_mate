@@ -26,7 +26,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   bool _isOwner = false;
   bool _isAdmin = false;
   bool _isEditing = false;
-  bool _isMuted = false;
+  bool _isNotificationMuted = false;
   
   late String _groupName;
   late String _groupDescription;
@@ -83,9 +83,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         if (role == 'admin') admin = true;
         if (role == 'owner') owner = true;
         
-        final status = doc.data()?['status'];
-        if (status == 'muted') {
-          _isMuted = true;
+        final notificationsMuted = doc.data()?['notificationsMuted'];
+        if (notificationsMuted == true) {
+          _isNotificationMuted = true;
         }
       }
       
@@ -154,7 +154,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   void _toggleMute() async {
     setState(() {
-      _isMuted = !_isMuted;
+      _isNotificationMuted = !_isNotificationMuted;
     });
     
     if (!_isMember) return;
@@ -163,13 +163,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       final user = _auth.currentUser;
       if (user != null) {
         await _firestore.collection('groups').doc(widget.group.id).collection('members').doc(user.uid).update({
-          'status': _isMuted ? 'muted' : 'active'
+          'notificationsMuted': _isNotificationMuted
         });
       }
     } catch (e) {}
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(_isMuted ? 'تم كتم الإشعارات' : 'تم تفعيل الإشعارات')),
+      SnackBar(content: Text(_isNotificationMuted ? 'تم كتم الإشعارات' : 'تم تفعيل الإشعارات')),
     );
   }
 
@@ -532,7 +532,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildActionItem(_isMuted ? Icons.notifications_off_rounded : Icons.notifications_rounded, _isMuted ? "تفعيل" : "كتم", _toggleMute),
+                          _buildActionItem(_isNotificationMuted ? Icons.notifications_off_rounded : Icons.notifications_rounded, _isNotificationMuted ? "تفعيل" : "كتم", _toggleMute),
                           _buildActionItem(Icons.search_rounded, "بحث", () {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("هذه الميزة غير متوفرة بعد")));
                           }),
@@ -630,7 +630,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final data = docs[index].data() as Map<String, dynamic>;
-            final name = data['name'] ?? data['displayName'] ?? 'عضو';
+            String name = (data['displayName']?.toString() ?? data['username']?.toString() ?? data['fullName']?.toString() ?? data['name']?.toString() ?? 'عضو').trim();
+            if (name.contains('@')) name = name.split('@').first;
             final imageUrl = data['imageUrl'] ?? data['photoUrl'];
             final role = data['role'] ?? 'member';
             final status = data['status'] ?? 'active';
