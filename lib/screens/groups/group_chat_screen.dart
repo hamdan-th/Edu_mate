@@ -294,13 +294,19 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0E1621), // Authentic Telegram Dark Theme
-      appBar: AppBar(
-        titleSpacing: 0,
-        backgroundColor: const Color(0xFF17212B),
-        elevation: 1,
-        shadowColor: Colors.black.withOpacity(0.3),
-        leadingWidth: 44,
+      backgroundColor: const Color(0xFF0E1621), // Deep dark background fallback
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF17212B), // Telegram Header
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 4, offset: const Offset(0, 1))],
+          ),
+          child: AppBar(
+            titleSpacing: 0,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leadingWidth: 44,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
@@ -356,53 +362,19 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           )
         ],
       ),
+      ),
+      ),
       body: _isLoadingRole
           ? const Center(child: CircularProgressIndicator())
           : !_isMember
               ? _buildNonMemberState()
-              : Column(
-                  children: [
-                    Expanded(
-                      child: StreamBuilder<QuerySnapshot>(
-                        stream: _firestore
-                            .collection('groups')
-                            .doc(widget.group.id)
-                            .collection('messages')
-                            .orderBy('createdAt', descending: true)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
-                          }
-
-                          if (snapshot.hasError) {
-                            return const Center(child: Text('تعذر تحميل الرسائل', style: TextStyle(color: AppColors.textSecondary)));
-                          }
-
-                          final docs = snapshot.data?.docs ?? [];
-
-                          if (docs.isEmpty) {
-                            return const _EmptyChatState();
-                          }
-
-                          return ListView.builder(
-                            controller: _scrollController,
-                            reverse: true, // Auto scrolls and shows latest at bottom
-                            padding: const EdgeInsets.only(top: 16, bottom: 10, left: 16, right: 16),
-                            itemCount: docs.length,
-                            itemBuilder: (context, index) {
-                              final data = docs[index].data() as Map<String, dynamic>;
-                              final myId = _auth.currentUser?.uid;
-                              final senderId = data['senderId'] ?? '';
-                              final isMe = myId != null && myId == senderId;
-                              
-                              return _buildMessageBubble(data, isMe);
-                            },
-                          );
-                        },
-                      ),
+              : Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage('https://i.imgur.com/IGjZep0.jpg'), // Iconic dark Telegram chat wallpaper
+                      fit: BoxFit.cover,
+                      opacity: 0.15, // Subtle texture
                     ),
-                    _buildInputArea(),
                   ],
                 ),
     );
@@ -456,11 +428,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final timestamp = data['createdAt'] as Timestamp?;
     final senderAvatarUrl = data['senderAvatar'] as String? ?? data['senderImageUrl'] as String? ?? data['photoUrl'] as String?;
 
+    final List<Color> _nameColors = [
+      const Color(0xFFE53935), const Color(0xFFD81B60), const Color(0xFF8E24AA), 
+      const Color(0xFF3949AB), const Color(0xFF039BE5), const Color(0xFF00897B), 
+      const Color(0xFF7CB342), const Color(0xFFF4511E)
+    ];
+    final senderColor = _nameColors[senderName.length % _nameColors.length];
+    
     final String? replyToData = data['replyTo']; // Placeholder for future reply support
 
     final messageContent = Container(
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+      padding: const EdgeInsets.only(left: 10, right: 12, top: 6, bottom: 6),
       decoration: BoxDecoration(
         color: isMe ? const Color(0xFF2B5278) : const Color(0xFF182533),
         borderRadius: BorderRadius.only(
@@ -471,8 +450,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 1.5,
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 1,
             offset: const Offset(0, 1),
           ),
         ],
@@ -483,24 +462,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         children: [
           if (!isMe)
             Padding(
-              padding: const EdgeInsets.only(bottom: 4, right: 2),
-              child: Text(senderName, style: const TextStyle(fontSize: 14, color: Color(0xFF64B5F6), fontWeight: FontWeight.w700)),
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(senderName, style: TextStyle(fontSize: 14, color: senderColor, fontWeight: FontWeight.w800)),
             ),
           
           if (replyToData != null) ...[
             Container(
                width: double.infinity,
                margin: const EdgeInsets.only(bottom: 6),
-               padding: const EdgeInsets.only(right: 8, left: 6, top: 2, bottom: 2),
+               padding: const EdgeInsets.only(right: 8, left: 8, top: 4, bottom: 4),
                decoration: BoxDecoration(
-                 border: const Border(right: BorderSide(color: Color(0xFF64B5F6), width: 3)),
-                 color: const Color(0xFF64B5F6).withOpacity(0.1),
+                 border: Border(right: BorderSide(color: senderColor, width: 3)),
+                 color: senderColor.withOpacity(0.1),
                  borderRadius: BorderRadius.circular(4),
                ),
                child: Column(
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: [
-                   const Text("رد على", style: TextStyle(color: Color(0xFF64B5F6), fontSize: 12, fontWeight: FontWeight.bold)),
+                   Text("رد على", style: TextStyle(color: senderColor, fontSize: 13, fontWeight: FontWeight.bold)),
                    Text(replyToData, style: const TextStyle(color: Colors.white70, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                  ],
                ),
@@ -589,26 +568,26 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     return Container(
       padding: EdgeInsets.only(
         left: 8, right: 8, top: 8,
-        bottom: MediaQuery.of(context).padding.bottom + 8,
+        bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF17212B), // Dark input area
-        border: Border(top: BorderSide(color: Colors.black.withOpacity(0.2))),
+        color: const Color(0xFF17212B), // Dark input area Telegram style
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, -1))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (_selectedImage != null)
             Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: const Color(0xFF242F3D), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)]),
+              margin: const EdgeInsets.only(bottom: 8, left: 42),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: const Color(0xFF242F3D), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)]),
               child: Row(
                 children: [
-                  ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(_selectedImage!, height: 44, width: 44, fit: BoxFit.cover)),
+                  ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(_selectedImage!, height: 50, width: 50, fit: BoxFit.cover)),
                   const SizedBox(width: 12),
-                  const Expanded(child: Text("صورة مرفقة", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.white))),
-                  IconButton(icon: const Icon(Icons.close_rounded, color: AppColors.error), onPressed: () => setState(() => _selectedImage = null)),
+                  const Expanded(child: Text("صورة مرفقة", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Colors.white))),
+                  IconButton(icon: const Icon(Icons.close_rounded, color: Color(0xFFE53935)), onPressed: () => setState(() => _selectedImage = null)),
                 ],
               ),
             ),
@@ -626,8 +605,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF242F3D), // Dark input field
-                    borderRadius: BorderRadius.circular(22),
+                    color: const Color(0xFF242F3D), // Modern Pill Composer
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: TextField(
                     controller: _messageController,
@@ -637,9 +616,9 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     style: const TextStyle(fontSize: 16, color: Colors.white),
                     decoration: const InputDecoration(
                       hintText: 'رسالة',
-                      hintStyle: TextStyle(color: Color(0xFF7F8B98)),
+                      hintStyle: TextStyle(color: Color(0xFF7F8B98), fontSize: 16),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
                       isDense: true,
                     ),
                   ),
@@ -649,16 +628,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               GestureDetector(
                 onTap: _isSending ? null : _send,
                 child: Container(
-                  height: 44,
-                  width: 44,
-                  margin: const EdgeInsets.only(bottom: 0),
+                  height: 48,
+                  width: 48,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF3390EC), // Telegram blue
+                    color: Color(0xFF3390EC),
                     shape: BoxShape.circle,
                   ),
                   child: _isSending
-                      ? const Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)))
-                      : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                      ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)))
+                      : const Icon(Icons.send_rounded, color: Colors.white, size: 22),
                 ),
               )
             ],
@@ -709,36 +687,18 @@ class _EmptyChatState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF17212B),
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 12, offset: const Offset(0, 4))],
+                color: const Color(0xFF182533).withOpacity(0.8),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(
-                Icons.chat_rounded,
-                size: 54,
-                color: Color(0xFF3390EC),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'لا توجد رسائل بعد',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'كن أول من يبدأ النقاش في هذا المجتمع، وشارك أفكارك مع الأعضاء.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF7F8B98),
-                height: 1.5,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              child: const Text(
+                'لا توجد رسائل بعد',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
