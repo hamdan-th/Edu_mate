@@ -107,8 +107,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -119,25 +118,42 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                 orElse: () => AcademicStructure.colleges.first,
               );
             }
-            return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + 24, top: 16, left: 24, right: 24),
+            return Container(
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24, 
+                top: 16, left: 24, right: 24
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)))),
-                  const SizedBox(height: 20),
-                  const Text('فلترة المجموعات', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                  const SizedBox(height: 20),
+                  Center(
+                    child: Container(
+                      width: 48, height: 5, 
+                      decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))
+                    )
+                  ),
+                  const SizedBox(height: 24),
+                  const Text('تصفية النتائج', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  const SizedBox(height: 24),
+                  
+                  // College Dropdown
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: 'الكلية',
+                      labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                       filled: true,
-                      fillColor: AppColors.inputFill,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      fillColor: AppColors.primary.withOpacity(0.04),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     ),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
                     value: tempCollegeId,
-                    items: AcademicStructure.colleges.map((col) => DropdownMenuItem(value: col.id, child: Text(col.name))).toList(),
+                    items: AcademicStructure.colleges.map((col) => DropdownMenuItem(value: col.id, child: Text(col.name, style: const TextStyle(fontWeight: FontWeight.bold)))).toList(),
                     onChanged: (val) {
                       setModalState(() {
                         tempCollegeId = val;
@@ -145,32 +161,51 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                       });
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  
+                  // Specialization Dropdown
                   if (currentCollege != null)
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: 'التخصص',
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                         filled: true,
-                        fillColor: AppColors.inputFill,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        fillColor: AppColors.primary.withOpacity(0.04),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       ),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
                       value: tempSpecId,
-                      items: currentCollege.specializations.map((spec) => DropdownMenuItem(value: spec.id, child: Text(spec.name))).toList(),
+                      items: currentCollege.specializations.map((spec) => DropdownMenuItem(value: spec.id, child: Text(spec.name, style: const TextStyle(fontWeight: FontWeight.bold)))).toList(),
                       onChanged: (val) => setModalState(() => tempSpecId = val),
                     ),
-                  const SizedBox(height: 16),
-                  SwitchListTile(
-                    title: const Text('المجموعات العامة فقط', style: TextStyle(fontWeight: FontWeight.w600)),
-                    value: tempPublicOnly,
-                    activeColor: AppColors.primary,
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (val) => setModalState(() => tempPublicOnly = val),
+                  if (currentCollege != null) const SizedBox(height: 20),
+                  
+                  // Switch
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: SwitchListTile(
+                      title: const Text('المجموعات العامة فقط', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                      value: tempPublicOnly,
+                      activeColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      onChanged: (val) => setModalState(() => tempPublicOnly = val),
+                    ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
+                  
+                  // Buttons
                   Row(
                     children: [
                       Expanded(
                         child: TextButton(
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
                           onPressed: () {
                             setState(() {
                               _selectedCollegeId = null;
@@ -179,7 +214,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                             });
                             Navigator.pop(context);
                           },
-                          child: const Text('إعادة تعيين', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                          child: const Text('إلغاء التصفية', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w800, fontSize: 16)),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -188,8 +223,9 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 0,
                           ),
                           onPressed: () {
@@ -200,7 +236,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                             });
                             Navigator.pop(context);
                           },
-                          child: const Text('تطبيق', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: const Text('تطبيق', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
                         ),
                       ),
                     ],
@@ -230,26 +266,27 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface, // Clean pure surface background
+      backgroundColor: const Color(0xFFF4F5F7),
       appBar: AppBar(
         backgroundColor: AppColors.surface,
-        elevation: 0,
-        scrolledUnderElevation: 0,
+        elevation: 0.5,
+        shadowColor: Colors.black.withOpacity(0.05),
+        centerTitle: !_isSearching,
         title: _isSearching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
-                  hintText: 'بحث...',
+                  hintText: 'ابحث عن مجتمع...',
                   border: InputBorder.none,
                   hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.7)),
                 ),
-                style: const TextStyle(fontSize: 16),
               )
-            : const Text("المجموعات", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+            : const Text("المجتمعات", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppColors.textPrimary)),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search_rounded, color: AppColors.textPrimary),
+            icon: Icon(_isSearching ? Icons.close_rounded : Icons.search_rounded, color: AppColors.textPrimary),
             onPressed: () {
               setState(() {
                 if (_isSearching) {
@@ -267,106 +304,285 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: Column(
-            children: [
-              TabBar(
-                controller: _tabController,
-                labelColor: AppColors.primary,
-                unselectedLabelColor: AppColors.textSecondary,
-                indicatorColor: AppColors.primary,
-                indicatorWeight: 3,
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                dividerColor: Colors.transparent, // Disable standard material divider
-                tabs: const [
-                  Tab(text: "اكتشف"),
-                  Tab(text: "مجموعاتي"),
-                ],
-              ),
-              Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.3)), // Sleeker bottom border
-            ],
+          preferredSize: const Size.fromHeight(54),
+          child: Container(
+            color: AppColors.surface,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textSecondary,
+              indicatorColor: AppColors.primary,
+              indicatorWeight: 4,
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+              dividerColor: AppColors.border.withOpacity(0.5),
+              tabs: const [
+                Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text("اكتشف"))),
+                Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text("مجموعاتي"))),
+              ],
+            ),
           ),
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildGroupsList(GroupService.streamDiscoverGroups(search: ''), isMyGroups: false),
-          _buildGroupsList(GroupService.streamMyGroups(), isMyGroups: true),
+          _buildDiscoverTab(),
+          _buildMyGroupsTab(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: _openCreateGroup,
         backgroundColor: AppColors.primary,
-        elevation: 2, // Minimal shadow for sleekness
-        child: const Icon(Icons.edit_rounded, color: Colors.white, size: 24),
+        elevation: 4,
+        shadowColor: AppColors.primary.withOpacity(0.4),
+        icon: const Icon(Icons.add_rounded, color: Colors.white, size: 24),
+        label: const Text("مجموعة جديدة", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
       ),
     );
   }
 
-  Widget _buildGroupsList(Stream<List<GroupModel>> stream, {required bool isMyGroups}) {
+  Widget _buildDiscoverTab() {
     return StreamBuilder<List<GroupModel>>(
-      stream: stream,
+      stream: GroupService.streamDiscoverGroups(search: ''),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
 
         final items = _applyFiltersAndSearch(snapshot.data!);
 
         if (items.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  isMyGroups ? Icons.chat_bubble_outline_rounded : Icons.explore_outlined,
-                  size: 64,
-                  color: AppColors.border,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  isMyGroups ? "لا توجد مجموعات منضمة" : "لم يتم العثور على مجموعات",
-                  style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                )
-              ],
-            ),
+          return _buildEmptyState(
+            icon: Icons.travel_explore_rounded,
+            title: "لا توجد مجتمعات متاحة للاكتشاف",
+            subtitle: "لم نتمكن من العثور على أي مجتمعات عامة تطابق معاييرك حالياً. يمكنك إنشاء مجتمعك الخاص!",
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.only(bottom: 80),
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
           itemCount: items.length,
-          separatorBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.only(left: 16, right: 80), // Telegram-style deep indent
-            child: Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.3)),
-          ),
           itemBuilder: (context, index) {
-            return _buildGroupTile(items[index], isMyGroups);
+            return _buildDiscoverCard(items[index]);
           },
         );
       },
     );
   }
 
-  Widget _buildGroupTile(GroupModel group, bool isMyGroups) {
-    return InkWell(
-      onTap: () => isMyGroups ? _openGroupChat(group) : _handleGroupTap(group),
+  Widget _buildMyGroupsTab() {
+    return StreamBuilder<List<GroupModel>>(
+      stream: GroupService.streamMyGroups(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+
+        final items = _applyFiltersAndSearch(snapshot.data!);
+
+        if (items.isEmpty) {
+          return _buildEmptyState(
+            icon: Icons.chat_bubble_outline_rounded,
+            title: "لست عضواً في أي مجتمع",
+            subtitle: "انضم إلى المجموعات الأكاديمية للتواصل مع زملائك، أو قم بإنشاء مجموعة جديدة.",
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.only(top: 12, bottom: 100),
+          itemCount: items.length,
+          separatorBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.only(left: 16, right: 88), 
+            child: Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.6)),
+          ),
+          itemBuilder: (context, index) {
+            return _buildMyGroupTile(items[index]);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState({required IconData icon, required String title, required String subtitle}) {
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 64, color: AppColors.primary.withOpacity(0.8)),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              subtitle,
+              style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.6, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDiscoverCard(GroupModel group) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => _handleGroupTap(group),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header: Avatar + Title + Badge
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      backgroundImage: group.imageUrl.isNotEmpty ? NetworkImage(group.imageUrl) : null,
+                      child: group.imageUrl.isEmpty
+                          ? Text(
+                              group.name.isNotEmpty ? group.name[0].toUpperCase() : 'M',
+                              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 24),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  group.name,
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: group.isPublic ? AppColors.success.withOpacity(0.12) : AppColors.warning.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(group.isPublic ? Icons.public_rounded : Icons.lock_rounded, size: 12, color: group.isPublic ? AppColors.success : AppColors.warning),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      group.isPublic ? "عامة" : "خاصة",
+                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: group.isPublic ? AppColors.success : AppColors.warning),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Icon(Icons.school_rounded, size: 14, color: AppColors.textSecondary),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  "${group.collegeName} • ${group.specializationName}",
+                                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (group.description.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    group.description,
+                    style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.5, fontWeight: FontWeight.w500),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 20),
+                // Join Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary.withOpacity(0.08),
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    onPressed: () => _handleGroupTap(group),
+                    child: const Text("انضمام للمجموعة", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMyGroupTile(GroupModel group) {
+    return InkWell(
+      onTap: () => _openGroupChat(group),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
             CircleAvatar(
-              radius: 26,
+              radius: 28,
               backgroundColor: AppColors.primary.withOpacity(0.1),
               backgroundImage: group.imageUrl.isNotEmpty ? NetworkImage(group.imageUrl) : null,
               child: group.imageUrl.isEmpty
                   ? Text(
                       group.name.isNotEmpty ? group.name[0].toUpperCase() : 'M',
-                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 20),
+                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 22),
                     )
                   : null,
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,21 +592,29 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                       Expanded(
                         child: Text(
                           group.name,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (!isMyGroups) ...[
-                        const SizedBox(width: 8),
-                        Icon(group.isPublic ? Icons.public_rounded : Icons.lock_rounded, size: 14, color: AppColors.textSecondary),
-                      ],
+                      if (group.messagesCount > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "${group.messagesCount}", 
+                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900)
+                          ),
+                        ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    isMyGroups ? (group.description.isNotEmpty ? group.description : group.specializationName) : group.description,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.2),
+                    group.description.isNotEmpty ? group.description : group.specializationName,
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
