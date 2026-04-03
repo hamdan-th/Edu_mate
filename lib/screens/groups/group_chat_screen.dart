@@ -309,7 +309,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF4F5F7), // Authentic Telegram-like soft background
       appBar: AppBar(
         titleSpacing: 0,
         backgroundColor: AppColors.surface,
@@ -476,20 +476,20 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
-        margin: const EdgeInsets.only(bottom: 2),
-        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 6),
         decoration: BoxDecoration(
-          color: isMe ? const Color(0xFFE3F2FD) : AppColors.surface, // Clean soft blue for me
+          color: isMe ? const Color(0xFFE3F2FD) : Colors.white, // Clean soft blue for me, crisp white for others
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isMe ? 16 : 4),
-            bottomRight: Radius.circular(isMe ? 4 : 16),
+            bottomLeft: Radius.circular(isMe ? 16 : 2), // Sharper edge corresponding to Telegram
+            bottomRight: Radius.circular(isMe ? 2 : 16),
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
-              blurRadius: 1,
+              blurRadius: 2,
               offset: const Offset(0, 1),
             ),
           ],
@@ -640,15 +640,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     return SafeArea(
       top: false,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         color: AppColors.surface,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (_selectedImage != null)
               Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.inputFill, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(12)),
                 child: Row(
                   children: [
                     ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(_selectedImage!, height: 40, width: 40, fit: BoxFit.cover)),
@@ -663,23 +664,29 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               children: [
                 IconButton(
                   onPressed: _pickImage,
-                  icon: const Icon(Icons.attach_file_rounded, color: AppColors.textSecondary, size: 26),
+                  icon: const Icon(Icons.attach_file_rounded, color: AppColors.textSecondary, size: 28), // Telegram attachment placement
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.inputFill,
+                      color: AppColors.background, // Contrast against clean white bottom bar
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: TextField(
                       controller: _messageController,
                       minLines: 1,
                       maxLines: 5,
+                      textInputAction: TextInputAction.newline,
+                      style: const TextStyle(fontSize: 16),
                       decoration: const InputDecoration(
-                        hintText: 'اكتب رسالة...',
+                        hintText: 'رسالة',
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        isDense: true,
                       ),
                     ),
                   ),
@@ -687,12 +694,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _isSending ? null : _send,
-                  child: CircleAvatar(
-                    radius: 22,
-                    backgroundColor: AppColors.primary,
+                  child: Container(
+                    height: 48,
+                    width: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
                     child: _isSending
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                        ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)))
+                        : const Icon(Icons.send_rounded, color: Colors.white, size: 22),
                   ),
                 )
               ],

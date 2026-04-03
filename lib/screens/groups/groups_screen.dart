@@ -228,9 +228,8 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    // Telegram style - elegant header and plain list
     return Scaffold(
-      backgroundColor: AppColors.surface, // Solid clean background throughout
+      backgroundColor: AppColors.surface, // Clean pure surface background
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -266,19 +265,27 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             onPressed: _openFilterModal,
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
-          indicatorWeight: 3,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-          dividerColor: AppColors.border.withOpacity(0.3),
-          tabs: const [
-            Tab(text: "اكتشف"),
-            Tab(text: "مجموعاتي"),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Column(
+            children: [
+              TabBar(
+                controller: _tabController,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textSecondary,
+                indicatorColor: AppColors.primary,
+                indicatorWeight: 3,
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                dividerColor: Colors.transparent, // Disable standard material divider
+                tabs: const [
+                  Tab(text: "اكتشف"),
+                  Tab(text: "مجموعاتي"),
+                ],
+              ),
+              Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.3)), // Sleeker bottom border
+            ],
+          ),
         ),
       ),
       body: TabBarView(
@@ -291,8 +298,8 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
       floatingActionButton: FloatingActionButton(
         onPressed: _openCreateGroup,
         backgroundColor: AppColors.primary,
-        elevation: 2,
-        child: const Icon(Icons.edit_rounded, color: Colors.white),
+        elevation: 2, // Minimal shadow for sleekness
+        child: const Icon(Icons.edit_rounded, color: Colors.white, size: 24),
       ),
     );
   }
@@ -301,7 +308,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     return StreamBuilder<List<GroupModel>>(
       stream: stream,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
 
         final items = _applyFiltersAndSearch(snapshot.data!);
 
@@ -325,8 +332,13 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
           );
         }
 
-        return ListView.builder(
+        return ListView.separated(
+          padding: const EdgeInsets.only(bottom: 80),
           itemCount: items.length,
+          separatorBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.only(left: 16, right: 80), // Telegram-style deep indent
+            child: Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.3)),
+          ),
           itemBuilder: (context, index) {
             return _buildGroupTile(items[index], isMyGroups);
           },
@@ -339,17 +351,17 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     return InkWell(
       onTap: () => isMyGroups ? _openGroupChat(group) : _handleGroupTap(group),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
             CircleAvatar(
               radius: 26,
-              backgroundColor: AppColors.inputFill,
+              backgroundColor: AppColors.primary.withOpacity(0.1),
               backgroundImage: group.imageUrl.isNotEmpty ? NetworkImage(group.imageUrl) : null,
               child: group.imageUrl.isEmpty
                   ? Text(
                       group.name.isNotEmpty ? group.name[0].toUpperCase() : 'M',
-                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 18),
+                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 20),
                     )
                   : null,
             ),
@@ -377,7 +389,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                   const SizedBox(height: 4),
                   Text(
                     isMyGroups ? (group.lastMessageText.isNotEmpty ? group.lastMessageText : group.specializationName) : group.description,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.2),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
