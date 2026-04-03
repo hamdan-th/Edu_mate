@@ -78,6 +78,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     if (!mounted) return;
     showDialog(
       context: context,
+      barrierDismissible: false,
       barrierColor: Colors.transparent,
       builder: (_) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
     );
@@ -89,7 +90,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     } catch (_) {}
 
     if (!mounted) return;
-    Navigator.pop(context);
+    Navigator.of(context, rootNavigator: true).pop();
 
     if (isMember) {
       _openGroupChat(group);

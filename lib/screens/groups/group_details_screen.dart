@@ -200,7 +200,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
               Container(width: 48, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))),
               const SizedBox(height: 24),
               
-              _buildMenuItem(Icons.info_outline_rounded, "معلومات المجموعة", () => Navigator.pop(context)),
+              _buildMenuItem(Icons.info_outline_rounded, "معلومات المجموعة", () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('أنت تتصفح معلومات المجموعة بالفعل')));
+              }),
               
               if (_isOwner || _isAdmin) ...[
                 _buildMenuItem(Icons.link_rounded, "رابط المجموعة", () {
@@ -448,11 +451,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                  const SizedBox(height: 12),
               ],
               
-              // Action Buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: _isLoadingRole 
-                  ? const SizedBox(height: 58) 
+                  ? const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Center(child: CircularProgressIndicator(color: AppColors.primary)))
                   : _isMember 
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -463,7 +465,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                             _toggleMute
                           ),
                           const SizedBox(width: 16),
-                          _buildSquareButton(Icons.search_rounded, "بحث", () {}),
+                          _buildSquareButton(Icons.search_rounded, "بحث", () {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("هذه الميزة غير متوفرة بعد")));
+                          }),
                           const SizedBox(width: 16),
                           _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup, iconColor: AppColors.error),
                           const SizedBox(width: 16),
@@ -633,6 +637,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   }
 
   Widget _buildMembersTab() {
+    if (!_isMember) {
+      return _buildEmptyState(Icons.lock_rounded, "يجب الانضمام لرؤية الأعضاء");
+    }
+
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore.collection('groups').doc(widget.group.id).collection('members').snapshots(),
       builder: (context, snapshot) {
