@@ -10,7 +10,6 @@ import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
 import 'group_details_screen.dart';
-import 'manage_members_screen.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final GroupModel group;
@@ -40,6 +39,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   bool _isBanned = false;
   bool _isMuted = false;
   File? _selectedImage;
+  int _membersCount = 0;
 
   @override
   void initState() {
@@ -67,6 +67,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     bool banned = false;
     bool muted = false;
     bool member = false;
+    int count = 0;
 
     // Fetch freshest group data to ensure membersCanChat is strictly accurate real-time
     try {
@@ -82,12 +83,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     }
 
     try {
-      final doc = await _firestore
-          .collection('groups')
-          .doc(widget.group.id)
-          .collection('members')
-          .doc(user.uid)
-          .get();
+      final membersCol = _firestore.collection('groups').doc(widget.group.id).collection('members');
+      final membersSnap = await membersCol.get();
+      count = membersSnap.docs.length;
+
+      final doc = await membersCol.doc(user.uid).get();
 
       if (doc.exists) {
         member = true;
@@ -127,6 +127,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         _isAdmin = admin;
         _isBanned = banned;
         _isMuted = muted;
+        _membersCount = count;
         _isLoadingRole = false;
       });
     }
