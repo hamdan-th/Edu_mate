@@ -327,7 +327,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               ),
             ],
           ),
-      );
+    ));
     }
 
     if (_isLoadingRole) {
