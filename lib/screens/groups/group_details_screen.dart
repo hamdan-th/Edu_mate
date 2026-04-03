@@ -78,7 +78,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
 
     try {
       final membersCol = _firestore.collection('groups').doc(widget.group.id).collection('members');
-      
       final doc = await membersCol.doc(user.uid).get();
 
       if (doc.exists) {
@@ -165,16 +164,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     if (user == null) return;
 
     if (_isOwner) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('المالك لا يمكنه المغادرة قبل نقل الملكية')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('المالك لا يمكنه المغادرة، يمكنك فقط نقل الملكية')));
       return;
     }
 
     try {
       await GroupService.leaveGroup(widget.group.id);
-          
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لقد غادرت المجموعة')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت المغادرة بنجاح')));
       }
     } catch (e) {
       if (mounted) {
@@ -191,39 +189,36 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
         return Container(
           decoration: const BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 48, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))),
-              const SizedBox(height: 16),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))),
+              const SizedBox(height: 24),
               
-              _buildMenuItem(Icons.report_problem_outlined, "إبلاغ", () {
+              _buildMenuItem(Icons.report_problem_rounded, "إبلاغ", () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال البلاغ بنجاح')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم استلام البلاغ')));
               }),
               _buildMenuItem(Icons.cleaning_services_rounded, "مسح محتوى الدردشة", () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ميزة مسح الحساب قيد التطوير')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('سيتم تفعيل الميزة قريباً')));
               }),
               _buildMenuItem(Icons.link_rounded, "رابط المجموعة", () {
                 Navigator.pop(context);
-                String inviteLink = widget.group.inviteLink;
-                if (inviteLink.isEmpty) {
-                  inviteLink = 'edu_mate://group/${widget.group.id}';
-                }
-                Clipboard.setData(ClipboardData(text: inviteLink));
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ رابط الدعوة')));
+                String link = widget.group.inviteLink.isEmpty ? 'edu_mate://group/${widget.group.id}' : widget.group.inviteLink;
+                Clipboard.setData(ClipboardData(text: link));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ الرابط')));
               }),
               
               if (_isOwner || _isAdmin) ...[
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: Divider(color: AppColors.border, height: 1),
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Divider(color: AppColors.background, thickness: 8),
                 ),
-                _buildMenuItem(Icons.people_outline_rounded, "إدارة الأعضاء", () {
+                _buildMenuItem(Icons.people_alt_rounded, "إدارة الأعضاء", () {
                   Navigator.pop(context);
                   Navigator.push(context, MaterialPageRoute(builder: (_) => ManageMembersScreen(group: widget.group)));
                 }),
@@ -232,7 +227,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
                   setState(() => _isEditing = true);
                 }),
               ],
-              
               const SizedBox(height: 16),
             ],
           ),
@@ -241,19 +235,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap, {Color? color}) {
-    final c = color ?? AppColors.textPrimary;
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: c.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: c, size: 22),
-      ),
-      title: Text(title, style: TextStyle(color: c, fontWeight: FontWeight.w600, fontSize: 16)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+      leading: Icon(icon, color: AppColors.textPrimary, size: 28),
+      title: Text(title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
       onTap: onTap,
     );
   }
@@ -261,342 +247,262 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverToBoxAdapter(
-              child: _buildHeader(),
+      backgroundColor: const Color(0xFFEBEBEB), // Distinct light gray background for Telegram-like contrast
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircleAvatar(
+            backgroundColor: Colors.black.withOpacity(0.3),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 22),
+              onPressed: () => Navigator.pop(context),
             ),
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _SliverAppBarDelegate(
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        offset: const Offset(0, 4),
-                        blurRadius: 8,
-                      )
-                    ]
-                  ),
-                  child: TabBar(
-                    controller: _tabController,
-                    indicator: UnderlineTabIndicator(
-                      borderSide: const BorderSide(width: 3.0, color: AppColors.primary),
-                      borderRadius: BorderRadius.circular(3),
-                      insets: const EdgeInsets.symmetric(horizontal: 24),
-                    ),
-                    labelColor: AppColors.primary,
-                    unselectedLabelColor: AppColors.textSecondary,
-                    dividerColor: Colors.transparent,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-                    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    tabAlignment: TabAlignment.fill,
-                    tabs: const [
-                      Tab(text: "الأعضاء"),
-                      Tab(text: "الوسائط"),
-                      Tab(text: "الروابط"),
-                      Tab(text: "المحفوظات"),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ];
-        },
-        body: Container(
-          color: AppColors.background,
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildMembersTab(),
-              _buildMediaTab(),
-              _buildLinksTab(),
-              _buildSavedTab(),
-            ],
           ),
         ),
       ),
+      body: _isEditing ? _buildEditingView() : _buildProfileView(),
     );
   }
 
-  Widget _buildHeader() {
-    if (_isEditing) {
-      return _buildEditHeader();
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Column(
-            children: [
-              // Top Actions Row
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 22),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 48), // Balance centering
-                  ],
+  Widget _buildProfileView() {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Container(
+            color: AppColors.surface, // Pure solid white top container
+            width: double.infinity,
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 56, bottom: 20),
+            child: Column(
+              children: [
+                // Avatar
+                CircleAvatar(
+                  radius: 64, // Large prominent size
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
+                  child: widget.group.imageUrl.isEmpty
+                      ? Text(
+                          _groupName.isNotEmpty ? _groupName[0].toUpperCase() : 'M',
+                          style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        )
+                      : null,
                 ),
-              ),
-              
-              // Avatar
-              Center(
-                child: Hero(
-                  tag: 'group_avatar_${widget.group.id}',
-                  child: CircleAvatar(
-                    radius: 48, // Slightly smaller and cleaner like telegram
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
-                    backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                    child: widget.group.imageUrl.isEmpty
-                        ? Text(
-                            _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
-                            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.primary),
-                          )
-                        : null,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              // Name and Details
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  _groupName,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary, height: 1.2),
-                ),
-              ),
-              const SizedBox(height: 4),
-              
-              Text(
-                "$_membersCount عضو",
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-              ),
-              
-              const SizedBox(height: 16),
-
-              if (_groupDescription.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                
+                // Details
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
-                    _groupDescription,
+                    _groupName,
                     textAlign: TextAlign.center,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5, fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                   ),
                 ),
+                const SizedBox(height: 6),
+                Text(
+                  "$_membersCount عضو",
+                  style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                ),
+                if (_groupDescription.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      _groupDescription,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.4),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
-              ] else ...[
-                 const SizedBox(height: 12),
+                
+                // Actions Row Strictly Under Header
+                _isLoadingRole
+                    ? const CircularProgressIndicator(color: AppColors.primary)
+                    : !_isMember
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                ),
+                                onPressed: _isJoining ? null : _joinPublicGroup,
+                                child: _isJoining
+                                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                    : const Text("انضمام للمجموعة", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                              ),
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildActionItem(
+                                  _isMuted ? Icons.notifications_off_rounded : Icons.notifications_rounded,
+                                  _isMuted ? "تفعيل" : "كتم",
+                                  _toggleMute),
+                              _buildActionItem(Icons.search_rounded, "بحث", () {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("البحث غير متاح قريباً")));
+                              }),
+                              _buildActionItem(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup, color: AppColors.error),
+                              _buildActionItem(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
+                            ],
+                          ),
               ],
-              
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _isLoadingRole 
-                  ? const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Center(child: CircularProgressIndicator(color: AppColors.primary)))
-                  : _isMember 
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildSquareButton(
-                            _isMuted ? Icons.notifications_off_rounded : Icons.notifications_none_rounded, 
-                            "كتم", 
-                            _toggleMute
-                          ),
-                          _buildSquareButton(Icons.search_rounded, "بحث", () {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("هذه الميزة غير متوفرة بعد")));
-                          }),
-                          _buildSquareButton(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup),
-                          _buildSquareButton(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
-                        ],
-                      )
-                    : SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            elevation: 0,
-                          ),
-                          onPressed: _isJoining ? null : _joinPublicGroup,
-                          child: _isJoining 
-                            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Text("انضم للمجتمع الآن", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        ),
-                      ),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+        
+        // Tab Bar Section (Separate Block)
+        SliverToBoxAdapter(
+          child: const SizedBox(height: 8), // Gap between Header and Tabs
+        ),
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _SliverAppBarDelegate(
+            Container(
+              color: AppColors.surface,
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: AppColors.primary,
+                indicatorWeight: 3,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textSecondary,
+                labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                tabs: const [
+                  Tab(text: "الأعضاء"),
+                  Tab(text: "الوسائط"),
+                  Tab(text: "الروابط"),
+                  Tab(text: "المحفوظات"),
+                ],
+              ),
+            ),
+          ),
+        ),
+        
+        // View Content
+        SliverFillRemaining(
+          child: Container(
+            color: AppColors.surface,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildMembersTab(),
+                _buildEmptyState(Icons.photo_library_rounded, "لا توجد وسائط"),
+                _buildEmptyState(Icons.link_rounded, "لا توجد روابط"),
+                _buildEmptyState(Icons.bookmark_rounded, "لا توجد محفوظات"),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildEditHeader() {
+  Widget _buildEditingView() {
     return Container(
       color: AppColors.surface,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => setState(() => _isEditing = false),
-                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                      child: const Text("إلغاء", style: TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w600)),
-                    ),
-                    const Text("تعديل المجموعة", style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w800)),
-                    TextButton(
-                      onPressed: _saveEdits,
-                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                      child: const Text("حفظ", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
-                    ),
-                  ],
+      width: double.infinity,
+      height: double.infinity,
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 20),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(onPressed: () => setState(() => _isEditing = false), child: const Text("إلغاء", style: TextStyle(color: AppColors.textSecondary, fontSize: 18))),
+                  const Text("تعديل", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  TextButton(onPressed: _saveEdits, child: const Text("حفظ", style: TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.bold))),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            CircleAvatar(
+              radius: 64,
+              backgroundColor: AppColors.inputFill,
+              backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
+              child: const Align(
+                alignment: Alignment.bottomRight,
+                child: CircleAvatar(
+                  backgroundColor: AppColors.primary,
+                  radius: 20,
+                  child: Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
                 ),
               ),
-              const SizedBox(height: 16),
-              Stack(
+            ),
+            const SizedBox(height: 48),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 4),
-                    ),
-                    child: CircleAvatar(
-                      radius: 56,
-                      backgroundColor: AppColors.inputFill,
-                      backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                      child: widget.group.imageUrl.isEmpty
-                          ? Text(
-                              _groupName.isNotEmpty ? _groupName.substring(0, 1).toUpperCase() : 'M',
-                              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
-                            )
-                          : null,
+                  TextField(
+                    controller: _nameController,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    decoration: InputDecoration(
+                      labelText: "اسم المجموعة",
+                      filled: true,
+                      fillColor: const Color(0xFFF4F5F7),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                     ),
                   ),
-                  Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.surface, width: 3),
-                        boxShadow: [
-                          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 6),
-                        ]
-                      ),
-                      child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _descController,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      labelText: "الوصف",
+                      filled: true,
+                      fillColor: const Color(0xFFF4F5F7),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _nameController,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
-                      decoration: InputDecoration(
-                        labelText: "اسم المجموعة",
-                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                        filled: true,
-                        fillColor: AppColors.inputFill,
-                        contentPadding: const EdgeInsets.all(16),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _descController,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        labelText: "الوصف",
-                        alignLabelWithHint: true,
-                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                        filled: true,
-                        fillColor: AppColors.inputFill,
-                        contentPadding: const EdgeInsets.all(16),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSquareButton(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildActionItem(IconData icon, String label, VoidCallback onTap, {Color color = AppColors.primary}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.08),
-              shape: BoxShape.circle,
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 24),
+            child: Icon(icon, color: color, size: 28),
           ),
           const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w600),
-            textAlign: TextAlign.center,
-          ),
+          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 13)),
         ],
       ),
     );
   }
 
   Widget _buildMembersTab() {
-    if (!_isMember) {
-      return _buildEmptyState(Icons.lock_rounded, "يجب الانضمام لرؤية الأعضاء");
-    }
+    if (!_isMember) return _buildEmptyState(Icons.lock_rounded, "يجب الانضمام لرؤية الأعضاء");
 
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore.collection('groups').doc(widget.group.id).collection('members').snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-           return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-        }
-        if (snapshot.hasError) {
-          return const Center(child: Text('خطأ في التحميل', style: TextStyle(color: AppColors.textSecondary)));
-        }
+        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        if (snapshot.hasError) return _buildEmptyState(Icons.error_outline_rounded, "حدث خطأ");
 
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) return _buildEmptyState(Icons.group_rounded, "لا يوجد أعضاء");
@@ -606,45 +512,26 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final data = docs[index].data() as Map<String, dynamic>;
-            
-            final String name = data['name'] ?? data['displayName'] ?? data['username'] ?? 'عضو بالمجموعة';
-            final String? imageUrl = data['imageUrl'] ?? data['photoUrl'];
-            final String role = data['role'] ?? 'member';
-            final String status = data['status'] ?? 'active';
-            
-            String roleLabel = "";
-            Color roleColor = Colors.transparent;
+            final name = data['name'] ?? data['displayName'] ?? 'عضو';
+            final imageUrl = data['imageUrl'] ?? data['photoUrl'];
+            final role = data['role'] ?? 'member';
+            final status = data['status'] ?? 'active';
 
-            if (role == 'owner') {
-              roleLabel = "مالك";
-              roleColor = AppColors.error;
-            } else if (role == 'admin') {
-              roleLabel = "مشرف";
-              roleColor = AppColors.warning;
-            }
-
-            String statusNote = "";
-            if (status == 'muted') statusNote = " (مكتوم)";
-            if (status == 'banned') statusNote = " (محظور)";
+            String roleStr = (role == 'owner') ? "مالك" : (role == 'admin' ? "مشرف" : "");
+            Color roleCol = role == 'owner' ? AppColors.error : AppColors.warning;
+            String statusStr = status == 'muted' ? " (مكتوم)" : (status == 'banned' ? " (محظور)" : "");
 
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
               leading: CircleAvatar(
-                radius: 22,
+                radius: 24,
                 backgroundColor: AppColors.primary.withOpacity(0.1),
                 backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-                child: imageUrl == null || imageUrl.isEmpty
-                    ? Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : 'M',
-                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
-                      )
-                    : null,
+                child: imageUrl == null || imageUrl.isEmpty ? Text(name[0], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)) : null,
               ),
-              title: Text(name + statusNote, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 15)),
-              subtitle: Text(roleLabel.isNotEmpty ? roleLabel : "عضو", style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4)),
-              trailing: roleLabel.isNotEmpty
-                  ? Text(roleLabel, style: TextStyle(color: roleColor, fontSize: 12, fontWeight: FontWeight.bold))
-                  : null,
+              title: Text(name + statusStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              subtitle: Text(roleStr.isNotEmpty ? roleStr : "عضو", style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              trailing: roleStr.isNotEmpty ? Text(roleStr, style: TextStyle(color: roleCol, fontWeight: FontWeight.w900, fontSize: 12)) : null,
             );
           },
         );
@@ -652,33 +539,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> with SingleTick
     );
   }
 
-  Widget _buildMediaTab() {
-    return _buildEmptyState(Icons.photo_library_outlined, "لا توجد وسائط");
-  }
-
-  Widget _buildLinksTab() {
-    return _buildEmptyState(Icons.link_rounded, "لا توجد روابط");
-  }
-
-  Widget _buildSavedTab() {
-    return _buildEmptyState(Icons.bookmark_outline_rounded, "لا توجد محفوظات");
-  }
-
-  Widget _buildEmptyState(IconData icon, String message) {
+  Widget _buildEmptyState(IconData icon, String msg) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 48, color: AppColors.textSecondary.withOpacity(0.5)),
-          ),
+          Icon(icon, size: 64, color: AppColors.border),
           const SizedBox(height: 16),
-          Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600)),
+          Text(msg, style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -691,17 +559,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate(this.child);
 
   @override
-  double get minExtent => 52;
+  double get minExtent => 50;
   @override
-  double get maxExtent => 52;
-
+  double get maxExtent => 50;
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
-  }
-
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;
   @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
-  }
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) => false;
 }
