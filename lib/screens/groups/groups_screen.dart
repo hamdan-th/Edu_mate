@@ -335,8 +335,8 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildDiscoverTab(),
-          _buildMyGroupsTab(),
+          _KeepAlivePage(child: _buildDiscoverTab()),
+          _KeepAlivePage(child: _buildMyGroupsTab()),
         ],
       ),
       floatingActionButton: Padding(
@@ -634,5 +634,24 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
         ),
       ),
     );
+  }
+}
+
+class _KeepAlivePage extends StatefulWidget {
+  final Widget child;
+  const _KeepAlivePage({required this.child});
+
+  @override
+  State<_KeepAlivePage> createState() => _KeepAlivePageState();
+}
+
+class _KeepAlivePageState extends State<_KeepAlivePage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
