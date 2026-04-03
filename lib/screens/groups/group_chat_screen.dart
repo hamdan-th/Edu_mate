@@ -342,27 +342,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             ],
           ),
         ),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded, color: AppColors.textPrimary),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            onSelected: _handleMenuAction,
-            itemBuilder: (context) {
-              return [
-                if (_isMember && !_isOwner && !_isAdmin) ...[
-                  const PopupMenuItem(value: 'mute', child: Text("كتم الإشعارات")),
-                ],
-                if (_isOwner || _isAdmin) ...[
-                  const PopupMenuItem(value: 'toggle_chat', child: Text("تفعيل/إيقاف دردشة الأعضاء")),
-                ],
-                if (_isMember) ...[
-                  const PopupMenuDivider(),
-                  const PopupMenuItem(value: 'leave', child: Text("مغادرة المجموعة", style: TextStyle(color: AppColors.error))),
-                ],
-              ];
-            },
-          ),
-        ],
+
       ),
       body: _isLoadingRole
           ? const Center(child: CircularProgressIndicator())
