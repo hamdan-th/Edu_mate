@@ -317,12 +317,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     if (!confirm) return;
 
     try {
-      final msgs = await _firestore.collection('groups').doc(widget.group.id).collection('messages').get();
-      final batch = _firestore.batch();
-      for (var doc in msgs.docs) {
-        batch.delete(doc.reference);
-      }
-      await batch.commit();
+      await GroupService.clearGroupChat(widget.group.id);
 
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم مسح سجل الدردشة بنجاح')));
     } catch (e) {

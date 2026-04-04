@@ -758,4 +758,30 @@ class GroupService {
 
     await batch.commit();
   }
+
+  static Future<void> clearGroupChat(String groupId) async {
+    // Only owner/admin should be verified, but the UI gatekeeps this.
+    // Chunked delete approach to handle limits safely (Firestore limits batches to 500)
+    final messagesQuery = _groups.doc(groupId).collection('messages');
+    
+    // Process in batches of 500
+    while (true) {
+      final snapshot = await messagesQuery.limit(500).get();
+      if (snapshot.docs.isEmpty) break;
+
+      final batch = _db.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      
+      // Update group message count
+      final groupRef = _groups.doc(groupId);
+      batch.update(groupRef, {
+         'messagesCount': FieldValue.increment(-snapshot.docs.length),
+         'lastMessageText': '',
+      });
+
+      await batch.commit();
+    }
+  }
 }
