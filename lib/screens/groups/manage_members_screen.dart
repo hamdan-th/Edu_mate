@@ -385,7 +385,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
     String roleLabel = "عضو";
     Color roleColor = AppColors.textSecondary;
-    Widget? roleIcon;
+    Widget roleIcon = const SizedBox.shrink();
 
     if (_isTargetOwner) {
       roleLabel = "مالك";
@@ -437,10 +437,8 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (roleIcon != null) ...[
-                        const SizedBox(width: 6),
-                        roleIcon,
-                      ],
+                      const SizedBox(width: 6),
+                      roleIcon,
                       if (isMe) ...[
                         const SizedBox(width: 6),
                         Text(
