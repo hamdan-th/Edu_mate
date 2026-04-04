@@ -11,6 +11,8 @@ import '../../models/group_model.dart';
 import '../../services/group_service.dart';
 import '../../models/group_membership_state.dart';
 import 'group_details_screen.dart';
+import 'invite_group_screen.dart';
+import 'package:flutter/gestures.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final GroupModel group;
@@ -621,7 +623,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.end,
               children: [
-                Text(text, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.4)),
+                _buildMessageText(text),
                 const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 1, top: 4),
@@ -668,6 +670,57 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             Flexible(child: messageContent),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMessageText(String text) {
+    if (!text.contains('edumate://invite')) {
+      return Text(text, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.4));
+    }
+    
+    final RegExp linkRegExp = RegExp(r'(edumate:\/\/invite\?[^\s]+)', caseSensitive: false);
+    final matches = linkRegExp.allMatches(text);
+    if (matches.isEmpty) {
+      return Text(text, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.4));
+    }
+
+    List<TextSpan> spans = [];
+    int currentPos = 0;
+    
+    for (final match in matches) {
+      if (match.start > currentPos) {
+        spans.add(TextSpan(text: text.substring(currentPos, match.start)));
+      }
+      final url = match.group(0)!;
+      spans.add(
+        TextSpan(
+          text: url,
+          style: const TextStyle(color: Color(0xFF64B5F6), decoration: TextDecoration.underline),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              final uri = Uri.tryParse(url);
+              if (uri != null) {
+                final groupId = uri.queryParameters['groupId'];
+                final code = uri.queryParameters['code'];
+                if (groupId != null && code != null) {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => InviteGroupScreen(groupId: groupId, code: code)));
+                }
+              }
+            },
+        ),
+      );
+      currentPos = match.end;
+    }
+    
+    if (currentPos < text.length) {
+      spans.add(TextSpan(text: text.substring(currentPos)));
+    }
+    
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.4),
+        children: spans,
       ),
     );
   }
