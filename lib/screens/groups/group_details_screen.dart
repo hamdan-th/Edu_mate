@@ -576,7 +576,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 _buildMembersTab(),
                 _buildEmptyState(Icons.photo_library_rounded, "لا توجد وسائط"),
                 _buildEmptyState(Icons.link_rounded, "لا توجد روابط"),
-                _buildEmptyState(Icons.bookmark_rounded, "لا توجد محفوظات"),
+                _buildSavedMessagesTab(),
               ],
             ),
           ),
@@ -660,7 +660,58 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     );
   }
 
-  Widget _buildEmptyState(IconData icon, String msg) {
+  Widget _buildSavedMessagesTab() {
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: GroupService.streamSavedMessages(widget.group.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text("حدث خطأ في تحميل المحفوظات", style: TextStyle(color: AppColors.textSecondary)));
+        }
+        
+        final msgs = snapshot.data ?? [];
+        if (msgs.isEmpty) {
+          return _buildEmptyState(Icons.bookmark_rounded, "لا توجد رسائل محفوظة");
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.only(top: 8, bottom: 24),
+          itemCount: msgs.length,
+          separatorBuilder: (_, __) => const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0xFFEBEBEB)),
+          itemBuilder: (context, index) {
+            final msg = msgs[index];
+            final timestamp = msg['createdAt'] as Timestamp?;
+            final dateStr = timestamp != null ? "${timestamp.toDate().day}/${timestamp.toDate().month} - ${timestamp.toDate().hour}:${timestamp.toDate().minute.toString().padLeft(2, '0')}" : "";
+            
+            return ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: AppColors.warning.withOpacity(0.15), shape: BoxShape.circle),
+                child: const Icon(Icons.star_rounded, color: AppColors.warning, size: 20),
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: Text(msg['senderName'] ?? 'عضو', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14))),
+                  if (dateStr.isNotEmpty)
+                    Text(dateStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                ],
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(msg['text'] ?? 'رسالة', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary)),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState(IconData icon, String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

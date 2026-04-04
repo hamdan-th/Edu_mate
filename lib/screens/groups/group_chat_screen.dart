@@ -489,7 +489,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     );
   }
 
-  void _showMessageOptions(Map<String, dynamic> data, String messageId, String resolvedSenderName) {
+  void _showMessageOptions(Map<String, dynamic> data, String messageId, String resolvedSenderName, bool isSaved) {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF17212B),
@@ -516,11 +516,19 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.star_rounded, color: Colors.amber),
-              title: const Text('تفضيل (قريباً)', style: TextStyle(color: Colors.white, fontSize: 16)),
-              onTap: () {
+              leading: Icon(isSaved ? Icons.star_border_rounded : Icons.star_rounded, color: Colors.amber),
+              title: Text(isSaved ? 'إزالة من المحفوظات' : 'حفظ بنجمة', style: const TextStyle(color: Colors.white, fontSize: 16)),
+              onTap: () async {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('قريباً: حفظ الرسائل')));
+                try {
+                  if (isSaved) {
+                    await GroupService.unsaveMessage(groupId: widget.group.id, messageId: messageId);
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت إزالة الرسالة')));
+                  } else {
+                    await GroupService.saveMessage(groupId: widget.group.id, messageId: messageId, data: data);
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حفظ الرسالة')));
+                  }
+                } catch (_) {}
               },
             ),
           ],
@@ -654,7 +662,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     );
 
     return GestureDetector(
-      onLongPress: () => _showMessageOptions(data, messageId, senderName),
+      onLongPress: () async {
+        final isSaved = await GroupService.isMessageSaved(groupId: widget.group.id, messageId: messageId);
+        if (!mounted) return;
+        _showMessageOptions(data, messageId, senderName, isSaved);
+      },
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 6),

@@ -529,4 +529,35 @@ class GroupService {
 
     return stream.asBroadcastStream();
   }
+
+  static Future<void> saveMessage({required String groupId, required String messageId, required Map<String, dynamic> data}) async {
+    final Map<String, dynamic> payload = {
+       'messageId': messageId,
+       'text': data['text'] ?? '',
+       'senderId': data['senderId'] ?? '',
+       'senderName': data['senderName'] ?? '',
+       'createdAt': data['createdAt'],
+       if (data['replyToText'] != null) 'replyToText': data['replyToText'],
+       if (data['replyToSenderName'] != null) 'replyToSenderName': data['replyToSenderName'],
+       'savedAt': FieldValue.serverTimestamp(),
+    };
+    await _groups.doc(groupId).collection('savedMessages').doc(currentUid).collection('items').doc(messageId).set(payload);
+  }
+
+  static Future<void> unsaveMessage({required String groupId, required String messageId}) async {
+    await _groups.doc(groupId).collection('savedMessages').doc(currentUid).collection('items').doc(messageId).delete();
+  }
+
+  static Future<bool> isMessageSaved({required String groupId, required String messageId}) async {
+    try {
+      final doc = await _groups.doc(groupId).collection('savedMessages').doc(currentUid).collection('items').doc(messageId).get();
+      return doc.exists;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Stream<List<Map<String, dynamic>>> streamSavedMessages(String groupId) {
+    return _groups.doc(groupId).collection('savedMessages').doc(currentUid).collection('items').orderBy('savedAt', descending: true).snapshots().map((snap) => snap.docs.map((e) => e.data()).toList());
+  }
 }
