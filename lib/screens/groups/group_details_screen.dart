@@ -775,10 +775,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             color: AppColors.surface,
             child: TabBarView(
               children: [
-                _buildMembersTab(),
-                _buildMediaTab(),
-                _buildLinksTab(),
-                _buildSavedMessagesTab(),
+                _KeepAlivePage(child: _buildMembersTab()),
+                _KeepAlivePage(child: _buildMediaTab()),
+                _KeepAlivePage(child: _buildLinksTab()),
+                _KeepAlivePage(child: _buildSavedMessagesTab()),
               ],
             ),
           ),
@@ -1084,5 +1084,24 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
     return false;
+  }
+}
+
+class _KeepAlivePage extends StatefulWidget {
+  final Widget child;
+  const _KeepAlivePage({required this.child});
+
+  @override
+  State<_KeepAlivePage> createState() => _KeepAlivePageState();
+}
+
+class _KeepAlivePageState extends State<_KeepAlivePage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
