@@ -75,25 +75,27 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
           icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 elevation: 0,
               ),
               onPressed: _isPublishing || (_contentController.text.trim().isEmpty && _selectedImage == null) ? null : _publishPost,
               child: _isPublishing 
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Text("نشر", style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
+                  ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text("نشر", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ),
-        ],
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
