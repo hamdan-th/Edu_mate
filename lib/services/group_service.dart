@@ -760,16 +760,19 @@ class GroupService {
     final postRef = _db.collection('posts').doc();
 
     batch.set(postRef, {
-      'id': postRef.id,
+      'postId': postRef.id,
       'groupId': group.id,
       'groupName': group.name,
       'groupImageUrl': group.imageUrl,
-      'authorUserId': currentUid,
+      'authorId': currentUid,
       'authorName': displayName,
-      'content': cleanText,
-      if (imageUrl != null && imageUrl.isNotEmpty) 'imageUrl': imageUrl,
+      'contentText': cleanText,
+      if (imageUrl != null && imageUrl.isNotEmpty) 'contentImageUrl': imageUrl,
+      'visibility': 'public',
       'createdAt': FieldValue.serverTimestamp(),
       'source': 'group_public',
+      'likesCount': 0,
+      'commentsCount': 0,
     });
 
     await batch.commit();
