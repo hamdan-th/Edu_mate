@@ -660,7 +660,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                           _buildActionItem(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
                         ],
                       ),
-                      if (_isOwner || _isAdmin) ...[
+                      if (widget.group.isPublic && (_isOwner || _isAdmin)) ...[
                         const SizedBox(height: 16),
                         StreamBuilder<DocumentSnapshot>(
                           stream: _firestore.collection('groups').doc(widget.group.id).snapshots(),
