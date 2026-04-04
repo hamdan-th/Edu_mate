@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../models/group_model.dart';
 import '../../models/group_message_model.dart';
+import '../../models/group_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/group_service.dart';
 import 'manage_members_screen.dart';
