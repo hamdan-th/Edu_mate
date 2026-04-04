@@ -689,7 +689,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               ),
               const SizedBox(width: 8),
             ],
-            messageContent,
+            Flexible(child: messageContent),
           ],
         ),
       ),
