@@ -377,7 +377,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     ),
                   ],
                 ),
-    );
+    ));
   }
 
   Widget _buildNonMemberState() {
