@@ -178,12 +178,12 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.primary.withOpacity(0.2)),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.image_rounded, color: AppColors.primary, size: 24),
-                        const SizedBox(width: 8),
-                        const Text("إضافة صورة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                        SizedBox(width: 8),
+                        Text("إضافة صورة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
                       ],
                     ),
                   ),
