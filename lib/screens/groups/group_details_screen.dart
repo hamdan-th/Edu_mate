@@ -11,6 +11,7 @@ import '../../models/group_membership_state.dart';
 import 'manage_members_screen.dart';
 import 'group_chat_screen.dart';
 import 'create_group_feed_post_screen.dart';
+import 'invite_group_screen.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final GroupModel group;
@@ -364,7 +365,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 title: const Text("نسخ الرابط", style: TextStyle(fontWeight: FontWeight.bold)),
                 onTap: () {
                   Navigator.pop(context);
-                  String link = widget.group.inviteLink.isEmpty ? 'edu_mate://group/${widget.group.id}' : widget.group.inviteLink;
+                  String link = widget.group.inviteLink.isEmpty 
+                      ? GroupService.buildInviteLink(groupId: widget.group.id, inviteCode: widget.group.inviteCode) 
+                      : widget.group.inviteLink;
                   Clipboard.setData(ClipboardData(text: link));
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ الرابط')));
                 },
@@ -1006,7 +1009,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
         if (snapshot.hasError) return const Center(child: Text("خطأ في تحميل الروابط", style: TextStyle(color: AppColors.textSecondary)));
 
-        final RegExp urlRegExp = RegExp(r'(https?:\/\/[^\s]+)', caseSensitive: false);
+        final RegExp urlRegExp = RegExp(r'(https?:\/\/[^\s]+|edumate:\/\/[^\s]+)', caseSensitive: false);
         final msgs = snapshot.data ?? [];
         
         // Filter messages that contain a link
@@ -1040,6 +1043,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               ),
               trailing: dateStr.isNotEmpty ? Text(dateStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)) : null,
               onTap: () {
+                if (url.startsWith('edumate://invite')) {
+                  final uri = Uri.tryParse(url);
+                  if (uri != null) {
+                    final groupId = uri.queryParameters['groupId'];
+                    final code = uri.queryParameters['code'];
+                    if (groupId != null && groupId.isNotEmpty && code != null && code.isNotEmpty) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => InviteGroupScreen(groupId: groupId, code: code)));
+                      return;
+                    }
+                  }
+                }
                 // Future enhancement: launchUrl(Uri.parse(url))
               },
             );
