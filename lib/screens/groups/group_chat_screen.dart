@@ -40,7 +40,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   bool _isMuted = false;
   File? _selectedImage;
   int _membersCount = 0;
-  
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   Map<String, Map<String, dynamic>> _userCache = {};
   Map<String, dynamic>? _replyMessage;
 
@@ -68,6 +71,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   void dispose() {
     _messageController.dispose();
+    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -328,12 +332,34 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             titleSpacing: 0,
             backgroundColor: Colors.transparent,
             elevation: 0,
-            leadingWidth: 44,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (_isSearching) {
+              setState(() {
+                _isSearching = false;
+                _searchQuery = '';
+                _searchController.clear();
+              });
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
         ),
-        title: GestureDetector(
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                cursorColor: Colors.white,
+                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                decoration: InputDecoration(
+                  hintText: 'البحث في الرسائل...',
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                  border: InputBorder.none,
+                ),
+                onChanged: (val) => setState(() => _searchQuery = val.trim()),
+              )
+            : GestureDetector(
           onTap: _openDetails,
           behavior: HitTestBehavior.opaque,
           child: Padding(
@@ -378,10 +404,21 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search_rounded, color: Color(0xFF7F8B98)),
-            onPressed: () {},
-          )
+          if (_isSearching)
+            IconButton(
+              icon: const Icon(Icons.close_rounded, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _searchController.clear();
+                  _searchQuery = '';
+                });
+              },
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.search_rounded, color: Color(0xFF7F8B98)),
+              onPressed: () => setState(() => _isSearching = true),
+            )
         ],
       ),
       ),
@@ -417,10 +454,22 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                return const Center(child: Text('تعذر تحميل الرسائل', style: TextStyle(color: Color(0xFF7F8B98))));
                             }
   
-                            final docs = snapshot.data?.docs ?? [];
-  
+                            // Apply Search Filter locally if active
+                            var docs = snapshot.data?.docs ?? [];
+                            
+                            if (_searchQuery.isNotEmpty) {
+                              final query = _searchQuery.toLowerCase();
+                              docs = docs.where((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+                                final text = (data['text'] ?? '').toString().toLowerCase();
+                                return text.contains(query);
+                              }).toList();
+                            }
+                            
                             if (docs.isEmpty) {
-                               return const _EmptyChatState();
+                               return _searchQuery.isNotEmpty
+                                   ? const Center(child: Text("لا توجد نتائج مطابقة", style: TextStyle(color: Color(0xFF7F8B98), fontSize: 16)))
+                                   : const _EmptyChatState();
                             }
   
                             return ListView.builder(
@@ -778,12 +827,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     minLines: 1,
                     maxLines: 5,
                     textInputAction: TextInputAction.newline,
-                    style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w500),
-                    decoration: const InputDecoration(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600),
+                    decoration: InputDecoration(
                       hintText: 'رسالة',
-                      hintStyle: TextStyle(color: Color(0xFF8D9CAE), fontSize: 16),
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 16),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                       isDense: true,
                     ),
                   ),
