@@ -718,7 +718,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         children: [
           Icon(icon, size: 64, color: AppColors.border),
           const SizedBox(height: 16),
-          Text(msg, style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+          Text(message, style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
         ],
       ),
     );
