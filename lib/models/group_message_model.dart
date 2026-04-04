@@ -5,6 +5,7 @@ class GroupMessageModel {
   final String senderId;
   final String senderName;
   final String text;
+  final String? imageUrl;
   final DateTime? createdAt;
   final String? replyToMessageId;
   final String? replyToText;
@@ -15,6 +16,7 @@ class GroupMessageModel {
     required this.senderId,
     required this.senderName,
     required this.text,
+    this.imageUrl,
     required this.createdAt,
     this.replyToMessageId,
     this.replyToText,
@@ -29,6 +31,7 @@ class GroupMessageModel {
       senderId: (data['senderId'] ?? '').toString(),
       senderName: (data['senderName'] ?? 'User').toString(),
       text: (data['text'] ?? '').toString(),
+      imageUrl: data['imageUrl']?.toString(),
       createdAt: _toDateTime(data['createdAt']),
       replyToMessageId: data['replyToMessageId']?.toString() ?? data['replyToId']?.toString(),
       replyToText: data['replyToText']?.toString(),
@@ -41,6 +44,7 @@ class GroupMessageModel {
       'senderId': senderId,
       'senderName': senderName,
       'text': text,
+      if (imageUrl != null) 'imageUrl': imageUrl,
       'createdAt': createdAt == null ? null : Timestamp.fromDate(createdAt!),
       if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
       if (replyToText != null) 'replyToText': replyToText,

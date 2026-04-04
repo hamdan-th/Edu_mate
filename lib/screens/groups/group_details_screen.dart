@@ -574,8 +574,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             child: TabBarView(
               children: [
                 _buildMembersTab(),
-                _buildEmptyState(Icons.photo_library_rounded, "لا توجد وسائط"),
-                _buildEmptyState(Icons.link_rounded, "لا توجد روابط"),
+                _buildMediaTab(),
+                _buildLinksTab(),
                 _buildSavedMessagesTab(),
               ],
             ),
@@ -721,6 +721,93 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           Text(message, style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
         ],
       ),
+    );
+  }
+
+  Widget _buildMediaTab() {
+    return StreamBuilder<List<GroupMessageModel>>(
+      stream: GroupService.streamMessages(widget.group.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        if (snapshot.hasError) return const Center(child: Text("خطأ في تحميل الوسائط", style: TextStyle(color: AppColors.textSecondary)));
+
+        final msgs = snapshot.data ?? [];
+        final mediaMsgs = msgs.where((m) => m.imageUrl != null && m.imageUrl!.isNotEmpty).toList();
+
+        if (mediaMsgs.isEmpty) return _buildEmptyState(Icons.photo_library_rounded, "لا توجد وسائط");
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
+          ),
+          itemCount: mediaMsgs.length,
+          itemBuilder: (context, index) {
+            final url = mediaMsgs[index].imageUrl!;
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                url,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) => progress == null ? child : Container(color: Colors.white10),
+                errorBuilder: (context, error, stack) => Container(color: AppColors.surface, child: const Icon(Icons.broken_image, color: AppColors.textSecondary)),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildLinksTab() {
+    return StreamBuilder<List<GroupMessageModel>>(
+      stream: GroupService.streamMessages(widget.group.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        if (snapshot.hasError) return const Center(child: Text("خطأ في تحميل الروابط", style: TextStyle(color: AppColors.textSecondary)));
+
+        final RegExp urlRegExp = RegExp(r'(https?:\/\/[^\s]+)', caseSensitive: false);
+        final msgs = snapshot.data ?? [];
+        
+        // Filter messages that contain a link
+        final linkMsgs = msgs.where((m) => urlRegExp.hasMatch(m.text)).toList();
+
+        if (linkMsgs.isEmpty) return _buildEmptyState(Icons.link_rounded, "لا توجد روابط");
+
+        return ListView.separated(
+          padding: const EdgeInsets.only(top: 8, bottom: 24),
+          itemCount: linkMsgs.length,
+          separatorBuilder: (_, __) => const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0xFFEBEBEB)),
+          itemBuilder: (context, index) {
+            final msg = linkMsgs[index];
+            final match = urlRegExp.firstMatch(msg.text);
+            final url = match?.group(0) ?? '';
+            
+            final timestamp = msg.createdAt;
+            final dateStr = timestamp != null ? "${timestamp.day}/${timestamp.month} - ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}" : "";
+            
+            return ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              leading: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), shape: BoxShape.circle),
+                child: const Icon(Icons.link_rounded, color: AppColors.primary, size: 22),
+              ),
+              title: Text(msg.senderName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textSecondary)),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(url, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.primary, fontSize: 15, fontWeight: FontWeight.w600)),
+              ),
+              trailing: dateStr.isNotEmpty ? Text(dateStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)) : null,
+              onTap: () {
+                // Future enhancement: launchUrl(Uri.parse(url))
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

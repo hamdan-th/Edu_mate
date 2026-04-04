@@ -761,7 +761,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             children: [
               IconButton(
                 onPressed: _pickImage,
-                icon: const Icon(Icons.attach_file_rounded, color: Color(0xFF7F8B98), size: 28),
+                icon: const Icon(Icons.image_outlined, color: Color(0xFF7F8B98), size: 28),
                 padding: const EdgeInsets.all(8),
                 constraints: const BoxConstraints(),
               ),
@@ -770,7 +770,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF242F3D), // Modern Pill Composer
+                    color: const Color(0xFF2B3A4C), // Slightly brighter for contrast against text
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: TextField(
@@ -778,10 +778,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     minLines: 1,
                     maxLines: 5,
                     textInputAction: TextInputAction.newline,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                    style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w500),
                     decoration: const InputDecoration(
                       hintText: 'رسالة',
-                      hintStyle: TextStyle(color: Color(0xFF7F8B98), fontSize: 16),
+                      hintStyle: TextStyle(color: Color(0xFF8D9CAE), fontSize: 16),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 12),
                       isDense: true,
