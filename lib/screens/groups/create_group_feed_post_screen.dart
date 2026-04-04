@@ -1,4 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
@@ -15,6 +19,8 @@ class CreateGroupFeedPostScreen extends StatefulWidget {
 class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
   final TextEditingController _contentController = TextEditingController();
   bool _isPublishing = false;
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void dispose() {
@@ -24,13 +30,25 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
 
   Future<void> _publishPost() async {
     final content = _contentController.text.trim();
-    if (content.isEmpty) return;
+    if (content.isEmpty && _selectedImage == null) return;
 
     setState(() => _isPublishing = true);
     try {
+      String? imageUrl;
+      if (_selectedImage != null) {
+        final uid = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('global_feed')
+            .child('${DateTime.now().millisecondsSinceEpoch}_$uid.jpg');
+        final uploadTask = await ref.putFile(_selectedImage!);
+        imageUrl = await uploadTask.ref.getDownloadURL();
+      }
+
       await GroupService.publishGlobalFeedPost(
         group: widget.group,
         text: content,
+        imageUrl: imageUrl,
       );
       if (mounted) {
         Navigator.pop(context);
@@ -67,7 +85,7 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
-              onPressed: _isPublishing || _contentController.text.trim().isEmpty ? null : _publishPost,
+              onPressed: _isPublishing || (_contentController.text.trim().isEmpty && _selectedImage == null) ? null : _publishPost,
               child: _isPublishing 
                   ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : const Text("نشر", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -112,32 +130,65 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
                 border: InputBorder.none,
               ),
             ),
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerRight,
-              child: InkWell(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('إضافة الصور ستكون متاحة قريباً')));
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+            if (_selectedImage != null)
+              Container(
+                margin: const EdgeInsets.only(top: 16),
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  image: DecorationImage(
+                    image: FileImage(_selectedImage!),
+                    fit: BoxFit.cover,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.image_rounded, color: AppColors.primary, size: 24),
-                      const SizedBox(width: 8),
-                      Text("إضافة صورة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
-                    ],
+                ),
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close, color: Colors.white, size: 20),
+                    ),
+                    onPressed: () => setState(() => _selectedImage = null),
                   ),
                 ),
               ),
-            ),
+            const SizedBox(height: 24),
+            if (_selectedImage == null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: InkWell(
+                  onTap: () async {
+                    final XFile? image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+                    if (image != null) {
+                      setState(() {
+                        _selectedImage = File(image.path);
+                      });
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.image_rounded, color: AppColors.primary, size: 24),
+                        const SizedBox(width: 8),
+                        const Text("إضافة صورة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

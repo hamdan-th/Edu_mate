@@ -191,35 +191,33 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                         }
                       }
 
-                      if (owners.isEmpty && admins.isEmpty && members.isEmpty) {
+                      final itemsList = <Widget>[];
+
+                      if (owners.isNotEmpty) {
+                        itemsList.add(_buildSectionTitle("المالك"));
+                        itemsList.addAll(owners.map((doc) => _buildMemberItem(doc)));
+                      }
+                      if (admins.isNotEmpty) {
+                        itemsList.add(_buildSectionTitle("المشرفون"));
+                        itemsList.addAll(admins.map((doc) => _buildMemberItem(doc)));
+                      }
+                      if (members.isNotEmpty) {
+                        itemsList.add(_buildSectionTitle("الأعضاء"));
+                        itemsList.addAll(members.map((doc) => _buildMemberItem(doc)));
+                      }
+
+                      if (itemsList.isEmpty) {
                         return _buildEmptyState();
                       }
 
                       return ListView.separated(
                         padding: const EdgeInsets.symmetric(vertical: 8),
-                        itemCount: owners.length + admins.length + members.length + 3,
+                        itemCount: itemsList.length,
                         separatorBuilder: (context, index) {
-                           // Try not to draw separators directly after section headers
                            return const Divider(height: 1, indent: 64);
                         },
                         itemBuilder: (context, index) {
-                          final List<Widget> items = [];
-                          
-                          if (owners.isNotEmpty) {
-                            items.add(_buildSectionTitle("المالك"));
-                            items.addAll(owners.map((doc) => _buildMemberItem(doc)));
-                          }
-                          if (admins.isNotEmpty) {
-                            items.add(_buildSectionTitle("المشرفون"));
-                            items.addAll(admins.map((doc) => _buildMemberItem(doc)));
-                          }
-                          if (members.isNotEmpty) {
-                            items.add(_buildSectionTitle("الأعضاء"));
-                            items.addAll(members.map((doc) => _buildMemberItem(doc)));
-                          }
-                          
-                          if (index < items.length) return items[index];
-                          return const SizedBox.shrink();
+                          return itemsList[index];
                         },
                       );
                     },
