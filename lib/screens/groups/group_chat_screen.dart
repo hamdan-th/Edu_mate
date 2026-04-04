@@ -357,13 +357,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           : !_isMember
               ? _buildNonMemberState()
               : Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage('https://i.imgur.com/IGjZep0.jpg'), // Iconic dark Telegram chat wallpaper
-                      fit: BoxFit.cover,
-                      opacity: 0.15, // Subtle texture
-                    ),
-                  ),
                   child: Column(
                     children: [
                       Expanded(
