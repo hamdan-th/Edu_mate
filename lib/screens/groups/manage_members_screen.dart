@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
+import '../../models/group_membership_state.dart';
 
 class ManageMembersScreen extends StatefulWidget {
   final GroupModel group;
@@ -45,37 +46,12 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   }
 
   Future<void> _loadCurrentUserRole() async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      setState(() => _isLoadingRole = false);
-      return;
-    }
-
-    if (widget.group.ownerId == user.uid) {
+    final state = await GroupService.getUserGroupState(widget.group.id);
+    if (mounted) {
       setState(() {
-        _currentUserRole = 'owner';
+        _currentUserRole = state.role;
         _isLoadingRole = false;
       });
-      return;
-    }
-
-    try {
-      final doc = await _firestore
-          .collection('groups')
-          .doc(widget.group.id)
-          .collection('members')
-          .doc(user.uid)
-          .get();
-
-      if (doc.exists) {
-        setState(() {
-          _currentUserRole = doc.data()?['role'] ?? 'member';
-        });
-      }
-    } catch (e) {
-      // Ignored
-    } finally {
-      if (mounted) setState(() => _isLoadingRole = false);
     }
   }
 

@@ -5,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/group_model.dart';
 import '../models/group_message_model.dart';
+import '../models/group_membership_state.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class GroupService {
   GroupService._();
@@ -18,6 +21,66 @@ class GroupService {
       throw Exception('المستخدم غير مسجل دخول');
     }
     return user.uid;
+  }
+
+  static Future<GroupMembershipState> getUserGroupState(String groupId) async {
+    final user = _auth.currentUser;
+    if (user == null) return GroupMembershipState.none();
+
+    final groupDoc = await _groups.doc(groupId).get();
+    if (!groupDoc.exists) return GroupMembershipState.none();
+
+    final groupData = groupDoc.data() ?? {};
+    final membersCanChat = (groupData['membersCanChat'] ?? true) == true;
+    final banned = (groupData['bannedUserIds'] as List?)
+        ?.map((e) => e.toString())
+        .toList() ??
+        <String>[];
+
+    final isBanned = banned.contains(user.uid);
+
+    final memberSnap = await _groups.doc(groupId).collection('members').doc(user.uid).get();
+
+    if (!memberSnap.exists) {
+      return GroupMembershipState(
+        isMember: false,
+        isOwner: false,
+        isAdmin: false,
+        isBanned: isBanned,
+        isMuted: false,
+        canSend: false,
+        notificationsMuted: false,
+        role: 'none',
+      );
+    }
+
+    final data = memberSnap.data() ?? {};
+    final role = data['role']?.toString() ?? 'member';
+    final status = data['status']?.toString() ?? 'active';
+
+    final isOwner = role == 'owner';
+    final isAdmin = role == 'admin';
+    final isMuted = status == 'muted';
+
+    bool canSend = false;
+    if (!isBanned && !isMuted) {
+      if (isOwner || isAdmin) {
+        canSend = true;
+      } else if (membersCanChat) {
+        canSend = true;
+      }
+    }
+
+    return GroupMembershipState(
+      isMember: true,
+      isOwner: isOwner,
+      isAdmin: isAdmin,
+      isBanned: isBanned || status == 'banned',
+      isMuted: isMuted,
+      canSend: canSend,
+      notificationsMuted: false,
+      role: role,
+    );
   }
 
   static CollectionReference<Map<String, dynamic>> get _groups =>
@@ -433,12 +496,13 @@ class GroupService {
   static Future<void> sendMessage({
     required String groupId,
     required String text,
+    File? imageFile,
     String? replyToMessageId,
     String? replyToText,
     String? replyToSenderName,
   }) async {
     final cleanText = text.trim();
-    if (cleanText.isEmpty) {
+    if (cleanText.isEmpty && imageFile == null) {
       throw Exception('لا يمكن إرسال رسالة فارغة');
     }
 
@@ -484,6 +548,18 @@ class GroupService {
     }
 
     final displayName = await _userDisplayName(currentUid);
+    
+    String? imageUrl;
+    if (imageFile != null) {
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('groups_chat')
+          .child(groupId)
+          .child('${DateTime.now().millisecondsSinceEpoch}_${currentUid}.jpg');
+      final uploadTask = await ref.putFile(imageFile);
+      imageUrl = await uploadTask.ref.getDownloadURL();
+    }
+
     final messageRef = groupRef.collection('messages').doc();
 
     final batch = _db.batch();
@@ -493,6 +569,7 @@ class GroupService {
       'senderId': currentUid,
       'senderName': displayName,
       'text': cleanText,
+      if (imageUrl != null) 'imageUrl': imageUrl,
       'createdAt': FieldValue.serverTimestamp(),
       if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
       if (replyToText != null) 'replyToText': replyToText,

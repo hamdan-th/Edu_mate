@@ -7,6 +7,7 @@ import '../../models/group_message_model.dart';
 import '../../models/group_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/group_service.dart';
+import '../../models/group_membership_state.dart';
 import 'manage_members_screen.dart';
 import 'group_chat_screen.dart';
 import 'create_group_feed_post_screen.dart';
@@ -60,50 +61,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   Future<void> _loadMembershipState() async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      if (mounted) setState(() => _isLoadingRole = false);
-      return;
-    }
-
-    bool member = false;
-    bool owner = widget.group.ownerId == user.uid;
-    bool admin = false;
-    int count = 0;
-
-    if (owner) {
-      member = true;
-    }
-
-    try {
-      final membersCol = _firestore.collection('groups').doc(widget.group.id).collection('members');
-      final doc = await membersCol.doc(user.uid).get();
-
-      if (doc.exists) {
-        member = true;
-        final role = doc.data()?['role'] ?? 'member';
-        if (role == 'admin') admin = true;
-        if (role == 'owner') owner = true;
-        
-        final notificationsMuted = doc.data()?['notificationsMuted'];
-        if (notificationsMuted == true) {
-          _isNotificationMuted = true;
-        }
-      }
-      
-      final membersSnap = await membersCol.get();
-      count = membersSnap.docs.length;
-      
-    } catch (e) {
-      // safe fallback
-    }
+    final state = await GroupService.getUserGroupState(widget.group.id);
 
     if (mounted) {
       setState(() {
-        _isMember = member;
-        _isOwner = owner;
-        _isAdmin = admin;
-        _membersCount = count;
+        _isMember = state.isMember;
+        _isOwner = state.isOwner;
+        _isAdmin = state.isAdmin;
+        _membersCount = widget.group.membersCounts;
+        _isNotificationMuted = state.notificationsMuted;
         _isLoadingRole = false;
       });
     }

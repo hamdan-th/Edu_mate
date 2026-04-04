@@ -9,6 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
+import '../../models/group_membership_state.dart';
 import 'group_details_screen.dart';
 
 class GroupChatScreen extends StatefulWidget {
@@ -77,79 +78,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   Future<void> _checkPermissions() async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      if (mounted) setState(() => _isLoadingRole = false);
-      return;
-    }
-
-    bool canSend = widget.group.membersCanChat;
-    bool owner = widget.group.ownerId == user.uid;
-    bool admin = false;
-    bool banned = false;
-    bool muted = false;
-    bool member = false;
-    int count = 0;
-
-    // Fetch freshest group data to ensure membersCanChat is strictly accurate real-time
-    try {
-      final grpDoc = await _firestore.collection('groups').doc(widget.group.id).get();
-      if (grpDoc.exists) {
-         canSend = grpDoc.data()?['membersCanChat'] ?? canSend;
-      }
-    } catch (_) {}
-
-    if (owner) {
-      canSend = true;
-      member = true;
-    }
-
-    try {
-      final membersCol = _firestore.collection('groups').doc(widget.group.id).collection('members');
-      final membersSnap = await membersCol.get();
-      count = membersSnap.docs.length;
-
-      final doc = await membersCol.doc(user.uid).get();
-
-      if (doc.exists) {
-        member = true;
-        final role = doc.data()?['role'];
-        final status = doc.data()?['status'];
-
-        if (status == 'banned') {
-          banned = true;
-          canSend = false;
-        } else if (status == 'muted') {
-          muted = true;
-          canSend = false;
-        }
-
-        if (role == 'admin' || role == 'owner') {
-          if (!banned) canSend = true;
-          if (role == 'admin') admin = true;
-          if (role == 'owner') owner = true;
-        } else {
-          // Double verification on real-time canSend vs banned/muted limitations
-          if (!canSend && !banned && !muted) {
-            canSend = false; // it is already false if chat is locked and not admin
-          } else if (banned || muted) {
-            canSend = false;
-          }
-        }
-      }
-    } catch (e) {
-      // Ignore gracefully
-    }
-
+    final state = await GroupService.getUserGroupState(widget.group.id);
+    
     if (mounted) {
       setState(() {
-        _isMember = member;
-        _canSend = canSend;
-        _isOwner = owner;
-        _isAdmin = admin;
-        _isBanned = banned;
-        _isMuted = muted;
-        _membersCount = count;
+        _isMember = state.isMember;
+        _canSend = state.canSend;
+        _isOwner = state.isOwner;
+        _isAdmin = state.isAdmin;
+        _isBanned = state.isBanned;
+        _isMuted = state.isMuted;
+        _membersCount = widget.group.membersCounts;
         _isLoadingRole = false;
       });
     }
@@ -176,53 +115,29 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty && _selectedImage == null) return;
 
-    final user = _auth.currentUser;
-    if (user == null) return;
-
-    setState(() {
-      _isSending = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isSending = true;
+      });
+    }
 
     try {
-      String senderName = 'عضو';
-      try {
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
-        if (userDoc.exists && userDoc.data() != null && userDoc.data()!.containsKey('name')) {
-          senderName = userDoc.data()!['name'];
-        }
-      } catch (_) {}
-
-      String? imageUrl;
-      if (_selectedImage != null) {
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('groups_chat')
-            .child(widget.group.id)
-            .child('${DateTime.now().millisecondsSinceEpoch}_${user.uid}.jpg');
-        final uploadTask = await ref.putFile(_selectedImage!);
-        imageUrl = await uploadTask.ref.getDownloadURL();
-      }
-
-      await _firestore
-          .collection('groups')
-          .doc(widget.group.id)
-          .collection('messages')
-          .add({
-        'text': text,
-        if (imageUrl != null) 'imageUrl': imageUrl,
-        'senderId': user.uid,
-        'senderName': senderName,
-        if (_replyMessage != null) 'replyToId': _replyMessage!['id'],
-        if (_replyMessage != null) 'replyToText': _replyMessage!['text'],
-        if (_replyMessage != null) 'replyToSender': _replyMessage!['senderName'],
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      await GroupService.sendMessage(
+        groupId: widget.group.id,
+        text: text,
+        imageFile: _selectedImage,
+        replyToMessageId: _replyMessage?['id'],
+        replyToText: _replyMessage?['text'],
+        replyToSenderName: _replyMessage?['senderName'],
+      );
 
       _messageController.clear();
-      setState(() {
-        _selectedImage = null;
-        _replyMessage = null;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedImage = null;
+          _replyMessage = null;
+        });
+      }
 
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -234,7 +149,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ أثناء الإرسال')),
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
       );
     } finally {
       if (mounted) {
