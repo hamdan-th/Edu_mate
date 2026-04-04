@@ -637,8 +637,20 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             final role = data['role'] ?? 'member';
             final status = data['status'] ?? 'active';
 
-            String roleStr = role == 'owner' ? "مالك" : (role == 'admin' ? "مشرف" : "");
-            Color roleCol = role == 'owner' ? AppColors.error : AppColors.warning;
+            String roleStr = "عضو";
+            Color roleCol = AppColors.primary;
+            Widget roleIcon = const SizedBox.shrink();
+
+            if (role == 'owner') {
+              roleStr = "مالك";
+              roleCol = AppColors.error;
+              roleIcon = const Icon(Icons.workspace_premium, color: Colors.purple, size: 18);
+            } else if (role == 'admin') {
+              roleStr = "مشرف";
+              roleCol = AppColors.warning;
+              roleIcon = const Icon(Icons.headset_mic, color: Colors.orange, size: 18);
+            }
+
             String statusStr = status == 'muted' ? " (مكتوم)" : (status == 'banned' ? " (محظور)" : "");
 
             return ListTile(
@@ -651,9 +663,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     ? Text(name.isNotEmpty ? name[0] : 'M', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))
                     : null,
               ),
-              title: Text(name + statusStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              subtitle: Text(roleStr.isNotEmpty ? roleStr : "عضو", style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-              trailing: roleStr.isNotEmpty ? Text(roleStr, style: TextStyle(color: roleCol, fontWeight: FontWeight.w900, fontSize: 12)) : null,
+              title: Row(
+                children: [
+                  Flexible(child: Text(name + statusStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                  const SizedBox(width: 6),
+                  roleIcon,
+                ],
+              ),
+              subtitle: Text(roleStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              trailing: role != 'member' ? Text(roleStr, style: TextStyle(color: roleCol, fontWeight: FontWeight.w900, fontSize: 12)) : null,
             );
           },
         );
