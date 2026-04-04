@@ -171,52 +171,74 @@ class GroupService {
 
   static Stream<List<GroupModel>> streamDiscoverGroups({String search = ''}) {
     final queryText = search.trim().toLowerCase();
+    
+    // We use a StreamController to properly combine the endless user and groups streams
+    // instead of asyncExpand, which permanently blocks on the first broadcast snapshot map.
+    StreamController<List<GroupModel>>? controller;
+    StreamSubscription? joinedSub;
+    StreamSubscription? groupsSub;
 
-    final stream = Stream.fromFuture(_userRefByUid(currentUid)).asyncExpand(
-          (userRef) {
-        return userRef.collection('joined_groups').snapshots().asyncExpand(
-              (joinedSnap) {
-            final joinedIds = joinedSnap.docs.map((e) => e.id).toSet();
+    Set<String> joinedIds = {};
+    List<DocumentSnapshot<Map<String, dynamic>>> groupDocs = [];
 
-            return _groups.snapshots().map((snapshot) {
-              final result = <GroupModel>[];
+    void emitResults() {
+      if (controller == null || controller.isClosed) return;
+      
+      final result = <GroupModel>[];
+      for (final doc in groupDocs) {
+        try {
+          final group = GroupModel.fromDoc(doc);
 
-              for (final doc in snapshot.docs) {
-                try {
-                  final group = GroupModel.fromDoc(doc);
+          if (!group.isActive) continue;
+          if (!group.isPublic) continue;
+          if (joinedIds.contains(group.id)) continue;
+          if (group.ownerId == currentUid) continue;
 
-                  if (!group.isActive) continue;
-                  if (!group.isPublic) continue;
-                  if (joinedIds.contains(group.id)) continue;
-                  if (group.ownerId == currentUid) continue;
+          if (queryText.isNotEmpty) {
+            final matches = group.name.toLowerCase().contains(queryText) ||
+                group.description.toLowerCase().contains(queryText) ||
+                group.specializationName.toLowerCase().contains(queryText) ||
+                group.collegeName.toLowerCase().contains(queryText);
 
-                  if (queryText.isNotEmpty) {
-                    final matches = group.name.toLowerCase().contains(queryText) ||
-                        group.description.toLowerCase().contains(queryText) ||
-                        group.specializationName.toLowerCase().contains(queryText) ||
-                        group.collegeName.toLowerCase().contains(queryText);
+            if (!matches) continue;
+          }
 
-                    if (!matches) continue;
-                  }
+          result.add(group);
+        } catch (_) {}
+      }
 
-                  result.add(group);
-                } catch (_) {}
-              }
+      result.sort((a, b) {
+        final aTime = a.createdAt?.millisecondsSinceEpoch ?? 0;
+        final bTime = b.createdAt?.millisecondsSinceEpoch ?? 0;
+        return bTime.compareTo(aTime);
+      });
 
-              result.sort((a, b) {
-                final aTime = a.createdAt?.millisecondsSinceEpoch ?? 0;
-                final bTime = b.createdAt?.millisecondsSinceEpoch ?? 0;
-                return bTime.compareTo(aTime);
-              });
+      controller.add(result);
+    }
 
-              return result;
-            });
-          },
-        );
+    controller = StreamController<List<GroupModel>>.broadcast(
+      onListen: () async {
+        try {
+          final userRef = await _userRefByUid(currentUid);
+          
+          joinedSub = userRef.collection('joined_groups').snapshots().listen((snap) {
+            joinedIds = snap.docs.map((e) => e.id).toSet();
+            emitResults();
+          });
+
+          groupsSub = _groups.snapshots().listen((snap) {
+            groupDocs = snap.docs;
+            emitResults();
+          });
+        } catch (_) {}
+      },
+      onCancel: () {
+        joinedSub?.cancel();
+        groupsSub?.cancel();
       },
     );
 
-    return stream.asBroadcastStream();
+    return controller.stream;
   }
 
   static Future<void> createGroup({
