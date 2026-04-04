@@ -40,6 +40,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   bool _isMuted = false;
   File? _selectedImage;
   int _membersCount = 0;
+  
+  Map<String, Map<String, dynamic>> _userCache = {};
+  Map<String, dynamic>? _replyMessage;
+
+  Future<void> _fetchUserIfNeeded(String userId) async {
+    if (userId.isEmpty || _userCache.containsKey(userId)) return;
+    _userCache[userId] = {}; // Optimistic lock to prevent infinite re-fetches
+    try {
+      final doc = await _firestore.collection('users').doc(userId).get();
+      if (doc.exists && doc.data() != null) {
+        if (mounted) {
+          setState(() {
+            _userCache[userId] = doc.data()!;
+          });
+        }
+      }
+    } catch (_) {}
+  }
 
   @override
   void initState() {
@@ -190,12 +208,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         if (imageUrl != null) 'imageUrl': imageUrl,
         'senderId': user.uid,
         'senderName': senderName,
+        if (_replyMessage != null) 'replyToId': _replyMessage!['id'],
+        if (_replyMessage != null) 'replyToText': _replyMessage!['text'],
+        if (_replyMessage != null) 'replyToSender': _replyMessage!['senderName'],
         'createdAt': FieldValue.serverTimestamp(),
       });
 
       _messageController.clear();
       setState(() {
         _selectedImage = null;
+        _replyMessage = null;
       });
 
       if (_scrollController.hasClients) {
@@ -407,12 +429,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                               padding: const EdgeInsets.only(top: 16, bottom: 12, left: 12, right: 12),
                               itemCount: docs.length,
                               itemBuilder: (context, index) {
-                                final data = docs[index].data() as Map<String, dynamic>;
+                                final doc = docs[index];
+                                final data = doc.data() as Map<String, dynamic>;
+                                final messageId = doc.id;
                                 final myId = _auth.currentUser?.uid;
                                 final senderId = data['senderId'] ?? '';
                                 final isMe = myId != null && myId == senderId;
                                 
-                                return _buildMessageBubble(data, isMe);
+                                return _buildMessageBubble(data, messageId, isMe);
                               },
                             );
                           },
@@ -465,13 +489,78 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(Map<String, dynamic> data, bool isMe) {
+  void _showMessageOptions(Map<String, dynamic> data, String messageId, String resolvedSenderName) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF17212B),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 12),
+            ListTile(
+              leading: const Icon(Icons.reply_rounded, color: Colors.white),
+              title: const Text('رد', style: TextStyle(color: Colors.white, fontSize: 16)),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {
+                  _replyMessage = {
+                    'id': messageId,
+                    'text': (data['text'] != null && data['text'].toString().isNotEmpty) ? data['text'] : 'صورة مرفقة',
+                    'senderName': resolvedSenderName,
+                  };
+                });
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.star_rounded, color: Colors.amber),
+              title: const Text('تفضيل', style: TextStyle(color: Colors.white, fontSize: 16)),
+              onTap: () async {
+                Navigator.pop(context);
+                final user = _auth.currentUser;
+                if (user != null) {
+                  try {
+                    await _firestore
+                        .collection('groups')
+                        .doc(widget.group.id)
+                        .collection('savedMessages')
+                        .doc(user.uid)
+                        .collection('messages')
+                        .doc(messageId)
+                        .set({...data, 'savedAt': FieldValue.serverTimestamp()});
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الحفظ في المحفوظات')));
+                  } catch (_) {}
+                }
+              },
+            ),
+          ],
+        ),
+      )
+    );
+  }
+
+  Widget _buildMessageBubble(Map<String, dynamic> data, String messageId, bool isMe) {
     final text = data['text'] ?? '';
     final imageUrl = data['imageUrl'] as String?;
-    String senderName = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? data['senderName']?.toString() ?? 'عضو').trim();
+    final senderId = data['senderId'] ?? '';
+    
+    _fetchUserIfNeeded(senderId);
+    final cachedUser = _userCache[senderId];
+    
+    String senderName = data['senderName']?.toString() ?? 'عضو';
+    String senderAvatarUrl = data['senderAvatar'] as String? ?? data['senderImageUrl'] as String? ?? data['photoUrl'] as String? ?? '';
+
+    if (cachedUser != null && cachedUser.isNotEmpty) {
+      senderName = (cachedUser['displayName']?.toString() ?? cachedUser['username']?.toString() ?? cachedUser['fullName']?.toString() ?? senderName).trim();
+      senderAvatarUrl = (cachedUser['photoUrl']?.toString() ?? cachedUser['imageUrl']?.toString() ?? senderAvatarUrl).trim();
+    }
+    
     if (senderName.contains('@')) senderName = senderName.split('@').first;
+    
     final timestamp = data['createdAt'] as Timestamp?;
-    final senderAvatarUrl = data['senderAvatar'] as String? ?? data['senderImageUrl'] as String? ?? data['photoUrl'] as String?;
 
     final List<Color> _nameColors = [
       const Color(0xFFE53935), const Color(0xFFD81B60), const Color(0xFF8E24AA), 
@@ -480,7 +569,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     ];
     final senderColor = _nameColors[senderName.length % _nameColors.length];
     
-    final String? replyToData = data['replyTo']; // Placeholder for future reply support
+    final String? replyToText = data['replyToText'];
+    final String? replyToSender = data['replyToSender'];
 
     final messageContent = Container(
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
@@ -511,7 +601,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               child: Text(senderName, style: TextStyle(fontSize: 14, color: senderColor, fontWeight: FontWeight.w800)),
             ),
           
-          if (replyToData != null) ...[
+          if (replyToText != null) ...[
             Container(
                width: double.infinity,
                margin: const EdgeInsets.only(bottom: 6),
@@ -524,8 +614,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                child: Column(
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: [
-                   Text("رد على", style: TextStyle(color: senderColor, fontSize: 13, fontWeight: FontWeight.bold)),
-                   Text(replyToData, style: const TextStyle(color: Colors.white70, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                   Text(replyToSender ?? "رد", style: TextStyle(color: senderColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                   Text(replyToText, style: const TextStyle(color: Colors.white70, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                  ],
                ),
             ),
@@ -576,25 +666,29 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       ),
     );
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!isMe) ...[
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: AppColors.primary.withOpacity(0.1),
-              backgroundImage: senderAvatarUrl != null && senderAvatarUrl.isNotEmpty ? NetworkImage(senderAvatarUrl) : null,
-              child: senderAvatarUrl == null || senderAvatarUrl.isEmpty
-                  ? Text(senderName.isNotEmpty ? senderName[0] : 'M', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary))
-                  : null,
-            ),
-            const SizedBox(width: 8),
+    return GestureDetector(
+      onLongPress: () => _showMessageOptions(data, messageId, senderName),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Row(
+          mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (!isMe) ...[
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: senderColor.withOpacity(0.15),
+                backgroundImage: senderAvatarUrl.isNotEmpty ? NetworkImage(senderAvatarUrl) : null,
+                child: senderAvatarUrl.isEmpty
+                    ? Text(senderName.isNotEmpty ? senderName[0] : 'M', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: senderColor))
+                    : null,
+              ),
+              const SizedBox(width: 8),
+            ],
+            messageContent,
           ],
-          messageContent,
-        ],
+        ),
       ),
     );
   }
@@ -622,6 +716,28 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (_replyMessage != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(color: const Color(0xFF242F3D), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)]),
+              child: Row(
+                children: [
+                  const Icon(Icons.reply_rounded, color: Color(0xFF64B5F6), size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_replyMessage!['senderName'], style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 13, fontWeight: FontWeight.bold)),
+                        Text(_replyMessage!['text'], style: const TextStyle(color: Colors.white70, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                  IconButton(icon: const Icon(Icons.close_rounded, color: Color(0xFF7F8B98)), onPressed: () => setState(() => _replyMessage = null), padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+                ],
+              ),
+            ),
           if (_selectedImage != null)
             Container(
               margin: const EdgeInsets.only(bottom: 8, left: 42),
