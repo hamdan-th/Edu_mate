@@ -9,6 +9,7 @@ import '../../core/theme/app_colors.dart';
 import '../../services/group_service.dart';
 import 'manage_members_screen.dart';
 import 'group_chat_screen.dart';
+import 'create_group_feed_post_screen.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final GroupModel group;
@@ -303,6 +304,66 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     );
   }
 
+  Future<void> _reportGroup() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("تأكيد البلاغ", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("هل أنت متأكد من رغبتك في الإبلاغ عن هذه المجموعة؟ سيتم مراجعة محتواها من قبل الإدارة."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("إلغاء")),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("إبلاغ", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
+        ],
+      )
+    ) ?? false;
+
+    if (!confirm) return;
+
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await _firestore.collection('reports').doc('group_reports').collection('reports').add({
+          'groupId': widget.group.id,
+          'reporterUserId': user.uid,
+          'reportedAt': FieldValue.serverTimestamp(),
+          'targetType': 'group',
+        });
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم استلام البلاغ وسيتم مراجعته')));
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء إرسال البلاغ')));
+    }
+  }
+
+  Future<void> _clearChatHistory() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("مسح سجل الدردشة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+        content: const Text("هل أنت متأكد من مسح جميع رسائل الدردشة؟ هذا الإجراء لا يمكن التراجع عنه."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("إلغاء")),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("مسح", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
+        ],
+      )
+    ) ?? false;
+
+    if (!confirm) return;
+
+    try {
+      final msgs = await _firestore.collection('groups').doc(widget.group.id).collection('messages').get();
+      final batch = _firestore.batch();
+      for (var doc in msgs.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم مسح سجل الدردشة بنجاح')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء مسح السجل')));
+    }
+  }
+
   void _openMoreMenu() {
     showModalBottomSheet(
       context: context,
@@ -325,17 +386,18 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 title: const Text("إبلاغ", style: TextStyle(fontWeight: FontWeight.bold)),
                 onTap: () {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم استلام البلاغ')));
+                  _reportGroup();
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.cleaning_services_rounded, color: AppColors.textPrimary),
-                title: const Text("مسح سجل الدردشة", style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('قريباً')));
-                },
-              ),
+              if (_isOwner)
+                ListTile(
+                  leading: const Icon(Icons.cleaning_services_rounded, color: AppColors.error),
+                  title: const Text("مسح سجل الدردشة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _clearChatHistory();
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.link_rounded, color: AppColors.textPrimary),
                 title: const Text("نسخ الرابط", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -633,9 +695,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           _buildActionItem(_isNotificationMuted ? Icons.notifications_off_rounded : Icons.notifications_rounded, _isNotificationMuted ? "تفعيل" : "كتم", _toggleMute),
-                          _buildActionItem(Icons.search_rounded, "بحث", () {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("هذه الميزة غير متوفرة بعد")));
-                          }),
                           _buildActionItem(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup, color: AppColors.error),
                           _buildActionItem(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
                         ],
@@ -652,6 +711,18 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
                             return Column(
                               children: [
+                                if (widget.group.isPublic) ...[
+                                  ListTile(
+                                    leading: CircleAvatar(backgroundColor: AppColors.primary.withOpacity(0.1), child: const Icon(Icons.campaign_rounded, color: AppColors.primary, size: 22)),
+                                    title: const Text("نشر إعلان في الفيد العام", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
+                                    subtitle: const Text("نشر تحديثات مرئية لجميع المستخدمين", style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.primary),
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (_) => CreateGroupFeedPostScreen(group: widget.group)));
+                                    },
+                                  ),
+                                  const Divider(height: 1, color: AppColors.border, indent: 24, endIndent: 24),
+                                ],
                                 SwitchListTile(
                                   title: const Text("السماح للأعضاء بالمشاركة في الدردشة", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
                                   activeColor: AppColors.primary,
