@@ -733,7 +733,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
        return _buildDisabledState('لقد تم كتمك. لا يمكنك الإرسال حالياً.', Icons.mic_off_rounded, AppColors.warning);
     }
     if (!_canSend) {
-       return _buildDisabledState('المجموعة للإعلانات فقط، المشرفون هم من يمكنهم الإرسال.', Icons.campaign_rounded, AppColors.textSecondary);
+       return _buildDisabledState('المجموعة للقراءة فقط', Icons.info_outline_rounded, AppColors.textSecondary);
     }
 
     return Container(
