@@ -385,13 +385,16 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
     String roleLabel = "عضو";
     Color roleColor = AppColors.textSecondary;
+    Widget? roleIcon;
 
     if (_isTargetOwner) {
       roleLabel = "مالك";
       roleColor = AppColors.error;
+      roleIcon = const Icon(Icons.workspace_premium, color: Colors.purple, size: 18);
     } else if (_isTargetAdmin) {
       roleLabel = "مشرف";
       roleColor = AppColors.warning;
+      roleIcon = const Icon(Icons.headset_mic, color: Colors.orange, size: 18);
     } else {
       roleLabel = "عضو";
       roleColor = AppColors.primary;
@@ -434,6 +437,10 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (roleIcon != null) ...[
+                        const SizedBox(width: 6),
+                        roleIcon,
+                      ],
                       if (isMe) ...[
                         const SizedBox(width: 6),
                         Text(
