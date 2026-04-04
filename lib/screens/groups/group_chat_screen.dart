@@ -351,11 +351,23 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 controller: _searchController,
                 autofocus: true,
                 cursorColor: Colors.white,
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
                 decoration: InputDecoration(
-                  hintText: 'البحث في الرسائل...',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
-                  border: InputBorder.none,
+                  hintText: "ابحث في المحادثة...",
+                  hintStyle: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 15,
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFF1E2A38),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
                 onChanged: (val) => setState(() => _searchQuery = val.trim()),
               )
