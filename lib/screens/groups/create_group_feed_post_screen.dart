@@ -77,9 +77,10 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -89,6 +90,7 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
               child: _isPublishing 
                   ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : const Text("نشر", style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
             ),
           ),
         ],
@@ -135,26 +137,35 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
                 margin: const EdgeInsets.only(top: 16),
                 width: double.infinity,
                 height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  image: DecorationImage(
-                    image: FileImage(_selectedImage!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.black54,
-                        shape: BoxShape.circle,
+                child: Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        image: DecorationImage(
+                          image: FileImage(_selectedImage!),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      child: const Icon(Icons.close, color: Colors.white, size: 20),
                     ),
-                    onPressed: () => setState(() => _selectedImage = null),
-                  ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: IconButton(
+                        icon: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close, color: Colors.white, size: 20),
+                        ),
+                        onPressed: () => setState(() => _selectedImage = null),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             const SizedBox(height: 24),
