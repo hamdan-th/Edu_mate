@@ -819,7 +819,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2B3A4C), // Slightly brighter for contrast against text
+                    color: const Color(0xFF242F3D),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: TextField(
@@ -827,13 +827,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     minLines: 1,
                     maxLines: 5,
                     textInputAction: TextInputAction.newline,
-                    cursorColor: Colors.white,
-                    style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600),
-                    decoration: InputDecoration(
+                    cursorColor: const Color(0xFF3390EC),
+                    style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),
+                    decoration: const InputDecoration(
                       hintText: 'رسالة',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 16),
+                      hintStyle: TextStyle(color: Color(0xFF7F8B98), fontSize: 16),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
                       isDense: true,
                     ),
                   ),
