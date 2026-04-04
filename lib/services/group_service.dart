@@ -530,18 +530,36 @@ class GroupService {
     return stream.asBroadcastStream();
   }
 
-  static Future<void> saveMessage({required String groupId, required String messageId, required Map<String, dynamic> data}) async {
-    final Map<String, dynamic> payload = {
-       'messageId': messageId,
-       'text': data['text'] ?? '',
-       'senderId': data['senderId'] ?? '',
-       'senderName': data['senderName'] ?? '',
-       'createdAt': data['createdAt'],
-       if (data['replyToText'] != null) 'replyToText': data['replyToText'],
-       if (data['replyToSenderName'] != null) 'replyToSenderName': data['replyToSenderName'],
-       'savedAt': FieldValue.serverTimestamp(),
-    };
-    await _groups.doc(groupId).collection('savedMessages').doc(currentUid).collection('items').doc(messageId).set(payload);
+  static Future<void> saveMessage({
+    required String groupId,
+    required String messageId,
+    required Map<String, dynamic> data,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception("User not logged in");
+      }
+
+      print('SAVE DEBUG: groupId=$groupId');
+      print('SAVE DEBUG: messageId=$messageId');
+      print('SAVE DEBUG: userId=${user.uid}');
+
+      final ref = _groups
+          .doc(groupId)
+          .collection('savedMessages')
+          .doc(user.uid)
+          .collection('items')
+          .doc(messageId);
+
+      await ref.set({
+        ...data,
+        'savedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('SAVE ERROR: $e');
+      rethrow;
+    }
   }
 
   static Future<void> unsaveMessage({required String groupId, required String messageId}) async {
