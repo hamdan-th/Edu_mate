@@ -51,8 +51,8 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
         imageUrl: imageUrl,
       );
       if (mounted) {
-        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نشر الإعلان في الفيد العام بنجاح')));
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
