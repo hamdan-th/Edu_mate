@@ -686,23 +686,23 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             final dateStr = timestamp != null ? "${timestamp.toDate().day}/${timestamp.toDate().month} - ${timestamp.toDate().hour}:${timestamp.toDate().minute.toString().padLeft(2, '0')}" : "";
             
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               leading: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: AppColors.warning.withOpacity(0.15), shape: BoxShape.circle),
-                child: const Icon(Icons.star_rounded, color: AppColors.warning, size: 20),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: AppColors.warning.withOpacity(0.12), shape: BoxShape.circle),
+                child: const Icon(Icons.star_rounded, color: AppColors.warning, size: 22),
               ),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(child: Text(msg['senderName'] ?? 'عضو', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14))),
+                  Expanded(child: Text(msg['senderName'] ?? 'عضو', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15))),
                   if (dateStr.isNotEmpty)
-                    Text(dateStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                    Text(dateStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
                 ],
               ),
               subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(msg['text'] ?? 'رسالة', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary)),
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(msg['text'] ?? 'رسالة', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.4)),
               ),
             );
           },

@@ -456,29 +456,29 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(color: const Color(0xFF17212B), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10)]),
-            child: Icon(Icons.lock_rounded, size: 48, color: const Color(0xFF7F8B98).withOpacity(0.6)),
+            decoration: BoxDecoration(color: const Color(0xFF17212B), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 16)]),
+            child: Icon(Icons.lock_rounded, size: 48, color: const Color(0xFF7F8B98).withOpacity(0.8)),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           const Text(
             'يجب الانضمام للمجموعة',
-            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
+            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               'هذا مجتمع خاص بأعضائه، يرجى عرض معلومات المجموعة وطلب الانضمام للمشاركة.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF7F8B98), fontSize: 14, height: 1.4),
+              style: TextStyle(color: Color(0xFF7F8B98), fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 32),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF3390EC),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
               elevation: 0,
             ),
             onPressed: _openDetails,
@@ -552,7 +552,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     String senderAvatarUrl = data['senderAvatar'] as String? ?? data['senderImageUrl'] as String? ?? data['photoUrl'] as String? ?? '';
 
     if (cachedUser != null && cachedUser.isNotEmpty) {
-      senderName = (cachedUser['displayName']?.toString() ?? cachedUser['username']?.toString() ?? cachedUser['fullName']?.toString() ?? senderName).trim();
+      senderName = (cachedUser['username']?.toString() ?? cachedUser['fullName']?.toString() ?? cachedUser['displayName']?.toString() ?? cachedUser['name']?.toString() ?? senderName).trim();
       senderAvatarUrl = (cachedUser['photoUrl']?.toString() ?? cachedUser['imageUrl']?.toString() ?? senderAvatarUrl).trim();
     }
     
@@ -571,20 +571,20 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final String? replyToSender = data['replyToSender'];
 
     final messageContent = Container(
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
-      padding: const EdgeInsets.only(left: 10, right: 12, top: 6, bottom: 6),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: isMe ? const Color(0xFF2B5278) : const Color(0xFF182533),
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(16),
-          topRight: const Radius.circular(16),
-          bottomLeft: Radius.circular(isMe ? 16 : 4),
-          bottomRight: Radius.circular(isMe ? 4 : 16),
+          topLeft: const Radius.circular(18),
+          topRight: const Radius.circular(18),
+          bottomLeft: Radius.circular(isMe ? 18 : 6),
+          bottomRight: Radius.circular(isMe ? 6 : 18),
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.15),
-            blurRadius: 1,
+            blurRadius: 1.5,
             offset: const Offset(0, 1),
           ),
         ],
@@ -603,17 +603,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             Container(
                width: double.infinity,
                margin: const EdgeInsets.only(bottom: 6),
-               padding: const EdgeInsets.only(right: 8, left: 8, top: 4, bottom: 4),
+               padding: const EdgeInsets.only(right: 10, left: 10, top: 4, bottom: 6),
                decoration: BoxDecoration(
-                 border: Border(right: BorderSide(color: senderColor, width: 3)),
-                 color: senderColor.withOpacity(0.1),
-                 borderRadius: BorderRadius.circular(4),
+                 border: Border(right: BorderSide(color: senderColor, width: 3.5)),
+                 color: senderColor.withOpacity(0.12),
+                 borderRadius: BorderRadius.circular(6),
                ),
                child: Column(
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: [
                    Text(replyToSender ?? "رد", style: TextStyle(color: senderColor, fontSize: 13, fontWeight: FontWeight.bold)),
-                   Text(replyToText, style: const TextStyle(color: Colors.white70, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                   const SizedBox(height: 2),
+                   Text(replyToText, style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.2), maxLines: 1, overflow: TextOverflow.ellipsis),
                  ],
                ),
             ),
@@ -644,10 +645,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.end,
               children: [
-                Text(text, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.35)),
+                Text(text, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.4)),
                 const SizedBox(width: 8),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 2, top: 4),
+                  padding: const EdgeInsets.only(bottom: 1, top: 4),
                   child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 11, color: const Color(0xFF7F8B98).withOpacity(0.9), letterSpacing: 0.1)),
                 ),
               ],
@@ -679,11 +680,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           children: [
             if (!isMe) ...[
               CircleAvatar(
-                radius: 16,
+                radius: 17,
                 backgroundColor: senderColor.withOpacity(0.15),
                 backgroundImage: senderAvatarUrl.isNotEmpty ? NetworkImage(senderAvatarUrl) : null,
                 child: senderAvatarUrl.isEmpty
-                    ? Text(senderName.isNotEmpty ? senderName[0] : 'M', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: senderColor))
+                    ? Text(senderName.isNotEmpty ? senderName[0] : 'M', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: senderColor))
                     : null,
               ),
               const SizedBox(width: 8),
@@ -721,18 +722,19 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           if (_replyMessage != null)
             Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(color: const Color(0xFF242F3D), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)]),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(color: const Color(0xFF242F3D), borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 4)]),
               child: Row(
                 children: [
-                  const Icon(Icons.reply_rounded, color: Color(0xFF64B5F6), size: 24),
+                  const Icon(Icons.reply_rounded, color: Color(0xFF64B5F6), size: 22),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_replyMessage!['senderName'], style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 13, fontWeight: FontWeight.bold)),
-                        Text(_replyMessage!['text'], style: const TextStyle(color: Colors.white70, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(_replyMessage!['senderName'], style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 13, fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 2),
+                        Text(_replyMessage!['text'], style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.2), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -850,16 +852,16 @@ class _EmptyChatState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF182533).withOpacity(0.8),
-                borderRadius: BorderRadius.circular(20),
+                color: const Color(0xFF182533).withOpacity(0.9),
+                borderRadius: BorderRadius.circular(24),
               ),
               child: const Text(
                 'لا توجد رسائل بعد',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
               ),
