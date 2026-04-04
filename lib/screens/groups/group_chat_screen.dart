@@ -490,6 +490,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   void _showMessageOptions(Map<String, dynamic> data, String messageId, String resolvedSenderName, bool isSaved) {
+    final parentContext = context;
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF17212B),
@@ -523,12 +524,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 try {
                   if (isSaved) {
                     await GroupService.unsaveMessage(groupId: widget.group.id, messageId: messageId);
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت إزالة الرسالة')));
+                    if (mounted) ScaffoldMessenger.of(parentContext).showSnackBar(const SnackBar(content: Text('تمت إزالة الرسالة')));
                   } else {
                     await GroupService.saveMessage(groupId: widget.group.id, messageId: messageId, data: data);
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حفظ الرسالة')));
+                    if (mounted) ScaffoldMessenger.of(parentContext).showSnackBar(const SnackBar(content: Text('تم حفظ الرسالة')));
                   }
-                } catch (_) {}
+                } catch (e) {
+                  if (mounted) ScaffoldMessenger.of(parentContext).showSnackBar(const SnackBar(content: Text('فشلت العملية، يرجى المحاولة لاحقاً')));
+                }
               },
             ),
           ],

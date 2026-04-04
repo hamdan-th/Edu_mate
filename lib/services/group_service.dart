@@ -558,6 +558,22 @@ class GroupService {
   }
 
   static Stream<List<Map<String, dynamic>>> streamSavedMessages(String groupId) {
-    return _groups.doc(groupId).collection('savedMessages').doc(currentUid).collection('items').orderBy('savedAt', descending: true).snapshots().map((snap) => snap.docs.map((e) => e.data()).toList());
+    try {
+      final uid = _auth.currentUser?.uid;
+      if (uid == null) return Stream.value([]);
+      
+      return _groups.doc(groupId).collection('savedMessages').doc(uid).collection('items').snapshots().map((snap) {
+        final list = snap.docs.map((e) => e.data()).toList();
+        list.sort((a, b) {
+           final aTime = a['savedAt'] as Timestamp?;
+           final bTime = b['savedAt'] as Timestamp?;
+           if (aTime == null || bTime == null) return 0;
+           return bTime.compareTo(aTime);
+        });
+        return list;
+      });
+    } catch (_) {
+      return Stream.value([]);
+    }
   }
 }
