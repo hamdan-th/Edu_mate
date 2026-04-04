@@ -517,23 +517,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.star_rounded, color: Colors.amber),
-              title: const Text('تفضيل', style: TextStyle(color: Colors.white, fontSize: 16)),
-              onTap: () async {
+              title: const Text('تفضيل (قريباً)', style: TextStyle(color: Colors.white, fontSize: 16)),
+              onTap: () {
                 Navigator.pop(context);
-                final user = _auth.currentUser;
-                if (user != null) {
-                  try {
-                    await _firestore
-                        .collection('groups')
-                        .doc(widget.group.id)
-                        .collection('savedMessages')
-                        .doc(user.uid)
-                        .collection('messages')
-                        .doc(messageId)
-                        .set({...data, 'savedAt': FieldValue.serverTimestamp()});
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الحفظ في المحفوظات')));
-                  } catch (_) {}
-                }
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('قريباً: حفظ الرسائل')));
               },
             ),
           ],
