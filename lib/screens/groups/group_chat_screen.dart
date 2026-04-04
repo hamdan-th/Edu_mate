@@ -375,9 +375,54 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       fit: BoxFit.cover,
                       opacity: 0.15, // Subtle texture
                     ),
-                  ],
+                  ),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: StreamBuilder<QuerySnapshot>(
+                          stream: _firestore
+                              .collection('groups')
+                              .doc(widget.group.id)
+                              .collection('messages')
+                              .orderBy('createdAt', descending: true)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                               return const Center(child: CircularProgressIndicator(color: Color(0xFF3390EC)));
+                            }
+  
+                            if (snapshot.hasError) {
+                               return const Center(child: Text('تعذر تحميل الرسائل', style: TextStyle(color: Color(0xFF7F8B98))));
+                            }
+  
+                            final docs = snapshot.data?.docs ?? [];
+  
+                            if (docs.isEmpty) {
+                               return const _EmptyChatState();
+                            }
+  
+                            return ListView.builder(
+                              controller: _scrollController,
+                              reverse: true,
+                              padding: const EdgeInsets.only(top: 16, bottom: 12, left: 12, right: 12),
+                              itemCount: docs.length,
+                              itemBuilder: (context, index) {
+                                final data = docs[index].data() as Map<String, dynamic>;
+                                final myId = _auth.currentUser?.uid;
+                                final senderId = data['senderId'] ?? '';
+                                final isMe = myId != null && myId == senderId;
+                                
+                                return _buildMessageBubble(data, isMe);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      _buildInputArea(),
+                    ],
+                  ),
                 ),
-    ));
+    );
   }
 
   Widget _buildNonMemberState() {
