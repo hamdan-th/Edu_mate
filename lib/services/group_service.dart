@@ -369,7 +369,26 @@ class GroupService {
         'membersCounts': FieldValue.increment(1),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-    });
+    final state = await getUserGroupState(groupId);
+    if (state.isBanned) {
+      throw Exception('أنت محظور من هذه المجموعة');
+    }
+    
+    final groupRef = _groups.doc(groupId);
+    final groupSnap = await groupRef.get();
+
+    if (!groupSnap.exists) {
+      throw Exception('المجموعة غير موجودة');
+    }
+
+    final data = groupSnap.data() as Map<String, dynamic>;
+    if (data['type'] != 'public') {
+      throw Exception('لا يمكنك الانضمام لهذه المجموعة مباشرة');
+    }
+
+    if (state.isMember) return;
+
+    await _joinGroup(groupId, 'public');
   }
 
   static Future<GroupModel> getGroupByInvite({
@@ -417,6 +436,12 @@ class GroupService {
   }
 
   static Future<void> _joinPrivateGroup(GroupModel group) async {
+    final state = await getUserGroupState(group.id);
+    if (state.isBanned) {
+      throw Exception('أنت محظور من هذه المجموعة');
+    }
+    if (state.isMember) return;
+    
     final groupRef = _groups.doc(group.id);
     final userRef = await _userRefByUid(currentUid);
     final displayName = await _userDisplayName(currentUid);
@@ -428,14 +453,6 @@ class GroupService {
       }
 
       final data = groupSnap.data() ?? {};
-      final banned = (data['bannedUserIds'] as List?)
-          ?.map((e) => e.toString())
-          .toList() ??
-          <String>[];
-
-      if (banned.contains(currentUid)) {
-        throw Exception('أنت محظور من هذه المجموعة');
-      }
 
       final memberRef = groupRef.collection('members').doc(currentUid);
       final memberSnap = await tx.get(memberRef);
@@ -506,47 +523,13 @@ class GroupService {
       throw Exception('لا يمكن إرسال رسالة فارغة');
     }
 
+    final state = await getUserGroupState(groupId);
+    if (!state.isMember) throw Exception('يجب أن تكون عضوًا في المجموعة لإرسال رسالة');
+    if (state.isBanned) throw Exception('أنت محظور من هذه المجموعة');
+    if (state.isMuted) throw Exception('تم كتمك داخل هذه المجموعة');
+    if (!state.canSend) throw Exception('المجموعة للقراءة فقط حاليًا');
+
     final groupRef = _groups.doc(groupId);
-    final groupSnap = await groupRef.get();
-
-    if (!groupSnap.exists) {
-      throw Exception('المجموعة غير موجودة');
-    }
-
-    final groupData = groupSnap.data() ?? {};
-    final membersCanChat = (groupData['membersCanChat'] ?? true) == true;
-    final banned = (groupData['bannedUserIds'] as List?)
-        ?.map((e) => e.toString())
-        .toList() ??
-        <String>[];
-
-    if (banned.contains(currentUid)) {
-      throw Exception('أنت محظور من هذه المجموعة');
-    }
-
-    final memberRef = groupRef.collection('members').doc(currentUid);
-    final memberSnap = await memberRef.get();
-
-    if (!memberSnap.exists) {
-      throw Exception('يجب أن تكون عضوًا في المجموعة لإرسال رسالة');
-    }
-
-    final memberData = memberSnap.data() ?? {};
-    final role = (memberData['role'] ?? 'member').toString();
-    final status = (memberData['status'] ?? 'active').toString();
-
-    if (status == 'banned' || banned.contains(currentUid)) {
-      throw Exception('أنت محظور من هذه المجموعة');
-    }
-
-    if (status == 'muted') {
-      throw Exception('تم كتمك داخل هذه المجموعة');
-    }
-
-    if (!membersCanChat && role == 'member') {
-      throw Exception('المجموعة للقراءة فقط حاليًا');
-    }
-
     final displayName = await _userDisplayName(currentUid);
     
     String? imageUrl;
@@ -673,6 +656,9 @@ class GroupService {
   }
 
   static Future<void> promoteToAdmin(String groupId, String memberId) async {
+    final state = await getUserGroupState(groupId);
+    if (!state.isOwner && !state.isAdmin) throw Exception('غير مصرح لك بهذا الإجراء');
+
     final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
     if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
@@ -681,6 +667,9 @@ class GroupService {
   }
 
   static Future<void> removeAdmin(String groupId, String memberId) async {
+    final state = await getUserGroupState(groupId);
+    if (!state.isOwner) throw Exception('المالك فقط يمكنه إزالة المشرفين');
+
     final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
     if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
@@ -689,6 +678,9 @@ class GroupService {
   }
 
   static Future<void> muteMember(String groupId, String memberId) async {
+    final state = await getUserGroupState(groupId);
+    if (!state.isOwner && !state.isAdmin) throw Exception('غير مصرح لك بهذا الإجراء');
+
     final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
     if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
@@ -697,6 +689,9 @@ class GroupService {
   }
 
   static Future<void> unmuteMember(String groupId, String memberId) async {
+    final state = await getUserGroupState(groupId);
+    if (!state.isOwner && !state.isAdmin) throw Exception('غير مصرح لك بهذا الإجراء');
+
     final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
     if (memberDoc.exists) {
@@ -705,6 +700,9 @@ class GroupService {
   }
 
   static Future<void> kickMember(String groupId, String memberId) async {
+    final state = await getUserGroupState(groupId);
+    if (!state.isOwner && !state.isAdmin) throw Exception('غير مصرح لك بهذا الإجراء');
+
     final groupRef = _groups.doc(groupId);
     final memberRef = groupRef.collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
@@ -733,6 +731,14 @@ class GroupService {
     required String text,
     String? imageUrl,
   }) async {
+    final state = await getUserGroupState(group.id);
+    if (group.type != 'public') {
+      throw Exception('النشر المتزامن متاح فقط للمجموعات العامة');
+    }
+    if (!state.isOwner && !state.isAdmin) {
+      throw Exception('المالك والمشرف فقط يمكنهم النشر في الفيد العام');
+    }
+
     final cleanText = text.trim();
     if (cleanText.isEmpty && (imageUrl == null || imageUrl.isEmpty)) {
       throw Exception('لا يمكن نشر محتوى فارغ');

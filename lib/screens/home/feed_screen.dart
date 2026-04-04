@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -359,7 +360,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                   .trim()
                                   .isNotEmpty,
                               'imageUrl': data['contentImageUrl'] ?? '',
-                              'joined': true,
+                              'groupId': data['groupId'] ?? '',
                               'tag': 'Public',
                             };
 
@@ -616,6 +617,8 @@ class _PostCardState extends State<PostCard>
     with SingleTickerProviderStateMixin {
   bool isLiked = false;
   bool isPressed = false;
+  bool _isJoined = false;
+  bool _isLoadingJoined = true;
 
   late final AnimationController _likeController;
   late final Animation<double> _likeScale;
@@ -623,6 +626,7 @@ class _PostCardState extends State<PostCard>
   @override
   void initState() {
     super.initState();
+    _checkMembership();
     _likeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 180),
@@ -630,6 +634,40 @@ class _PostCardState extends State<PostCard>
     _likeScale = Tween<double>(begin: 1, end: 1.18).animate(
       CurvedAnimation(parent: _likeController, curve: Curves.easeOut),
     );
+  }
+
+  Future<void> _checkMembership() async {
+    final groupId = widget.post['groupId']?.toString() ?? '';
+    if (groupId.isNotEmpty) {
+      final state = await GroupService.getUserGroupState(groupId);
+      if (mounted) {
+        setState(() {
+          _isJoined = state.isMember;
+          _isLoadingJoined = false;
+        });
+      }
+    } else {
+      if (mounted) setState(() => _isLoadingJoined = false);
+    }
+  }
+
+  Future<void> _joinGroup() async {
+    final groupId = widget.post['groupId']?.toString() ?? '';
+    if (groupId.isEmpty || _isJoined) return;
+    
+    try {
+      await GroupService.joinPublicGroup(groupId);
+      setState(() {
+        _isJoined = true;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الانضمام للمجموعة')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+      }
+    }
   }
 
   void _toggleLike() {
@@ -722,25 +760,27 @@ class _PostCardState extends State<PostCard>
                       ],
                     ),
                   ),
-                  Container(
-                    height: 34,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: widget.post['joined'] == true
-                          ? primarySoft
-                          : AppColors.primary,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        widget.post['joined'] == true ? 'Public' : 'Join',
-                        style: TextStyle(
-                          color: widget.post['joined'] == true
-                              ? AppColors.primary
-                              : Colors.white,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
-                        ),
+                  InkWell(
+                    onTap: (_isLoadingJoined || _isJoined) ? null : _joinGroup,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      height: 34,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: _isJoined ? primarySoft : AppColors.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: _isLoadingJoined
+                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                            : Text(
+                                _isJoined ? 'Joined' : 'Join',
+                                style: TextStyle(
+                                  color: _isJoined ? AppColors.primary : Colors.white,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                       ),
                     ),
                   ),
