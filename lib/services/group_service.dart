@@ -650,4 +650,35 @@ class GroupService {
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
+
+  static Future<void> publishGlobalFeedPost({
+    required GroupModel group,
+    required String text,
+    String? imageUrl,
+  }) async {
+    final cleanText = text.trim();
+    if (cleanText.isEmpty && (imageUrl == null || imageUrl.isEmpty)) {
+      throw Exception('لا يمكن نشر محتوى فارغ');
+    }
+
+    final displayName = await _userDisplayName(currentUid);
+    final batch = _db.batch();
+
+    final postRef = _db.collection('posts').doc();
+
+    batch.set(postRef, {
+      'id': postRef.id,
+      'groupId': group.id,
+      'groupName': group.name,
+      'groupImageUrl': group.imageUrl,
+      'authorUserId': currentUid,
+      'authorName': displayName,
+      'content': cleanText,
+      if (imageUrl != null && imageUrl.isNotEmpty) 'imageUrl': imageUrl,
+      'createdAt': FieldValue.serverTimestamp(),
+      'source': 'group_public',
+    });
+
+    await batch.commit();
+  }
 }

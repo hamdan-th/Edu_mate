@@ -404,7 +404,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
         List<PopupMenuEntry<String>> items = [];
 
         bool canManage = false;
-        if (_currentUserRole == 'owner') canManage = true;
+        if (_currentUserRole == 'owner' && !isTargetOwner) canManage = true;
         if (_currentUserRole == 'admin' && !isTargetOwner && !isTargetAdmin) canManage = true;
 
         if (canManage) {

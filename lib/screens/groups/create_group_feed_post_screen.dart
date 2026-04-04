@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../models/group_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/group_model.dart';
+import '../../services/group_service.dart';
 
 class CreateGroupFeedPostScreen extends StatefulWidget {
   final GroupModel group;
-  
+
   const CreateGroupFeedPostScreen({super.key, required this.group});
 
   @override
@@ -15,42 +14,32 @@ class CreateGroupFeedPostScreen extends StatefulWidget {
 
 class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
   final TextEditingController _contentController = TextEditingController();
-  bool _isSubmitting = false;
+  bool _isPublishing = false;
 
-  Future<void> _submitPost() async {
+  @override
+  void dispose() {
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _publishPost() async {
     final content = _contentController.text.trim();
     if (content.isEmpty) return;
 
-    setState(() => _isSubmitting = true);
-
+    setState(() => _isPublishing = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      // In a real app we might fetch the user's name from firestore
-      // For now we'll use a generic "مشرف" or auth display name
-      final authorName = user.displayName?.isEmpty == false ? user.displayName! : "إدارة المجموعة";
-
-      await FirebaseFirestore.instance.collection('feed_posts').add({
-        'groupId': widget.group.id,
-        'groupName': widget.group.name,
-        'groupImageUrl': widget.group.imageUrl,
-        'authorUserId': user.uid,
-        'authorName': authorName,
-        'content': content,
-        'imageUrl': null, // optional image upload not implemented in this mock phase
-        'createdAt': FieldValue.serverTimestamp(),
-        'source': 'group_public',
-      });
-
+      await GroupService.publishGlobalFeedPost(
+        group: widget.group,
+        text: content,
+      );
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نشر الإعلان في الفيد العام بنجاح')));
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء النشر')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+        setState(() => _isPublishing = false);
       }
     }
   }
@@ -60,7 +49,7 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("إنشاء إعلان", style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+        title: const Text("نشر في الفيد العام", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
         centerTitle: true,
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -69,11 +58,20 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          TextButton(
-            onPressed: _isSubmitting ? null : _submitPost,
-            child: _isSubmitting
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text("نشر", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+              onPressed: _isPublishing || _contentController.text.trim().isEmpty ? null : _publishPost,
+              child: _isPublishing 
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text("نشر", style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
           ),
         ],
       ),
@@ -87,56 +85,56 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
                   radius: 24,
                   backgroundColor: AppColors.primary.withOpacity(0.1),
                   backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                  child: widget.group.imageUrl.isEmpty
-                      ? Text(widget.group.name.isNotEmpty ? widget.group.name[0] : 'M')
-                      : null,
+                  child: widget.group.imageUrl.isEmpty ? Text(widget.group.name.isNotEmpty ? widget.group.name[0].toUpperCase() : 'G', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)) : null,
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.group.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const Text("عام - سيظهر لجميع المستخدمين", style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.group.name, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.textPrimary)),
+                      const Text("إعلان عام للطلاب", style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                    ],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             TextField(
               controller: _contentController,
-              maxLines: 8,
-              maxLength: 500,
-              decoration: InputDecoration(
-                hintText: "اكتب إعلانك أو تحديثك هنا ليظهر في الفيد العام...",
-                hintStyle: const TextStyle(color: AppColors.textSecondary),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: AppColors.surface,
+              onChanged: (_) => setState(() {}),
+              maxLines: null,
+              minLines: 6,
+              style: const TextStyle(fontSize: 16, height: 1.5, color: AppColors.textPrimary),
+              decoration: const InputDecoration(
+                hintText: "ماذا تفكر اليوم؟ شارك تحديثاً عن المجموعة...",
+                hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 18),
+                border: InputBorder.none,
               ),
             ),
-            const SizedBox(height: 16),
-            InkWell(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('رفع الصور سيكون متاحاً قريباً')));
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border, width: 1),
-                ),
-                child: const Column(
-                  children: [
-                    Icon(Icons.add_photo_alternate_rounded, size: 40, color: AppColors.textSecondary),
-                    SizedBox(height: 8),
-                    Text("إضافة صورة (اختياري)", style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
-                  ],
+            const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerRight,
+              child: InkWell(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('إضافة الصور ستكون متاحة قريباً')));
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.image_rounded, color: AppColors.primary, size: 24),
+                      const SizedBox(width: 8),
+                      Text("إضافة صورة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    ],
+                  ),
                 ),
               ),
             ),

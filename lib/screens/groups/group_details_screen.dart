@@ -269,7 +269,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         List<PopupMenuEntry<String>> items = [];
 
         bool canManage = false;
-        if (_isOwner) canManage = true;
+        if (_isOwner && !isTargetOwner) canManage = true;
         if (_isAdmin && !isTargetOwner && !isTargetAdmin) canManage = true;
 
         if (canManage) {
@@ -707,21 +707,63 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                             if (!snapshot.hasData) return const SizedBox.shrink();
                             final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
                             final canChat = data['membersCanChat'] ?? true;
-                            final externalFeed = data['allowExternalFeedPublishing'] ?? false;
 
                             return Column(
                               children: [
                                 if (widget.group.isPublic) ...[
-                                  ListTile(
-                                    leading: CircleAvatar(backgroundColor: AppColors.primary.withOpacity(0.1), child: const Icon(Icons.campaign_rounded, color: AppColors.primary, size: 22)),
-                                    title: const Text("نشر إعلان في الفيد العام", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
-                                    subtitle: const Text("نشر تحديثات مرئية لجميع المستخدمين", style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.primary),
-                                    onTap: () {
-                                      Navigator.push(context, MaterialPageRoute(builder: (_) => CreateGroupFeedPostScreen(group: widget.group)));
-                                    },
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [AppColors.primary, Color(0xFF8A4DFF)],
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.primary.withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(16),
+                                        onTap: () {
+                                          Navigator.push(context, MaterialPageRoute(builder: (_) => CreateGroupFeedPostScreen(group: widget.group)));
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white.withOpacity(0.2),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(Icons.campaign_rounded, color: Colors.white, size: 24),
+                                              ),
+                                              const SizedBox(width: 16),
+                                              const Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text("نشر في الفيد العام", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 16)),
+                                                    SizedBox(height: 2),
+                                                    Text("مشاركة إعلان أو تحديث لجميع الطلاب", style: TextStyle(fontSize: 12, color: Colors.white70)),
+                                                  ],
+                                                ),
+                                              ),
+                                              const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  const Divider(height: 1, color: AppColors.border, indent: 24, endIndent: 24),
+                                  const SizedBox(height: 8),
                                 ],
                                 SwitchListTile(
                                   title: const Text("السماح للأعضاء بالمشاركة في الدردشة", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
@@ -729,13 +771,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 24),
                                   value: canChat,
                                   onChanged: (val) => _firestore.collection('groups').doc(widget.group.id).update({'membersCanChat': val}),
-                                ),
-                                SwitchListTile(
-                                  title: const Text("السماح بنشر محتوى المجموعة في الفيد العام", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-                                  activeColor: AppColors.primary,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                                  value: externalFeed,
-                                  onChanged: (val) => _firestore.collection('groups').doc(widget.group.id).update({'allowExternalFeedPublishing': val}),
                                 ),
                               ],
                             );
