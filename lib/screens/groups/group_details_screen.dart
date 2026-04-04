@@ -196,6 +196,113 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     }
   }
 
+  Future<void> _transferOwnership(String newOwnerId) async {
+    final oldOwnerId = _auth.currentUser?.uid;
+    if (oldOwnerId == null) return;
+
+    try {
+      WriteBatch batch = _firestore.batch();
+      final groupRef = _firestore.collection('groups').doc(widget.group.id);
+      batch.update(groupRef, {'ownerId': newOwnerId});
+      final oldOwnerRef = groupRef.collection('members').doc(oldOwnerId);
+      batch.update(oldOwnerRef, {'role': 'admin'});
+      final newOwnerRef = groupRef.collection('members').doc(newOwnerId);
+      batch.update(newOwnerRef, {'role': 'owner'});
+      await batch.commit();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نقل الملكية بنجاح')));
+        _loadMembershipState(); // reload local flags
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء نقل الملكية')));
+    }
+  }
+
+  void _handleMemberAction(String action, Map<String, dynamic> memberData, String memberId) async {
+    if (memberId == _auth.currentUser?.uid) return;
+
+    try {
+      switch (action) {
+        case 'make_admin':
+          await GroupService.promoteToAdmin(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تعيين المشرف')));
+          break;
+        case 'remove_admin':
+          await GroupService.removeAdmin(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إزالة المشرف')));
+          break;
+        case 'mute':
+          await GroupService.muteMember(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم كتم العضو')));
+          break;
+        case 'unmute':
+          await GroupService.unmuteMember(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إلغاء كتم العضو')));
+          break;
+        case 'report':
+          await GroupService.reportMember(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال البلاغ لمدير التطبيق')));
+          break;
+        case 'kick':
+          await GroupService.kickMember(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم طرد العضو')));
+          break;
+        case 'transfer_owner':
+          await _transferOwnership(memberId);
+          break;
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+    }
+  }
+
+  Widget _buildPopupMenu(String memberId, Map<String, dynamic> data, bool isTargetOwner, bool isTargetAdmin) {
+    final status = data['status'] ?? 'active';
+    
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      onSelected: (action) => _handleMemberAction(action, data, memberId),
+      itemBuilder: (context) {
+        List<PopupMenuEntry<String>> items = [];
+
+        bool canManage = false;
+        if (_isOwner) canManage = true;
+        if (_isAdmin && !isTargetOwner && !isTargetAdmin) canManage = true;
+
+        if (canManage) {
+          if (_isOwner && !isTargetOwner) {
+            if (isTargetAdmin) {
+              items.add(const PopupMenuItem(value: 'remove_admin', child: Text("إزالة من الإشراف", style: TextStyle(fontWeight: FontWeight.bold))));
+            } else {
+              items.add(const PopupMenuItem(value: 'make_admin', child: Text("تعيين كمشرف", style: TextStyle(fontWeight: FontWeight.bold))));
+            }
+          }
+
+          if (status == 'muted') {
+            items.add(const PopupMenuItem(value: 'unmute', child: Text("إلغاء الكتم", style: TextStyle(fontWeight: FontWeight.bold))));
+          } else {
+            items.add(const PopupMenuItem(value: 'mute', child: Text("كتم العضو", style: TextStyle(fontWeight: FontWeight.bold))));
+          }
+
+          items.add(const PopupMenuDivider());
+          items.add(const PopupMenuItem(value: 'kick', child: Text("طرد العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+        }
+
+        if (items.isNotEmpty) items.add(const PopupMenuDivider());
+        items.add(const PopupMenuItem(value: 'report', child: Text("إبلاغ", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+
+        if (_isOwner && !isTargetOwner) {
+          items.add(const PopupMenuDivider());
+          items.add(const PopupMenuItem(value: 'transfer_owner', child: Text("نقل الملكية", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w900))));
+        }
+
+        return items;
+      },
+    );
+  }
+
   void _openMoreMenu() {
     showModalBottomSheet(
       context: context,
@@ -242,14 +349,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               
               if (_isOwner || _isAdmin) ...[
                 const Divider(color: AppColors.background, thickness: 8),
-                ListTile(
-                  leading: const Icon(Icons.people_alt_rounded, color: AppColors.textPrimary),
-                  title: const Text("إدارة الأعضاء", style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => ManageMembersScreen(group: widget.group)));
-                  },
-                ),
                 ListTile(
                   leading: const Icon(Icons.edit_rounded, color: AppColors.textPrimary),
                   title: const Text("تعديل المجموعة", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -541,6 +640,37 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                           _buildActionItem(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
                         ],
                       ),
+                      if (_isOwner || _isAdmin) ...[
+                        const SizedBox(height: 16),
+                        StreamBuilder<DocumentSnapshot>(
+                          stream: _firestore.collection('groups').doc(widget.group.id).snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) return const SizedBox.shrink();
+                            final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+                            final canChat = data['membersCanChat'] ?? true;
+                            final externalFeed = data['allowExternalFeedPublishing'] ?? false;
+
+                            return Column(
+                              children: [
+                                SwitchListTile(
+                                  title: const Text("السماح للأعضاء بالمشاركة في الدردشة", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
+                                  activeColor: AppColors.primary,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                                  value: canChat,
+                                  onChanged: (val) => _firestore.collection('groups').doc(widget.group.id).update({'membersCanChat': val}),
+                                ),
+                                SwitchListTile(
+                                  title: const Text("السماح بنشر محتوى المجموعة في الفيد العام", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
+                                  activeColor: AppColors.primary,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                                  value: externalFeed,
+                                  onChanged: (val) => _firestore.collection('groups').doc(widget.group.id).update({'allowExternalFeedPublishing': val}),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -664,6 +794,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
             String statusStr = status == 'muted' ? " (مكتوم)" : (status == 'banned' ? " (محظور)" : "");
 
+            final memberId = docs[index].id;
+
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
               leading: CircleAvatar(
@@ -682,7 +814,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 ],
               ),
               subtitle: Text(roleStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-              trailing: role != 'member' ? Text(roleStr, style: TextStyle(color: roleCol, fontWeight: FontWeight.w900, fontSize: 12)) : null,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (role != 'member') Text(roleStr, style: TextStyle(color: roleCol, fontWeight: FontWeight.w900, fontSize: 12)),
+                  if (memberId != _auth.currentUser?.uid) ...[
+                    if (role != 'member') const SizedBox(width: 8),
+                    _buildPopupMenu(memberId, data, role == 'owner', role == 'admin'),
+                  ],
+                ],
+              ),
             );
           },
         );
