@@ -6,6 +6,9 @@ class GroupMessageModel {
   final String senderName;
   final String text;
   final DateTime? createdAt;
+  final String? replyToMessageId;
+  final String? replyToText;
+  final String? replyToSenderName;
 
   GroupMessageModel({
     required this.id,
@@ -13,6 +16,9 @@ class GroupMessageModel {
     required this.senderName,
     required this.text,
     required this.createdAt,
+    this.replyToMessageId,
+    this.replyToText,
+    this.replyToSenderName,
   });
 
   factory GroupMessageModel.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -24,6 +30,9 @@ class GroupMessageModel {
       senderName: (data['senderName'] ?? 'User').toString(),
       text: (data['text'] ?? '').toString(),
       createdAt: _toDateTime(data['createdAt']),
+      replyToMessageId: data['replyToMessageId']?.toString() ?? data['replyToId']?.toString(),
+      replyToText: data['replyToText']?.toString(),
+      replyToSenderName: data['replyToSenderName']?.toString() ?? data['replyToSender']?.toString(),
     );
   }
 
@@ -33,6 +42,9 @@ class GroupMessageModel {
       'senderName': senderName,
       'text': text,
       'createdAt': createdAt == null ? null : Timestamp.fromDate(createdAt!),
+      if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
+      if (replyToText != null) 'replyToText': replyToText,
+      if (replyToSenderName != null) 'replyToSenderName': replyToSenderName,
     };
   }
 

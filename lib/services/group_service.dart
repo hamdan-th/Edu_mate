@@ -433,6 +433,9 @@ class GroupService {
   static Future<void> sendMessage({
     required String groupId,
     required String text,
+    String? replyToMessageId,
+    String? replyToText,
+    String? replyToSenderName,
   }) async {
     final cleanText = text.trim();
     if (cleanText.isEmpty) {
@@ -491,6 +494,9 @@ class GroupService {
       'senderName': displayName,
       'text': cleanText,
       'createdAt': FieldValue.serverTimestamp(),
+      if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
+      if (replyToText != null) 'replyToText': replyToText,
+      if (replyToSenderName != null) 'replyToSenderName': replyToSenderName,
     });
 
     batch.update(groupRef, {
