@@ -63,6 +63,7 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
       await GroupService.joinPrivateGroupByLink(group.inviteLink);
 
       if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الانضمام للمجموعة بنجاح')));
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;

@@ -81,6 +81,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     try {
       await GroupService.joinPublicGroup(widget.group.id);
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الانضمام للمجموعة بنجاح')));
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)));
       }
     } catch (e) {
