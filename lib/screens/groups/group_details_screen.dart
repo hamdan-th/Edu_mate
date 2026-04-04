@@ -621,10 +621,21 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           return _buildEmptyState(Icons.error_outline_rounded, "حدث خطأ أثناء تحميل الأعضاء");
         }
 
-        final docs = snapshot.data?.docs ?? [];
+        final List<DocumentSnapshot> docs = List.from(snapshot.data?.docs ?? []);
         if (docs.isEmpty) {
           return _buildEmptyState(Icons.group_rounded, "لا يوجد أعضاء في هذه المجموعة");
         }
+
+        docs.sort((a, b) {
+          final roleA = (a.data() as Map<String, dynamic>)['role'] ?? 'member';
+          final roleB = (b.data() as Map<String, dynamic>)['role'] ?? 'member';
+          int weight(String r) {
+            if (r == 'owner') return 0;
+            if (r == 'admin') return 1;
+            return 2;
+          }
+          return weight(roleA).compareTo(weight(roleB));
+        });
 
         return ListView.builder(
           padding: const EdgeInsets.only(top: 8, bottom: 40),

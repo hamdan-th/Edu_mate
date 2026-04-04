@@ -594,4 +594,60 @@ class GroupService {
       return Stream.value([]);
     }
   }
+
+  static Future<void> promoteToAdmin(String groupId, String memberId) async {
+    final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
+    final memberDoc = await memberRef.get();
+    if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
+      await memberRef.update({'role': 'admin'});
+    }
+  }
+
+  static Future<void> removeAdmin(String groupId, String memberId) async {
+    final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
+    final memberDoc = await memberRef.get();
+    if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
+      await memberRef.update({'role': 'member'});
+    }
+  }
+
+  static Future<void> muteMember(String groupId, String memberId) async {
+    final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
+    final memberDoc = await memberRef.get();
+    if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
+      await memberRef.update({'status': 'muted'});
+    }
+  }
+
+  static Future<void> unmuteMember(String groupId, String memberId) async {
+    final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
+    final memberDoc = await memberRef.get();
+    if (memberDoc.exists) {
+      await memberRef.update({'status': 'active'});
+    }
+  }
+
+  static Future<void> kickMember(String groupId, String memberId) async {
+    final groupRef = _groups.doc(groupId);
+    final memberRef = groupRef.collection('members').doc(memberId);
+    final memberDoc = await memberRef.get();
+    
+    if (!memberDoc.exists) return;
+    if (memberDoc.data()?['role'] == 'owner') throw Exception("لا يمكن طرد المالك");
+
+    final batch = _db.batch();
+    batch.delete(memberRef);
+    batch.delete(_users.doc(memberId).collection('joined_groups').doc(groupId));
+    batch.update(groupRef, {'membersCounts': FieldValue.increment(-1)});
+    await batch.commit();
+  }
+
+  static Future<void> reportMember(String groupId, String reportedUserId) async {
+    await _db.collection('reports').add({
+      'groupId': groupId,
+      'reportedUserId': reportedUserId,
+      'reporterUserId': currentUid,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
 }

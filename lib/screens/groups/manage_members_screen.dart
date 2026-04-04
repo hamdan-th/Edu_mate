@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
+import '../../services/group_service.dart';
 
 class ManageMembersScreen extends StatefulWidget {
   final GroupModel group;
@@ -78,90 +79,6 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     }
   }
 
-  Future<void> _updateMemberRole(String memberId, String newRole) async {
-    try {
-      await _firestore
-          .collection('groups')
-          .doc(widget.group.id)
-          .collection('members')
-          .doc(memberId)
-          .update({'role': newRole});
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تحديث صلاحيات العضو')));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء التحديث')));
-      }
-    }
-  }
-
-  Future<void> _updateMemberStatus(String memberId, String status) async {
-    try {
-      WriteBatch batch = _firestore.batch();
-      
-      final memberRef = _firestore
-          .collection('groups')
-          .doc(widget.group.id)
-          .collection('members')
-          .doc(memberId);
-      
-      final groupRef = _firestore.collection('groups').doc(widget.group.id);
-
-      batch.update(memberRef, {
-        'status': status,
-      });
-
-      if (status == 'banned') {
-         batch.update(groupRef, {
-           'bannedUserIds': FieldValue.arrayUnion([memberId])
-         });
-      } else {
-         batch.update(groupRef, {
-           'bannedUserIds': FieldValue.arrayRemove([memberId])
-         });
-      }
-
-      await batch.commit();
-
-      if (mounted) {
-        String msg = 'تم تحديث حالة العضو';
-        if (status == 'muted') msg = 'تم كتم العضو';
-        if (status == 'active') msg = 'تم إلغاء الكتم عن العضو';
-        if (status == 'banned') msg = 'تم حظر العضو';
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء التحديث')));
-      }
-    }
-  }
-
-  Future<void> _removeMember(String memberId) async {
-    try {
-      WriteBatch batch = _firestore.batch();
-      final groupRef = _firestore.collection('groups').doc(widget.group.id);
-      
-      batch.delete(groupRef.collection('members').doc(memberId));
-      batch.delete(_firestore.collection('users').doc(memberId).collection('joined_groups').doc(widget.group.id));
-      
-      batch.update(groupRef, {
-        'membersCounts': FieldValue.increment(-1),
-      });
-
-      await batch.commit();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إزالة العضو من المجموعة')));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء إزالة العضو')));
-      }
-    }
-  }
-
   Future<void> _transferOwnership(String newOwnerId) async {
     final oldOwnerId = _auth.currentUser?.uid;
     if (oldOwnerId == null) return;
@@ -193,31 +110,43 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     }
   }
 
-  void _handleMemberAction(String action, Map<String, dynamic> memberData, String memberId) {
+  void _handleMemberAction(String action, Map<String, dynamic> memberData, String memberId) async {
     if (memberId == _auth.currentUser?.uid) return;
 
-    switch (action) {
-      case 'make_admin':
-        _updateMemberRole(memberId, 'admin');
-        break;
-      case 'remove_admin':
-        _updateMemberRole(memberId, 'member');
-        break;
-      case 'mute':
-        _updateMemberStatus(memberId, 'muted');
-        break;
-      case 'unmute':
-        _updateMemberStatus(memberId, 'active');
-        break;
-      case 'ban':
-        _updateMemberStatus(memberId, 'banned');
-        break;
-      case 'kick':
-        _removeMember(memberId);
-        break;
-      case 'transfer_owner':
-        _transferOwnership(memberId);
-        break;
+    try {
+      switch (action) {
+        case 'make_admin':
+          await GroupService.promoteToAdmin(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تعيين المشرف')));
+          break;
+        case 'remove_admin':
+          await GroupService.removeAdmin(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إزالة المشرف')));
+          break;
+        case 'mute':
+          await GroupService.muteMember(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم كتم العضو')));
+          break;
+        case 'unmute':
+          await GroupService.unmuteMember(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إلغاء كتم العضو')));
+          break;
+        case 'report':
+          await GroupService.reportMember(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال البلاغ لمدير التطبيق')));
+          break;
+        case 'kick':
+          await GroupService.kickMember(widget.group.id, memberId);
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم طرد العضو')));
+          break;
+        case 'transfer_owner':
+          await _transferOwnership(memberId);
+          break;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+      }
     }
   }
 
@@ -456,15 +385,15 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                 ],
               ),
             ),
-            if (!isMe && _currentUserRole != 'member' && !_isTargetOwner)
-              _buildPopupMenu(memberId, data, _isTargetAdmin),
+            if (!isMe)
+              _buildPopupMenu(memberId, data, _isTargetOwner, _isTargetAdmin),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPopupMenu(String memberId, Map<String, dynamic> data, bool isTargetAdmin) {
+  Widget _buildPopupMenu(String memberId, Map<String, dynamic> data, bool isTargetOwner, bool isTargetAdmin) {
     final status = data['status'] ?? 'active';
     
     return PopupMenuButton<String>(
@@ -474,32 +403,34 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       itemBuilder: (context) {
         List<PopupMenuEntry<String>> items = [];
 
-        if (_currentUserRole == 'owner') {
-          if (isTargetAdmin) {
-            items.add(const PopupMenuItem(value: 'remove_admin', child: Text("إزالة من الإشراف", style: TextStyle(fontWeight: FontWeight.bold))));
-          } else {
-            items.add(const PopupMenuItem(value: 'make_admin', child: Text("تعيين كمشرف", style: TextStyle(fontWeight: FontWeight.bold))));
+        bool canManage = false;
+        if (_currentUserRole == 'owner') canManage = true;
+        if (_currentUserRole == 'admin' && !isTargetOwner && !isTargetAdmin) canManage = true;
+
+        if (canManage) {
+          if (_currentUserRole == 'owner' && !isTargetOwner) {
+            if (isTargetAdmin) {
+              items.add(const PopupMenuItem(value: 'remove_admin', child: Text("إزالة من الإشراف", style: TextStyle(fontWeight: FontWeight.bold))));
+            } else {
+              items.add(const PopupMenuItem(value: 'make_admin', child: Text("تعيين كمشرف", style: TextStyle(fontWeight: FontWeight.bold))));
+            }
           }
-        }
 
-        // Mute / Unmute
-        if (status == 'muted') {
-          items.add(const PopupMenuItem(value: 'unmute', child: Text("إلغاء الكتم", style: TextStyle(fontWeight: FontWeight.bold))));
-        } else {
-          items.add(const PopupMenuItem(value: 'mute', child: Text("كتم العضو", style: TextStyle(fontWeight: FontWeight.bold))));
-        }
+          if (status == 'muted') {
+            items.add(const PopupMenuItem(value: 'unmute', child: Text("إلغاء الكتم", style: TextStyle(fontWeight: FontWeight.bold))));
+          } else {
+            items.add(const PopupMenuItem(value: 'mute', child: Text("كتم العضو", style: TextStyle(fontWeight: FontWeight.bold))));
+          }
 
-        // Ban
-        if (status != 'banned') {
+          // We removed 'ban' and just use 'kick'
           items.add(const PopupMenuDivider());
-          items.add(const PopupMenuItem(value: 'ban', child: Text("حظر العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+          items.add(const PopupMenuItem(value: 'kick', child: Text("طرد العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
         }
 
-        // Kick
-        if (status == 'banned' && items.isEmpty) items.add(const PopupMenuDivider());
-        items.add(const PopupMenuItem(value: 'kick', child: Text("طرد العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
-        
-        if (_currentUserRole == 'owner') {
+        if (items.isNotEmpty) items.add(const PopupMenuDivider());
+        items.add(const PopupMenuItem(value: 'report', child: Text("إبلاغ", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+
+        if (_currentUserRole == 'owner' && !isTargetOwner) {
           items.add(const PopupMenuDivider());
           items.add(const PopupMenuItem(value: 'transfer_owner', child: Text("نقل الملكية", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w900))));
         }
