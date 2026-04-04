@@ -313,6 +313,12 @@ class GroupService {
   }
 
   static Future<void> joinPublicGroup(String groupId) async {
+    final state = await getUserGroupState(groupId);
+    if (state.isBanned) {
+      throw Exception('أنت محظور من هذه المجموعة');
+    }
+    if (state.isMember) return;
+
     final groupRef = _groups.doc(groupId);
     final userRef = await _userRefByUid(currentUid);
     final displayName = await _userDisplayName(currentUid);
@@ -327,8 +333,8 @@ class GroupService {
       final status = (data['status'] ?? 'active').toString();
       final type = (data['type'] ?? 'public').toString();
       final banned = (data['bannedUserIds'] as List?)
-          ?.map((e) => e.toString())
-          .toList() ??
+              ?.map((e) => e.toString())
+              .toList() ??
           <String>[];
 
       if (status != 'active') {
@@ -336,7 +342,7 @@ class GroupService {
       }
 
       if (type != 'public') {
-        throw Exception('هذه المجموعة ليست عامة');
+        throw Exception('لا يمكنك الانضمام لهذه المجموعة مباشرة');
       }
 
       if (banned.contains(currentUid)) {
@@ -369,26 +375,7 @@ class GroupService {
         'membersCounts': FieldValue.increment(1),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-    final state = await getUserGroupState(groupId);
-    if (state.isBanned) {
-      throw Exception('أنت محظور من هذه المجموعة');
-    }
-    
-    final groupRef = _groups.doc(groupId);
-    final groupSnap = await groupRef.get();
-
-    if (!groupSnap.exists) {
-      throw Exception('المجموعة غير موجودة');
-    }
-
-    final data = groupSnap.data() as Map<String, dynamic>;
-    if (data['type'] != 'public') {
-      throw Exception('لا يمكنك الانضمام لهذه المجموعة مباشرة');
-    }
-
-    if (state.isMember) return;
-
-    await _joinGroup(groupId, 'public');
+    });
   }
 
   static Future<GroupModel> getGroupByInvite({
@@ -766,11 +753,13 @@ class GroupService {
   }
 
   static Future<void> clearGroupChat(String groupId) async {
-    // Only owner/admin should be verified, but the UI gatekeeps this.
-    // Chunked delete approach to handle limits safely (Firestore limits batches to 500)
+    final state = await getUserGroupState(groupId);
+    if (!state.isOwner && !state.isAdmin) {
+      throw Exception('غير مصرح لك بهذا الإجراء');
+    }
+
     final messagesQuery = _groups.doc(groupId).collection('messages');
-    
-    // Process in batches of 500
+
     while (true) {
       final snapshot = await messagesQuery.limit(500).get();
       if (snapshot.docs.isEmpty) break;
@@ -779,12 +768,12 @@ class GroupService {
       for (final doc in snapshot.docs) {
         batch.delete(doc.reference);
       }
-      
-      // Update group message count
+
       final groupRef = _groups.doc(groupId);
       batch.update(groupRef, {
-         'messagesCount': FieldValue.increment(-snapshot.docs.length),
-         'lastMessageText': '',
+        'messagesCount': FieldValue.increment(-snapshot.docs.length),
+        'lastMessageText': '',
+        'updatedAt': FieldValue.serverTimestamp(),
       });
 
       await batch.commit();
