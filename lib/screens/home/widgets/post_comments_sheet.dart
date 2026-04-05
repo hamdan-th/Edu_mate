@@ -339,11 +339,13 @@ class _CommentItem extends StatefulWidget {
   final String postId;
   final FeedCommentModel comment;
   final VoidCallback? onReplyTap;
+  final Function(FeedCommentReplyModel)? onReplyToReplyTap;
 
   const _CommentItem({
     required this.postId,
     required this.comment,
     this.onReplyTap,
+    this.onReplyToReplyTap,
   });
 
   @override
@@ -408,7 +410,7 @@ class _CommentItemState extends State<_CommentItem> {
     }
   }
 
-  void _showReportDialog() {
+  void _showReportDialog({FeedCommentReplyModel? reply}) {
     bool isReporting = false;
 
     showDialog(
@@ -418,9 +420,9 @@ class _CommentItemState extends State<_CommentItem> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: AppColors.surface,
-              title: const Text('الإبلاغ عن تعليق', style: TextStyle(color: AppColors.textPrimary)),
+              title: const Text('الإبلاغ', style: TextStyle(color: AppColors.textPrimary)),
               content: const Text(
-                'هل أنت متأكد من رغبتك في الإبلاغ عن هذا التعليق كمرجع للمراجعة؟',
+                'هل أنت متأكد من رغبتك في الإبلاغ كمرجع للمراجعة؟',
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5),
               ),
               actions: [
@@ -436,9 +438,9 @@ class _CommentItemState extends State<_CommentItem> {
                           try {
                             await FeedCommentReactionsService.reportComment(
                               postId: widget.postId,
-                              commentId: widget.comment.commentId,
-                              reportedCommentAuthorId: widget.comment.authorId,
-                              commentText: widget.comment.text,
+                              commentId: reply?.replyId ?? widget.comment.commentId,
+                              reportedCommentAuthorId: reply?.authorId ?? widget.comment.authorId,
+                              commentText: reply?.text ?? widget.comment.text,
                             );
                             if (mounted) {
                               Navigator.pop(ctx);
@@ -802,7 +804,7 @@ class _CommentItemState extends State<_CommentItem> {
                                       ],
                                     ).then((value) {
                                       if (value == 'report') {
-                                        _showReportDialog(); // Uses parent comment context for report intentionally to flag the thread
+                                        _showReportDialog(reply: reply);
                                       } else if (value == 'edit') {
                                         _showEditDialog(reply.text, replyId: reply.replyId);
                                       } else if (value == 'delete') {
