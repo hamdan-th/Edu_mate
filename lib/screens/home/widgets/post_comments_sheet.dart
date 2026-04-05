@@ -62,8 +62,6 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
     }
   }
 
-  }
-
   @override
   Widget build(BuildContext context) {
     final postId = widget.postCardData['postId']?.toString() ?? '';
@@ -336,7 +334,6 @@ class _CommentItemState extends State<_CommentItem> {
   }
 
   void _showReportDialog() {
-    final reportController = TextEditingController();
     bool isReporting = false;
 
     showDialog(
@@ -347,24 +344,9 @@ class _CommentItemState extends State<_CommentItem> {
             return AlertDialog(
               backgroundColor: AppColors.surface,
               title: const Text('الإبلاغ عن تعليق', style: TextStyle(color: AppColors.textPrimary)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('الرجاء توضيح سبب الإبلاغ بوضوح:', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: reportController,
-                    maxLines: 3,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: InputDecoration(
-                      hintText: 'السبب...',
-                      hintStyle: const TextStyle(color: AppColors.textSecondary),
-                      filled: true,
-                      fillColor: AppColors.background,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    ),
-                  ),
-                ],
+              content: const Text(
+                'هل أنت متأكد من رغبتك في الإبلاغ عن هذا التعليق كمرجع للمراجعة؟',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5),
               ),
               actions: [
                 TextButton(
@@ -375,9 +357,6 @@ class _CommentItemState extends State<_CommentItem> {
                   onPressed: isReporting
                       ? null
                       : () async {
-                          final text = reportController.text.trim();
-                          if (text.isEmpty) return;
-
                           setDialogState(() => isReporting = true);
                           try {
                             await FeedCommentReactionsService.reportComment(
