@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../services/feed_reactions_service.dart';
 import '../../services/feed_service.dart';
 import '../../models/feed_post_model.dart';
 import '../../services/group_service.dart';
@@ -616,6 +617,8 @@ class _PostCardState extends State<PostCard>
   bool isPressed = false;
   bool _isJoined = false;
   bool _isLoadingJoined = true;
+  bool _isLoadingLike = false;
+  int _likesCount = 0;
 
   late final AnimationController _likeController;
   late final Animation<double> _likeScale;
@@ -623,7 +626,9 @@ class _PostCardState extends State<PostCard>
   @override
   void initState() {
     super.initState();
+    _likesCount = widget.post['likes'] as int? ?? 0;
     _checkMembership();
+    _checkLikeStatus();
     _likeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 180),
@@ -648,6 +653,18 @@ class _PostCardState extends State<PostCard>
     }
   }
 
+  Future<void> _checkLikeStatus() async {
+    final postId = widget.post['postId']?.toString() ?? '';
+    if (postId.isNotEmpty) {
+      final liked = await FeedReactionsService.hasUserLikedPost(postId);
+      if (mounted) {
+        setState(() {
+          isLiked = liked;
+        });
+      }
+    }
+  }
+
   Future<void> _joinGroup() async {
     final groupId = widget.post['groupId']?.toString() ?? '';
     if (groupId.isEmpty || _isJoined) return;
@@ -667,9 +684,44 @@ class _PostCardState extends State<PostCard>
     }
   }
 
-  void _toggleLike() {
-    setState(() => isLiked = !isLiked);
+  Future<void> _toggleLike() async {
+    if (_isLoadingLike) return;
+    
+    final postId = widget.post['postId']?.toString() ?? '';
+    if (postId.isEmpty) return;
+
+    final oldIsLiked = isLiked;
+
+    setState(() {
+      _isLoadingLike = true;
+      isLiked = !isLiked;
+      _likesCount += isLiked ? 1 : -1;
+    });
+
     _likeController.forward().then((_) => _likeController.reverse());
+
+    try {
+      await FeedReactionsService.toggleLike(
+        postId: postId,
+        isCurrentlyLiked: oldIsLiked,
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLiked = oldIsLiked;
+          _likesCount += oldIsLiked ? 1 : -1;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذر تحديث الإعجاب')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingLike = false;
+        });
+      }
+    }
   }
 
   @override
@@ -877,7 +929,7 @@ class _PostCardState extends State<PostCard>
                             ),
                             const SizedBox(width: 5),
                             Text(
-                              '${widget.post['likes'] ?? 0}',
+                              '$_likesCount',
                               style: const TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 12.5,
