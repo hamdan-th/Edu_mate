@@ -5,7 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../services/feed_reactions_service.dart';
 import '../../services/feed_service.dart';
 import '../../models/feed_post_model.dart';
-import 'post_comments_screen.dart';
+import 'widgets/post_comments_sheet.dart';
 import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 
@@ -964,10 +964,15 @@ class _PostCardState extends State<PostCard>
                     label: '${widget.post['comments'] ?? 0}',
                     color: AppColors.textSecondary,
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => PostCommentsScreen(postCardData: widget.post),
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => Padding(
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom,
+                          ),
+                          child: PostCommentsSheet(postCardData: widget.post),
                         ),
                       );
                     },
