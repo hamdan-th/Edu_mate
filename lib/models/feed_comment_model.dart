@@ -7,6 +7,7 @@ class FeedCommentModel {
   final String authorName;
   final String text;
   final Timestamp? createdAt;
+  final int likesCount;
 
   FeedCommentModel({
     required this.commentId,
@@ -15,6 +16,7 @@ class FeedCommentModel {
     required this.authorName,
     required this.text,
     this.createdAt,
+    this.likesCount = 0,
   });
 
   factory FeedCommentModel.fromMap(Map<String, dynamic> map, String documentId) {
@@ -25,6 +27,7 @@ class FeedCommentModel {
       authorName: map['authorName']?.toString() ?? 'مستخدم',
       text: map['text']?.toString() ?? '',
       createdAt: map['createdAt'] as Timestamp?,
+      likesCount: map['likesCount'] as int? ?? 0,
     );
   }
 }

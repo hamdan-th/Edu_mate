@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/feed_comment_model.dart';
 import '../../../services/feed_comments_service.dart';
+import '../../../services/feed_comment_reactions_service.dart';
 
 class PostCommentsSheet extends StatefulWidget {
   final Map<String, dynamic> postCardData;
@@ -61,17 +62,6 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
     }
   }
 
-  String _formatTime(DateTime? date) {
-    if (date == null) return '';
-    final now = DateTime.now();
-    final diff = now.difference(date);
-
-    if (diff.inSeconds < 60) return 'الآن';
-    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
-    if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
-    if (diff.inDays < 7) return 'منذ ${diff.inDays} يوم';
-
-    return '${date.day}/${date.month}/${date.year}';
   }
 
   @override
@@ -174,49 +164,9 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
                       final comment = comments[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  comment.authorName,
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                Text(
-                                  _formatTime(comment.createdAt?.toDate()),
-                                  style: const TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              comment.text,
-                              style: const TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 13.5,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
+                      return _CommentItem(
+                        postId: postId,
+                        comment: comment,
                       );
                     },
                   );
@@ -310,6 +260,264 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommentItem extends StatefulWidget {
+  final String postId;
+  final FeedCommentModel comment;
+
+  const _CommentItem({
+    required this.postId,
+    required this.comment,
+  });
+
+  @override
+  State<_CommentItem> createState() => _CommentItemState();
+}
+
+class _CommentItemState extends State<_CommentItem> {
+  bool _isLiked = false;
+  int _likesCount = 0;
+  bool _isLoadingLike = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _likesCount = widget.comment.likesCount;
+    _checkLikeStatus();
+  }
+
+  Future<void> _checkLikeStatus() async {
+    final liked = await FeedCommentReactionsService.hasUserLikedComment(
+      postId: widget.postId,
+      commentId: widget.comment.commentId,
+    );
+    if (mounted) {
+      setState(() {
+        _isLiked = liked;
+      });
+    }
+  }
+
+  Future<void> _toggleLike() async {
+    if (_isLoadingLike) return;
+
+    final oldLiked = _isLiked;
+    setState(() {
+      _isLoadingLike = true;
+      _isLiked = !oldLiked;
+      _likesCount += _isLiked ? 1 : -1;
+    });
+
+    try {
+      await FeedCommentReactionsService.toggleCommentLike(
+        postId: widget.postId,
+        commentId: widget.comment.commentId,
+        isCurrentlyLiked: oldLiked,
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLiked = oldLiked;
+          _likesCount += oldLiked ? 1 : -1;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تعذر تحديث الإعجاب')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingLike = false);
+      }
+    }
+  }
+
+  void _showReportDialog() {
+    final reportController = TextEditingController();
+    bool isReporting = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppColors.surface,
+              title: const Text('الإبلاغ عن تعليق', style: TextStyle(color: AppColors.textPrimary)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('الرجاء توضيح سبب الإبلاغ بوضوح:', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: reportController,
+                    maxLines: 3,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'السبب...',
+                      hintStyle: const TextStyle(color: AppColors.textSecondary),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isReporting ? null : () => Navigator.pop(ctx),
+                  child: const Text('إلغاء', style: TextStyle(color: AppColors.textSecondary)),
+                ),
+                TextButton(
+                  onPressed: isReporting
+                      ? null
+                      : () async {
+                          final text = reportController.text.trim();
+                          if (text.isEmpty) return;
+
+                          setDialogState(() => isReporting = true);
+                          try {
+                            await FeedCommentReactionsService.reportComment(
+                              postId: widget.postId,
+                              commentId: widget.comment.commentId,
+                              reportedCommentAuthorId: widget.comment.authorId,
+                              commentText: widget.comment.text,
+                            );
+                            if (mounted) {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال البلاغ بنجاح')));
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              setDialogState(() => isReporting = false);
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء الإرسال')));
+                            }
+                          }
+                        },
+                  child: isReporting
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('إرسال', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _formatTime(DateTime? date) {
+    if (date == null) return '';
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inSeconds < 60) return 'الآن';
+    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
+    if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
+    if (diff.inDays < 7) return 'منذ ${diff.inDays} يوم';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.comment.authorName,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    _formatTime(widget.comment.createdAt?.toDate()),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTapDown: (details) {
+                      showMenu(
+                        context: context,
+                        color: AppColors.surface,
+                        position: RelativeRect.fromLTRB(
+                          details.globalPosition.dx,
+                          details.globalPosition.dy,
+                          details.globalPosition.dx,
+                          details.globalPosition.dy,
+                        ),
+                        items: [
+                          const PopupMenuItem(
+                            value: 'report',
+                            child: Text('إبلاغ', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ).then((value) {
+                        if (value == 'report') {
+                          _showReportDialog();
+                        }
+                      });
+                    },
+                    child: const Icon(Icons.more_horiz_rounded, size: 16, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            widget.comment.text,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 13.5,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: _toggleLike,
+                child: Row(
+                  children: [
+                    Icon(
+                      _isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                      size: 16,
+                      color: _isLiked ? Colors.red : AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$_likesCount',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
