@@ -18,12 +18,6 @@ class _EduBotScreenState extends State<EduBotScreen> {
   bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    // Start empty to show premium welcome state
-  }
-
-  @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
@@ -43,7 +37,7 @@ class _EduBotScreenState extends State<EduBotScreen> {
   }
 
   Future<void> _handleSendMessage(String text) async {
-    if (text.trim().isEmpty || _isLoading) return;
+    if (_isLoading || text.trim().isEmpty) return;
 
     final userMsgText = text.trim();
     _messageController.clear();
@@ -55,32 +49,20 @@ class _EduBotScreenState extends State<EduBotScreen> {
       createdAt: DateTime.now(),
     );
 
-    final loadingId = 'loading_${DateTime.now().millisecondsSinceEpoch}';
-    final loadingMsg = EduBotMessageModel(
-      id: loadingId,
-      text: '',
-      isUser: false,
-      createdAt: DateTime.now(),
-      isLoading: true,
-    );
-
     setState(() {
       _messages.add(userMsg);
-      _messages.add(loadingMsg);
       _isLoading = true;
     });
 
     _scrollToBottom();
 
-    final List<EduBotMessageModel> historyPayload = _messages
-        .where((m) => !m.isLoading && m.text.isNotEmpty && m.id != userMsg.id)
-        .toList();
+    final List<EduBotMessageModel> historyPayload = 
+        _messages.sublist(0, _messages.length - 1);
 
     final botReply = await EduBotService.sendMessage(userMsgText, history: historyPayload);
 
     if (mounted) {
       setState(() {
-        _messages.removeWhere((m) => m.id == loadingId);
         _messages.add(
           EduBotMessageModel(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -98,6 +80,7 @@ class _EduBotScreenState extends State<EduBotScreen> {
   void _clearChat() {
     setState(() {
       _messages.clear();
+      _isLoading = false;
     });
   }
 
@@ -160,7 +143,7 @@ class _EduBotScreenState extends State<EduBotScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'مساعدك الذكي دائم الجاهزية لدعمك في مشوارك الجامعي. اختر من المقترحات أدناه أو اطرح سؤالك مباشرة.',
+                'مساعدك الذكي دائم الجاهزية لدعمك في مشوارك الجامعي. اطرح سؤالك مباشرة.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.textSecondary,
@@ -168,88 +151,7 @@ class _EduBotScreenState extends State<EduBotScreen> {
                   height: 1.6,
                 ),
               ),
-              const SizedBox(height: 48),
-              _buildCategoryBox('داخل التطبيق', Icons.phone_iphone_rounded, [
-                'كيف أنضم لمجموعة؟',
-                'كيف أنشر في الفيد؟'
-              ]),
-              const SizedBox(height: 16),
-              _buildCategoryBox('الدراسة والشرح', Icons.menu_book_rounded, [
-                'كيف أبدأ محادثة دراسية؟',
-                'اقترح طريقة للمذاكرة'
-              ]),
-              const SizedBox(height: 16),
-              _buildCategoryBox('حل المشاكل', Icons.handyman_rounded, [
-                'التطبيق يعلق معي',
-                'دعوات الجروب ما تشتغل'
-              ]),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryBox(String title, IconData icon, List<String> suggestions) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: AppColors.primary),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: suggestions.map((text) => _buildSuggestionChip(text)).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSuggestionChip(String label) {
-    return GestureDetector(
-      onTap: () => _handleSendMessage(label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -351,18 +253,20 @@ class _EduBotScreenState extends State<EduBotScreen> {
       body: Column(
         children: [
           Expanded(
-            child: _messages.isEmpty
+            child: _messages.isEmpty && !_isLoading
                 ? _buildWelcomeState()
                 : ListView.builder(
                     controller: _scrollController,
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                    itemCount: _messages.length,
+                    itemCount: _messages.length + (_isLoading ? 1 : 0),
                     itemBuilder: (context, index) {
+                      if (index == _messages.length) {
+                        return _buildTypingIndicator();
+                      }
+
                       final message = _messages[index];
                       final isUser = message.isUser;
-
-                      if (message.isLoading) return _buildTypingIndicator();
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 20),
