@@ -59,6 +59,8 @@ export const eduBot = functions
     }
 
     try {
+      console.log("EduBot: request received");
+
       const apiKey = process.env.GEMINI_API_KEY || "";
       if (!apiKey) {
         console.error("Missing GEMINI_API_KEY in environment variables.");
@@ -90,6 +92,7 @@ export const eduBot = functions
         parts: [{ text: message }]
       });
       
+      console.log("EduBot: model call start");
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: contentsPayload,
@@ -97,6 +100,7 @@ export const eduBot = functions
           systemInstruction: systemInstruction,
         }
       });
+      console.log("EduBot: model call success");
 
       const text = response.text || "عذراً، لم أتمكن من إنشاء رد في الوقت الحالي.";
 
@@ -104,7 +108,7 @@ export const eduBot = functions
         reply: text,
       };
     } catch (error) {
-      console.error("EduBot Generation Error:", error);
+      console.error("EduBot: model call error:", error);
       return {
         reply: "عذراً، أواجه مشكلة في الاتصال حالياً. يرجى المحاولة لاحقاً."
       };
