@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/feed_comment_model.dart';
+import '../../../models/feed_comment_reply_model.dart';
 import '../../../services/feed_comments_service.dart';
 import '../../../services/feed_comment_reactions_service.dart';
 
@@ -19,6 +20,7 @@ class PostCommentsSheet extends StatefulWidget {
 class _PostCommentsSheetState extends State<PostCommentsSheet> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSending = false;
+  FeedCommentModel? _replyingTo;
 
   @override
   void dispose() {
@@ -43,9 +45,21 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
     _unfocus();
 
     try {
-      await FeedCommentsService.addComment(postId: postId, text: text);
+      if (_replyingTo != null) {
+        await FeedCommentsService.addReply(
+          postId: postId,
+          commentId: _replyingTo!.commentId,
+          text: text,
+        );
+      } else {
+        await FeedCommentsService.addComment(postId: postId, text: text);
+      }
+      
       if (mounted) {
         _commentController.clear();
+        setState(() {
+          _replyingTo = null;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -165,6 +179,11 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                       return _CommentItem(
                         postId: postId,
                         comment: comment,
+                        onReplyTap: () {
+                          setState(() {
+                            _replyingTo = comment;
+                          });
+                        },
                       );
                     },
                   );
@@ -190,70 +209,103 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
               ],
             ),
             child: SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: TextField(
-                        controller: _commentController,
-                        maxLines: 5,
-                        minLines: 1,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 14,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: 'إضافة تعليق...',
-                          hintStyle: TextStyle(color: AppColors.textSecondary),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                  if (_replyingTo != null) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'الرد على ${_replyingTo!.authorName}',
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
                           ),
-                          border: InputBorder.none,
                         ),
-                      ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _replyingTo = null;
+                            });
+                          },
+                          child: const Icon(Icons.close_rounded,
+                              size: 16, color: AppColors.textSecondary),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: _isSending ? null : _sendComment,
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
+                    const SizedBox(height: 8),
+                  ],
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.background,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: AppColors.border),
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: _isSending
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.send_rounded,
-                                color: Colors.white,
-                                size: 18,
+                          child: TextField(
+                            controller: _commentController,
+                            maxLines: 5,
+                            minLines: 1,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: _replyingTo != null
+                                  ? 'اكتب ردك هنا...'
+                                  : 'إضافة تعليق...',
+                              hintStyle: const TextStyle(
+                                  color: AppColors.textSecondary),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
                               ),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: _isSending ? null : _sendComment,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: _isSending
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.send_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -268,10 +320,12 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
 class _CommentItem extends StatefulWidget {
   final String postId;
   final FeedCommentModel comment;
+  final VoidCallback? onReplyTap;
 
   const _CommentItem({
     required this.postId,
     required this.comment,
+    this.onReplyTap,
   });
 
   @override
@@ -282,11 +336,14 @@ class _CommentItemState extends State<_CommentItem> {
   bool _isLiked = false;
   int _likesCount = 0;
   bool _isLoadingLike = false;
+  bool _isSelf = false;
 
   @override
   void initState() {
     super.initState();
     _likesCount = widget.comment.likesCount;
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    _isSelf = currentUserId == widget.comment.authorId;
     _checkLikeStatus();
   }
 
@@ -401,105 +458,189 @@ class _CommentItemState extends State<_CommentItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.comment.authorName,
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13,
-                ),
-              ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _formatTime(widget.comment.createdAt?.toDate()),
+                    widget.comment.authorName,
                     style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTapDown: (details) {
-                      showMenu(
-                        context: context,
-                        color: AppColors.surface,
-                        position: RelativeRect.fromLTRB(
-                          details.globalPosition.dx,
-                          details.globalPosition.dy,
-                          details.globalPosition.dx,
-                          details.globalPosition.dy,
+                  Row(
+                    children: [
+                      Text(
+                        _formatTime(widget.comment.createdAt?.toDate()),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
                         ),
-                        items: [
-                          const PopupMenuItem(
-                            value: 'report',
-                            child: Text('إبلاغ', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+                      ),
+                      if (!_isSelf) ...[
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTapDown: (details) {
+                            showMenu(
+                              context: context,
+                              color: AppColors.surface,
+                              position: RelativeRect.fromLTRB(
+                                details.globalPosition.dx,
+                                details.globalPosition.dy,
+                                details.globalPosition.dx,
+                                details.globalPosition.dy,
+                              ),
+                              items: [
+                                const PopupMenuItem(
+                                  value: 'report',
+                                  child: Text('إبلاغ', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ).then((value) {
+                              if (value == 'report') {
+                                _showReportDialog();
+                              }
+                            });
+                          },
+                          child: const Icon(Icons.more_horiz_rounded, size: 16, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.comment.text,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 13.5,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: _toggleLike,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                          size: 16,
+                          color: _isLiked ? Colors.red : AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$_likesCount',
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
-                      ).then((value) {
-                        if (value == 'report') {
-                          _showReportDialog();
-                        }
-                      });
-                    },
-                    child: const Icon(Icons.more_horiz_rounded, size: 16, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  GestureDetector(
+                    onTap: widget.onReplyTap,
+                    child: const Text(
+                      'رد',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            widget.comment.text,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 13.5,
-              height: 1.4,
+        ),
+        
+        // Replies StreamBuilder
+        Padding(
+          padding: const EdgeInsets.only(right: 24.0, bottom: 12.0),
+          child: StreamBuilder<List<FeedCommentReplyModel>>(
+            stream: FeedCommentsService.streamReplies(
+              postId: widget.postId,
+              commentId: widget.comment.commentId,
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: _toggleLike,
-                child: Row(
-                  children: [
-                    Icon(
-                      _isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                      size: 16,
-                      color: _isLiked ? Colors.red : AppColors.textSecondary,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox.shrink();
+              final replies = snapshot.data!;
+              if (replies.isEmpty) return const SizedBox.shrink();
+
+              return Column(
+                children: replies.map((reply) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border, width: 0.5),
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$_likesCount',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              reply.authorName,
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                            Text(
+                              _formatTime(reply.createdAt?.toDate()),
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          reply.text,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 12.5,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  );
+                }).toList(),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
