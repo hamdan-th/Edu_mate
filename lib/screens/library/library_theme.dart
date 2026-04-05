@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class LibraryTheme {
-  static const Color primary = Color(0xFF4F46E5);
-  static const Color secondary = Color(0xFF8B5CF6);
-  static const Color accent = Color(0xFFF59E0B);
-  static const Color success = Color(0xFF10B981);
-  static const Color danger = Color(0xFFEF4444);
-  static const Color bg = Color(0xFFF7F9FF);
-  static const Color surface = Colors.white;
-  static const Color text = Color(0xFF0F172A);
-  static const Color muted = Color(0xFF64748B);
-  static const Color border = Color(0xFFE8ECF5);
+  LibraryTheme._();
+
+  static const Color primary = AppColors.primary;
+  static const Color secondary = AppColors.primaryDark;
+  static const Color accent = AppColors.secondary;
+  static const Color success = AppColors.success;
+  static const Color danger = AppColors.error;
+  static const Color bg = AppColors.background;
+  static const Color surface = AppColors.surface;
+  static const Color text = AppColors.textPrimary;
+  static const Color muted = AppColors.textSecondary;
+  static const Color border = AppColors.border;
 
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -21,18 +24,18 @@ class LibraryTheme {
   static const LinearGradient aquaGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
+    colors: [AppColors.blueGlow, primary],
   );
 
   static const LinearGradient amberGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+    colors: [accent, Color(0xFFF59E0B)],
   );
 
   static const LinearGradient mintGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF10B981), Color(0xFF14B8A6)],
+    colors: [success, primary],
   );
 }
