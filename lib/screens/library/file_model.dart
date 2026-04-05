@@ -1,9 +1,9 @@
-// lib/file_model.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FileModel {
   final String id;
-  final String title; // <-- رجعت هنا
-  final String author; // <-- رجعت هنا
+  final String title;
+  final String author;
   final String course;
   final String university;
   final String college;
@@ -12,10 +12,20 @@ class FileModel {
   final String fileType;
   final String thumbnailUrl;
   final String fileUrl;
+  final String uploaderName;
+  final String uploaderUsername;
+  final String description;
+  final DateTime? createdAt;
   final int likes;
   final int saves;
+  final int downloads;
+  final int views;
+  final int shares;
+  final String status;
+  final String? userId;
+  final String? storagePath;
 
-  FileModel({
+  const FileModel({
     required this.id,
     required this.title,
     required this.author,
@@ -27,59 +37,104 @@ class FileModel {
     required this.fileType,
     required this.thumbnailUrl,
     required this.fileUrl,
+    required this.uploaderName,
+    required this.uploaderUsername,
+    required this.description,
+    required this.createdAt,
     required this.likes,
     required this.saves,
+    this.downloads = 0,
+    this.views = 0,
+    this.shares = 0,
+    this.status = 'approved',
+    this.userId,
+    this.storagePath,
   });
+
+  bool get isPdf =>
+      fileType.toLowerCase() == 'pdf' ||
+      fileUrl.toLowerCase().contains('.pdf');
+
+  bool get isWord => fileType.toLowerCase() == 'word';
+
+  String get displayUploader {
+    if (uploaderUsername.trim().isNotEmpty) return '@$uploaderUsername';
+    if (uploaderName.trim().isNotEmpty) return uploaderName;
+    return 'غير معروف';
+  }
+
+  FileModel copyWith({
+    int? likes,
+    int? saves,
+    int? downloads,
+    int? views,
+    int? shares,
+    String? status,
+  }) {
+    return FileModel(
+      id: id,
+      title: title,
+      author: author,
+      course: course,
+      university: university,
+      college: college,
+      major: major,
+      semester: semester,
+      fileType: fileType,
+      thumbnailUrl: thumbnailUrl,
+      fileUrl: fileUrl,
+      uploaderName: uploaderName,
+      uploaderUsername: uploaderUsername,
+      description: description,
+      createdAt: createdAt,
+      likes: likes ?? this.likes,
+      saves: saves ?? this.saves,
+      downloads: downloads ?? this.downloads,
+      views: views ?? this.views,
+      shares: shares ?? this.shares,
+      status: status ?? this.status,
+      userId: userId,
+      storagePath: storagePath,
+    );
+  }
+
+  factory FileModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? <String, dynamic>{};
+
+    int readInt(String key) {
+      final value = data[key];
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? 0;
+      return 0;
+    }
+
+    return FileModel(
+      id: doc.id,
+      title: (data['subjectName'] ?? '').toString(),
+      author: (data['doctorName'] ?? '').toString(),
+      course: (data['subjectName'] ?? '').toString(),
+      university: (data['university'] ?? 'جامعة صنعاء').toString(),
+      college: (data['college'] ?? '').toString(),
+      major: (data['specialization'] ?? '').toString(),
+      semester:
+          '${data['level'] ?? ''}${data['term'] != null ? ' • ${data['term']}' : ''}',
+      fileType: (data['fileType'] ?? '').toString(),
+      thumbnailUrl: (data['thumbnailUrl'] ?? '').toString(),
+      fileUrl: (data['fileUrl'] ?? '').toString(),
+      uploaderName: (data['uploaderName'] ?? '').toString(),
+      uploaderUsername: (data['uploaderUsername'] ?? '').toString(),
+      description: (data['description'] ?? '').toString(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      likes: readInt('likesCount'),
+      saves: readInt('savesCount'),
+      downloads: readInt('downloadsCount'),
+      views: readInt('viewsCount'),
+      shares: readInt('sharesCount'),
+      status: (data['status'] ?? 'approved').toString(),
+      userId: (data['userId'] ?? '').toString(),
+      storagePath: (data['storagePath'] ?? '').toString(),
+    );
+  }
 }
-
-// قائمة البيانات الوهمية (تم تحديثها)
-final List<FileModel> dummyFiles = [
-FileModel(
-id: '1',
-title: 'محاضرات التفاضل والتكامل 1',
-author: 'د. أحمد المصري',
-course: 'التفاضل والتكامل 1',
-university: 'جامعة الملك سعود',
-college: 'كلية العلوم',
-major: 'الرياضيات',
-semester: 'الفصل الأول 2023',
-fileType: 'PDF',
-thumbnailUrl: 'https://i.imgur.com/2c0a1x4.png', // صورة غلاف كتاب رياضيات
-fileUrl: 'url_to_file_1',
-likes: 150,
-saves: 75,
-),
-FileModel(
-id: '2',
-title: 'مقدمة في هياكل البيانات',
-author: 'د. سارة الجهني',
-course: 'هياكل البيانات',
-university: 'جامعة الملك عبد العزيز',
-college: 'كلية الهندسة وتقنية المعلومات',
-major: 'هندسة الحاسب',
-semester: 'الفصل الثاني 2023',
-fileType: 'PDF',
-thumbnailUrl: 'https://i.imgur.com/O3y5g3A.png', // صورة غلاف كتاب برمجة
-fileUrl: 'url_to_file_2',
-likes: 230,
-saves: 120,
-),
-// ابحث عن هذا العنصر واستبدله بالكامل
-FileModel(
-id: '3',
-title: 'ملخص قوانين الفيزياء العامة',
-author: 'م. خالد الغامدي',
-course: 'الفيزياء العامة',
-university: 'جامعة الملك فهد للبترول والمعادن',
-college: 'كلية العلوم الهندسية',
-major: 'الهندسة الميكانيكية',
-semester: 'الفصل الأول 2023',
-fileType: 'Word',
-thumbnailUrl: 'https://i.imgur.com/sT4bYfU.png',
-// --- هذه هي الأسطر المضافة ---
-fileUrl: 'url_to_file_3',
-likes: 95,
-saves: 40,
-
-),
-];
