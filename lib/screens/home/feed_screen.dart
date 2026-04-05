@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../services/feed_service.dart';
+import '../../models/feed_post_model.dart';
 import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 
@@ -14,6 +16,8 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   String _selectedFilter = 'For You';
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   final List<String> _filters = const [
     'For You',
@@ -21,6 +25,22 @@ class _FeedScreenState extends State<FeedScreen> {
     'Popular',
     'Recent',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> _refresh() async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -75,26 +95,11 @@ class _FeedScreenState extends State<FeedScreen> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  bool _isValidPost(Map<String, dynamic> data) {
-    final contentText = (data['contentText'] ?? '').toString().trim();
-    final contentImageUrl = (data['contentImageUrl'] ?? '').toString().trim();
-    final groupId = (data['groupId'] ?? '').toString().trim();
-    final groupName = (data['groupName'] ?? '').toString().trim();
-    final visibility = (data['visibility'] ?? '').toString().trim();
-
-    final hasContent = contentText.isNotEmpty || contentImageUrl.isNotEmpty;
-    final hasGroup = groupId.isNotEmpty || groupName.isNotEmpty;
-    final isPublic = visibility.toLowerCase() == 'public';
-
-    return hasContent && hasGroup && isPublic;
-  }
-
-  Stream<QuerySnapshot<Map<String, dynamic>>> _postsStream() {
-    return FirebaseFirestore.instance
-        .collection('posts')
-        .where('visibility', isEqualTo: 'public')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
+  Stream<List<FeedPostModel>> _postsStream() {
+    return FeedService.streamPublicFeed(
+      filter: _selectedFilter,
+      searchQuery: _searchQuery,
+    );
   }
 
   @override
@@ -240,9 +245,10 @@ class _FeedScreenState extends State<FeedScreen> {
                         ),
                       ],
                     ),
-                    child: const TextField(
-                      style: TextStyle(color: AppColors.textPrimary),
-                      decoration: InputDecoration(
+                    child: TextField(
+                      controller: _searchController,
+                      style: const TextStyle(color: AppColors.textPrimary),
+                      decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Search public posts or groups',
                         hintStyle: TextStyle(
@@ -286,7 +292,7 @@ class _FeedScreenState extends State<FeedScreen> {
                     onRefresh: _refresh,
                     color: AppColors.primary,
                     backgroundColor: AppColors.surface,
-                    child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    child: StreamBuilder<List<FeedPostModel>>(
                       stream: _postsStream(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
@@ -315,12 +321,7 @@ class _FeedScreenState extends State<FeedScreen> {
                           );
                         }
 
-                        final rawDocs = snapshot.data?.docs ?? [];
-
-                        final docs = rawDocs.where((doc) {
-                          final data = doc.data();
-                          return _isValidPost(data);
-                        }).toList();
+                        final docs = snapshot.data ?? [];
 
                         if (docs.isEmpty) {
                           return ListView(
@@ -342,25 +343,21 @@ class _FeedScreenState extends State<FeedScreen> {
                           const EdgeInsets.fromLTRB(20, 0, 20, 110),
                           itemCount: docs.length,
                           itemBuilder: (context, index) {
-                            final data = docs[index].data();
+                            final data = docs[index];
 
                             final post = {
-                              'postId': data['postId'] ?? docs[index].id,
-                              'authorId': data['authorId'] ?? '',
-                              'authorName': data['authorName'] ?? '',
-                              'groupName': data['groupName'] ?? '',
+                              'postId': data.id,
+                              'authorId': data.authorId,
+                              'authorName': data.authorName,
+                              'groupName': data.groupName,
                               'groupMeta': 'Public Group',
-                              'time': _formatTime(data['createdAt']),
-                              'content': data['contentText'] ?? '',
-                              'likes': data['likesCount'] ?? 0,
-                              'comments': data['commentsCount'] ?? 0,
-                              'hasImage':
-                              (data['contentImageUrl'] ?? '')
-                                  .toString()
-                                  .trim()
-                                  .isNotEmpty,
-                              'imageUrl': data['contentImageUrl'] ?? '',
-                              'groupId': data['groupId'] ?? '',
+                              'time': _formatTime(data.createdAt),
+                              'content': data.contentText,
+                              'likes': data.likesCount,
+                              'comments': data.commentsCount,
+                              'hasImage': data.contentImageUrl.isNotEmpty,
+                              'imageUrl': data.contentImageUrl,
+                              'groupId': data.groupId,
                               'tag': 'Public',
                             };
 
