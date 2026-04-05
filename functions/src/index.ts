@@ -70,9 +70,29 @@ export const eduBot = functions
       
       const ai = new GoogleGenAI({ apiKey: apiKey });
       
+      const contentsPayload: any[] = [];
+      const history = data.history;
+      if (Array.isArray(history)) {
+        // Safe iterate avoiding enormous arrays
+        const safeHistory = history.slice(-6); 
+        for (const msg of safeHistory) {
+          if (msg && typeof msg.text === "string" && msg.text.trim().length > 0) {
+             contentsPayload.push({
+               role: msg.role === "model" ? "model" : "user",
+               parts: [{ text: msg.text }]
+             });
+          }
+        }
+      }
+      
+      contentsPayload.push({
+        role: "user",
+        parts: [{ text: message }]
+      });
+      
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: message,
+        contents: contentsPayload,
         config: {
           systemInstruction: systemInstruction,
         }

@@ -72,7 +72,11 @@ class _EduBotScreenState extends State<EduBotScreen> {
 
     _scrollToBottom();
 
-    final botReply = await EduBotService.sendMessage(userMsgText);
+    final List<EduBotMessageModel> historyPayload = _messages
+        .where((m) => !m.isLoading && m.text.isNotEmpty && m.id != userMsg.id)
+        .toList();
+
+    final botReply = await EduBotService.sendMessage(userMsgText, history: historyPayload);
 
     if (mounted) {
       setState(() {
