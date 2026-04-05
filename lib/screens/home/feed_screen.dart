@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../services/feed_reactions_service.dart';
 import '../../services/feed_service.dart';
 import '../../models/feed_post_model.dart';
+import 'post_comments_screen.dart';
 import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 
@@ -962,6 +963,14 @@ class _PostCardState extends State<PostCard>
                     icon: Icons.chat_bubble_outline_rounded,
                     label: '${widget.post['comments'] ?? 0}',
                     color: AppColors.textSecondary,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PostCommentsScreen(postCardData: widget.post),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 20),
                   const FlatPostAction(
@@ -983,19 +992,21 @@ class FlatPostAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
+  final VoidCallback? onTap;
 
   const FlatPostAction({
     super.key,
     required this.icon,
     required this.label,
     required this.color,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(10),
-      onTap: () {},
+      onTap: onTap ?? () {},
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
         child: Row(
