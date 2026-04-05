@@ -24,6 +24,7 @@ class _MessageInputState extends State<MessageInput> {
     if (text.trim().isNotEmpty) {
       widget.onSend(text);
       _controller.clear();
+      setState((){});
     }
   }
 
@@ -35,73 +36,89 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
+    final hasText = _controller.text.trim().isNotEmpty;
+    
     return Container(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 32),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 32),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: const Border(top: BorderSide(color: AppColors.border)),
+        color: AppColors.background,
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.03),
-            blurRadius: 24,
-            offset: const Offset(0, -8),
+            color: AppColors.textPrimary.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.border.withOpacity(0.8)),
-              ),
-              child: TextField(
-                controller: _controller,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, height: 1.4),
-                maxLines: 5,
-                minLines: 1,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _handleSend(),
-                decoration: const InputDecoration(
-                  hintText: 'اسأل Edu Bot أي شيء...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14.5),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: SafeArea(
+        top: false,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: AppColors.border.withOpacity(0.5)),
+            boxShadow: [
+               BoxShadow(
+                 color: AppColors.textPrimary.withOpacity(0.03),
+                 blurRadius: 10,
+                 offset: const Offset(0, 2),
+               )
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  onChanged: (_) => setState(() {}),
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, height: 1.5, fontWeight: FontWeight.w500),
+                  maxLines: 5,
+                  minLines: 1,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => _handleSend(),
+                  decoration: const InputDecoration(
+                    hintText: 'اسأل Edu Bot أي شيء...',
+                    hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14.5),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          InkWell(
-            onTap: widget.isSending ? null : _handleSend,
-            borderRadius: BorderRadius.circular(24),
-            child: Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                gradient: widget.isSending 
-                  ? null 
-                  : const LinearGradient(colors: [AppColors.primary, AppColors.blueGlow], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                color: widget.isSending ? AppColors.border : null,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  if (!widget.isSending)
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                ],
+              Padding(
+                padding: const EdgeInsets.only(left: 8, right: 6, bottom: 6),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: (hasText && !widget.isSending)
+                      ? const LinearGradient(colors: [AppColors.primary, AppColors.blueGlow], begin: Alignment.topLeft, end: Alignment.bottomRight)
+                      : null,
+                    color: (hasText && !widget.isSending) ? null : AppColors.surface,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      if (hasText && !widget.isSending)
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                    ],
+                  ),
+                  child: InkWell(
+                    onTap: (hasText && !widget.isSending) ? _handleSend : null,
+                    borderRadius: BorderRadius.circular(22),
+                    child: widget.isSending 
+                       ? const Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)))
+                       : Icon(Icons.arrow_upward_rounded, color: (hasText && !widget.isSending) ? Colors.white : AppColors.textSecondary.withOpacity(0.5), size: 20),
+                  ),
+                ),
               ),
-              child: widget.isSending 
-                 ? const Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white)))
-                 : const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 24),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

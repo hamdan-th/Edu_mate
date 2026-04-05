@@ -12,23 +12,27 @@ class EmptyState extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        border: Border.all(color: AppColors.border.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppColors.textPrimary.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 20, color: AppColors.primary),
-              const SizedBox(width: 8),
+              Container(
+                 padding: const EdgeInsets.all(6),
+                 decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                 child: Icon(icon, size: 18, color: AppColors.primary),
+              ),
+              const SizedBox(width: 12),
               Text(
                 title,
                 style: const TextStyle(
@@ -41,8 +45,8 @@ class EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 10,
+            runSpacing: 10,
             children: suggestions.map((text) => _buildSuggestionChip(text)).toList(),
           ),
         ],
@@ -53,20 +57,28 @@ class EmptyState extends StatelessWidget {
   Widget _buildSuggestionChip(String label) {
     return GestureDetector(
       onTap: () => onSuggestionTap(label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.background,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: AppColors.border.withOpacity(0.7)),
         ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.arrow_back_ios_rounded, size: 10, color: AppColors.textSecondary.withOpacity(0.5)),
+          ],
         ),
       ),
     );
@@ -78,60 +90,70 @@ class EmptyState extends StatelessWidget {
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.blueGlow],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: child,
+                )
+              );
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.blueGlow],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.auto_awesome_rounded, size: 40, color: Colors.white),
                 ),
-                child: const Icon(Icons.auto_awesome_rounded, size: 48, color: Colors.white),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'مرحباً بك في Edu Bot',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
+                const SizedBox(height: 28),
+                const Text(
+                  'مرحباً بك في Edu Bot',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'مساعدك الذكي دائم الجاهزية. اختر سؤالاً للتجربة أو اطرح استفسارك فوراً.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 15,
-                  height: 1.6,
+                const SizedBox(height: 12),
+                const Text(
+                  'أنا مساعدك الذكي المعزز بالذكاء الاصطناعي.\nاطرح أي سؤال حول دراستك أو التطبيق وسأساعدك فوراً.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 15,
+                    height: 1.6,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 48),
-              _buildCategoryBox('الاستخدام الأساسي', Icons.phone_iphone_rounded, [
-                'كيف أنضم لمجموعة؟',
-                'كيف أنشر تعليق؟'
-              ]),
-              const SizedBox(height: 16),
-              _buildCategoryBox('المكتبة والملفات', Icons.folder_shared_rounded, [
-                'كيف أجد ملفات تخصصك؟',
-                'كيف أرفع ملخص؟'
-              ]),
-            ],
+                const SizedBox(height: 48),
+                _buildCategoryBox('شروحات سريعة', Icons.lightbulb_outline_rounded, [
+                  'كيف أستفيد من مجموعات التطبيق؟',
+                  'اشرح لي كيفية نشر ملف جديد',
+                ]),
+              ],
+            ),
           ),
         ),
       ),
