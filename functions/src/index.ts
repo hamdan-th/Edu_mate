@@ -25,15 +25,24 @@ Rules:
 export const eduBot = functions
   .runWith({ secrets: [geminiApiKey] })
   .https.onCall(async (data, context) => {
-    try {
-      const message = data.message;
-      if (!message || typeof message !== "string") {
-        throw new functions.https.HttpsError(
-          "invalid-argument",
-          "The function must be called with a valid 'message' string."
-        );
-      }
+    const rawMessage = data.message;
+    const message = typeof rawMessage === "string" ? rawMessage.trim() : "";
 
+    if (!message) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "يجب إرسال رسالة نصية صالحة."
+      );
+    }
+
+    if (message.length > 2000) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "الرسالة طويلة جداً. يرجى اختصارها بما لا يتجاوز 2000 حرف."
+      );
+    }
+
+    try {
       const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
       
       const response = await ai.models.generateContent({
