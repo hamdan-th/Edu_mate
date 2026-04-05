@@ -9,6 +9,7 @@ import '../../models/feed_post_model.dart';
 import 'widgets/post_comments_sheet.dart';
 import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
+import '../../features/edu_bot/screens/edu_bot_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -70,7 +71,7 @@ class _FeedScreenState extends State<FeedScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const PlaceholderBotScreen(),
+        builder: (_) => const EduBotScreen(),
       ),
     );
   }
