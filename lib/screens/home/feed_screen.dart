@@ -666,20 +666,32 @@ class _PostCardState extends State<PostCard>
   }
 
   Future<void> _joinGroup() async {
+    if (_isLoadingJoined || _isJoined) return;
+    
     final groupId = widget.post['groupId']?.toString() ?? '';
-    if (groupId.isEmpty || _isJoined) return;
+    if (groupId.isEmpty) return;
+    
+    setState(() {
+      _isLoadingJoined = true;
+    });
     
     try {
       await GroupService.joinPublicGroup(groupId);
-      setState(() {
-        _isJoined = true;
-      });
       if (mounted) {
+        setState(() {
+          _isJoined = true;
+        });
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الانضمام للمجموعة')));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingJoined = false;
+        });
       }
     }
   }
@@ -821,7 +833,11 @@ class _PostCardState extends State<PostCard>
                       ),
                       child: Center(
                         child: _isLoadingJoined
-                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                            ? const SizedBox(
+                                width: 16, 
+                                height: 16, 
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                              )
                             : Text(
                                 _isJoined ? 'Joined' : 'Join',
                                 style: TextStyle(
