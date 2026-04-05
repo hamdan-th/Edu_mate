@@ -7,6 +7,7 @@ import '../widgets/message_bubble.dart';
 import '../widgets/message_input.dart';
 import '../widgets/typing_indicator.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/chat_history_drawer.dart';
 
 class BotScreen extends StatefulWidget {
   const BotScreen({super.key});
@@ -18,6 +19,7 @@ class BotScreen extends StatefulWidget {
 class _BotScreenState extends State<BotScreen> {
   late final BotController _controller;
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -55,7 +57,9 @@ class _BotScreenState extends State<BotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: AppColors.background,
+      endDrawer: ChatHistoryDrawer(controller: _controller),
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -77,18 +81,59 @@ class _BotScreenState extends State<BotScreen> {
           ],
         ),
         actions: [
+          IconButton(
+             icon: const Icon(Icons.history_rounded, color: AppColors.textPrimary, size: 22),
+             onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+             tooltip: 'سجل المحادثات',
+          ),
+          const SizedBox(width: 4),
           AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
               if (_controller.messages.isEmpty) return const SizedBox.shrink();
-              return IconButton(
-                icon: const Icon(Icons.cleaning_services_rounded, color: AppColors.textSecondary, size: 22),
-                onPressed: () => _controller.clearChat(),
-                tooltip: 'مسح المحادثة',
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  popupMenuTheme: PopupMenuThemeData(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    color: AppColors.surface,
+                  )
+                ),
+                child: PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary, size: 22),
+                  onSelected: (value) {
+                    if (value == 'new') {
+                       _controller.createNewChat();
+                    } else if (value == 'clear') {
+                       _controller.clearChatConfirm(context);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                     const PopupMenuItem(
+                       value: 'new',
+                       child: Row(
+                         children: [
+                           Icon(Icons.add_rounded, color: AppColors.textPrimary, size: 20),
+                           SizedBox(width: 12),
+                           Text('محادثة جديدة', style: TextStyle(fontWeight: FontWeight.w600)),
+                         ],
+                       ),
+                     ),
+                     const PopupMenuItem(
+                       value: 'clear',
+                       child: Row(
+                         children: [
+                           Icon(Icons.cleaning_services_rounded, color: AppColors.error, size: 20),
+                           SizedBox(width: 12),
+                           Text('مسح الرسائل', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w600)),
+                         ],
+                       ),
+                     ),
+                  ],
+                ),
               );
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),

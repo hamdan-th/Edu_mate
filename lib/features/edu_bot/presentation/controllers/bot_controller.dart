@@ -1,28 +1,92 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/chat_message.dart';
+import '../../domain/entities/chat_session.dart';
 import '../../data/repositories/bot_repository.dart';
 
 class BotController extends ChangeNotifier {
   final BotRepository _repository;
   
-  final List<ChatMessage> _messages = [];
+  final List<ChatSession> _sessions = [];
+  String? _activeSessionId;
   bool _isSending = false;
 
-  BotController(this._repository);
+  BotController(this._repository) {
+    _initDefaultSession();
+  }
 
-  List<ChatMessage> get messages => List.unmodifiable(_messages);
+  void _initDefaultSession() {
+    if (_sessions.isEmpty) {
+      createNewChat();
+    }
+  }
+
+  List<ChatSession> get sessions {
+    return List.unmodifiable([..._sessions]..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)));
+  }
+
   bool get isSending => _isSending;
+  
+  ChatSession? get activeSession {
+    if (_activeSessionId == null) return null;
+    final index = _sessions.indexWhere((s) => s.id == _activeSessionId);
+    return index != -1 ? _sessions[index] : null;
+  }
+  
+  List<ChatMessage> get messages => activeSession?.messages ?? [];
+
+  void createNewChat() {
+    if (_isSending) return;
+    
+    if (activeSession != null && activeSession!.messages.isEmpty) {
+      return; 
+    }
+
+    final newSession = ChatSession(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: 'محادثة جديدة',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      messages: const [],
+    );
+    _sessions.add(newSession);
+    _activeSessionId = newSession.id;
+    notifyListeners();
+  }
+
+  void openChat(String sessionId) {
+    if (_isSending) return;
+    final index = _sessions.indexWhere((s) => s.id == sessionId);
+    if (index != -1) {
+      _activeSessionId = sessionId;
+      notifyListeners();
+    }
+  }
+
+  void deleteChat(String sessionId) {
+    if (_isSending && _activeSessionId == sessionId) return;
+
+    _sessions.removeWhere((s) => s.id == sessionId);
+    
+    if (_sessions.isEmpty) {
+      createNewChat();
+    } else if (_activeSessionId == sessionId) {
+      _activeSessionId = sessions.first.id;
+    }
+    notifyListeners();
+  }
 
   Future<void> sendMessage(String text) async {
-    if (_isSending || text.trim().isEmpty) return;
+    if (_isSending || text.trim().isEmpty || activeSession == null) return;
     
     _isSending = true;
     notifyListeners();
 
     final trimmedText = text.trim();
     final userMsgId = DateTime.now().millisecondsSinceEpoch.toString();
+    final curSessionId = _activeSessionId!;
     
-    _messages.add(
+    _appendMessageToSession(
+      curSessionId,
       ChatMessage(
         id: userMsgId,
         text: trimmedText,
@@ -30,28 +94,31 @@ class BotController extends ChangeNotifier {
         createdAt: DateTime.now(),
         status: MessageStatus.sending,
       ),
+      updateTitle: trimmedText,
     );
     notifyListeners();
 
-    final historyToPass = _messages
+    final currentSession = _sessions.firstWhere((s) => s.id == curSessionId, orElse: () => _sessions.first);
+    final historyToPass = currentSession.messages
         .where((m) => m.id != userMsgId && m.status == MessageStatus.sent)
         .toList();
 
     try {
       final botReply = await _repository.sendMessage(trimmedText, historyToPass);
 
-      final index = _messages.indexWhere((m) => m.id == userMsgId);
-      if (index != -1) {
-        _messages[index] = ChatMessage(
-          id: userMsgId,
-          text: trimmedText,
-          sender: MessageSender.user,
-          createdAt: _messages[index].createdAt,
+      _updateMessageInSession(
+        curSessionId,
+        userMsgId,
+        (msg) => ChatMessage(
+          id: msg.id,
+          text: msg.text,
+          sender: msg.sender,
+          createdAt: msg.createdAt,
           status: MessageStatus.sent,
-        );
-      }
+        ),
+      );
 
-      _messages.add(botReply);
+      _appendMessageToSession(curSessionId, botReply);
     } catch (e) {
       final String rawError = e.toString().toLowerCase();
       String friendlyError = "عذراً، واجهنا خطأ تقني. يرجى المحاولة لاحقاً.";
@@ -77,60 +144,139 @@ class BotController extends ChangeNotifier {
              fallbackReply = "عذراً، أواجه ضغطاً استثنائياً حالياً ولن أتمكن من إجابة سؤالك المفصل. سأعود للعمل قريباً!";
          }
 
-         final index = _messages.indexWhere((m) => m.id == userMsgId);
-         if (index != -1) {
-            _messages[index] = ChatMessage(
-              id: userMsgId,
-              text: trimmedText,
-              sender: MessageSender.user,
-              createdAt: _messages[index].createdAt,
-              status: MessageStatus.sent,
-            );
-         }
-         _messages.add(
-            ChatMessage(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              text: fallbackReply,
-              sender: MessageSender.bot,
-              createdAt: DateTime.now(),
-              status: MessageStatus.sent,
-            )
+         _updateMessageInSession(
+           curSessionId,
+           userMsgId,
+           (msg) => ChatMessage(
+             id: msg.id,
+             text: msg.text,
+             sender: msg.sender,
+             createdAt: msg.createdAt,
+             status: MessageStatus.sent,
+           ),
+         );
+         
+         _appendMessageToSession(
+           curSessionId,
+           ChatMessage(
+             id: DateTime.now().millisecondsSinceEpoch.toString(),
+             text: fallbackReply,
+             sender: MessageSender.bot,
+             createdAt: DateTime.now(),
+             status: MessageStatus.sent,
+           )
          );
       } else {
-        final index = _messages.indexWhere((m) => m.id == userMsgId);
-        if (index != -1) {
-          _messages[index] = ChatMessage(
-            id: userMsgId,
-            text: trimmedText,
-            sender: MessageSender.user,
-            createdAt: _messages[index].createdAt,
-            status: MessageStatus.failed,
-            errorMessage: friendlyError,
-          );
-        }
+         _updateMessageInSession(
+           curSessionId,
+           userMsgId,
+           (msg) => ChatMessage(
+             id: msg.id,
+             text: msg.text,
+             sender: msg.sender,
+             createdAt: msg.createdAt,
+             status: MessageStatus.failed,
+             errorMessage: friendlyError,
+           ),
+         );
       }
     } finally {
-      _isSending = false;
+      if (_activeSessionId == curSessionId) {
+        _isSending = false;
+      } else {
+         _isSending = false; 
+      }
       notifyListeners();
     }
   }
 
   Future<void> retryMessage(String messageId) async {
-    if (_isSending) return;
+    if (_isSending || activeSession == null) return;
     
-    final index = _messages.indexWhere((m) => m.id == messageId && m.status == MessageStatus.failed);
+    final curSessionId = _activeSessionId!;
+    final index = activeSession!.messages.indexWhere((m) => m.id == messageId && m.status == MessageStatus.failed);
     if (index == -1) return;
 
-    final failedText = _messages[index].text;
-    _messages.removeAt(index);
-    notifyListeners();
+    final failedText = activeSession!.messages[index].text;
+    
+    final sessionIndex = _sessions.indexWhere((s) => s.id == curSessionId);
+    if (sessionIndex != -1) {
+       final session = _sessions[sessionIndex];
+       final updatedMessages = List<ChatMessage>.from(session.messages)..removeAt(index);
+       _sessions[sessionIndex] = session.copyWith(messages: updatedMessages, updatedAt: DateTime.now());
+       notifyListeners();
+    }
 
     await sendMessage(failedText);
   }
 
-  void clearChat() {
-    _messages.clear();
-    _isSending = false;
-    notifyListeners();
+  void clearChatConfirm(BuildContext context) {
+    if (activeSession == null || activeSession!.messages.isEmpty) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('مسح المحادثة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        content: const Text('هل أنت متأكد أنك تريد مسح جميع رسائل هذه المحادثة؟', style: TextStyle(height: 1.5)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+               _clearCurrentChat();
+               Navigator.pop(context);
+            },
+            child: const Text('مسح', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _clearCurrentChat() {
+    if (_activeSessionId == null) return;
+    final index = _sessions.indexWhere((s) => s.id == _activeSessionId);
+    if (index != -1) {
+       _sessions[index] = _sessions[index].copyWith(messages: const [], title: 'محادثة جديدة', updatedAt: DateTime.now());
+       notifyListeners();
+    }
+  }
+
+  void _appendMessageToSession(String sessionId, ChatMessage message, {String? updateTitle}) {
+    final index = _sessions.indexWhere((s) => s.id == sessionId);
+    if (index != -1) {
+      final session = _sessions[index];
+      final newMessages = List<ChatMessage>.from(session.messages)..add(message);
+      
+      String newTitle = session.title;
+      if (updateTitle != null && session.messages.isEmpty) {
+        newTitle = updateTitle.length > 25 ? '${updateTitle.substring(0, 25)}...' : updateTitle;
+      }
+      
+      _sessions[index] = session.copyWith(
+        messages: newMessages,
+        title: newTitle,
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
+
+  void _updateMessageInSession(String sessionId, String messageId, ChatMessage Function(ChatMessage) update) {
+    final sessionIndex = _sessions.indexWhere((s) => s.id == sessionId);
+    if (sessionIndex != -1) {
+       final session = _sessions[sessionIndex];
+       final msgIndex = session.messages.indexWhere((m) => m.id == messageId);
+       if (msgIndex != -1) {
+          final newMessages = List<ChatMessage>.from(session.messages);
+          newMessages[msgIndex] = update(newMessages[msgIndex]);
+          _sessions[sessionIndex] = session.copyWith(
+             messages: newMessages,
+             updatedAt: DateTime.now(),
+          );
+       }
+    }
   }
 }
