@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/feed_reactions_service.dart';
 import '../../services/feed_service.dart';
+import '../../services/feed_share_service.dart';
 import '../../models/feed_post_model.dart';
 import 'widgets/post_comments_sheet.dart';
 import '../../services/group_service.dart';
@@ -978,10 +979,17 @@ class _PostCardState extends State<PostCard>
                     },
                   ),
                   const SizedBox(width: 20),
-                  const FlatPostAction(
+                  FlatPostAction(
                     icon: Icons.share_outlined,
                     label: '',
                     color: AppColors.textSecondary,
+                    onTap: () {
+                      final feedPost = FeedPostModel.fromMap(
+                        widget.post,
+                        widget.post['postId']?.toString() ?? '',
+                      );
+                      FeedShareService.sharePost(context, feedPost);
+                    },
                   ),
                 ],
               ),
