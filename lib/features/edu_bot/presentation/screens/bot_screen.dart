@@ -93,11 +93,13 @@ class _BotScreenState extends State<BotScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: AppColors.border.withOpacity(0.5), 
             height: 1,
-            boxShadow: [
-               BoxShadow(color: AppColors.textPrimary.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))
-            ],
+            decoration: BoxDecoration(
+              color: AppColors.border.withOpacity(0.5),
+              boxShadow: [
+                 BoxShadow(color: AppColors.textPrimary.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))
+              ],
+            ),
           ),
         ),
       ),
