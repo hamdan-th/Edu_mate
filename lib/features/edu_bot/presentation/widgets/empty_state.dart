@@ -2,7 +2,75 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key});
+  final Function(String) onSuggestionTap;
+
+  const EmptyState({super.key, required this.onSuggestionTap});
+
+  Widget _buildCategoryBox(String title, IconData icon, List<String> suggestions) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textPrimary.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: suggestions.map((text) => _buildSuggestionChip(text)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionChip(String label) {
+    return GestureDetector(
+      onTap: () => onSuggestionTap(label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +113,7 @@ class EmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               const Text(
-                'مساعدك الذكي دائم الجاهزية لدعمك في مشوارك الجامعي. اطرح سؤالك مباشرة.',
+                'مساعدك الذكي دائم الجاهزية. اختر سؤالاً للتجربة أو اطرح استفسارك فوراً.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.textSecondary,
@@ -53,6 +121,16 @@ class EmptyState extends StatelessWidget {
                   height: 1.6,
                 ),
               ),
+              const SizedBox(height: 48),
+              _buildCategoryBox('الاستخدام الأساسي', Icons.phone_iphone_rounded, [
+                'كيف أنضم لمجموعة؟',
+                'كيف أنشر تعليق؟'
+              ]),
+              const SizedBox(height: 16),
+              _buildCategoryBox('المكتبة والملفات', Icons.folder_shared_rounded, [
+                'كيف أجد ملفات تخصصك؟',
+                'كيف أرفع ملخص؟'
+              ]),
             ],
           ),
         ),

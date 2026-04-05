@@ -50,6 +50,8 @@ class _BotScreenState extends State<BotScreen> {
     }
   }
 
+  void _unfocus() => FocusScope.of(context).unfocus();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,37 +92,51 @@ class _BotScreenState extends State<BotScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: AppColors.border, height: 1),
+          child: Container(
+            color: AppColors.border.withOpacity(0.5), 
+            height: 1,
+            boxShadow: [
+               BoxShadow(color: AppColors.textPrimary.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))
+            ],
+          ),
         ),
       ),
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Column(
-            children: [
-              Expanded(
-                child: _controller.messages.isEmpty && !_controller.isSending
-                    ? const EmptyState()
-                    : ListView.builder(
-                        controller: _scrollController,
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                        itemCount: _controller.messages.length + (_controller.isSending ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == _controller.messages.length) {
-                            return const TypingIndicator();
-                          }
-                          return MessageBubble(message: _controller.messages[index]);
-                        },
-                      ),
-              ),
-              MessageInput(
-                onSend: _controller.sendMessage,
-                isSending: _controller.isSending,
-              ),
-            ],
-          );
-        },
+      body: GestureDetector(
+        onTap: _unfocus,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Column(
+              children: [
+                Expanded(
+                  child: _controller.messages.isEmpty && !_controller.isSending
+                      ? EmptyState(
+                          onSuggestionTap: (suggestion) => _controller.sendMessage(suggestion),
+                        )
+                      : ListView.builder(
+                          controller: _scrollController,
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                          itemCount: _controller.messages.length + (_controller.isSending ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == _controller.messages.length) {
+                              return const TypingIndicator();
+                            }
+                            return MessageBubble(
+                              message: _controller.messages[index],
+                              onRetry: () => _controller.retryMessage(_controller.messages[index].id),
+                            );
+                          },
+                        ),
+                ),
+                MessageInput(
+                  onSend: _controller.sendMessage,
+                  isSending: _controller.isSending,
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -53,21 +53,79 @@ class BotController extends ChangeNotifier {
 
       _messages.add(botReply);
     } catch (e) {
-      final index = _messages.indexWhere((m) => m.id == userMsgId);
-      if (index != -1) {
-        _messages[index] = ChatMessage(
-          id: userMsgId,
-          text: trimmedText,
-          sender: MessageSender.user,
-          createdAt: _messages[index].createdAt,
-          status: MessageStatus.failed,
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-        );
+      final String rawError = e.toString().toLowerCase();
+      String friendlyError = "عذراً، واجهنا خطأ تقني. يرجى المحاولة لاحقاً.";
+      bool canFallback = false;
+
+      if (rawError.contains('resource-exhausted') || rawError.contains('quota') || rawError.contains('429')) {
+        friendlyError = "الخدمة تحت ضغط عالي، يرجى المحاولة بعد قليل.";
+        canFallback = true;
+      } else if (rawError.contains('unavailable') || rawError.contains('network') || rawError.contains('internet')) {
+        friendlyError = "لا يوجد اتصال بالإنترنت، يرجى التحقق من الشبكة.";
+      }
+
+      if (canFallback) {
+         final String lowerText = trimmedText.toLowerCase();
+         String fallbackReply = "";
+         if (lowerText.contains("نشر") || lowerText.contains("فيد") || lowerText.contains("post")) {
+             fallbackReply = "💡 (وضع الأوفلاين) لنشر بوست: اذهب إلى شاشة الفيد واضغط على زر الإضافة (+).";
+         } else if (lowerText.contains("جروب") || lowerText.contains("مجموعة") || lowerText.contains("group")) {
+             fallbackReply = "💡 (وضع الأوفلاين) للانضمام للمجموعات: ابحث في قسم Discover أو استخدم دعوة مباشرة.";
+         } else if (lowerText.contains("مكتبة") || lowerText.contains("ملف") || lowerText.contains("library")) {
+             fallbackReply = "💡 (وضع الأوفلاين) للملفات: افتح قسم المكتبة أسفل الشاشة وابحث عن القسم المناسب.";
+         } else {
+             fallbackReply = "عذراً، أواجه ضغطاً استثنائياً حالياً ولن أتمكن من إجابة سؤالك المفصل. سأعود للعمل قريباً!";
+         }
+
+         final index = _messages.indexWhere((m) => m.id == userMsgId);
+         if (index != -1) {
+            _messages[index] = ChatMessage(
+              id: userMsgId,
+              text: trimmedText,
+              sender: MessageSender.user,
+              createdAt: _messages[index].createdAt,
+              status: MessageStatus.sent,
+            );
+         }
+         _messages.add(
+            ChatMessage(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              text: fallbackReply,
+              sender: MessageSender.bot,
+              createdAt: DateTime.now(),
+              status: MessageStatus.sent,
+            )
+         );
+      } else {
+        final index = _messages.indexWhere((m) => m.id == userMsgId);
+        if (index != -1) {
+          _messages[index] = ChatMessage(
+            id: userMsgId,
+            text: trimmedText,
+            sender: MessageSender.user,
+            createdAt: _messages[index].createdAt,
+            status: MessageStatus.failed,
+            errorMessage: friendlyError,
+          );
+        }
       }
     } finally {
       _isSending = false;
       notifyListeners();
     }
+  }
+
+  Future<void> retryMessage(String messageId) async {
+    if (_isSending) return;
+    
+    final index = _messages.indexWhere((m) => m.id == messageId && m.status == MessageStatus.failed);
+    if (index == -1) return;
+
+    final failedText = _messages[index].text;
+    _messages.removeAt(index);
+    notifyListeners();
+
+    await sendMessage(failedText);
   }
 
   void clearChat() {

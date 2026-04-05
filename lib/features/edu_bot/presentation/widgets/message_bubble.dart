@@ -5,10 +5,12 @@ import '../../domain/entities/chat_message.dart';
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
+  final VoidCallback? onRetry;
 
   const MessageBubble({
     super.key,
     required this.message,
+    this.onRetry,
   });
 
   void _copyToClipboard(BuildContext context, String text) {
@@ -71,9 +73,9 @@ class MessageBubble extends StatelessWidget {
                         bottomLeft: Radius.circular(isUser ? 4 : 20),
                         bottomRight: Radius.circular(isUser ? 20 : 4),
                       ),
-                      border: isUser ? null : Border.all(
-                        color: isFailed ? AppColors.error.withOpacity(0.5) : AppColors.border.withOpacity(0.5),
-                      ),
+                      border: isUser 
+                         ? Border.all(color: AppColors.primaryDark, width: 0.5) 
+                         : Border.all(color: isFailed ? AppColors.error.withOpacity(0.5) : AppColors.border.withOpacity(0.5)),
                       boxShadow: [
                         BoxShadow(
                           color: (isUser ? AppColors.primary : AppColors.textPrimary).withOpacity(0.08),
@@ -96,21 +98,52 @@ class MessageBubble extends StatelessWidget {
                           ),
                         ),
                         if (isFailed) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.error_outline_rounded, color: isUser ? Colors.white70 : AppColors.error, size: 14),
-                              const SizedBox(width: 4),
-                              Text(
-                                'فشل الإرسال: ${message.errorMessage ?? "خطأ غير معروف"}',
-                                style: TextStyle(
-                                  color: isUser ? Colors.white70 : AppColors.error,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.error_outline_rounded, color: AppColors.error, size: 16),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    message.errorMessage ?? 'فشل الإرسال',
+                                    style: TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                                if (onRetry != null && isUser) ...[
+                                  const SizedBox(width: 14),
+                                  InkWell(
+                                    onTap: onRetry,
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.error.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Text(
+                                        'إعادة المحاولة',
+                                        style: TextStyle(
+                                          color: AppColors.error,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ],
                         if (message.status == MessageStatus.sending) ...[
@@ -127,7 +160,7 @@ class MessageBubble extends StatelessWidget {
                 ),
               ],
             ),
-            if (!isUser) ...[
+            if (!isUser && !isFailed) ...[
               const SizedBox(height: 6),
               Padding(
                 padding: const EdgeInsets.only(right: 48),
@@ -142,7 +175,7 @@ class MessageBubble extends StatelessWidget {
                         Icon(Icons.copy_rounded, size: 14, color: AppColors.textSecondary.withOpacity(0.7)),
                         const SizedBox(width: 6),
                         Text(
-                          'نسخ التوضيح',
+                          'نسخ الرد',
                           style: TextStyle(
                             fontSize: 11,
                             color: AppColors.textSecondary.withOpacity(0.7),
