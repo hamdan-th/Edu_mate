@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'library_theme.dart';
+
 import 'file_card.dart';
 import 'file_details_screen.dart';
 import 'file_model.dart';
-
+import 'library_files_service.dart';
+import 'library_theme.dart';
+import 'university_academic_data.dart';
 
 class UniversityLibraryScreen extends StatefulWidget {
   const UniversityLibraryScreen({Key? key}) : super(key: key);
@@ -13,120 +16,155 @@ class UniversityLibraryScreen extends StatefulWidget {
 }
 
 class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
-  final List<FileModel> _allFiles = dummyFiles;
-  List<FileModel> _filteredFiles = [];
   bool _isGridView = false;
   final TextEditingController _searchController = TextEditingController();
 
-  // ✨ 1. متغيرات جديدة لتخزين قيم الفلاتر المختارة
-  String? _selectedCollege = 'كلية الهندسة';
-  String? _selectedLevel = 'المستوى الأول';
+  String? _selectedCollege;
+  String? _selectedMajor;
+  String? _selectedLevel;
   String _sortOrder = 'الأحدث';
 
   @override
-  void initState() {
-    super.initState();
-    _filteredFiles = _allFiles;
-    _searchController.addListener(_filterFiles);
-  }
-
-  void _filterFiles() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredFiles = _allFiles.where((file) {
-        final titleMatch = file.title.toLowerCase().contains(query); // بدون .info
-        final authorMatch = file.author.toLowerCase().contains(query); // بدون .info
-        return titleMatch || authorMatch;
-      }).toList();
-    });
-  }
-
-
-
-  @override
   void dispose() {
-    _searchController.removeListener(_filterFiles);
     _searchController.dispose();
     super.dispose();
   }
 
-  // ✨ 2. دالة جديدة لعرض لوحة الفلاتر
+  List<FileModel> _applyFilters(List<FileModel> files) {
+    final query = _searchController.text.trim().toLowerCase();
+
+    List<FileModel> filtered = files.where((file) {
+      final searchable = [
+        file.title,
+        file.author,
+        file.course,
+        file.college,
+        file.major,
+        file.description,
+      ].join(' ').toLowerCase();
+
+      final collegeMatch = _selectedCollege == null || file.college == _selectedCollege;
+      final majorMatch = _selectedMajor == null || file.major == _selectedMajor;
+      final levelMatch = _selectedLevel == null || file.semester.contains(_selectedLevel!);
+
+      return searchable.contains(query) && collegeMatch && majorMatch && levelMatch;
+    }).toList();
+
+    switch (_sortOrder) {
+      case 'الأكثر إعجاباً':
+        filtered.sort((a, b) => b.likes.compareTo(a.likes));
+        break;
+      case 'الأكثر مشاهدة':
+        filtered.sort((a, b) => b.views.compareTo(a.views));
+        break;
+      default:
+        filtered.sort((a, b) => (b.createdAt ?? DateTime(2000)).compareTo(a.createdAt ?? DateTime(2000)));
+    }
+
+    return filtered;
+  }
+
   void _showFilterPanel() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: LibraryTheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        // نستخدم StatefulWidget هنا للسماح بتغيير القيم داخل اللوحة
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(20.0),
+          builder: (context, setModalState) {
+            final majors = _selectedCollege == null
+                ? <String>[]
+                : UniversityAcademicData.majorsByCollege[_selectedCollege] ?? <String>[];
+
+            return Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              decoration: const BoxDecoration(
+                color: LibraryTheme.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('فلترة النتائج', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 20),
-
-                  // فلتر الكلية
-                  DropdownButtonFormField<String>(
-                    value: _selectedCollege,
-                    decoration: const InputDecoration(labelText: 'الكلية', border: OutlineInputBorder()),
-                    items: ['كلية الهندسة', 'كلية الطب', 'كلية العلوم', 'كلية الآداب']
-                        .map((college) => DropdownMenuItem(value: college, child: Text(college)))
-                        .toList(),
-                    onChanged: (value) => setModalState(() => _selectedCollege = value),
+                  const Center(
+                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: LibraryTheme.border)),
                   ),
+                  const SizedBox(height: 12),
+                  const Text('فلترة وترتيب', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 16),
-
-                  // فلتر المستوى
-                  DropdownButtonFormField<String>(
+                  _BottomSheetDropdown(
+                    value: _selectedCollege,
+                    label: 'الكلية',
+                    items: UniversityAcademicData.colleges,
+                    onChanged: (value) => setModalState(() {
+                      _selectedCollege = value;
+                      _selectedMajor = null;
+                    }),
+                  ),
+                  const SizedBox(height: 12),
+                  _BottomSheetDropdown(
+                    value: _selectedMajor,
+                    label: 'التخصص',
+                    items: majors,
+                    onChanged: (value) => setModalState(() => _selectedMajor = value),
+                  ),
+                  const SizedBox(height: 12),
+                  _BottomSheetDropdown(
                     value: _selectedLevel,
-                    decoration: const InputDecoration(labelText: 'المستوى', border: OutlineInputBorder()),
-                    items: ['المستوى الأول', 'المستوى الثاني', 'المستوى الثالث', 'المستوى الرابع']
-                        .map((level) => DropdownMenuItem(value: level, child: Text(level)))
-                        .toList(),
+                    label: 'المستوى',
+                    items: UniversityAcademicData.levels,
                     onChanged: (value) => setModalState(() => _selectedLevel = value),
                   ),
-                  const SizedBox(height: 20),
-
-                  // فلتر الترتيب
-                  const Text('ترتيب حسب', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  Row(
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
                     children: [
-                      ChoiceChip(
-                        label: const Text('الأحدث'),
-                        selected: _sortOrder == 'الأحدث',
-                        onSelected: (selected) => setModalState(() => _sortOrder = 'الأحدث'),
-                      ),
-                      const SizedBox(width: 10),
-                      ChoiceChip(
-                        label: const Text('الأكثر إعجاباً'),
-                        selected: _sortOrder == 'الأكثر إعجاباً',
-                        onSelected: (selected) => setModalState(() => _sortOrder = 'الأكثر إعجاباً'),
-                      ),
+                      for (final option in ['الأحدث', 'الأكثر إعجاباً', 'الأكثر مشاهدة'])
+                        ChoiceChip(
+                          label: Text(option),
+                          selected: _sortOrder == option,
+                          onSelected: (_) => setModalState(() => _sortOrder = option),
+                        ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-
-                  // زر تطبيق الفلاتر
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: LibraryTheme.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedCollege = null;
+                              _selectedMajor = null;
+                              _selectedLevel = null;
+                              _sortOrder = 'الأحدث';
+                            });
+                            Navigator.pop(context);
+                          },
+                          child: const Text('إعادة ضبط'),
+                        ),
                       ),
-                      onPressed: () {
-                        // مستقبلاً: هنا يتم تطبيق الفلترة الفعلية
-                        print('تم اختيار: $_selectedCollege, $_selectedLevel, $_sortOrder');
-                        Navigator.pop(context); // إغلاق اللوحة
-                      },
-                      child: const Text('تطبيق', style: TextStyle(fontSize: 18, color: LibraryTheme.surface)),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {});
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: LibraryTheme.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('تطبيق'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -137,99 +175,205 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
     );
   }
 
+  Widget _buildSearchAndActions() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                hintText: 'ابحث عن مادة أو دكتور أو تخصص...',
+                prefixIcon: const Icon(Icons.search_rounded),
+                filled: true,
+                fillColor: LibraryTheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: const BorderSide(color: LibraryTheme.border),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          _ActionIconButton(
+            icon: Icons.tune_rounded,
+            onTap: _showFilterPanel,
+          ),
+          const SizedBox(width: 8),
+          _ActionIconButton(
+            icon: _isGridView ? Icons.view_agenda_rounded : Icons.grid_view_rounded,
+            onTap: () => setState(() => _isGridView = !_isGridView),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                // ✨ 3. شريط البحث أصبح داخل Expanded
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'ابحث عن مادة أو دكتور...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: LibraryTheme.surface,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                // ✨ 4. إضافة زر الفلترة
-                IconButton(
-                  icon: const Icon(Icons.filter_list_rounded),
-                  onPressed: _showFilterPanel,
-                  tooltip: 'فلترة',
-                  style: IconButton.styleFrom(
-                    backgroundColor: LibraryTheme.surface,
-                    padding: const EdgeInsets.all(12),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                // زر تبديل العرض
-                IconButton(
-                  icon: Icon(_isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded),
-                  onPressed: () => setState(() => _isGridView = !_isGridView),
-                  tooltip: 'تغيير طريقة العرض',
-                  style: IconButton.styleFrom(
-                    backgroundColor: LibraryTheme.surface,
-                    padding: const EdgeInsets.all(12),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildSearchAndActions(),
           Expanded(
-            child: _isGridView
-                ? GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: _filteredFiles.length,
-              itemBuilder: (context, index) {
-                final file = _filteredFiles[index];
-                return GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => FileDetailsScreen(file: file)),
-                  ),
-                  child: GridFileCard(file: file),
-                );
-              },
-            )
-                : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _filteredFiles.length,
-              itemBuilder: (context, index) {
-                final file = _filteredFiles[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => FileDetailsScreen(file: file)),
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: LibraryFilesService.universityFiles(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+                final files = docs.map((doc) => FileModel.fromFirestore(doc)).toList();
+                final filteredFiles = _applyFilters(files);
+
+                if (filteredFiles.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'لا توجد ملفات مطابقة حالياً',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: LibraryTheme.muted,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    child: FileCard(file: file),
-                  ),
+                  );
+                }
+
+                if (_isGridView) {
+                  return GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.72,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: filteredFiles.length,
+                    itemBuilder: (context, index) {
+                      final file = filteredFiles[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => FileDetailsScreen(file: file),
+                            ),
+                          );
+                        },
+                        child: FileCard(file: file),
+                      );
+                    },
+                  );
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                  itemCount: filteredFiles.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final file = filteredFiles[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FileDetailsScreen(file: file),
+                          ),
+                        );
+                      },
+                      child: FileCard(file: file),
+                    );
+                  },
                 );
               },
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ActionIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ActionIconButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: LibraryTheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: LibraryTheme.border),
+          ),
+          child: Icon(icon, color: LibraryTheme.text),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomSheetDropdown extends StatelessWidget {
+  final String? value;
+  final String label;
+  final List<String> items;
+  final ValueChanged<String?> onChanged;
+
+  const _BottomSheetDropdown({
+    required this.value,
+    required this.label,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final safeItems = items.toSet().toList();
+    final safeValue = safeItems.contains(value) ? value : null;
+
+    return DropdownButtonFormField<String>(
+      value: safeValue,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: const Color(0xFFF8FAFD),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: LibraryTheme.border),
+        ),
+      ),
+      items: safeItems
+          .map((item) => DropdownMenuItem<String>(
+                value: item,
+                child: Text(item, overflow: TextOverflow.ellipsis),
+              ))
+          .toList(),
+      onChanged: onChanged,
     );
   }
 }
