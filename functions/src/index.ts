@@ -107,8 +107,19 @@ export const eduBot = functions
       return {
         reply: text,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("EduBot: model call error:", error);
+
+      const errorMessage = String(error?.message || error).toLowerCase();
+      const status = error?.status || error?.response?.status;
+      
+      if (status === 429 || errorMessage.includes("429") || errorMessage.includes("resource_exhausted") || errorMessage.includes("quota")) {
+        throw new functions.https.HttpsError(
+          "resource-exhausted",
+          "عذراً، وصلنا للحد الأقصى من الطلبات حالياً. يرجى المحاولة بعد قليل."
+        );
+      }
+
       return {
         reply: "عذراً، أواجه مشكلة في الاتصال حالياً. يرجى المحاولة لاحقاً."
       };
