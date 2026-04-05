@@ -79,6 +79,8 @@ class FeedCommentsService {
     required String postId,
     required String commentId,
     required String text,
+    String? replyToUserId,
+    String? replyToUserName,
   }) async {
     final user = _auth.currentUser;
     if (user == null || postId.isEmpty || commentId.isEmpty || text.trim().isEmpty) return;
@@ -100,12 +102,78 @@ class FeedCommentsService {
         
     final replyRef = commentRef.collection('replies').doc();
 
-    await replyRef.set({
+    final data = <String, dynamic>{
       'commentId': commentId,
       'authorId': user.uid,
       'authorName': authorName,
       'text': text.trim(),
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    };
+
+    if (replyToUserId != null) data['replyToUserId'] = replyToUserId;
+    if (replyToUserName != null) data['replyToUserName'] = replyToUserName;
+
+    await replyRef.set(data);
+  }
+
+  static Future<void> editComment({
+    required String postId,
+    required String commentId,
+    required String newText,
+  }) async {
+    if (postId.isEmpty || commentId.isEmpty || newText.trim().isEmpty) return;
+    await _firestore
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .doc(commentId)
+        .update({'text': newText.trim()});
+  }
+
+  static Future<void> deleteComment({
+    required String postId,
+    required String commentId,
+  }) async {
+    if (postId.isEmpty || commentId.isEmpty) return;
+    final postRef = _firestore.collection('posts').doc(postId);
+    final commentRef = postRef.collection('comments').doc(commentId);
+    
+    final batch = _firestore.batch();
+    batch.delete(commentRef);
+    batch.update(postRef, {'commentsCount': FieldValue.increment(-1)}); // Approximation safety
+    await batch.commit();
+  }
+
+  static Future<void> editReply({
+    required String postId,
+    required String commentId,
+    required String replyId,
+    required String newText,
+  }) async {
+    if (postId.isEmpty || commentId.isEmpty || replyId.isEmpty || newText.trim().isEmpty) return;
+    await _firestore
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .doc(commentId)
+        .collection('replies')
+        .doc(replyId)
+        .update({'text': newText.trim()});
+  }
+
+  static Future<void> deleteReply({
+    required String postId,
+    required String commentId,
+    required String replyId,
+  }) async {
+    if (postId.isEmpty || commentId.isEmpty || replyId.isEmpty) return;
+    await _firestore
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .doc(commentId)
+        .collection('replies')
+        .doc(replyId)
+        .delete();
   }
 }

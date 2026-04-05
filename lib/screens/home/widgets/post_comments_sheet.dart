@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/feed_comment_model.dart';
@@ -21,6 +22,8 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSending = false;
   FeedCommentModel? _replyingTo;
+  String? _activeReplyTargetName;
+  String? _activeReplyTargetId;
 
   @override
   void dispose() {
@@ -50,6 +53,8 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
           postId: postId,
           commentId: _replyingTo!.commentId,
           text: text,
+          replyToUserId: _activeReplyTargetId,
+          replyToUserName: _activeReplyTargetName,
         );
       } else {
         await FeedCommentsService.addComment(postId: postId, text: text);
@@ -59,6 +64,8 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
         _commentController.clear();
         setState(() {
           _replyingTo = null;
+          _activeReplyTargetName = null;
+          _activeReplyTargetId = null;
         });
       }
     } catch (e) {
@@ -182,6 +189,15 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                         onReplyTap: () {
                           setState(() {
                             _replyingTo = comment;
+                            _activeReplyTargetName = comment.authorName;
+                            _activeReplyTargetId = comment.authorId;
+                          });
+                        },
+                        onReplyToReplyTap: (reply) {
+                          setState(() {
+                            _replyingTo = comment; // Parent comment context maintained
+                            _activeReplyTargetName = reply.authorName;
+                            _activeReplyTargetId = reply.authorId;
                           });
                         },
                       );
@@ -217,7 +233,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'الرد على ${_replyingTo!.authorName}',
+                          'الرد على ${_activeReplyTargetName ?? 'مستخدم'}',
                           style: const TextStyle(
                             color: AppColors.primary,
                             fontSize: 12,
@@ -228,6 +244,8 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                           onTap: () {
                             setState(() {
                               _replyingTo = null;
+                              _activeReplyTargetName = null;
+                              _activeReplyTargetId = null;
                             });
                           },
                           child: const Icon(Icons.close_rounded,
@@ -445,6 +463,123 @@ class _CommentItemState extends State<_CommentItem> {
     );
   }
 
+  void _showDeleteDialog({String? replyId}) {
+    bool isDeleting = false;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: const Text('حذف التعليق', style: TextStyle(color: AppColors.textPrimary)),
+          content: const Text('هل أنت متأكد من رغبتك في الحذف؟ لا يمكن التراجع عن هذا الإجراء.', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          actions: [
+            TextButton(
+              onPressed: isDeleting ? null : () => Navigator.pop(ctx),
+              child: const Text('إلغاء', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: isDeleting
+                  ? null
+                  : () async {
+                      setDialogState(() => isDeleting = true);
+                      try {
+                        if (replyId != null) {
+                          await FeedCommentsService.deleteReply(
+                            postId: widget.postId,
+                            commentId: widget.comment.commentId,
+                            replyId: replyId,
+                          );
+                        } else {
+                          await FeedCommentsService.deleteComment(
+                            postId: widget.postId,
+                            commentId: widget.comment.commentId,
+                          );
+                        }
+                        if (mounted) Navigator.pop(ctx);
+                      } catch (e) {
+                        if (mounted) {
+                          setDialogState(() => isDeleting = false);
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء الحذف')));
+                        }
+                      }
+                    },
+              child: isDeleting
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Text('حذف', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditDialog(String oldText, {String? replyId}) {
+    final controller = TextEditingController(text: oldText);
+    bool isEditing = false;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: const Text('تعديل التعليق', style: TextStyle(color: AppColors.textPrimary)),
+          content: TextField(
+            controller: controller,
+            maxLines: 3,
+            style: const TextStyle(color: AppColors.textPrimary),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.background,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isEditing ? null : () => Navigator.pop(ctx),
+              child: const Text('إلغاء', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: isEditing
+                  ? null
+                  : () async {
+                      final text = controller.text.trim();
+                      if (text.isEmpty || text == oldText) {
+                        Navigator.pop(ctx);
+                        return;
+                      }
+                      setDialogState(() => isEditing = true);
+                      try {
+                        if (replyId != null) {
+                          await FeedCommentsService.editReply(
+                            postId: widget.postId,
+                            commentId: widget.comment.commentId,
+                            replyId: replyId,
+                            newText: text,
+                          );
+                        } else {
+                          await FeedCommentsService.editComment(
+                            postId: widget.postId,
+                            commentId: widget.comment.commentId,
+                            newText: text,
+                          );
+                        }
+                        if (mounted) Navigator.pop(ctx);
+                      } catch (e) {
+                        if (mounted) {
+                          setDialogState(() => isEditing = false);
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء التعديل')));
+                        }
+                      }
+                    },
+              child: isEditing
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Text('حفظ', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String _formatTime(DateTime? date) {
     if (date == null) return '';
     final now = DateTime.now();
@@ -493,34 +628,38 @@ class _CommentItemState extends State<_CommentItem> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      if (!_isSelf) ...[
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTapDown: (details) {
-                            showMenu(
-                              context: context,
-                              color: AppColors.surface,
-                              position: RelativeRect.fromLTRB(
-                                details.globalPosition.dx,
-                                details.globalPosition.dy,
-                                details.globalPosition.dx,
-                                details.globalPosition.dy,
-                              ),
-                              items: [
-                                const PopupMenuItem(
-                                  value: 'report',
-                                  child: Text('إبلاغ', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
-                                ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTapDown: (details) {
+                          showMenu(
+                            context: context,
+                            color: AppColors.surface,
+                            position: RelativeRect.fromLTRB(
+                              details.globalPosition.dx,
+                              details.globalPosition.dy,
+                              details.globalPosition.dx,
+                              details.globalPosition.dy,
+                            ),
+                            items: [
+                              if (_isSelf) ...[
+                                const PopupMenuItem(value: 'edit', child: Text('تعديل', style: TextStyle(color: AppColors.textPrimary))),
+                                const PopupMenuItem(value: 'delete', child: Text('حذف', style: TextStyle(color: AppColors.error))),
+                              ] else ...[
+                                const PopupMenuItem(value: 'report', child: Text('إبلاغ', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
                               ],
-                            ).then((value) {
-                              if (value == 'report') {
-                                _showReportDialog();
-                              }
-                            });
-                          },
-                          child: const Icon(Icons.more_horiz_rounded, size: 16, color: AppColors.textSecondary),
-                        ),
-                      ],
+                            ],
+                          ).then((value) {
+                            if (value == 'report') {
+                              _showReportDialog();
+                            } else if (value == 'edit') {
+                              _showEditDialog(widget.comment.text);
+                            } else if (value == 'delete') {
+                              _showDeleteDialog();
+                            }
+                          });
+                        },
+                        child: const Icon(Icons.more_horiz_rounded, size: 16, color: AppColors.textSecondary),
+                      ),
                     ],
                   ),
                 ],
@@ -558,18 +697,20 @@ class _CommentItemState extends State<_CommentItem> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  GestureDetector(
-                    onTap: widget.onReplyTap,
-                    child: const Text(
-                      'رد',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
+                  if (!_isSelf) ...[
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: widget.onReplyTap,
+                      child: const Text(
+                        'رد',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ],
@@ -605,21 +746,73 @@ class _CommentItemState extends State<_CommentItem> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              reply.authorName,
-                              style: const TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  reply.authorName,
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                if (reply.replyToUserName != null) ...[
+                                  const Icon(Icons.arrow_left_rounded, size: 14, color: AppColors.textSecondary),
+                                  Text(
+                                    reply.replyToUserName!,
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                            Text(
-                              _formatTime(reply.createdAt?.toDate()),
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  _formatTime(reply.createdAt?.toDate()),
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTapDown: (details) {
+                                    final bool isReplySelf = FirebaseAuth.instance.currentUser?.uid == reply.authorId;
+                                    showMenu(
+                                      context: context,
+                                      color: AppColors.surface,
+                                      position: RelativeRect.fromLTRB(
+                                        details.globalPosition.dx,
+                                        details.globalPosition.dy,
+                                        details.globalPosition.dx,
+                                        details.globalPosition.dy,
+                                      ),
+                                      items: [
+                                        if (isReplySelf) ...[
+                                          const PopupMenuItem(value: 'edit', child: Text('تعديل', style: TextStyle(color: AppColors.textPrimary))),
+                                          const PopupMenuItem(value: 'delete', child: Text('حذف', style: TextStyle(color: AppColors.error))),
+                                        ] else ...[
+                                          const PopupMenuItem(value: 'report', child: Text('إبلاغ', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
+                                        ],
+                                      ],
+                                    ).then((value) {
+                                      if (value == 'report') {
+                                        _showReportDialog(); // Uses parent comment context for report intentionally to flag the thread
+                                      } else if (value == 'edit') {
+                                        _showEditDialog(reply.text, replyId: reply.replyId);
+                                      } else if (value == 'delete') {
+                                        _showDeleteDialog(replyId: reply.replyId);
+                                      }
+                                    });
+                                  },
+                                  child: const Icon(Icons.more_horiz_rounded, size: 14, color: AppColors.textSecondary),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -632,6 +825,20 @@ class _CommentItemState extends State<_CommentItem> {
                             height: 1.4,
                           ),
                         ),
+                        if (FirebaseAuth.instance.currentUser?.uid != reply.authorId && widget.onReplyToReplyTap != null) ...[
+                          const SizedBox(height: 6),
+                          GestureDetector(
+                            onTap: () => widget.onReplyToReplyTap!(reply),
+                            child: const Text(
+                              'رد',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   );

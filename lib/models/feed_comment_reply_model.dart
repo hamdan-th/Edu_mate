@@ -7,6 +7,8 @@ class FeedCommentReplyModel {
   final String authorName;
   final String text;
   final Timestamp? createdAt;
+  final String? replyToUserId;
+  final String? replyToUserName;
 
   FeedCommentReplyModel({
     required this.replyId,
@@ -15,6 +17,8 @@ class FeedCommentReplyModel {
     required this.authorName,
     required this.text,
     this.createdAt,
+    this.replyToUserId,
+    this.replyToUserName,
   });
 
   factory FeedCommentReplyModel.fromMap(Map<String, dynamic> map, String documentId) {
@@ -25,6 +29,8 @@ class FeedCommentReplyModel {
       authorName: map['authorName']?.toString() ?? 'مستخدم',
       text: map['text']?.toString() ?? '',
       createdAt: map['createdAt'] as Timestamp?,
+      replyToUserId: map['replyToUserId']?.toString(),
+      replyToUserName: map['replyToUserName']?.toString(),
     );
   }
 }
