@@ -1,8 +1,5 @@
 import * as functions from "firebase-functions";
-import { defineSecret } from "firebase-functions/params";
 import { GoogleGenAI } from "@google/genai";
-
-const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
 const systemInstruction = `You are Edu Bot inside the Edu Mate app.
 You help university students with:
@@ -27,7 +24,6 @@ Rules:
 - do not provide dangerous or highly sensitive guidance beyond a safe general level`;
 
 export const eduBot = functions
-  .runWith({ secrets: [geminiApiKey] })
   .https.onCall(async (data, context) => {
     const rawMessage = data.message;
     const message = typeof rawMessage === "string" ? rawMessage.trim() : "";
@@ -47,7 +43,16 @@ export const eduBot = functions
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey: geminiApiKey.value() });
+      const apiKey = process.env.GEMINI_API_KEY || "";
+      if (!apiKey) {
+        console.error("Missing GEMINI_API_KEY in environment variables.");
+        throw new functions.https.HttpsError(
+          "internal",
+          "عذراً، أواجه مشكلة في الاتصال حالياً. يرجى المحاولة لاحقاً."
+        );
+      }
+      
+      const ai = new GoogleGenAI({ apiKey: apiKey });
       
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
