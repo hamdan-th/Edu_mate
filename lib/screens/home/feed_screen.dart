@@ -419,6 +419,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   bool isLiked = false;
   int _likesCount = 0;
   bool _isJoined = false;
+  bool _isJoining = false;
 
   late final AnimationController _likeController;
   late final Animation<double> _likeScale;
@@ -464,6 +465,23 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
       await FeedReactionsService.toggleLike(postId: postId, isCurrentlyLiked: oldIsLiked);
     } catch (_) {
       if (mounted) setState(() { isLiked = oldIsLiked; _likesCount += oldIsLiked ? 1 : -1; });
+    }
+  }
+
+  Future<void> _joinGroup() async {
+    if (_isJoined || _isJoining) return;
+    final groupId = widget.post['groupId']?.toString() ?? '';
+    if (groupId.isEmpty) return;
+    
+    setState(() => _isJoining = true);
+    try {
+      await GroupService.joinPublicGroup(groupId);
+      if (mounted) setState(() { _isJoined = true; _isJoining = false; });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isJoining = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to join group')));
+      }
     }
   }
 
@@ -521,14 +539,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   ),
                 ),
                 GestureDetector(
-                  onTap: () async {
-                    if (_isJoined) return;
-                    final groupId = widget.post['groupId']?.toString() ?? '';
-                    if (groupId.isNotEmpty) {
-                      await GroupService.joinGroup(groupId);
-                      if (mounted) setState(() => _isJoined = true);
-                    }
-                  },
+                  onTap: _joinGroup,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
@@ -536,14 +547,19 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: _isJoined ? Colors.white.withOpacity(0.1) : AppColors.primary.withOpacity(0.8), width: 1),
                     ),
-                    child: Text(
-                      _isJoined ? 'Joined' : 'Join',
-                      style: TextStyle(
-                        color: _isJoined ? Colors.white.withOpacity(0.5) : AppColors.primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      )
-                    )
+                    child: _isJoining
+                      ? const SizedBox(
+                          width: 12, height: 12, 
+                          child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2)
+                        )
+                      : Text(
+                          _isJoined ? 'Joined' : 'Join',
+                          style: TextStyle(
+                            color: _isJoined ? Colors.white.withOpacity(0.5) : AppColors.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          )
+                        )
                   )
                 ),
                 const SizedBox(width: 12),
