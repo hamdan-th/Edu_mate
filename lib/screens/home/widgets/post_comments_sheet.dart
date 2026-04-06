@@ -92,9 +92,9 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      decoration: const BoxDecoration(
-        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : Color(0xFFF8F9FA)),
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
@@ -104,7 +104,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
           // Drag handle and header
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
               ),
@@ -120,7 +120,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'التعليقات',
                   style: TextStyle(
                     color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
@@ -145,7 +145,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                   }
 
                   if (snapshot.hasError) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         'تعذر تحميل التعليقات',
                         style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
@@ -156,7 +156,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                   final comments = snapshot.data ?? [];
 
                   if (comments.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -213,7 +213,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
             padding: EdgeInsets.fromLTRB(12, 12, 12, 12 + keyboardHeight),
             decoration: BoxDecoration(
               color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-              border: const Border(
+              border: Border(
                 top: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
               ),
               boxShadow: [
@@ -248,7 +248,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                               _activeReplyTargetId = null;
                             });
                           },
-                          child: const Icon(Icons.close_rounded,
+                          child: Icon(Icons.close_rounded,
                               size: 16, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
                         ),
                       ],
@@ -269,7 +269,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                             controller: _commentController,
                             maxLines: 5,
                             minLines: 1,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                               fontSize: 14,
                             ),
@@ -277,7 +277,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                               hintText: _replyingTo != null
                                   ? 'اكتب ردك هنا...'
                                   : 'إضافة تعليق...',
-                              hintStyle: const TextStyle(
+                              hintStyle: TextStyle(
                                   color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -420,15 +420,15 @@ class _CommentItemState extends State<_CommentItem> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-              title: const Text('الإبلاغ', style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87))),
-              content: const Text(
+              title: Text('الإبلاغ', style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87))),
+              content: Text(
                 'هل أنت متأكد من رغبتك في الإبلاغ كمرجع للمراجعة؟',
                 style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54), fontSize: 13, height: 1.5),
               ),
               actions: [
                 TextButton(
                   onPressed: isReporting ? null : () => Navigator.pop(ctx),
-                  child: const Text('إلغاء', style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54))),
+                  child: Text('إلغاء', style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54))),
                 ),
                 TextButton(
                   onPressed: isReporting
@@ -624,7 +624,7 @@ class _CommentItemState extends State<_CommentItem> {
                     children: [
                       Text(
                         _formatTime(widget.comment.createdAt?.toDate()),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
@@ -669,7 +669,7 @@ class _CommentItemState extends State<_CommentItem> {
               const SizedBox(height: 8),
               Text(
                 widget.comment.text,
-                style: const TextStyle(
+                style: TextStyle(
                   color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                   fontSize: 13.5,
                   height: 1.4,
@@ -690,7 +690,7 @@ class _CommentItemState extends State<_CommentItem> {
                         const SizedBox(width: 4),
                         Text(
                           '$_likesCount',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -703,7 +703,7 @@ class _CommentItemState extends State<_CommentItem> {
                     const SizedBox(width: 16),
                     GestureDetector(
                       onTap: widget.onReplyTap,
-                      child: const Text(
+                      child: Text(
                         'رد',
                         style: TextStyle(
                           color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
@@ -762,7 +762,7 @@ class _CommentItemState extends State<_CommentItem> {
                                   Icon(Icons.arrow_left_rounded, size: 14, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
                                   Text(
                                     reply.replyToUserName!,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                                       fontWeight: FontWeight.w600,
                                       fontSize: 10,
@@ -775,7 +775,7 @@ class _CommentItemState extends State<_CommentItem> {
                               children: [
                                 Text(
                                   _formatTime(reply.createdAt?.toDate()),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                                     fontSize: 10,
                                     fontWeight: FontWeight.w500,
@@ -821,7 +821,7 @@ class _CommentItemState extends State<_CommentItem> {
                         const SizedBox(height: 4),
                         Text(
                           reply.text,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                             fontSize: 12.5,
                             height: 1.4,
@@ -831,7 +831,7 @@ class _CommentItemState extends State<_CommentItem> {
                           const SizedBox(height: 6),
                           GestureDetector(
                             onTap: () => widget.onReplyToReplyTap!(reply),
-                            child: const Text(
+                            child: Text(
                               'رد',
                               style: TextStyle(
                                 color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),

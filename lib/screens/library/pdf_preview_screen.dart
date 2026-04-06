@@ -24,7 +24,7 @@ class PdfPreviewScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: url.trim().isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
                 'لا يوجد رابط للملف',
                 style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87)),

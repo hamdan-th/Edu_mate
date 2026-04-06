@@ -119,7 +119,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'هذا النوع لا يُعرض داخل التطبيق حاليًا.\nاختر فتحه خارجيًا أو تنزيله.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -697,7 +697,7 @@ $url
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'الوصف',
                     style: TextStyle(
                       fontSize: 16.5,

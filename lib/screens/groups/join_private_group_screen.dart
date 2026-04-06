@@ -82,7 +82,7 @@ class _JoinPrivateGroupScreenState extends State<JoinPrivateGroupScreen> {
                 color: AppColors.primary,
               ),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'الصق رابط الدعوة',
                 style: TextStyle(
                   fontSize: 18,

@@ -337,7 +337,7 @@ class _UploadScreenState extends State<UploadScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Center(
+                    Center(
                       child: Text(
                         'سيتم رفع الملف ثم مراجعته قبل ظهوره داخل مكتبة الجامعة',
                         textAlign: TextAlign.center,
@@ -390,7 +390,7 @@ class _TopBar extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        const Text(
+        Text(
           'رفع ملف جديد',
           style: TextStyle(
             fontSize: 21,

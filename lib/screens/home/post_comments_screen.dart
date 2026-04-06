@@ -99,7 +99,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                   }
 
                   if (snapshot.hasError) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         'تعذر تحميل التعليقات',
                         style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
@@ -110,7 +110,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                   final comments = snapshot.data ?? [];
 
                   if (comments.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
