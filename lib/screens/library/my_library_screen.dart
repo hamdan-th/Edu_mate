@@ -134,22 +134,29 @@ class MyLibraryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: LibraryTheme.bg,
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
-        children: [
-            _HeroCard(
-              onUploadTap: () => _openUpload(context),
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            sliver: SliverToBoxAdapter(
+              child: _HeroCard(
+                onUploadTap: () => _openUpload(context),
+              ),
             ),
-            const SizedBox(height: 22),
-            const _SectionHeader(
-              title: 'مؤشرات مكتبتي',
-              subtitle: 'إحصائيات سريعة لكل ما يتعلق بملفاتك وتفاعلاتك',
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 22, 16, 14),
+              child: _SectionHeader(
+                title: 'مؤشرات مكتبتي',
+                subtitle: 'إحصائيات سريعة لكل ما يتعلق بملفاتك وتفاعلاتك',
+              ),
             ),
-            const SizedBox(height: 14),
-            GridView.count(
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+            sliver: SliverGrid.count(
               crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 14,
               mainAxisSpacing: 14,
               childAspectRatio: 0.88,
@@ -224,7 +231,8 @@ class MyLibraryScreen extends StatelessWidget {
                 ),
               ],
             ),
-          ],
+          ),
+        ],
       ),
     );
   }
