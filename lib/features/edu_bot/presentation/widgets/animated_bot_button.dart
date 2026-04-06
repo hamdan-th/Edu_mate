@@ -251,7 +251,13 @@ class _MascotRobot extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF37474F), // dark joint
                 borderRadius: BorderRadius.circular(2),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.8), inset: false, offset: const Offset(0,-2))],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.8),
+                    offset: const Offset(0, -2),
+                    blurRadius: 4,
+                  )
+                ],
               ),
             ),
           ),
