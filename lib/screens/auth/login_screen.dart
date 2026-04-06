@@ -43,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     _cardSlide = Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
     );
+  }
 
   @override
   void dispose() {
@@ -215,14 +216,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       width: 100,
                       height: 100,
                       fit: BoxFit.contain,
-                  Image.asset(
-                    'assets/images/university_logo.png',
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.contain,
+                    ),
                   ),
                         
-                        const SizedBox(height: 36), // Increased spacing
+                  const SizedBox(height: 36), // Increased spacing
                         
                         Text(
                           l10n.app_name,
@@ -367,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                                   color: Colors.white,
                                                 ),
                                               )
-                                            : Text(l10n.loginBtn),
+                                            : Text(l10n.loginTitle),
                                       ),
                                     ),
                                     
@@ -411,8 +408,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 ),
               ),
           ),
-        ),
-      ),
-    );
+        );
   }
 }

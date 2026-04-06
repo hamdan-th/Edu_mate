@@ -303,8 +303,6 @@ class _SignupScreenState extends State<SignupScreen>
                           const SizedBox(height: 14),
                           Text(
                             l10n.signupTitle,
-                          Text(
-                            l10n.signupTitle,
                             style: textTheme.headlineLarge,
                           ),
                           const SizedBox(height: 8),
@@ -502,7 +500,6 @@ class _SignupScreenState extends State<SignupScreen>
             ],
           ),
         ),
-      ),
     );
   }
 }
