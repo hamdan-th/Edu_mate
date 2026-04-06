@@ -94,7 +94,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.darkSurface.withOpacity(0.85),
                   borderRadius: BorderRadius.circular(32),
