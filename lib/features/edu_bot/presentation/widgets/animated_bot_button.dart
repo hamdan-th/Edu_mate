@@ -36,7 +36,7 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
     );
 
     _checkConnectivity();
-    _connectivityTimer = Timer.periodic(const Duration(seconds: 4), (_) => _checkConnectivity());
+    _connectivityTimer = Timer.periodic(const Duration(seconds: 5), (_) => _checkConnectivity());
   }
 
   @override
@@ -83,7 +83,7 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final scaleAnimation = Tween<double>(begin: 1.0, end: 0.9).animate(
+    final scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(
       CurvedAnimation(parent: _pressController, curve: Curves.easeOutCubic)
     );
 
@@ -94,18 +94,13 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
       child: AnimatedBuilder(
         animation: Listenable.merge([_floatController, _pressController]),
         builder: (context, child) {
-          // Warning shake if offline
-          final shake = !_isOnline 
-              ? math.sin(_floatController.value * math.pi * 12) * 1.5 
-              : 0.0;
-          
-          final yOffset = math.sin(_floatController.value * math.pi) * 6;
+          final yOffset = math.sin(_floatController.value * math.pi) * 5;
 
           return Transform.scale(
             scale: scaleAnimation.value,
             child: Transform.translate(
-              offset: Offset(shake, yOffset),
-              child: _BotCharacter(isOnline: _isOnline, floatValue: _floatController.value),
+              offset: Offset(0, yOffset),
+              child: _BotCharacter(isOnline: _isOnline),
             ),
           );
         },
@@ -116,176 +111,50 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
 
 class _BotCharacter extends StatelessWidget {
   final bool isOnline;
-  final double floatValue;
 
-  const _BotCharacter({required this.isOnline, required this.floatValue});
+  const _BotCharacter({required this.isOnline});
 
   @override
   Widget build(BuildContext context) {
-    final eyeColor = isOnline ? AppColors.primary : Colors.redAccent;
-    final glowColor = isOnline ? AppColors.primary.withOpacity(0.5) : Colors.redAccent.withOpacity(0.5);
+    final statusColor = isOnline ? AppColors.primary : Colors.redAccent.withOpacity(0.8);
+    final glowOpacity = isOnline ? 0.20 : 0.08;
 
-    return Container(
-      width: 54,
-      height: 64,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
+      width: 58,
+      height: 58,
       decoration: BoxDecoration(
         color: AppColors.darkSurface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white.withOpacity(0.05),
+          width: 1,
+        ),
         boxShadow: [
+          // Ambient dynamic glow based on network state
           BoxShadow(
-            color: isOnline ? AppColors.primary.withOpacity(0.15) : Colors.redAccent.withOpacity(0.15),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: statusColor.withOpacity(glowOpacity),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
+          // Structural dark drop shadow for float priority
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           )
         ],
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          // Antenna base
-          Positioned(
-            top: -4,
-            child: Container(
-              width: 12,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-              ),
-            ),
+      child: Center(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 600),
+          child: Icon(
+            Icons.auto_awesome_rounded, // Premium implicit Spark / AI icon
+            color: statusColor,
+            size: 26,
           ),
-          // Antenna stem
-          Positioned(
-            top: -10,
-            child: Container(
-              width: 3,
-              height: 6,
-              color: Colors.white.withOpacity(0.4),
-            ),
-          ),
-          // Antenna bulb
-          Positioned(
-            top: -14,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: eyeColor,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: glowColor, blurRadius: 4)],
-              ),
-            ),
-          ),
-          
-          // Face Screen
-          Positioned(
-            top: 12,
-            child: Container(
-              width: 38,
-              height: 20,
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F0F13), // Deep void screen
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.black.withOpacity(0.6), width: 1.5),
-              ),
-              child: Stack(
-                children: [
-                  // Left Eye
-                  Positioned(
-                    left: 8,
-                    top: 5,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      width: 5,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: eyeColor,
-                        borderRadius: BorderRadius.circular(2.5),
-                        boxShadow: [BoxShadow(color: glowColor, blurRadius: 4)],
-                      ),
-                    ),
-                  ),
-                  // Right Eye
-                  Positioned(
-                    right: 8,
-                    top: 5,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      width: 5,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: eyeColor,
-                        borderRadius: BorderRadius.circular(2.5),
-                        boxShadow: [BoxShadow(color: glowColor, blurRadius: 4)],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          // Body details
-          Positioned(
-            bottom: 12,
-            child: Container(
-              width: 20,
-              height: 2,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(1),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 8,
-            child: Container(
-              width: 10,
-              height: 2,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(1),
-              ),
-            ),
-          ),
-          
-          // Left Floating Arm
-          Positioned(
-            left: -6,
-            top: 24 + math.sin(floatValue * math.pi) * 4,
-            child: Container(
-              width: 5,
-              height: 14,
-              decoration: BoxDecoration(
-                color: AppColors.darkSurface,
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-                borderRadius: BorderRadius.circular(2.5),
-              ),
-            ),
-          ),
-          // Right Floating Arm
-          Positioned(
-            right: -6,
-            top: 24 + math.sin(floatValue * math.pi) * 4,
-            child: Container(
-              width: 5,
-              height: 14,
-              decoration: BoxDecoration(
-                color: AppColors.darkSurface,
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-                borderRadius: BorderRadius.circular(2.5),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
