@@ -104,8 +104,6 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     }
   }
 
-
-
   void _openFilterModal() {
     String? tempCollegeId = _selectedCollegeId;
     String? tempSpecId = _selectedSpecializationId;
@@ -127,7 +125,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             }
             return Container(
               decoration: const BoxDecoration(
-                color: AppColors.surface,
+                color: AppColors.darkSurface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
               padding: EdgeInsets.only(
@@ -154,19 +152,20 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                       labelText: 'الكلية',
                       labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                       filled: true,
-                      fillColor: AppColors.primary.withOpacity(0.04),
+                      fillColor: AppColors.inputDarkFill,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     ),
                     icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
                     value: tempCollegeId,
-                    items: AcademicStructure.colleges.map((col) => DropdownMenuItem(value: col.id, child: Text(col.name, style: const TextStyle(fontWeight: FontWeight.bold)))).toList(),
+                    items: AcademicStructure.colleges.map((col) => DropdownMenuItem(value: col.id, child: Text(col.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)))).toList(),
                     onChanged: (val) {
                       setModalState(() {
                         tempCollegeId = val;
                         tempSpecId = null;
                       });
                     },
+                    dropdownColor: AppColors.darkSurface,
                   ),
                   const SizedBox(height: 16),
                   
@@ -177,14 +176,15 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                         labelText: 'التخصص',
                         labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                         filled: true,
-                        fillColor: AppColors.primary.withOpacity(0.04),
+                        fillColor: AppColors.inputDarkFill,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       ),
                       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
                       value: tempSpecId,
-                      items: currentCollege.specializations.map((spec) => DropdownMenuItem(value: spec.id, child: Text(spec.name, style: const TextStyle(fontWeight: FontWeight.bold)))).toList(),
+                      items: currentCollege.specializations.map((spec) => DropdownMenuItem(value: spec.id, child: Text(spec.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)))).toList(),
                       onChanged: (val) => setModalState(() => tempSpecId = val),
+                      dropdownColor: AppColors.darkSurface,
                     ),
                   if (currentCollege != null) const SizedBox(height: 20),
                   
@@ -195,7 +195,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: SwitchListTile(
-                      title: const Text('المجموعات العامة فقط', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                      title: const Text('المجموعات العامة فقط', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: Colors.white)),
                       value: tempPublicOnly,
                       activeColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -230,7 +230,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
+                            foregroundColor: AppColors.secondary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 0,
@@ -273,27 +273,26 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F7),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0.5,
-        shadowColor: Colors.black.withOpacity(0.05),
+        backgroundColor: AppColors.background,
+        elevation: 0,
         centerTitle: !_isSearching,
         title: _isSearching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'ابحث عن مجتمع...',
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.7)),
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                 ),
               )
-            : const Text("المجتمعات", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppColors.textPrimary)),
+            : const Text("المجتمعات", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: AppColors.textPrimary, letterSpacing: 1.2)),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close_rounded : Icons.search_rounded, color: AppColors.textPrimary),
+            icon: Icon(_isSearching ? Icons.close_rounded : Icons.search_rounded, color: AppColors.primary),
             onPressed: () {
               setState(() {
                 if (_isSearching) {
@@ -306,24 +305,25 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             },
           ),
           IconButton(
-            icon: const Icon(Icons.tune_rounded, color: AppColors.textPrimary),
+            icon: const Icon(Icons.tune_rounded, color: AppColors.primary),
             onPressed: _openFilterModal,
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(54),
           child: Container(
-            color: AppColors.surface,
+            color: AppColors.background,
             child: TabBar(
               controller: _tabController,
               labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textSecondary,
+              unselectedLabelColor: Colors.white.withOpacity(0.5),
               indicatorColor: AppColors.primary,
-              indicatorWeight: 4,
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-              dividerColor: AppColors.border.withOpacity(0.5),
+              indicatorWeight: 3,
+              indicatorSize: TabBarIndicatorSize.label,
+              labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, letterSpacing: 0.5),
+              dividerColor: AppColors.border.withOpacity(0.2),
+              splashFactory: NoSplash.splashFactory,
               tabs: const [
                 Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text("اكتشف"))),
                 Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text("مجموعاتي"))),
@@ -334,19 +334,21 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
       ),
       body: TabBarView(
         controller: _tabController,
+        physics: const BouncingScrollPhysics(),
         children: [
           _KeepAlivePage(child: _buildDiscoverTab()),
           _KeepAlivePage(child: _buildMyGroupsTab()),
         ],
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 72.0),
-        child: FloatingActionButton.extended(
+        padding: const EdgeInsets.only(bottom: 96.0),
+        child: FloatingActionButton(
           onPressed: _openCreateGroup,
           backgroundColor: AppColors.primary,
-          elevation: 4,
-          icon: const Icon(Icons.add_rounded, color: Colors.white, size: 24),
-          label: const Text("مجموعة جديدة", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+          foregroundColor: AppColors.secondary,
+          elevation: 8,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add_rounded, size: 28),
         ),
       ),
     );
@@ -369,7 +371,8 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
           itemCount: items.length,
           itemBuilder: (context, index) {
             return _buildDiscoverCard(items[index]);
@@ -395,13 +398,10 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.only(top: 12, bottom: 100),
+        return ListView.builder(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
           itemCount: items.length,
-          separatorBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.only(left: 16, right: 88), 
-            child: Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.6)),
-          ),
           itemBuilder: (context, index) {
             return _buildMyGroupTile(items[index]);
           },
@@ -434,7 +434,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             const SizedBox(height: 12),
             Text(
               subtitle,
-              style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.6, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 15, color: Colors.white.withOpacity(0.6), height: 1.6, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -447,21 +447,23 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.darkSurface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        border: Border.all(color: AppColors.border.withOpacity(0.2)),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
+          splashColor: AppColors.primary.withOpacity(0.15),
+          highlightColor: Colors.transparent,
           onTap: () => _handleGroupTap(group),
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -472,16 +474,32 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: AppColors.primary.withOpacity(0.1),
-                      backgroundImage: group.imageUrl.isNotEmpty ? NetworkImage(group.imageUrl) : null,
-                      child: group.imageUrl.isEmpty
-                          ? Text(
-                              group.name.isNotEmpty ? group.name[0].toUpperCase() : 'M',
-                              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 24),
-                            )
-                          : null,
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [AppColors.primary, AppColors.primary.withOpacity(0.6)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.2),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: group.imageUrl.isNotEmpty
+                          ? ClipOval(child: Image.network(group.imageUrl, fit: BoxFit.cover))
+                          : Center(
+                              child: Text(
+                                group.name.isNotEmpty ? group.name[0].toUpperCase() : 'G',
+                                style: const TextStyle(color: AppColors.secondary, fontWeight: FontWeight.w900, fontSize: 24),
+                              ),
+                            ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -494,7 +512,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                               Expanded(
                                 child: Text(
                                   group.name,
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -504,7 +522,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: group.isPublic ? AppColors.success.withOpacity(0.12) : AppColors.warning.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -513,7 +531,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                                     const SizedBox(width: 4),
                                     Text(
                                       group.isPublic ? "عامة" : "خاصة",
-                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: group.isPublic ? AppColors.success : AppColors.warning),
+                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: group.isPublic ? AppColors.success : AppColors.warning),
                                     ),
                                   ],
                                 ),
@@ -523,12 +541,12 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              const Icon(Icons.school_rounded, size: 14, color: AppColors.textSecondary),
+                              Icon(Icons.school_rounded, size: 14, color: AppColors.primary.withOpacity(0.8)),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   "${group.collegeName} • ${group.specializationName}",
-                                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                                  style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.6), fontWeight: FontWeight.w600),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -544,27 +562,11 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                   const SizedBox(height: 16),
                   Text(
                     group.description,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.5, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8), height: 1.5, fontWeight: FontWeight.w500),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                const SizedBox(height: 20),
-                // Join Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary.withOpacity(0.08),
-                      foregroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    onPressed: () => _handleGroupTap(group),
-                    child: const Text("استعراض المجموعة", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
-                  ),
-                ),
               ],
             ),
           ),
@@ -574,63 +576,101 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
   }
 
   Widget _buildMyGroupTile(GroupModel group) {
-    return InkWell(
-      onTap: () => _openGroupChat(group),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: AppColors.primary.withOpacity(0.1),
-              backgroundImage: group.imageUrl.isNotEmpty ? NetworkImage(group.imageUrl) : null,
-              child: group.imageUrl.isEmpty
-                  ? Text(
-                      group.name.isNotEmpty ? group.name[0].toUpperCase() : 'M',
-                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 22),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          group.name,
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: AppColors.darkSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          splashColor: AppColors.primary.withOpacity(0.15),
+          highlightColor: Colors.transparent,
+          onTap: () => _openGroupChat(group),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, Color(0xFFE8C868)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                      if (group.messagesCount > 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            "${group.messagesCount}", 
-                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900)
-                          ),
-                        ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    group.description.isNotEmpty ? group.description : group.specializationName,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: group.imageUrl.isNotEmpty
+                      ? ClipOval(child: Image.network(group.imageUrl, fit: BoxFit.cover))
+                      : Center(
+                          child: Text(
+                            group.name.isNotEmpty ? group.name[0].toUpperCase() : 'G',
+                            style: const TextStyle(color: AppColors.secondary, fontWeight: FontWeight.w900, fontSize: 24),
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              group.name,
+                              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (group.messagesCount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                              ),
+                              child: Text(
+                                group.messagesCount > 99 ? "+99" : "${group.messagesCount}", 
+                                style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w900)
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        group.description.isNotEmpty ? group.description : group.specializationName,
+                        style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.55), fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
