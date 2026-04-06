@@ -96,7 +96,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                     )
                   ),
                   const SizedBox(height: 24),
-                  const Text('تصفية النتائج', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+                  const Text('تصفية النتائج', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 24),
                   
                   // College Dropdown
@@ -105,20 +105,20 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                       labelText: 'الكلية',
                       labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                       filled: true,
-                      fillColor: AppColors.inputDarkFill,
+                      fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     ),
                     icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
                     value: tempCollegeId,
-                    items: AcademicStructure.colleges.map((col) => DropdownMenuItem(value: col.id, child: Text(col.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)))).toList(),
+                    items: AcademicStructure.colleges.map((col) => DropdownMenuItem(value: col.id, child: Text(col.name, style: const TextStyle(fontWeight: FontWeight.bold)))).toList(),
                     onChanged: (val) {
                       setModalState(() {
                         tempCollegeId = val;
                         tempSpecId = null;
                       });
                     },
-                    dropdownColor: AppColors.darkSurface,
+                    dropdownColor: Theme.of(context).cardTheme.color,
                   ),
                   const SizedBox(height: 16),
                   
@@ -129,26 +129,22 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                         labelText: 'التخصص',
                         labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                         filled: true,
-                        fillColor: AppColors.inputDarkFill,
+                        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       ),
                       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
                       value: tempSpecId,
-                      items: currentCollege.specializations.map((spec) => DropdownMenuItem(value: spec.id, child: Text(spec.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)))).toList(),
+                      items: currentCollege.specializations.map((spec) => DropdownMenuItem(value: spec.id, child: Text(spec.name, style: const TextStyle(fontWeight: FontWeight.bold)))).toList(),
                       onChanged: (val) => setModalState(() => tempSpecId = val),
-                      dropdownColor: AppColors.darkSurface,
+                      dropdownColor: Theme.of(context).cardTheme.color,
                     ),
                   if (currentCollege != null) const SizedBox(height: 20),
                   
                   // Switch
                   Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
                     child: SwitchListTile(
-                      title: const Text('المجموعات العامة فقط', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: Colors.white)),
+                      title: const Text('المجموعات العامة فقط', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
                       value: tempPublicOnly,
                       activeColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -234,16 +230,16 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: theme.textTheme.bodyLarge?.color),
                 decoration: InputDecoration(
                   hintText: 'ابحث عن مجتمع...',
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  hintStyle: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5)),
                 ),
               )
-            : const Text(
+            : Text(
                 "المجتمعات", 
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: AppColors.textPrimary, letterSpacing: 1.2)
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1.2)
               ),
         actions: [
           IconButton(
@@ -271,7 +267,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             child: TabBar(
               controller: _tabController,
               labelColor: AppColors.primary,
-              unselectedLabelColor: Colors.white.withOpacity(0.4),
+              unselectedLabelColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
               indicatorColor: AppColors.primary,
               indicatorWeight: 3.5,
               indicatorSize: TabBarIndicatorSize.label,
@@ -384,13 +380,13 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             const SizedBox(height: 24),
             Text(
               title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Theme.of(context).textTheme.bodyLarge?.color),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               subtitle,
-              style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.5), height: 1.6, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5), height: 1.6, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -548,10 +544,10 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                               Expanded(
                                 child: Text(
                                   widget.group.name,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 17, 
                                     fontWeight: FontWeight.w900, 
-                                    color: Colors.white, 
+                                    color: Theme.of(context).textTheme.bodyLarge?.color, 
                                     letterSpacing: 0.3
                                   ),
                                   maxLines: 1,
@@ -611,7 +607,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                                 Expanded(
                                   child: Text(
                                     "${widget.group.collegeName} • ${widget.group.specializationName}",
-                                    style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.55), fontWeight: FontWeight.w600),
+                                    style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7), fontWeight: FontWeight.w600),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -621,7 +617,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                           else
                             Text(
                               widget.group.description.isNotEmpty ? widget.group.description : widget.group.specializationName,
-                              style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.45), fontWeight: FontWeight.w500, height: 1.4),
+                              style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6), fontWeight: FontWeight.w500, height: 1.4),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -635,7 +631,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                   const SizedBox(height: 16),
                   Text(
                     widget.group.description,
-                    style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.45), height: 1.5, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6), height: 1.5, fontWeight: FontWeight.w500),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

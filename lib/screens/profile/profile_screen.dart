@@ -373,15 +373,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        AppColors.primaryDark,
-                        AppColors.primary,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: Theme.of(context).cardTheme.color,
                     borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
@@ -393,8 +394,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Text(
                             fullName.isEmpty ? username : fullName,
-                            style: const TextStyle(
-                              color: AppColors.textOnDark,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.titleLarge?.color,
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                             ),
@@ -411,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         '@$username',
                         style: TextStyle(
-                          color: AppColors.textOnDark.withOpacity(0.85),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -423,13 +424,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.12),
+                          color: Theme.of(context).primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           isDoctorVerified ? 'دكتور موثق' : 'مستخدم $role',
-                          style: const TextStyle(
-                            color: AppColors.textOnDark,
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

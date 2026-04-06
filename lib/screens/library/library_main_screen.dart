@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'digital_library_screen.dart';
-import 'library_theme.dart';
 import 'my_library_screen.dart';
 import 'university_library_screen.dart';
 
@@ -97,21 +96,25 @@ class _ModernHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        color: isDark ? theme.colorScheme.surface : theme.primaryColor,
+        gradient: isDark ? LinearGradient(
           colors: [
-            LibraryTheme.primary,
-            LibraryTheme.secondary,
+            theme.colorScheme.primary.withOpacity(0.15),
+            theme.colorScheme.surface,
           ],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-        ),
+        ) : null,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: LibraryTheme.primary.withOpacity(0.25),
+            color: theme.colorScheme.primary.withOpacity(0.15),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
