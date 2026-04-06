@@ -210,10 +210,13 @@ class _FeedScreenState extends State<FeedScreen> {
                       final active = _selectedFilter == label;
                       
                       String displayLabel = label;
-                      if (label == 'College') displayLabel = l10n.filterCollege;
-                      else if (label == 'Major') displayLabel = l10n.filterMajor;
-                      else if (label == 'Courses') displayLabel = l10n.filterCourses;
-
+                      if (label == 'College') {
+                        displayLabel = l10n.filterCollege;
+                      } else if (label == 'Major') {
+                        displayLabel = l10n.filterMajor;
+                      } else if (label == 'Courses') {
+                        displayLabel = l10n.filterCourses;
+                      }
                       return GestureDetector(
                         onTap: () {
                           setState(() {
@@ -717,7 +720,7 @@ class _PostCardState extends State<PostCard>
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           decoration: BoxDecoration(
             color: Theme.of(context).cardTheme.color ?? AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: isDark ? AppColors.border.withOpacity(0.5) : Colors.black12),
             boxShadow: [
               BoxShadow(
@@ -736,8 +739,8 @@ class _PostCardState extends State<PostCard>
                   Container(
                     width: 44,
                     height: 44,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [AppColors.primary, AppColors.primaryDark],

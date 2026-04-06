@@ -5,18 +5,19 @@ class AppColors {
 
   // Primary identity
   static const Color primary = Color(0xFFD4AF37);
-  static const Color primaryDark = Color(0xFF8C6B1F);
+  static const Color primaryDark = Color(0xFFB68A1E);
   static const Color secondary = Color(0xFF111111);
 
-  // Backgrounds
+  // Backgrounds - Structured Charcoal / Academic Light
   static const Color background = Color(0xFF0F1115);
   static const Color surface = Color(0xFF1A1D23);
   static const Color darkSurface = Color(0xFF0B0D11);
 
-  // Text
+  // Text Hierarchy
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFF9CA3AF);
   static const Color textOnDark = Color(0xFFFFFFFF);
+  static const Color textOnLight = Color(0xFF111111);
 
   // Inputs / borders
   static const Color inputFill = Color(0xFF1A1D23);
@@ -28,6 +29,6 @@ class AppColors {
   static const Color error = Color(0xFFDC2626);
   static const Color warning = Color(0xFFF59E0B);
 
-  // Accent glow
+  // Accent glow / highlights (using primary gold smoothly)
   static const Color blueGlow = Color(0xFFD4AF37);
 }

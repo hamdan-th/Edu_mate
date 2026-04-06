@@ -10,8 +10,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   late final AnimationController _entranceController;
   late final AnimationController _exitController;
-  late final AnimationController _glowController;
-  late final AnimationController _floatController;
 
   late final Animation<double> _logoScale;
   late final Animation<double> _logoOpacity;
@@ -19,8 +17,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   late final Animation<double> _univOpacity;
   late final Animation<double> _arabicOpacity;
   
-  late final Animation<double> _glowAnimation;
-  late final Animation<double> _floatAnimation;
   late final Animation<double> _exitOpacity;
 
   @override
@@ -32,12 +28,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
     _exitController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 400));
-
-    _glowController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 2500))..repeat(reverse: true);
-
-    _floatController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 4000))..repeat(reverse: true);
 
     _logoScale = Tween<double>(begin: 0.9, end: 1.0).animate(
       CurvedAnimation(
@@ -69,14 +59,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           curve: const Interval(0.8, 1.0, curve: Curves.easeIn)),
     );
 
-    _glowAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
-    );
-
-    _floatAnimation = Tween<double>(begin: -4.0, end: 4.0).animate(
-      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
-    );
-
     _exitOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _exitController, curve: Curves.easeOut),
     );
@@ -99,8 +81,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   void dispose() {
     _entranceController.dispose();
     _exitController.dispose();
-    _glowController.dispose();
-    _floatController.dispose();
     super.dispose();
   }
 
@@ -121,43 +101,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         },
         child: Stack(
           children: [
-            // Elegant background halo
-            Positioned.fill(
-              child: Center(
-                child: AnimatedBuilder(
-                  animation: _glowAnimation,
-                  builder: (context, _) {
-                    return Container(
-                      width: 280,
-                      height: 280,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: gold.withOpacity(0.025 * _glowAnimation.value),
-                            blurRadius: 140,
-                            spreadRadius: 20,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
+
             
-            // Centered explicit splash content
             SafeArea(
               child: Center(
                 child: AnimatedBuilder(
-                  animation: Listenable.merge([
-                    _entranceController,
-                    _floatController,
-                  ]),
+                  animation: _entranceController,
                   builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, _floatAnimation.value),
-                      child: Column(
+                    return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // 1. Logo

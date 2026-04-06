@@ -11,7 +11,6 @@ class SettingsBottomSheet extends StatelessWidget {
   static void show(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => const SettingsBottomSheet(),
     );
@@ -26,10 +25,6 @@ class SettingsBottomSheet extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.only(top: 16, bottom: 32, left: 24, right: 24),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surface : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -79,7 +79,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
         child: Container(
           margin: const EdgeInsets.fromLTRB(24, 0, 24, 28),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.5),
@@ -94,14 +94,14 @@ class _MainNavScreenState extends State<MainNavScreen> {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(28),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface.withOpacity(0.85) : Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(32),
+                  borderRadius: BorderRadius.circular(28),
                   border: Border.all(
                     color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
                     width: 1,

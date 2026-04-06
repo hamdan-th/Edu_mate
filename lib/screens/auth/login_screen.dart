@@ -36,16 +36,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 500),
     )..forward();
 
-    _floatController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    )..repeat(reverse: true);
-
-    _glowController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
-
     _cardOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOut),
     );
@@ -54,22 +44,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
     );
 
-    _floatAnimation = Tween<double>(begin: -4, end: 4).animate(
-      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
-    );
-
-    _glowAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
-    );
-  }
-
   @override
   void dispose() {
     _loginController.dispose();
     _passwordController.dispose();
     _entranceController.dispose();
-    _floatController.dispose();
-    _glowController.dispose();
     super.dispose();
   }
 
@@ -207,103 +186,52 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: isDark 
-              ? [AppColors.background, AppColors.darkSurface]
-              : [const Color(0xFFF9FAFB), const Color(0xFFF3F4F6)],
-          ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              // Subtle background glow
-              Positioned.fill(
-                child: Center(
-                  child: AnimatedBuilder(
-                    animation: _glowAnimation,
-                    builder: (context, _) {
-                      return Container(
-                        width: 280,
-                        height: 280,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.03 * _glowAnimation.value),
-                              blurRadius: 120,
-                              spreadRadius: 30,
-                            ),
-                          ],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  
+                  // 1. Header Section - Logo
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.08),
+                          blurRadius: 30,
+                          spreadRadius: 4,
                         ),
-                      );
-                    },
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/images/university_logo.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.contain,
+                  Image.asset(
+                    'assets/images/university_logo.png',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.contain,
                   ),
-                ),
-              ),
-              
-              Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 20),
-                        
-                        // 1. Header Section - Logo
-                        AnimatedBuilder(
-                          animation: Listenable.merge([_floatController, _glowController]),
-                          builder: (context, _) {
-                            return Transform.translate(
-                              offset: Offset(0, _floatAnimation.value),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary.withOpacity(0.08 * _glowAnimation.value),
-                                      blurRadius: 30,
-                                      spreadRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                                child: Image.asset(
-                                  'assets/images/university_logo.png',
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
                         
                         const SizedBox(height: 36), // Increased spacing
                         
-                        // Header Text
                         Text(
                           l10n.app_name,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 34,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.2,
-                          ),
+                          style: textTheme.headlineLarge,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           l10n.loginWelcomeBack,
-                          style: TextStyle(
-                            color: isDark ? Colors.white.withOpacity(0.5) : Colors.black54,
-                            fontSize: 14,
-                            letterSpacing: 2.5,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: textTheme.bodyMedium,
                         ),
                         
                         const SizedBox(height: 40),
@@ -321,13 +249,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   color: isDark ? AppColors.border.withOpacity(0.5) : Colors.black12,
                                   width: 1,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(isDark ? 0.25 : 0.05),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -384,34 +305,30 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       ),
                                       child: Column(
                                         children: [
-                                          TextField(
+                                          TextFormField(
                                             controller: _loginController,
                                             keyboardType: TextInputType.emailAddress,
-                                            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                                            style: textTheme.bodyLarge,
                                             decoration: _inputDecoration(
                                               label: l10n.loginEmailHint,
                                               icon: Icons.person_outline_rounded,
                                             ),
                                           ),
                                           const SizedBox(height: 16),
-                                          TextField(
+                                          TextFormField(
                                             controller: _passwordController,
                                             obscureText: _obscurePassword,
-                                            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                                            style: textTheme.bodyLarge,
                                             decoration: _inputDecoration(
                                               label: l10n.loginPasswordHint,
                                               icon: Icons.lock_outline_rounded,
                                               suffixIcon: IconButton(
                                                 onPressed: () {
-                                                  setState(() {
-                                                    _obscurePassword = !_obscurePassword;
-                                                  });
+                                                  setState(() => _obscurePassword = !_obscurePassword);
                                                 },
                                                 icon: Icon(
-                                                  _obscurePassword
-                                                      ? Icons.visibility_off_outlined
-                                                      : Icons.visibility_outlined,
-                                                  color: isDark ? Colors.white.withOpacity(0.4) : Colors.black54,
+                                                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                                  color: isDark ? AppColors.textSecondary : Colors.black54,
                                                 ),
                                               ),
                                             ),
@@ -437,54 +354,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     const SizedBox(height: 20),
                                     
                                     // 5. Login Button
-                                    Container(
+                                    SizedBox(
                                       width: double.infinity,
-                                      height: 54,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(16),
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xFFE8C868), // Soft lighter gold
-                                            AppColors.primary, // Base gold
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppColors.primary.withOpacity(0.5),
-                                            blurRadius: 16,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
                                       child: ElevatedButton(
                                         onPressed: _isLoading ? null : _handleLogin,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          shadowColor: Colors.transparent,
-                                          foregroundColor: AppColors.secondary, // Dark text
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                        ),
                                         child: _isLoading
                                             ? const SizedBox(
-                                                width: 24,
-                                                height: 24,
+                                                width: 22,
+                                                height: 22,
                                                 child: CircularProgressIndicator(
                                                   strokeWidth: 2.5,
-                                                  color: AppColors.secondary,
+                                                  color: Colors.white,
                                                 ),
                                               )
-                                            : Text(
-                                                l10n.loginTitle,
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w800,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
+                                            : Text(l10n.loginBtn),
                                       ),
                                     ),
                                     
@@ -527,7 +410,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   ),
                 ),
               ),
-            ],
           ),
         ),
       ),

@@ -19,22 +19,33 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
       ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           color: AppColors.textPrimary,
+          fontSize: 28,
+          letterSpacing: -0.5,
           fontWeight: FontWeight.w800,
         ),
         headlineMedium: TextStyle(
           color: AppColors.textPrimary,
+          fontSize: 22,
+          letterSpacing: -0.3,
           fontWeight: FontWeight.w700,
         ),
         bodyLarge: TextStyle(
           color: AppColors.textPrimary,
+          fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
         bodyMedium: TextStyle(
           color: AppColors.textSecondary,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -63,24 +74,33 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.secondary,
+          foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(52),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           textStyle: const TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w800,
+            letterSpacing: 0.3,
           ),
         ),
       ),
       cardTheme: CardTheme(
         color: AppColors.surface,
         elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: AppColors.border),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
       ),
       snackBarTheme: const SnackBarThemeData(
@@ -104,22 +124,33 @@ class AppTheme {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
       ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           color: Colors.black,
+          fontSize: 28,
+          letterSpacing: -0.5,
           fontWeight: FontWeight.w800,
         ),
         headlineMedium: TextStyle(
           color: Colors.black,
+          fontSize: 22,
+          letterSpacing: -0.3,
           fontWeight: FontWeight.w700,
         ),
         bodyLarge: TextStyle(
           color: Colors.black,
+          fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
         bodyMedium: TextStyle(
           color: Color(0xFF4B5563),
+          fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -155,17 +186,26 @@ class AppTheme {
             borderRadius: BorderRadius.circular(16),
           ),
           textStyle: const TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w800,
+            letterSpacing: 0.3,
           ),
         ),
       ),
       cardTheme: CardTheme(
         color: Colors.white,
         elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
       ),
       snackBarTheme: const SnackBarThemeData(

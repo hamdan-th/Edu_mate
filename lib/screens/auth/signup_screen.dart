@@ -265,36 +265,15 @@ class _SignupScreenState extends State<SignupScreen>
       }
     }
   }
-
-  InputDecoration _darkInputDecoration({
+  InputDecoration _inputDecoration({
     required String label,
     required IconData icon,
-    required bool isDark,
     Widget? suffixIcon,
-    Color? iconColor,
   }) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: iconColor ?? AppColors.blueGlow),
+      prefixIcon: Icon(icon),
       suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: isDark ? AppColors.inputDarkFill : const Color(0xFFF3F4F6),
-      labelStyle: TextStyle(
-        color: isDark ? AppColors.textOnDark.withOpacity(0.72) : Colors.black54,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(
-          color: isDark ? AppColors.textOnDark.withOpacity(0.06) : Colors.black12,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(
-          color: AppColors.blueGlow,
-          width: 1.2,
-        ),
-      ),
     );
   }
 
@@ -302,66 +281,13 @@ class _SignupScreenState extends State<SignupScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: isDark
-              ? const [
-                  AppColors.primaryDark,
-                  Color(0xFF1E3A70),
-                ]
-              : [
-                  const Color(0xFFF9FAFB), 
-                  const Color(0xFFF3F4F6)
-                ],
-          ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              Positioned(
-                top: -70,
-                left: -30,
-                child: Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.blueGlow.withOpacity(0.10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.blueGlow.withOpacity(0.18),
-                        blurRadius: 100,
-                        spreadRadius: 18,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -70,
-                right: -25,
-                child: Container(
-                  width: 190,
-                  height: 190,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.secondary.withOpacity(0.07),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.secondary.withOpacity(0.14),
-                        blurRadius: 100,
-                        spreadRadius: 16,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Stack(
+          children: [
               SingleChildScrollView(
                 padding:
                 const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
@@ -377,37 +303,27 @@ class _SignupScreenState extends State<SignupScreen>
                           const SizedBox(height: 14),
                           Text(
                             l10n.signupTitle,
-                            style: TextStyle(
-                              color: isDark ? AppColors.textOnDark : Colors.black87,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                            ),
+                          Text(
+                            l10n.signupTitle,
+                            style: textTheme.headlineLarge,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             l10n.signupSubtitle,
-                            style: TextStyle(
-                              color: isDark ? AppColors.textOnDark.withOpacity(0.74) : Colors.black54,
-                              fontSize: 14,
-                            ),
+                            style: textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 22),
                           Card(
-                            color: isDark ? AppColors.darkSurface.withOpacity(0.94) : colorScheme.surface,
                             child: Padding(
                               padding: const EdgeInsets.all(22),
                               child: Column(
                                 children: [
                                   TextFormField(
                                     controller: _usernameController,
-                                    style: TextStyle(
-                                      color: isDark ? AppColors.textOnDark : Colors.black87,
-                                    ),
-                                    decoration: _darkInputDecoration(
+                                    style: textTheme.bodyLarge,
+                                    decoration: _inputDecoration(
                                       label: l10n.signupUsernameHint,
                                       icon: Icons.alternate_email_rounded,
-                                      iconColor: AppColors.blueGlow,
-                                      isDark: isDark,
                                     ),
                                     validator: (value) {
                                       final text = value?.trim() ?? '';
@@ -427,14 +343,10 @@ class _SignupScreenState extends State<SignupScreen>
                                   const SizedBox(height: 14),
                                   TextFormField(
                                     controller: _fullNameController,
-                                    style: TextStyle(
-                                      color: isDark ? AppColors.textOnDark : Colors.black87,
-                                    ),
-                                    decoration: _darkInputDecoration(
+                                    style: textTheme.bodyLarge,
+                                    decoration: _inputDecoration(
                                       label: l10n.signupFullNameHint,
                                       icon: Icons.person_outline,
-                                      iconColor: AppColors.blueGlow,
-                                      isDark: isDark,
                                     ),
                                     validator: (value) {
                                       if ((value?.trim() ?? '').isEmpty) {
@@ -447,14 +359,10 @@ class _SignupScreenState extends State<SignupScreen>
                                   TextFormField(
                                     controller: _emailController,
                                     keyboardType: TextInputType.emailAddress,
-                                    style: TextStyle(
-                                      color: isDark ? AppColors.textOnDark : Colors.black87,
-                                    ),
-                                    decoration: _darkInputDecoration(
+                                    style: textTheme.bodyLarge,
+                                    decoration: _inputDecoration(
                                       label: l10n.loginEmailHint,
                                       icon: Icons.email_outlined,
-                                      iconColor: AppColors.secondary,
-                                      isDark: isDark,
                                     ),
                                     validator: (value) {
                                       final text = value?.trim() ?? '';
@@ -471,14 +379,10 @@ class _SignupScreenState extends State<SignupScreen>
                                   DropdownButtonFormField<String>(
                                     value: _selectedCollege,
                                     dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
-                                    style: TextStyle(
-                                      color: isDark ? AppColors.textOnDark : Colors.black87,
-                                    ),
-                                    decoration: _darkInputDecoration(
+                                    style: textTheme.bodyLarge,
+                                    decoration: _inputDecoration(
                                       label: l10n.signupCollegeHint,
                                       icon: Icons.account_balance_outlined,
-                                      iconColor: AppColors.secondary,
-                                      isDark: isDark,
                                     ),
                                     items: collegesList.map((college) {
                                       return DropdownMenuItem<String>(
@@ -491,9 +395,7 @@ class _SignupScreenState extends State<SignupScreen>
                                       setState(() {
                                         _selectedCollege = value;
                                         _specializationId = specializationsList
-                                            .firstWhere((item) =>
-                                        item.college ==
-                                            _selectedCollege)
+                                            .firstWhere((item) => item.college == _selectedCollege)
                                             .id;
                                       });
                                     },
@@ -502,17 +404,12 @@ class _SignupScreenState extends State<SignupScreen>
                                   DropdownButtonFormField<String>(
                                     value: _specializationId,
                                     dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
-                                    style: TextStyle(
-                                      color: isDark ? AppColors.textOnDark : Colors.black87,
-                                    ),
-                                    decoration: _darkInputDecoration(
+                                    style: textTheme.bodyLarge,
+                                    decoration: _inputDecoration(
                                       label: l10n.signupMajorHint,
                                       icon: Icons.school_outlined,
-                                      iconColor: AppColors.blueGlow,
-                                      isDark: isDark,
                                     ),
-                                    items:
-                                    _filteredSpecializations.map((item) {
+                                    items: _filteredSpecializations.map((item) {
                                       return DropdownMenuItem<String>(
                                         value: item.id,
                                         child: Text(item.name),
@@ -529,42 +426,27 @@ class _SignupScreenState extends State<SignupScreen>
                                   TextFormField(
                                     controller: _bioController,
                                     maxLines: 2,
-                                    style: TextStyle(
-                                      color: isDark ? AppColors.textOnDark : Colors.black87,
-                                    ),
-                                    decoration: _darkInputDecoration(
+                                    style: textTheme.bodyLarge,
+                                    decoration: _inputDecoration(
                                       label: l10n.signupBioHint,
                                       icon: Icons.info_outline,
-                                      iconColor: AppColors.secondary,
-                                      isDark: isDark,
                                     ),
                                   ),
                                   const SizedBox(height: 14),
                                   TextFormField(
                                     controller: _passwordController,
                                     obscureText: _obscurePassword,
-                                    style: TextStyle(
-                                      color: isDark ? AppColors.textOnDark : Colors.black87,
-                                    ),
-                                    decoration: _darkInputDecoration(
+                                    style: textTheme.bodyLarge,
+                                    decoration: _inputDecoration(
                                       label: l10n.loginPasswordHint,
                                       icon: Icons.lock_outline,
-                                      iconColor: AppColors.secondary,
-                                      isDark: isDark,
                                       suffixIcon: IconButton(
                                         onPressed: () {
-                                          setState(() {
-                                            _obscurePassword =
-                                            !_obscurePassword;
-                                          });
+                                          setState(() => _obscurePassword = !_obscurePassword);
                                         },
                                         icon: Icon(
-                                          _obscurePassword
-                                              ? Icons.visibility_off_outlined
-                                              : Icons.visibility_outlined,
-                                          color: isDark 
-                                              ? AppColors.textOnDark.withOpacity(0.70)
-                                              : Colors.black54,
+                                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                          color: isDark ? AppColors.textSecondary : Colors.black54,
                                         ),
                                       ),
                                     ),
@@ -583,19 +465,16 @@ class _SignupScreenState extends State<SignupScreen>
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
-                                      onPressed:
-                                      _isLoading ? null : _handleSignup,
+                                      onPressed: _isLoading ? null : _handleSignup,
                                       child: _isLoading
                                           ? const SizedBox(
-                                        width: 22,
-                                        height: 22,
-                                        child:
-                                        CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          color:
-                                          AppColors.primaryDark,
-                                        ),
-                                      )
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.5,
+                                                color: Colors.white,
+                                              ),
+                                            )
                                           : Text(l10n.signupBtn),
                                     ),
                                   ),
@@ -605,7 +484,7 @@ class _SignupScreenState extends State<SignupScreen>
                                     child: Text(
                                       l10n.signupAlreadyHaveAccount,
                                       style: const TextStyle(
-                                        color: AppColors.blueGlow,
+                                        color: AppColors.primary,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
