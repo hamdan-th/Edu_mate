@@ -114,27 +114,47 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Premium abstract icon representation of university logomark
+                            // Real university logo asset integration
                             Container(
-                              padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: gold.withOpacity(0.2),
-                                  width: 1,
-                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: gold.withOpacity(0.08),
-                                    blurRadius: 30,
-                                    spreadRadius: 5,
+                                    color: gold.withOpacity(0.12),
+                                    blurRadius: 40,
+                                    spreadRadius: 10,
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.account_balance_rounded,
-                                size: 64,
-                                color: gold,
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                width: 140,
+                                height: 140,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 140,
+                                    height: 140,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: gold.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'LOGO\nMISSING',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: gold.withOpacity(0.6),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                             const SizedBox(height: 36),
