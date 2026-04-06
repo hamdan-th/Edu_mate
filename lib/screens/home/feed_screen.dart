@@ -374,6 +374,14 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     _likeScale = Tween<double>(begin: 1.0, end: 1.4).animate(CurvedAnimation(parent: _likeController, curve: Curves.elasticOut));
   }
 
+  @override
+  void didUpdateWidget(PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.post['likes'] != widget.post['likes']) {
+      _likesCount = widget.post['likes'] as int? ?? 0;
+    }
+  }
+
   Future<void> _checkMembership() async {
     final groupId = widget.post['groupId']?.toString() ?? '';
     if (groupId.isNotEmpty) {
@@ -567,24 +575,19 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
           ],
           
           // Stats Row
-          if (_likesCount > 0 || (widget.post['comments'] > 0)) ...[
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  if (_likesCount > 0) ...[
-                    const Icon(Icons.favorite, color: AppColors.primary, size: 14),
-                    const SizedBox(width: 4),
-                    Text('$_likesCount', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-                  ],
-                  const Spacer(),
-                  if (widget.post['comments'] != null && widget.post['comments'] > 0)
-                    Text('${widget.post['comments']} comments', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-                ],
-              ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                const Icon(Icons.favorite, color: AppColors.primary, size: 14),
+                const SizedBox(width: 4),
+                Text('$_likesCount', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                const Spacer(),
+                Text('${widget.post['comments'] ?? 0} comments', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+              ],
             ),
-          ],
+          ),
           
           // Action Divider
           const SizedBox(height: 16),
