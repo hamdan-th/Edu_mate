@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'library_theme.dart';
 import 'library_upload_service.dart';
 import 'university_academic_data.dart';
+import '../../core/theme/app_colors.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({Key? key}) : super(key: key);
@@ -163,7 +164,7 @@ class _UploadScreenState extends State<UploadScreen> {
             .toList();
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
       body: Stack(
         children: [
           Positioned(
@@ -174,7 +175,7 @@ class _UploadScreenState extends State<UploadScreen> {
               height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Theme.of(context).primaryColor.withOpacity(0.07),
+                color: AppColors.primary.withOpacity(0.07),
               ),
             ),
           ),
@@ -300,10 +301,10 @@ class _UploadScreenState extends State<UploadScreen> {
                       child: ElevatedButton(
                         onPressed: _isUploading ? null : _submitForm,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           disabledBackgroundColor:
-                              Theme.of(context).primaryColor.withOpacity(0.55),
+                              AppColors.primary.withOpacity(0.55),
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 17),
                           shape: RoundedRectangleBorder(
@@ -341,7 +342,7 @@ class _UploadScreenState extends State<UploadScreen> {
                         'سيتم رفع الملف ثم مراجعته قبل ظهوره داخل مكتبة الجامعة',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                          color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                           fontSize: 12.8,
                           height: 1.5,
                         ),
@@ -374,9 +375,9 @@ class _TopBar extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color,
+              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+              border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.03),
@@ -511,14 +512,14 @@ class _FilePickerCard extends StatelessWidget {
           radius: const Radius.circular(22),
           dashPattern: const [8, 5],
           color: hasFile
-              ? Theme.of(context).primaryColor.withOpacity(0.45)
-              : Theme.of(context).dividerColor.withOpacity(0.1),
+              ? AppColors.primary.withOpacity(0.45)
+              : (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12),
           strokeWidth: 1.5,
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color,
+              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
               borderRadius: BorderRadius.circular(22),
             ),
             child: Column(
@@ -530,7 +531,7 @@ class _FilePickerCard extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: hasFile
                           ? [
-                              Theme.of(context).primaryColor.withOpacity(0.16),
+                              AppColors.primary.withOpacity(0.16),
                               Theme.of(context).colorScheme.secondary.withOpacity(0.12),
                             ]
                           : [
@@ -544,7 +545,7 @@ class _FilePickerCard extends StatelessWidget {
                     hasFile
                         ? Icons.check_circle_rounded
                         : Icons.attach_file_rounded,
-                    color: hasFile ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyMedium?.color,
+                    color: hasFile ? AppColors.primary : (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                     size: 24,
                   ),
                 ),
@@ -557,7 +558,7 @@ class _FilePickerCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14.6,
                     fontWeight: FontWeight.w700,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -568,7 +569,7 @@ class _FilePickerCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12.5,
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                     height: 1.5,
                   ),
                 ),
@@ -581,14 +582,14 @@ class _FilePickerCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Theme.of(context).canvasColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                    border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
                   ),
                   child: Text(
                     hasFile ? 'تغيير الملف' : 'اختيار ملف',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Theme.of(context).primaryColor,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -617,9 +618,9 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
+        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -644,7 +645,7 @@ class _SectionCard extends StatelessWidget {
             subtitle,
             style: TextStyle(
               fontSize: 12.8,
-              color: Theme.of(context).textTheme.bodyMedium?.color,
+              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
               height: 1.45,
             ),
           ),
@@ -679,7 +680,7 @@ class _ModernTextField extends StatelessWidget {
       validator: validator,
       style: TextStyle(
         fontSize: 14.5,
-        color: Theme.of(context).textTheme.bodyLarge?.color,
+        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
@@ -698,14 +699,14 @@ class _ModernTextField extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: Theme.of(context).dividerColor.withOpacity(0.3),
+            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: Theme.of(context).primaryColor,
+            color: AppColors.primary,
             width: 1.4,
           ),
         ),
@@ -755,7 +756,7 @@ class _ModernDropdown extends StatelessWidget {
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
       style: TextStyle(
         fontSize: 14.5,
-        color: Theme.of(context).textTheme.bodyLarge?.color,
+        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
@@ -774,14 +775,14 @@ class _ModernDropdown extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: Theme.of(context).dividerColor.withOpacity(0.3),
+            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: Theme.of(context).primaryColor,
+            color: AppColors.primary,
             width: 1.4,
           ),
         ),

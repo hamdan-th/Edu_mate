@@ -334,7 +334,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       builder: (context) {
         return Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).bottomSheetTheme.backgroundColor ?? Theme.of(context).cardTheme.color,
+            color: Theme.of(context).bottomSheetTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.symmetric(vertical: 20),
@@ -489,7 +489,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 56, bottom: 40),
           child: Column(
             children: [
@@ -610,7 +610,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             return [
               SliverToBoxAdapter(
                 child: Container(
-                  color: Theme.of(context).scaffoldBackgroundColor,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
                   padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48, bottom: 20),
                   child: Column(
                     children: [
@@ -746,7 +746,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 pinned: true,
                 delegate: _StickyTabBarDelegate(
                   Container(
-                    color: Theme.of(context).scaffoldBackgroundColor,
+                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
                     child: const TabBar(
                       indicatorColor: AppColors.primary,
                       indicatorWeight: 3,
@@ -767,7 +767,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             ];
           },
           body: Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
             child: TabBarView(
               children: [
                 _KeepAlivePage(child: _buildMembersTab()),
@@ -939,7 +939,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text(msg['text'] ?? 'رسالة', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 14, height: 1.4)),
+                child: Text(msg['text'] ?? 'رسالة', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87), fontSize: 14, height: 1.4)),
               ),
             );
           },
@@ -988,8 +988,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               child: Image.network(
                 url,
                 fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) => progress == null ? child : Container(color: Theme.of(context).dividerColor.withOpacity(0.05)),
-                errorBuilder: (context, error, stack) => Container(color: Theme.of(context).cardTheme.color, child: const Icon(Icons.broken_image, color: AppColors.textSecondary)),
+                loadingBuilder: (context, child, progress) => progress == null ? child : Container(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.05) : Colors.black12)),
+                errorBuilder: (context, error, stack) => Container(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white), child: const Icon(Icons.broken_image, color: AppColors.textSecondary)),
               ),
             );
           },

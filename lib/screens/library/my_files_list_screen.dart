@@ -10,6 +10,7 @@ import 'file_model.dart';
 import 'library_files_service.dart';
 import 'library_theme.dart';
 import 'pdf_preview_screen.dart';
+import '../../core/theme/app_colors.dart';
 
 class MyFilesListScreen extends StatelessWidget {
   final String title;
@@ -147,7 +148,7 @@ class MyFilesListScreen extends StatelessWidget {
           emptyMessage,
           style: TextStyle(
             fontSize: 18,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
+            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
           ),
         ),
       );
@@ -181,12 +182,12 @@ class MyFilesListScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color,
+              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+              border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).primaryColor.withOpacity(0.04),
+                  color: AppColors.primary.withOpacity(0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -198,7 +199,7 @@ class MyFilesListScreen extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: (isPdf ? Theme.of(context).colorScheme.error : Theme.of(context).primaryColor)
+                  color: (isPdf ? AppColors.error : AppColors.primary)
                       .withOpacity(0.10),
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -206,14 +207,14 @@ class MyFilesListScreen extends StatelessWidget {
                   isPdf
                       ? Icons.picture_as_pdf_rounded
                       : Icons.description_rounded,
-                  color: isPdf ? Theme.of(context).colorScheme.error : Theme.of(context).primaryColor,
+                  color: isPdf ? AppColors.error : AppColors.primary,
                 ),
               ),
               title: Text(
                 data['subjectName'] ?? 'بدون عنوان',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                 ),
               ),
               subtitle: Padding(
@@ -221,7 +222,7 @@ class MyFilesListScreen extends StatelessWidget {
                 child: Text(
                   '${data['doctorName'] ?? ''} • ${data['college'] ?? ''}',
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                     height: 1.4,
                   ),
                 ),
@@ -233,7 +234,7 @@ class MyFilesListScreen extends StatelessWidget {
                     (data['fileType'] ?? '').toString(),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Theme.of(context).primaryColor,
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -241,7 +242,7 @@ class MyFilesListScreen extends StatelessWidget {
                     (data['status'] ?? '').toString(),
                     style: TextStyle(
                       fontSize: 11,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                     ),
                   ),
                 ],
@@ -263,7 +264,7 @@ class MyFilesListScreen extends StatelessWidget {
           'لا توجد مراجع رقمية محفوظة',
           style: TextStyle(
             fontSize: 18,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
+            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
           ),
         ),
       );
@@ -295,9 +296,9 @@ class MyFilesListScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color,
+              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+              border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
             ),
             child: ListTile(
               contentPadding: EdgeInsets.zero,
@@ -317,7 +318,7 @@ class MyFilesListScreen extends StatelessWidget {
                 data['title'] ?? 'بدون عنوان',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                 ),
               ),
               subtitle: Padding(
@@ -325,7 +326,7 @@ class MyFilesListScreen extends StatelessWidget {
                 child: Text(
                   '${data['authors'] ?? ''} • ${data['yearPublished'] ?? ''}',
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                     height: 1.4,
                   ),
                 ),
@@ -379,11 +380,11 @@ class MyFilesListScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
       appBar: AppBar(
         title: Text(title),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+        foregroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
         elevation: 0,
       ),
       body: user == null
@@ -392,7 +393,7 @@ class MyFilesListScreen extends StatelessWidget {
                 'يجب تسجيل الدخول أولاً',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                 ),
               ),
             )

@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'core_api_service.dart';
 import 'core_result_details_screen.dart';
 import 'library_theme.dart';
+import '../../core/theme/app_colors.dart';
 
 class DigitalLibraryScreen extends StatefulWidget {
   const DigitalLibraryScreen({Key? key}) : super(key: key);
@@ -99,7 +100,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
       body: Column(
         children: [
           Padding(
@@ -113,7 +114,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.send_rounded),
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.primary,
                   onPressed: _performSearch,
                 ),
                 border: OutlineInputBorder(
@@ -134,7 +135,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                           _message,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                             fontSize: 16,
                           ),
                         ),
@@ -151,9 +152,9 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
 
                           return Container(
                             decoration: BoxDecoration(
-                              color: Theme.of(context).cardTheme.color,
+                              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
                               borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                              border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
                             ),
                             child: ListTile(
                               contentPadding: const EdgeInsets.all(14),
@@ -161,7 +162,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                                 title,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
-                                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                                 ),
                               ),
                               subtitle: Padding(
@@ -169,7 +170,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                                 child: Text(
                                   result['yearPublished']?.toString() ?? 'غير معروف',
                                   style: TextStyle(
-                                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                                   ),
                                 ),
                               ),

@@ -10,6 +10,7 @@ import 'library_reactions_service.dart';
 import 'library_theme.dart';
 import 'pdf_preview_screen.dart';
 import 'university_academic_data.dart';
+import '../../core/theme/app_colors.dart';
 
 class FileDetailsScreen extends StatefulWidget {
   final FileModel file;
@@ -90,7 +91,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 width: 42,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -99,12 +100,12 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.08),
+                  color: AppColors.primary.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Icon(
                   Icons.description_rounded,
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.primary,
                   size: 26,
                 ),
               ),
@@ -114,7 +115,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                 ),
               ),
               const SizedBox(height: 8),
@@ -123,7 +124,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.2,
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                   height: 1.5,
                 ),
               ),
@@ -137,8 +138,8 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                         await _downloadFile(url);
                       },
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(context).primaryColor,
-                        side: BorderSide(color: Theme.of(context).primaryColor),
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: AppColors.primary),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -163,7 +164,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -328,7 +329,7 @@ $url
                         width: 42,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).dividerColor.withOpacity(0.1),
+                          color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -454,7 +455,7 @@ $url
                                   }
                                 },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
@@ -535,11 +536,11 @@ $url
     final isOwner = FirebaseAuth.instance.currentUser?.uid == file.userId;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
       appBar: AppBar(
         title: const Text('تفاصيل الملف'),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+        foregroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
         elevation: 0,
         actions: [
           if (isOwner)
@@ -571,12 +572,12 @@ $url
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color,
+                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
                 borderRadius: BorderRadius.circular(26),
-                border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).primaryColor.withOpacity(0.05),
+                    color: AppColors.primary.withOpacity(0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),
@@ -689,9 +690,9 @@ $url
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color,
+                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -711,7 +712,7 @@ $url
                         : file.description,
                     style: TextStyle(
                       fontSize: 14.2,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                       height: 1.65,
                     ),
                   ),
@@ -754,7 +755,7 @@ $url
                               ? Icons.bookmark_rounded
                               : Icons.bookmark_border_rounded,
                           label: isSaved ? 'تم الحفظ' : 'حفظ',
-                          color: Theme.of(context).primaryColor,
+                          color: AppColors.primary,
                           onTap: () async {
                             try {
                               await LibraryReactionsService.toggleSave(
@@ -804,7 +805,7 @@ $url
                   icon: Icons.visibility_rounded,
                   label: 'المشاهدات',
                   value: file.views.toString(),
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(width: 10),
                 _MetricCard(
@@ -840,13 +841,13 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).primaryColor),
+          Icon(icon, size: 18, color: AppColors.primary),
           const SizedBox(width: 10),
           Expanded(
             child: RichText(
               text: TextSpan(
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -928,9 +929,9 @@ class _MetricCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color,
+          color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
         ),
         child: Column(
           children: [
@@ -949,7 +950,7 @@ class _MetricCard extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12.5,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
+                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
               ),
             ),
           ],
@@ -988,11 +989,11 @@ class _ModernField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+          borderSide: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+          borderSide: BorderSide(color: AppColors.primary),
         ),
       ),
     );
@@ -1033,7 +1034,7 @@ class _DropdownField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+          borderSide: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12)),
         ),
       ),
       items: safeItems

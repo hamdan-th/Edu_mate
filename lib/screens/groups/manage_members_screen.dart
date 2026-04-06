@@ -333,7 +333,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                       Flexible(
                         child: Text(
                           name + statusNote,
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -430,7 +430,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
             const SizedBox(height: 20),
             Text(
               "لا توجد نتائج",
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: Theme.of(context).textTheme.bodyLarge?.color),
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87)),
             ),
             const SizedBox(height: 8),
             const Text(

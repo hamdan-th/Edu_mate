@@ -7,6 +7,7 @@ import 'file_model.dart';
 import 'library_files_service.dart';
 import 'library_theme.dart';
 import 'university_academic_data.dart';
+import '../../core/theme/app_colors.dart';
 
 class UniversityLibraryScreen extends StatefulWidget {
   const UniversityLibraryScreen({Key? key}) : super(key: key);
@@ -84,7 +85,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
               decoration: BoxDecoration(
-                color: Theme.of(context).bottomSheetTheme.backgroundColor ?? Theme.of(context).cardTheme.color,
+                color: Theme.of(context).bottomSheetTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: Column(
@@ -92,7 +93,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: Theme.of(context).dividerColor.withOpacity(0.1))),
+                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12))),
                   ),
                   const SizedBox(height: 12),
                   const Text('فلترة وترتيب', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
@@ -158,7 +159,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                           ),
                           child: const Text('تطبيق'),
@@ -195,7 +196,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+                  borderSide: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12)),
                 ),
               ),
             ),
@@ -240,7 +241,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                       'لا توجد ملفات مطابقة حالياً',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -314,7 +315,7 @@ class _ActionIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).cardTheme.color,
+      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -324,7 +325,7 @@ class _ActionIconButton extends StatelessWidget {
           height: 52,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+            border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
           ),
           child: Icon(icon, color: Theme.of(context).iconTheme.color),
         ),
@@ -364,7 +365,7 @@ class _BottomSheetDropdown extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+          borderSide: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12)),
         ),
       ),
       items: safeItems

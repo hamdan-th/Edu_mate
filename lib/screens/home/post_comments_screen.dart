@@ -80,7 +80,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
     final postId = widget.postCardData['postId']?.toString() ?? '';
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
       appBar: AppBar(
         title: const Text('التعليقات'),
       ),
@@ -94,7 +94,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
+                      child: CircularProgressIndicator(color: AppColors.primary),
                     );
                   }
 
@@ -102,7 +102,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                     return const Center(
                       child: Text(
                         'تعذر تحميل التعليقات',
-                        style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                        style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
                       ),
                     );
                   }
@@ -115,13 +115,13 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.chat_bubble_outline_rounded,
-                              size: 48, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                              size: 48, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
                           const SizedBox(height: 16),
                           Text(
                             'لا توجد تعليقات بعد\nكُن أول من يعلق!',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyMedium?.color,
+                              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                               fontWeight: FontWeight.w600,
                               fontSize: 15,
                             ),
@@ -144,9 +144,9 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).cardTheme.color,
+                          color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                          border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +157,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                                 Text(
                                   comment.authorName,
                                   style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.w800,
                                     fontSize: 13,
                                   ),
@@ -165,7 +165,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                                 Text(
                                   _formatTime(comment.createdAt?.toDate()),
                                   style: TextStyle(
-                                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -176,7 +176,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                             Text(
                               comment.text,
                               style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                                 fontSize: 13.5,
                                 height: 1.4,
                               ),
@@ -200,9 +200,9 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
+        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
         border: Border(
-          top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          top: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
         ),
         boxShadow: [
           BoxShadow(
@@ -219,21 +219,21 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                  border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
                 ),
                 child: TextField(
                   controller: _commentController,
                   maxLines: 5,
                   minLines: 1,
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                     fontSize: 14,
                   ),
                   decoration: InputDecoration(
                     hintText: 'إضافة تعليق...',
-                    hintStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                    hintStyle: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 12,
@@ -250,11 +250,11 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.3),
+                      color: AppColors.primary.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),

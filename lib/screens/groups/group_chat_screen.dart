@@ -237,13 +237,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).cardTheme.color,
-            boxShadow: [BoxShadow(color: Theme.of(context).dividerColor.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 1))],
+            color: Theme.of(context).appBarTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
+            boxShadow: [BoxShadow(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12), blurRadius: 4, offset: const Offset(0, 1))],
           ),
           child: AppBar(
             titleSpacing: 0,
@@ -275,7 +275,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 decoration: InputDecoration(
                   hintText: "ابحث في المحادثة...",
                   hintStyle: TextStyle(
-                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)?.withOpacity(0.7),
                     fontSize: 15,
                   ),
                   filled: true,
@@ -321,7 +321,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       const SizedBox(height: 1),
                       Text(
                         "${_membersCount > 0 ? '$_membersCount أعضاء • ' : ''}${widget.group.specializationName}".trim(),
-                        style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7), height: 1.1),
+                        style: TextStyle(fontSize: 13, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)?.withOpacity(0.7), height: 1.1),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -427,7 +427,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(color: Theme.of(context).cardTheme.color, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Theme.of(context).dividerColor.withOpacity(0.05), blurRadius: 16)]),
+            decoration: BoxDecoration(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white), shape: BoxShape.circle, boxShadow: [BoxShadow(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.05) : Colors.black12), blurRadius: 16)]),
             child: Icon(Icons.lock_rounded, size: 48, color: Theme.of(context).iconTheme.color?.withOpacity(0.8)),
           ),
           const SizedBox(height: 24),
@@ -447,7 +447,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           const SizedBox(height: 32),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
               elevation: 0,
@@ -464,7 +464,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final parentContext = context;
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).bottomSheetTheme.backgroundColor ?? Theme.of(context).cardTheme.color,
+      backgroundColor: Theme.of(context).bottomSheetTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => Padding(
         padding: const EdgeInsets.only(top: 8, bottom: 20),
@@ -545,7 +545,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isMe ? Theme.of(context).primaryColor : Theme.of(context).cardTheme.color,
+        color: isMe ? AppColors.primary : (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(18),
           topRight: const Radius.circular(18),
@@ -554,7 +554,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).dividerColor.withOpacity(0.05),
+            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.05) : Colors.black12),
             blurRadius: 1.5,
             offset: const Offset(0, 1),
           ),
@@ -735,8 +735,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).bottomSheetTheme.backgroundColor ?? Theme.of(context).cardTheme.color,
-        boxShadow: [BoxShadow(color: Theme.of(context).dividerColor.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, -1))],
+        color: Theme.of(context).bottomSheetTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
+        boxShadow: [BoxShadow(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12), blurRadius: 4, offset: const Offset(0, -1))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -803,7 +803,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   decoration: InputDecoration(
                     hintText: "اكتب رسالة...",
                     hintStyle: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)?.withOpacity(0.7),
                       fontSize: 15,
                     ),
                     filled: true,
@@ -823,7 +823,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   height: 48,
                   width: 48,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
                   child: _isSending
@@ -846,7 +846,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         left: 20, right: 20,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
+        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
         border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: Row(
@@ -881,13 +881,13 @@ class _EmptyChatState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color?.withOpacity(0.9),
+                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white)?.withOpacity(0.9),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Text(
                 'لا توجد رسائل بعد',
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
