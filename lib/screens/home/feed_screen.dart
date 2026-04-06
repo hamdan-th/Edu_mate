@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../services/feed_reactions_service.dart';
@@ -23,9 +26,24 @@ class _FeedScreenState extends State<FeedScreen> {
   String _selectedFilter = 'For You';
   final List<String> _filters = const ['For You', 'Academic', 'Popular', 'Recent'];
 
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _refresh() async {
@@ -39,6 +57,25 @@ class _FeedScreenState extends State<FeedScreen> {
 
   void _openBot() {
     Navigator.push(context, MaterialPageRoute(builder: (_) => const BotScreen()));
+  }
+
+  void _pickPhoto() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تحديد الصورة بنجاح')));
+    }
+  }
+
+  void _pickDocument() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf', 'doc', 'docx']);
+    if (result != null && result.files.isNotEmpty && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تحديد المستند بنجاح')));
+    }
+  }
+
+  void _createGroupPost() {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء التوجه إلى مجتمع معين لنشر المحتوى')));
   }
 
   String _formatTime(dynamic value) {
@@ -63,7 +100,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Stream<List<FeedPostModel>> _postsStream() {
-    return FeedService.streamPublicFeed(filter: _selectedFilter, searchQuery: '');
+    return FeedService.streamPublicFeed(filter: _selectedFilter, searchQuery: _searchQuery);
   }
 
   @override
@@ -77,38 +114,86 @@ class _FeedScreenState extends State<FeedScreen> {
               children: [
                 // Clean Premium Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                   child: Row(
                     children: [
-                      const Text(
-                        'Edu Mate',
-                        style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 0.5),
-                      ),
-                      const Spacer(),
-                      _HeaderAction(icon: Icons.search_rounded, onTap: () {}),
-                      const SizedBox(width: 12),
-                      _HeaderAction(icon: Icons.notifications_none_rounded, hasBadge: true, onTap: () {}),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: _openProfile,
-                        child: Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.primary, width: 2),
-                            image: const DecorationImage(
-                              image: AssetImage('assets/images/university_logo.png'), // Using uni logo as placeholder avatar for premium feel
-                              fit: BoxFit.cover,
+                      if (!_isSearching)
+                        const Text(
+                          'Edu Mate',
+                          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                        ),
+                      if (_isSearching)
+                        Expanded(
+                          child: Container(
+                            height: 38,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: AppColors.background,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withOpacity(0.1)),
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                hintText: 'Search...',
+                                hintStyle: TextStyle(color: Colors.white54),
+                                border: InputBorder.none,
+                                isDense: true,
+                              ),
                             ),
                           ),
                         ),
+                      if (!_isSearching) const Spacer(),
+                      const SizedBox(width: 12),
+                      _HeaderAction(
+                        icon: _isSearching ? Icons.close_rounded : Icons.search_rounded, 
+                        onTap: () {
+                          setState(() {
+                            if (_isSearching) _searchController.clear();
+                            _isSearching = !_isSearching;
+                          });
+                        }
+                      ),
+                      const SizedBox(width: 12),
+                      _HeaderAction(icon: Icons.notifications_none_rounded, hasBadge: true, onTap: () {}),
+                      const SizedBox(width: 12),
+                      
+                      // Authenticated User Avatar
+                      FutureBuilder<User?>(
+                        future: Future.value(FirebaseAuth.instance.currentUser),
+                        builder: (context, snapshot) {
+                          final user = snapshot.data;
+                          return GestureDetector(
+                            onTap: _openProfile,
+                            child: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppColors.primary, width: 1.5),
+                                color: AppColors.primary.withOpacity(0.1),
+                              ),
+                              child: ClipOval(
+                                child: (user?.photoURL?.isNotEmpty ?? false)
+                                    ? Image.network(user!.photoURL!, fit: BoxFit.cover)
+                                    : Center(
+                                        child: Text(
+                                          user?.displayName?.isNotEmpty == true ? user!.displayName![0].toUpperCase() : 'U',
+                                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 16),
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          );
+                        }
                       ),
                     ],
                   ),
                 ),
                 
-                // Composer / Quick Post Area (Social style)
+                // Composer / Quick Post Area
                 Container(
                   color: AppColors.darkSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -117,10 +202,20 @@ class _FeedScreenState extends State<FeedScreen> {
                     children: [
                       Row(
                         children: [
-                          Container(
-                            width: 40, height: 40,
-                            decoration: const BoxDecoration(color: Color(0xFF262626), shape: BoxShape.circle),
-                            child: const Icon(Icons.person, color: Colors.white54),
+                          FutureBuilder<User?>(
+                            future: Future.value(FirebaseAuth.instance.currentUser),
+                            builder: (context, snapshot) {
+                              final user = snapshot.data;
+                              return Container(
+                                width: 40, height: 40,
+                                decoration: const BoxDecoration(color: Color(0xFF1E1E22), shape: BoxShape.circle),
+                                child: ClipOval(
+                                  child: (user?.photoURL?.isNotEmpty ?? false)
+                                      ? Image.network(user!.photoURL!, fit: BoxFit.cover)
+                                      : const Icon(Icons.person, color: Colors.white54),
+                                ),
+                              );
+                            }
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -130,7 +225,7 @@ class _FeedScreenState extends State<FeedScreen> {
                               decoration: BoxDecoration(
                                 color: AppColors.background,
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                                border: Border.all(color: Colors.white.withOpacity(0.04)),
                               ),
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -141,13 +236,13 @@ class _FeedScreenState extends State<FeedScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _ComposerAction(icon: Icons.image_rounded, label: 'Photo', color: Colors.greenAccent),
-                          _ComposerAction(icon: Icons.article_rounded, label: 'Document', color: Colors.blueAccent),
-                          _ComposerAction(icon: Icons.groups_rounded, label: 'Group', color: AppColors.primary),
+                          _ComposerAction(icon: Icons.image_rounded, label: 'Photo', color: AppColors.primary, onTap: _pickPhoto),
+                          _ComposerAction(icon: Icons.article_rounded, label: 'Document', color: AppColors.primary, onTap: _pickDocument),
+                          _ComposerAction(icon: Icons.groups_rounded, label: 'Group', color: AppColors.primary, onTap: _createGroupPost),
                         ],
                       ),
                     ],
@@ -177,7 +272,6 @@ class _FeedScreenState extends State<FeedScreen> {
                           decoration: BoxDecoration(
                             color: active ? AppColors.primary.withOpacity(0.15) : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: active ? AppColors.primary : Colors.transparent),
                           ),
                           child: Center(
                             child: Text(
@@ -291,10 +385,9 @@ class _HeaderAction extends StatelessWidget {
           Container(
             width: 38,
             height: 38,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.darkSurface,
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
             ),
             child: Icon(icon, color: Colors.white, size: 20),
           ),
@@ -316,17 +409,25 @@ class _ComposerAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
+  final VoidCallback onTap;
 
-  const _ComposerAction({required this.icon, required this.label, required this.color});
+  const _ComposerAction({required this.icon, required this.label, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(width: 6),
-        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.w600)),
-      ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(width: 8),
+            Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -412,7 +513,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 Container(
                   width: 44, height: 44,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF262626),
+                    color: Color(0xFF1E1E22),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -508,7 +609,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
           const SizedBox(height: 12),
           Divider(height: 1, thickness: 1, color: Colors.white.withOpacity(0.04)),
           
-          // Action Row (LinkedIn/FB style wide buttons)
+          // Action Row
           Row(
             children: [
               _SocialActionButton(

@@ -101,17 +101,17 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
     setState(() {
       _x += details.delta.dx;
       _y += details.delta.dy;
-      // Keep boundaries safe
+      // Keep boundaries safe without arbitrary context lookups
       _x = _x.clamp(8.0, widget.screenWidth - 68.0);
-      _y = _y.clamp(SafeArea(child: Container()).minimum.top + kToolbarHeight, widget.screenHeight - 120.0);
+      _y = _y.clamp(120.0, widget.screenHeight - 140.0);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized && widget.screenWidth > 0) {
-      _x = widget.screenWidth - 76; 
-      _y = widget.screenHeight - (widget.screenHeight * 0.25); 
+      _x = widget.screenWidth - 64; 
+      _y = widget.screenHeight - 180; 
       _isInitialized = true;
     }
 
