@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../services/app_link_handler.dart';
@@ -41,8 +42,11 @@ class _MainNavScreenState extends State<MainNavScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       extendBody: true,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 280),
@@ -96,10 +100,10 @@ class _MainNavScreenState extends State<MainNavScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: AppColors.darkSurface.withOpacity(0.85),
+                  color: isDark ? AppColors.darkSurface.withOpacity(0.85) : Colors.white.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(32),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.08),
+                    color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
                     width: 1,
                   ),
                 ),
@@ -109,8 +113,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
                       child: _NavItem(
                         icon: Icons.home_outlined,
                         activeIcon: Icons.home_rounded,
-                        label: 'Home',
+                        label: l10n.navHome,
                         selected: _currentIndex == 0,
+                        isDark: isDark,
                         onTap: () => setState(() => _currentIndex = 0),
                       ),
                     ),
@@ -118,8 +123,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
                       child: _NavItem(
                         icon: Icons.groups_outlined,
                         activeIcon: Icons.groups_rounded,
-                        label: 'Groups',
+                        label: l10n.navGroups,
                         selected: _currentIndex == 1,
+                        isDark: isDark,
                         onTap: () => setState(() => _currentIndex = 1),
                       ),
                     ),
@@ -127,8 +133,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
                       child: _NavItem(
                         icon: Icons.library_books_outlined,
                         activeIcon: Icons.library_books_rounded,
-                        label: 'Library',
+                        label: l10n.navLibrary,
                         selected: _currentIndex == 2,
+                        isDark: isDark,
                         onTap: () => setState(() => _currentIndex = 2),
                       ),
                     ),
@@ -149,6 +156,7 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final bool isDark;
 
   const _NavItem({
     required this.icon,
@@ -156,6 +164,7 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    required this.isDark,
   });
 
   @override
@@ -190,7 +199,7 @@ class _NavItem extends StatelessWidget {
                   selected ? activeIcon : icon,
                   key: ValueKey(selected),
                   size: 24,
-                  color: selected ? AppColors.primary : Colors.white.withOpacity(0.35),
+                  color: selected ? AppColors.primary : (isDark ? Colors.white.withOpacity(0.35) : Colors.black45),
                 ),
               ),
             ),
@@ -199,7 +208,7 @@ class _NavItem extends StatelessWidget {
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               style: TextStyle(
-                color: selected ? AppColors.primary : Colors.white.withOpacity(0.35),
+                color: selected ? AppColors.primary : (isDark ? Colors.white.withOpacity(0.35) : Colors.black45),
                 fontSize: 11.5,
                 fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                 letterSpacing: selected ? 0.3 : 0.0,

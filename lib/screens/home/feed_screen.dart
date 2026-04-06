@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../services/feed_reactions_service.dart';
@@ -108,8 +109,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: SafeArea(
         child: Padding(
@@ -131,10 +135,10 @@ class _FeedScreenState extends State<FeedScreen> {
                     children: [
                       Row(
                         children: [
-                          const Text(
-                            'Edu Mate',
+                          Text(
+                            l10n.app_name,
                             style: TextStyle(
-                              color: AppColors.textPrimary,
+                              color: isDark ? AppColors.textPrimary : Colors.black87,
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.8,
@@ -175,12 +179,12 @@ class _FeedScreenState extends State<FeedScreen> {
                     ),
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: isDark ? AppColors.textPrimary : Colors.black87, fontSize: 14),
+                      decoration: InputDecoration(
                         border: InputBorder.none,
-                        hintText: 'Search feed...',
+                        hintText: l10n.feedSearchHint,
                         hintStyle: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: isDark ? AppColors.textSecondary : Colors.black54,
                           fontWeight: FontWeight.w400,
                           fontSize: 14,
                         ),
@@ -204,6 +208,11 @@ class _FeedScreenState extends State<FeedScreen> {
                     itemBuilder: (context, index) {
                       final label = _filters[index];
                       final active = _selectedFilter == label;
+                      
+                      String displayLabel = label;
+                      if (label == 'College') displayLabel = l10n.filterCollege;
+                      else if (label == 'Major') displayLabel = l10n.filterMajor;
+                      else if (label == 'Courses') displayLabel = l10n.filterCourses;
 
                       return GestureDetector(
                         onTap: () {
@@ -211,7 +220,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             _selectedFilter = label;
                           });
                         },
-                        child: ModernChip(label: label, active: active),
+                        child: ModernChip(label: displayLabel, originalValue: label, active: active),
                       );
                     },
                   ),
@@ -240,12 +249,11 @@ class _FeedScreenState extends State<FeedScreen> {
                           return ListView(
                             padding:
                             const EdgeInsets.fromLTRB(20, 30, 20, 110),
-                            children: const [
+                            children: [
                               EmptyStateCard(
                                 icon: Icons.error_outline_rounded,
-                                title: 'تعذر تحميل المنشورات',
-                                subtitle:
-                                'تحقق من الاتصال أو من إعدادات Firestore',
+                                title: l10n.feedErrLoadPosts,
+                                subtitle: l10n.feedErrCheckConnection,
                               ),
                             ],
                           );
@@ -257,12 +265,11 @@ class _FeedScreenState extends State<FeedScreen> {
                           return ListView(
                             padding:
                             const EdgeInsets.fromLTRB(20, 30, 20, 110),
-                            children: const [
+                            children: [
                               EmptyStateCard(
                                 icon: Icons.feed_outlined,
-                                title: 'لا يوجد منشورات عامة بعد',
-                                subtitle:
-                                'ستظهر هنا فقط منشورات المجموعات العامة',
+                                title: l10n.feedEmptyPublicPosts,
+                                subtitle: l10n.feedEmptyPublicPostsSub,
                               ),
                             ],
                           );
@@ -320,6 +327,8 @@ class FloatingStudyBotButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -328,7 +337,7 @@ class FloatingStudyBotButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.97),
+            color: isDark ? AppColors.surface.withOpacity(0.97) : Colors.white.withOpacity(0.97),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: AppColors.border),
             boxShadow: [
@@ -339,21 +348,21 @@ class FloatingStudyBotButton extends StatelessWidget {
               ),
             ],
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.menu_book_rounded,
                 color: AppColors.primary,
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'Edu Bot',
+                l10n.feedBotName,
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 13,
-                  color: AppColors.textPrimary,
+                  color: isDark ? AppColors.textPrimary : Colors.black87,
                 ),
               ),
             ],
@@ -378,6 +387,7 @@ class FeedTopActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -388,9 +398,9 @@ class FeedTopActionButton extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.surface.withOpacity(0.98),
+              color: isDark ? AppColors.surface.withOpacity(0.98) : Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: isDark ? AppColors.border : Colors.black12),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.primary.withOpacity(0.06),
@@ -401,7 +411,7 @@ class FeedTopActionButton extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              color: AppColors.textPrimary,
+              color: isDark ? AppColors.textPrimary : Colors.black87,
               size: 21,
             ),
           ),
@@ -427,30 +437,38 @@ class FeedTopActionButton extends StatelessWidget {
 
 class ModernChip extends StatelessWidget {
   final String label;
+  final String? originalValue;
   final bool active;
 
   const ModernChip({
     super.key,
     required this.label,
+    this.originalValue,
     this.active = false,
   });
 
   IconData _getIcon() {
-    if (label.contains('College')) return Icons.account_balance_rounded;
-    if (label.contains('Major')) return Icons.school_rounded;
-    if (label.contains('Course')) return Icons.menu_book_rounded;
+    final checkLabel = originalValue ?? label;
+    if (checkLabel.contains('College')) return Icons.account_balance_rounded;
+    if (checkLabel.contains('Major')) return Icons.school_rounded;
+    if (checkLabel.contains('Course')) return Icons.menu_book_rounded;
     return Icons.filter_list_rounded;
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: active ? AppColors.primary.withOpacity(0.12) : AppColors.surface.withOpacity(0.3),
+        color: active 
+          ? AppColors.primary.withOpacity(0.12) 
+          : (isDark ? AppColors.surface.withOpacity(0.3) : Colors.white.withOpacity(0.6)),
         borderRadius: BorderRadius.circular(20),
-        border: active ? Border.all(color: AppColors.primary.withOpacity(0.3)) : Border.all(color: AppColors.border.withOpacity(0.3)),
+        border: active 
+          ? Border.all(color: AppColors.primary.withOpacity(0.3)) 
+          : Border.all(color: isDark ? AppColors.border.withOpacity(0.3) : Colors.black12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -464,7 +482,7 @@ class ModernChip extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: active ? AppColors.primary : AppColors.textSecondary,
+              color: active ? AppColors.primary : (isDark ? AppColors.textSecondary : Colors.black54),
               fontSize: 13,
               fontWeight: active ? FontWeight.w700 : FontWeight.w500,
             ),
@@ -617,7 +635,8 @@ class _PostCardState extends State<PostCard>
         setState(() {
           _isJoined = true;
         });
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الانضمام للمجموعة')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.feedJoinedGroup)));
       }
     } catch (e) {
       if (mounted) {
@@ -659,8 +678,9 @@ class _PostCardState extends State<PostCard>
           isLiked = oldIsLiked;
           _likesCount += oldIsLiked ? 1 : -1;
         });
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تعذر تحديث الإعجاب')),
+          SnackBar(content: Text(l10n.feedErrUpdateLike)),
         );
       }
     } finally {
@@ -680,6 +700,8 @@ class _PostCardState extends State<PostCard>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final imageUrl = (widget.post['imageUrl'] ?? '').toString();
 
     return GestureDetector(
@@ -694,12 +716,12 @@ class _PostCardState extends State<PostCard>
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Theme.of(context).cardTheme.color ?? AppColors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border.withOpacity(0.5)),
+            border: Border.all(color: isDark ? AppColors.border.withOpacity(0.5) : Colors.black12),
             boxShadow: [
               BoxShadow(
-                color: AppColors.textPrimary.withOpacity(isPressed ? 0.04 : 0.01),
+                color: Colors.black.withOpacity(isPressed ? (isDark ? 0.2 : 0.05) : (isDark ? 0.1 : 0.02)),
                 blurRadius: isPressed ? 8 : 4,
                 offset: const Offset(0, 2),
               ),
@@ -735,8 +757,8 @@ class _PostCardState extends State<PostCard>
                       children: [
                         Text(
                           '${widget.post['authorName'] ?? ''}',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: isDark ? AppColors.textPrimary : Colors.black87,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.2,
@@ -787,9 +809,9 @@ class _PostCardState extends State<PostCard>
                                   height: 14, 
                                   child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
                                 )
-                              : const Text(
-                                  'Join',
-                                  style: TextStyle(
+                              : Text(
+                                  l10n.feedJoinAction,
+                                  style: const TextStyle(
                                     color: AppColors.primary,
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
@@ -799,14 +821,14 @@ class _PostCardState extends State<PostCard>
                       ),
                     ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.more_horiz, color: AppColors.textSecondary, size: 24),
+                  Icon(Icons.more_horiz, color: isDark ? AppColors.textSecondary : Colors.black45, size: 24),
                 ],
               ),
               const SizedBox(height: 14),
               Text(
                 widget.post['content'] ?? '',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: isDark ? AppColors.textPrimary : Colors.black87,
                   fontSize: 15.5,
                   height: 1.5,
                   fontWeight: FontWeight.w400,

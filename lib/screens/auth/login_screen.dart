@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../core/theme/app_colors.dart';
 
@@ -76,8 +77,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final email = _loginController.text.trim();
     final password = _passwordController.text.trim();
 
+    final l10n = AppLocalizations.of(context)!;
+
     if (email.isEmpty || password.isEmpty) {
-      _showMessage('Please enter your email and password');
+      _showMessage(l10n.errEnterEmailPass);
       return;
     }
 
@@ -97,32 +100,32 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      String message = 'Login failed';
+      String message = l10n.signupFailed;
 
       switch (e.code) {
         case 'invalid-email':
-          message = 'Invalid email address';
+          message = l10n.errInvalidEmail;
           break;
         case 'user-not-found':
-          message = 'Account not found';
+          message = l10n.errAccountNotFound;
           break;
         case 'wrong-password':
-          message = 'Incorrect password';
+          message = l10n.errWrongPassword;
           break;
         case 'invalid-credential':
-          message = 'Invalid credentials';
+          message = l10n.errInvalidCredentials;
           break;
         case 'user-disabled':
-          message = 'Account disabled';
+          message = l10n.errAccountDisabled;
           break;
         case 'too-many-requests':
-          message = 'Too many requests, try again later';
+          message = l10n.errTooManyRequests;
           break;
       }
 
       _showMessage(message);
     } catch (_) {
-      _showMessage('An unexpected error occurred');
+      _showMessage(l10n.errUnexpected);
     } finally {
       if (mounted) {
         setState(() {
@@ -133,10 +136,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Future<void> _resetPassword() async {
+    final l10n = AppLocalizations.of(context)!;
     final email = _loginController.text.trim();
 
     if (email.isEmpty) {
-      _showMessage('Please enter your email first');
+      _showMessage(l10n.resetEnterEmailFirst);
       return;
     }
 
@@ -146,19 +150,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      _showMessage('Password reset link sent to your email');
+      _showMessage(l10n.resetLinkSent);
     } on FirebaseAuthException catch (e) {
-      String message = 'Failed to send reset link';
+      String message = l10n.resetFailedSend;
 
       if (e.code == 'invalid-email') {
-        message = 'Invalid email address';
+        message = l10n.errInvalidEmail;
       } else if (e.code == 'user-not-found') {
-        message = 'Email not registered';
+        message = l10n.resetEmailNotRegistered;
       }
 
       _showMessage(message);
     } catch (_) {
-      _showMessage('An unexpected error occurred');
+      _showMessage(l10n.errUnexpected);
     } finally {
       if (mounted) {
         setState(() {
@@ -198,17 +202,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              AppColors.background,
-              AppColors.darkSurface,
-            ],
+            colors: isDark 
+              ? [AppColors.background, AppColors.darkSurface]
+              : [const Color(0xFFF9FAFB), const Color(0xFFF3F4F6)],
           ),
         ),
         child: SafeArea(
@@ -280,10 +286,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         const SizedBox(height: 36), // Increased spacing
                         
                         // Header Text
-                        const Text(
-                          'Edu Mate',
+                        Text(
+                          l10n.app_name,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: isDark ? Colors.white : Colors.black87,
                             fontSize: 34,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 1.2,
@@ -291,9 +297,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Welcome back',
+                          l10n.loginWelcomeBack,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
+                            color: isDark ? Colors.white.withOpacity(0.5) : Colors.black54,
                             fontSize: 14,
                             letterSpacing: 2.5,
                             fontWeight: FontWeight.w500,
@@ -309,15 +315,15 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             opacity: _cardOpacity,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: AppColors.surface,
+                                color: colorScheme.surface,
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
-                                  color: AppColors.border.withOpacity(0.5),
+                                  color: isDark ? AppColors.border.withOpacity(0.5) : Colors.black12,
                                   width: 1,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.25),
+                                    color: Colors.black.withOpacity(isDark ? 0.25 : 0.05),
                                     blurRadius: 24,
                                     offset: const Offset(0, 8),
                                   ),
@@ -328,19 +334,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Log In',
+                                    Text(
+                                      l10n.loginTitle,
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: isDark ? Colors.white : Colors.black87,
                                         fontSize: 24,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      'Sign in to access your platform',
+                                      l10n.loginSubtitle,
                                       style: TextStyle(
-                                        color: Colors.white.withOpacity(0.6),
+                                        color: isDark ? Colors.white.withOpacity(0.6) : Colors.black54,
                                         fontSize: 13,
                                       ),
                                     ),
@@ -350,13 +356,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     Theme(
                                       data: Theme.of(context).copyWith(
                                         inputDecorationTheme: InputDecorationTheme(
-                                          fillColor: AppColors.inputDarkFill,
+                                          fillColor: isDark ? AppColors.inputDarkFill : const Color(0xFFF3F4F6),
                                           filled: true,
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                                           labelStyle: TextStyle(
-                                            color: Colors.white.withOpacity(0.4), // improved placeholder contrast
+                                            color: isDark ? Colors.white.withOpacity(0.4) : Colors.black54,
                                           ),
-                                          prefixIconColor: AppColors.primary.withOpacity(0.6), // reduced opacity
+                                          prefixIconColor: AppColors.primary.withOpacity(0.8),
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(16),
                                             borderSide: BorderSide.none,
@@ -364,14 +370,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(16),
                                             borderSide: BorderSide(
-                                              color: AppColors.border.withOpacity(0.2),
+                                              color: isDark ? AppColors.border.withOpacity(0.2) : Colors.black12,
                                             ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(16),
                                             borderSide: const BorderSide(
                                               color: AppColors.primary,
-                                              width: 2.0, // stronger gold border
+                                              width: 2.0,
                                             ),
                                           ),
                                         ),
@@ -381,9 +387,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           TextField(
                                             controller: _loginController,
                                             keyboardType: TextInputType.emailAddress,
-                                            style: const TextStyle(color: Colors.white),
+                                            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                                             decoration: _inputDecoration(
-                                              label: 'Email',
+                                              label: l10n.loginEmailHint,
                                               icon: Icons.person_outline_rounded,
                                             ),
                                           ),
@@ -391,9 +397,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           TextField(
                                             controller: _passwordController,
                                             obscureText: _obscurePassword,
-                                            style: const TextStyle(color: Colors.white),
+                                            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                                             decoration: _inputDecoration(
-                                              label: 'Password',
+                                              label: l10n.loginPasswordHint,
                                               icon: Icons.lock_outline_rounded,
                                               suffixIcon: IconButton(
                                                 onPressed: () {
@@ -405,7 +411,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                                   _obscurePassword
                                                       ? Icons.visibility_off_outlined
                                                       : Icons.visibility_outlined,
-                                                  color: Colors.white.withOpacity(0.4),
+                                                  color: isDark ? Colors.white.withOpacity(0.4) : Colors.black54,
                                                 ),
                                               ),
                                             ),
@@ -422,9 +428,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       child: TextButton(
                                         onPressed: _isLoading ? null : _resetPassword,
                                         style: TextButton.styleFrom(
-                                          foregroundColor: Colors.white.withOpacity(0.4), // subtle
+                                          foregroundColor: isDark ? Colors.white.withOpacity(0.6) : Colors.black54, 
                                         ),
-                                        child: const Text('Forgot password?', style: TextStyle(fontSize: 12)),
+                                        child: Text(l10n.loginForgotPassword, style: const TextStyle(fontSize: 12)),
                                       ),
                                     ),
                                     
@@ -471,9 +477,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                                   color: AppColors.secondary,
                                                 ),
                                               )
-                                            : const Text(
-                                                'Log In',
-                                                style: TextStyle(
+                                            : Text(
+                                                l10n.loginTitle,
+                                                style: const TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w800,
                                                   letterSpacing: 0.5,
@@ -488,9 +494,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          "Don't have an account?",
+                                          l10n.loginNoAccount,
                                           style: textTheme.bodyMedium?.copyWith(
-                                            color: Colors.white.withOpacity(0.5),
+                                            color: isDark ? Colors.white.withOpacity(0.5) : Colors.black54,
                                             fontSize: 13,
                                           ),
                                         ),
@@ -499,9 +505,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           style: TextButton.styleFrom(
                                             foregroundColor: AppColors.primary,
                                           ),
-                                          child: const Text(
-                                            'Sign up',
-                                            style: TextStyle(
+                                          child: Text(
+                                            l10n.loginSignupAction,
+                                            style: const TextStyle(
                                               fontWeight: FontWeight.w800,
                                               fontSize: 13,
                                             ),
