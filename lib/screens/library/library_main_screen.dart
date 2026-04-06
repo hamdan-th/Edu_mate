@@ -41,7 +41,6 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
     final currentTab = _tabs[_selectedIndex];
 
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -186,7 +185,7 @@ class _ModernHeader extends StatelessWidget {
                       duration: const Duration(milliseconds: 250),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.white : Colors.transparent,
+                        color: isSelected ? Theme.of(context).cardTheme.color : Colors.transparent,
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: isSelected
                             ? [
@@ -205,7 +204,7 @@ class _ModernHeader extends StatelessWidget {
                             item.icon,
                             size: 19,
                             color: isSelected
-                                ? LibraryTheme.primary
+                                ? Theme.of(context).primaryColor
                                 : Colors.white,
                           ),
                           const SizedBox(height: 6),
@@ -216,7 +215,7 @@ class _ModernHeader extends StatelessWidget {
                               fontSize: 12.4,
                               fontWeight: FontWeight.w700,
                               color: isSelected
-                                  ? LibraryTheme.primary
+                                  ? Theme.of(context).primaryColor
                                   : Colors.white,
                             ),
                           ),

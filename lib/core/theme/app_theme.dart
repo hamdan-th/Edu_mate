@@ -106,6 +106,38 @@ class AppTheme {
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
       ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.border,
+        thickness: 1,
+        space: 24,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surface,
+        selectedColor: AppColors.primary.withOpacity(0.15),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.border),
+        ),
+        labelStyle: const TextStyle(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
+        secondaryLabelStyle: const TextStyle(
+          color: AppColors.primary,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: AppColors.textSecondary,
+        ),
+      ),
+      listTileTheme: const ListTileThemeData(
+        iconColor: AppColors.textSecondary,
+        textColor: AppColors.textPrimary,
+        contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      ),
     );
   }
 
@@ -210,6 +242,38 @@ class AppTheme {
       ),
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
+      ),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFFE5E7EB),
+        thickness: 1,
+        space: 24,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.white,
+        selectedColor: AppColors.primary.withOpacity(0.1),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        labelStyle: const TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.w600,
+        ),
+        secondaryLabelStyle: const TextStyle(
+          color: AppColors.primary,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: const Color(0xFF4B5563),
+        ),
+      ),
+      listTileTheme: const ListTileThemeData(
+        iconColor: Color(0xFF4B5563),
+        textColor: Colors.black87,
+        contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 4),
       ),
     );
   }

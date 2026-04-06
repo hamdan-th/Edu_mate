@@ -70,7 +70,6 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -82,10 +81,6 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
               );
             }
             return Container(
-              decoration: const BoxDecoration(
-                color: AppColors.darkSurface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom + 24, 
                 top: 16, left: 24, right: 24
@@ -230,11 +225,10 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
         centerTitle: !_isSearching,
         title: _isSearching
             ? TextField(
@@ -478,10 +472,10 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
         child: Container(
           margin: const EdgeInsets.only(bottom: 14),
           decoration: BoxDecoration(
-            color: AppColors.darkSurface,
+            color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withOpacity(0.04), // Subtle depth border
+              color: Theme.of(context).dividerColor.withOpacity(0.1),
               width: 1,
             ),
             boxShadow: [
