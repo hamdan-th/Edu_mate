@@ -407,13 +407,17 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     try {
       await FeedReactionsService.toggleLike(postId: postId, isCurrentlyLiked: oldIsLiked);
     } catch (_) {
-      if (mounted) setState(() { 
-        isLiked = oldIsLiked; 
-        _likesCount += oldIsLiked ? 1 : -1; 
-        if (_likesCount < 0) _likesCount = 0;
-      });
+      if (mounted) {
+        setState(() { 
+          isLiked = oldIsLiked; 
+          _likesCount += oldIsLiked ? 1 : -1; 
+          if (_likesCount < 0) _likesCount = 0;
+        });
+      }
     } finally {
-      if (mounted) _isLiking = false;
+      if (mounted) {
+        _isLiking = false;
+      }
     }
   }
 
