@@ -83,16 +83,16 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 top: 20,
                 bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
-              decoration: const BoxDecoration(
-                color: LibraryTheme.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              decoration: BoxDecoration(
+                color: Theme.of(context).bottomSheetTheme.backgroundColor ?? Theme.of(context).cardTheme.color,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Center(
-                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: LibraryTheme.border)),
+                  Center(
+                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: Theme.of(context).dividerColor.withOpacity(0.1))),
                   ),
                   const SizedBox(height: 12),
                   const Text('فلترة وترتيب', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
@@ -158,7 +158,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: LibraryTheme.primary,
+                            backgroundColor: Theme.of(context).primaryColor,
                             foregroundColor: Colors.white,
                           ),
                           child: const Text('تطبيق'),
@@ -188,14 +188,14 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 hintText: 'ابحث عن مادة أو دكتور أو تخصص...',
                 prefixIcon: const Icon(Icons.search_rounded),
                 filled: true,
-                fillColor: LibraryTheme.surface,
+                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
-                  borderSide: const BorderSide(color: LibraryTheme.border),
+                  borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
                 ),
               ),
             ),
@@ -235,12 +235,12 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 final filteredFiles = _applyFilters(files);
 
                 if (filteredFiles.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
                       'لا توجد ملفات مطابقة حالياً',
                       style: TextStyle(
                         fontSize: 16,
-                        color: LibraryTheme.muted,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -314,7 +314,7 @@ class _ActionIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: LibraryTheme.surface,
+      color: Theme.of(context).cardTheme.color,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -324,9 +324,9 @@ class _ActionIconButton extends StatelessWidget {
           height: 52,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: LibraryTheme.border),
+            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
           ),
-          child: Icon(icon, color: LibraryTheme.text),
+          child: Icon(icon, color: Theme.of(context).iconTheme.color),
         ),
       ),
     );
@@ -357,14 +357,14 @@ class _BottomSheetDropdown extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: LibraryTheme.border),
+          borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
         ),
       ),
       items: safeItems

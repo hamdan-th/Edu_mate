@@ -129,17 +129,15 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
           "إدارة الأعضاء",
-          style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+          style: TextStyle(fontWeight: FontWeight.w900),
         ),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_rounded, color: Theme.of(context).iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -230,12 +228,12 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
   Widget _buildSearchBar() {
     return Container(
-      color: AppColors.surface,
+      color: Theme.of(context).canvasColor,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.inputFill,
+          color: Theme.of(context).inputDecorationTheme.fillColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: TextField(
@@ -335,7 +333,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                       Flexible(
                         child: Text(
                           name + statusNote,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -430,9 +428,9 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
               child: Icon(Icons.person_search_rounded, size: 54, color: AppColors.primary.withOpacity(0.6)),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               "لا توجد نتائج",
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.textPrimary),
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
             const SizedBox(height: 8),
             const Text(

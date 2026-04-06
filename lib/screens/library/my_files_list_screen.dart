@@ -145,9 +145,9 @@ class MyFilesListScreen extends StatelessWidget {
       return Center(
         child: Text(
           emptyMessage,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
-            color: LibraryTheme.text,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
       );
@@ -181,12 +181,12 @@ class MyFilesListScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: LibraryTheme.surface,
+              color: Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: LibraryTheme.border),
+              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
               boxShadow: [
                 BoxShadow(
-                  color: LibraryTheme.primary.withOpacity(0.04),
+                  color: Theme.of(context).primaryColor.withOpacity(0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -198,7 +198,7 @@ class MyFilesListScreen extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: (isPdf ? LibraryTheme.danger : LibraryTheme.primary)
+                  color: (isPdf ? Theme.of(context).colorScheme.error : Theme.of(context).primaryColor)
                       .withOpacity(0.10),
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -206,22 +206,22 @@ class MyFilesListScreen extends StatelessWidget {
                   isPdf
                       ? Icons.picture_as_pdf_rounded
                       : Icons.description_rounded,
-                  color: isPdf ? LibraryTheme.danger : LibraryTheme.primary,
+                  color: isPdf ? Theme.of(context).colorScheme.error : Theme.of(context).primaryColor,
                 ),
               ),
               title: Text(
                 data['subjectName'] ?? 'بدون عنوان',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: LibraryTheme.text,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   '${data['doctorName'] ?? ''} • ${data['college'] ?? ''}',
-                  style: const TextStyle(
-                    color: LibraryTheme.muted,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                     height: 1.4,
                   ),
                 ),
@@ -231,17 +231,17 @@ class MyFilesListScreen extends StatelessWidget {
                 children: [
                   Text(
                     (data['fileType'] ?? '').toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: LibraryTheme.primary,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     (data['status'] ?? '').toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: LibraryTheme.muted,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
                     ),
                   ),
                 ],
@@ -258,12 +258,12 @@ class MyFilesListScreen extends StatelessWidget {
     List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
   ) {
     if (docs.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'لا توجد مراجع رقمية محفوظة',
           style: TextStyle(
             fontSize: 18,
-            color: LibraryTheme.text,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
       );
@@ -295,9 +295,9 @@ class MyFilesListScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: LibraryTheme.surface,
+              color: Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: LibraryTheme.border),
+              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
             ),
             child: ListTile(
               contentPadding: EdgeInsets.zero,
@@ -305,27 +305,27 @@ class MyFilesListScreen extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: LibraryTheme.accent.withOpacity(0.12),
+                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.menu_book_rounded,
-                  color: LibraryTheme.accent,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
               ),
               title: Text(
                 data['title'] ?? 'بدون عنوان',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: LibraryTheme.text,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   '${data['authors'] ?? ''} • ${data['yearPublished'] ?? ''}',
-                  style: const TextStyle(
-                    color: LibraryTheme.muted,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                     height: 1.4,
                   ),
                 ),
@@ -379,20 +379,20 @@ class MyFilesListScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: LibraryTheme.surface,
-        foregroundColor: LibraryTheme.text,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         elevation: 0,
       ),
       body: user == null
-          ? const Center(
+          ? Center(
               child: Text(
                 'يجب تسجيل الدخول أولاً',
                 style: TextStyle(
                   fontSize: 16,
-                  color: LibraryTheme.text,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             )

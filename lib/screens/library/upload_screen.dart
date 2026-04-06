@@ -163,7 +163,7 @@ class _UploadScreenState extends State<UploadScreen> {
             .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           Positioned(
@@ -174,7 +174,7 @@ class _UploadScreenState extends State<UploadScreen> {
               height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: LibraryTheme.primary.withOpacity(0.07),
+                color: Theme.of(context).primaryColor.withOpacity(0.07),
               ),
             ),
           ),
@@ -186,7 +186,7 @@ class _UploadScreenState extends State<UploadScreen> {
               height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: LibraryTheme.secondary.withOpacity(0.05),
+                color: Theme.of(context).colorScheme.secondary.withOpacity(0.05),
               ),
             ),
           ),
@@ -300,10 +300,10 @@ class _UploadScreenState extends State<UploadScreen> {
                       child: ElevatedButton(
                         onPressed: _isUploading ? null : _submitForm,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: LibraryTheme.primary,
+                          backgroundColor: Theme.of(context).primaryColor,
                           foregroundColor: Colors.white,
                           disabledBackgroundColor:
-                              LibraryTheme.primary.withOpacity(0.55),
+                              Theme.of(context).primaryColor.withOpacity(0.55),
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 17),
                           shape: RoundedRectangleBorder(
@@ -341,7 +341,7 @@ class _UploadScreenState extends State<UploadScreen> {
                         'سيتم رفع الملف ثم مراجعته قبل ظهوره داخل مكتبة الجامعة',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: LibraryTheme.muted,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: 12.8,
                           height: 1.5,
                         ),
@@ -374,9 +374,9 @@ class _TopBar extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: LibraryTheme.border),
+              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.03),
@@ -394,7 +394,7 @@ class _TopBar extends StatelessWidget {
           style: TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.w800,
-            color: LibraryTheme.text,
+            color: Theme.of(context).textTheme.titleLarge?.color,
           ),
         ),
       ],
@@ -511,14 +511,14 @@ class _FilePickerCard extends StatelessWidget {
           radius: const Radius.circular(22),
           dashPattern: const [8, 5],
           color: hasFile
-              ? LibraryTheme.primary.withOpacity(0.45)
-              : LibraryTheme.border,
+              ? Theme.of(context).primaryColor.withOpacity(0.45)
+              : Theme.of(context).dividerColor.withOpacity(0.1),
           strokeWidth: 1.5,
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: LibraryTheme.bg,
+              color: Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(22),
             ),
             child: Column(
@@ -530,8 +530,8 @@ class _FilePickerCard extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: hasFile
                           ? [
-                              LibraryTheme.primary.withOpacity(0.16),
-                              LibraryTheme.secondary.withOpacity(0.12),
+                              Theme.of(context).primaryColor.withOpacity(0.16),
+                              Theme.of(context).colorScheme.secondary.withOpacity(0.12),
                             ]
                           : [
                               Colors.grey.withOpacity(0.08),
@@ -544,7 +544,7 @@ class _FilePickerCard extends StatelessWidget {
                     hasFile
                         ? Icons.check_circle_rounded
                         : Icons.attach_file_rounded,
-                    color: hasFile ? LibraryTheme.primary : LibraryTheme.muted,
+                    color: hasFile ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyMedium?.color,
                     size: 24,
                   ),
                 ),
@@ -554,10 +554,10 @@ class _FilePickerCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14.6,
                     fontWeight: FontWeight.w700,
-                    color: LibraryTheme.text,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -566,9 +566,9 @@ class _FilePickerCard extends StatelessWidget {
                       ? 'تم اختيار الملف بنجاح، ويمكنك الآن إكمال بقية البيانات'
                       : 'الأنواع المدعومة: PDF / DOC / DOCX / JPG / PNG',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12.5,
-                    color: LibraryTheme.muted,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                     height: 1.5,
                   ),
                 ),
@@ -579,16 +579,16 @@ class _FilePickerCard extends StatelessWidget {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).canvasColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: LibraryTheme.border),
+                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                   ),
                   child: Text(
                     hasFile ? 'تغيير الملف' : 'اختيار ملف',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: LibraryTheme.primary,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
                 ),
@@ -617,9 +617,9 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: LibraryTheme.border),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -633,18 +633,18 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17.5,
               fontWeight: FontWeight.w800,
-              color: LibraryTheme.text,
+              color: Theme.of(context).textTheme.titleLarge?.color,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12.8,
-              color: LibraryTheme.muted,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
               height: 1.45,
             ),
           ),
@@ -677,16 +677,16 @@ class _ModernTextField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14.5,
-        color: LibraryTheme.text,
+        color: Theme.of(context).textTheme.bodyLarge?.color,
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 16,
@@ -697,15 +697,15 @@ class _ModernTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: LibraryTheme.border,
+          borderSide: BorderSide(
+            color: Theme.of(context).dividerColor.withOpacity(0.3),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: LibraryTheme.primary,
+          borderSide: BorderSide(
+            color: Theme.of(context).primaryColor,
             width: 1.4,
           ),
         ),
@@ -753,16 +753,16 @@ class _ModernDropdown extends StatelessWidget {
       value: safeValue,
       isExpanded: true,
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14.5,
-        color: LibraryTheme.text,
+        color: Theme.of(context).textTheme.bodyLarge?.color,
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 16,
@@ -773,15 +773,15 @@ class _ModernDropdown extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: LibraryTheme.border,
+          borderSide: BorderSide(
+            color: Theme.of(context).dividerColor.withOpacity(0.3),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: LibraryTheme.primary,
+          borderSide: BorderSide(
+            color: Theme.of(context).primaryColor,
             width: 1.4,
           ),
         ),

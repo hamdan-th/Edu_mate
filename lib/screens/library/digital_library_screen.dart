@@ -99,7 +99,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           Padding(
@@ -113,7 +113,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.send_rounded),
-                  color: LibraryTheme.primary,
+                  color: Theme.of(context).primaryColor,
                   onPressed: _performSearch,
                 ),
                 border: OutlineInputBorder(
@@ -121,7 +121,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: LibraryTheme.surface,
+                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
               ),
             ),
           ),
@@ -133,8 +133,8 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                         child: Text(
                           _message,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: LibraryTheme.text,
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                             fontSize: 16,
                           ),
                         ),
@@ -151,25 +151,25 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
 
                           return Container(
                             decoration: BoxDecoration(
-                              color: LibraryTheme.surface,
+                              color: Theme.of(context).cardTheme.color,
                               borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: LibraryTheme.border),
+                              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                             ),
                             child: ListTile(
                               contentPadding: const EdgeInsets.all(14),
                               title: Text(
                                 title,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w800,
-                                  color: LibraryTheme.text,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
                                 ),
                               ),
                               subtitle: Padding(
                                 padding: const EdgeInsets.only(top: 8),
                                 child: Text(
                                   result['yearPublished']?.toString() ?? 'غير معروف',
-                                  style: const TextStyle(
-                                    color: LibraryTheme.muted,
+                                  style: TextStyle(
+                                    color: Theme.of(context).textTheme.bodyMedium?.color,
                                   ),
                                 ),
                               ),

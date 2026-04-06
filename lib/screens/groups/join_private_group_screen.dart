@@ -61,7 +61,6 @@ class _JoinPrivateGroupScreenState extends State<JoinPrivateGroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('الانضمام برابط دعوة'),
       ),
@@ -70,9 +69,9 @@ class _JoinPrivateGroupScreenState extends State<JoinPrivateGroupScreen> {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -88,7 +87,7 @@ class _JoinPrivateGroupScreenState extends State<JoinPrivateGroupScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
               const SizedBox(height: 8),

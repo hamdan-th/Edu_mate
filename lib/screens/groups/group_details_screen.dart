@@ -333,9 +333,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).bottomSheetTheme.backgroundColor ?? Theme.of(context).cardTheme.color,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
@@ -397,9 +397,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   Widget build(BuildContext context) {
     if (_isEditing) {
       return Scaffold(
-        backgroundColor: AppColors.surface,
         appBar: AppBar(
-          backgroundColor: AppColors.surface,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
@@ -436,7 +434,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 decoration: InputDecoration(
                   labelText: "اسم المجموعة",
                   filled: true,
-                  fillColor: const Color(0xFFF4F5F7),
+                  fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                 ),
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -448,7 +446,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 decoration: InputDecoration(
                   labelText: "الوصف",
                   filled: true,
-                  fillColor: const Color(0xFFF4F5F7),
+                  fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                 ),
               ),
@@ -459,7 +457,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
     if (_isLoadingRole) {
       return Scaffold(
-        backgroundColor: AppColors.background,
         appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
         body: const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       );
@@ -474,7 +471,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   Widget _buildPreviewView() {
     return Scaffold(
-      backgroundColor: const Color(0xFFEBEBEB),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -493,7 +489,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          color: AppColors.surface,
+          color: Theme.of(context).scaffoldBackgroundColor,
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 56, bottom: 40),
           child: Column(
             children: [
@@ -594,7 +590,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     return DefaultTabController(
       length: 4,
       child: Scaffold(
-        backgroundColor: const Color(0xFFEBEBEB),
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -615,7 +610,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             return [
               SliverToBoxAdapter(
                 child: Container(
-                  color: AppColors.surface,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48, bottom: 20),
                   child: Column(
                     children: [
@@ -751,7 +746,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 pinned: true,
                 delegate: _StickyTabBarDelegate(
                   Container(
-                    color: AppColors.surface,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     child: const TabBar(
                       indicatorColor: AppColors.primary,
                       indicatorWeight: 3,
@@ -772,7 +767,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             ];
           },
           body: Container(
-            color: AppColors.surface,
+            color: Theme.of(context).scaffoldBackgroundColor,
             child: TabBarView(
               children: [
                 _KeepAlivePage(child: _buildMembersTab()),
@@ -921,7 +916,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         return ListView.separated(
           padding: const EdgeInsets.only(top: 8, bottom: 24),
           itemCount: msgs.length,
-          separatorBuilder: (_, __) => const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0xFFEBEBEB)),
+          separatorBuilder: (_, __) => const Divider(height: 1, indent: 20, endIndent: 20),
           itemBuilder: (context, index) {
             final msg = msgs[index];
             final timestamp = msg['createdAt'] as Timestamp?;
@@ -944,7 +939,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text(msg['text'] ?? 'رسالة', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.4)),
+                child: Text(msg['text'] ?? 'رسالة', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 14, height: 1.4)),
               ),
             );
           },
@@ -993,8 +988,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               child: Image.network(
                 url,
                 fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) => progress == null ? child : Container(color: Colors.white10),
-                errorBuilder: (context, error, stack) => Container(color: AppColors.surface, child: const Icon(Icons.broken_image, color: AppColors.textSecondary)),
+                loadingBuilder: (context, child, progress) => progress == null ? child : Container(color: Theme.of(context).dividerColor.withOpacity(0.05)),
+                errorBuilder: (context, error, stack) => Container(color: Theme.of(context).cardTheme.color, child: const Icon(Icons.broken_image, color: AppColors.textSecondary)),
               ),
             );
           },
@@ -1021,7 +1016,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         return ListView.separated(
           padding: const EdgeInsets.only(top: 8, bottom: 24),
           itemCount: linkMsgs.length,
-          separatorBuilder: (_, __) => const Divider(height: 1, indent: 20, endIndent: 20, color: Color(0xFFEBEBEB)),
+          separatorBuilder: (_, __) => const Divider(height: 1, indent: 20, endIndent: 20),
           itemBuilder: (context, index) {
             final msg = linkMsgs[index];
             final match = urlRegExp.firstMatch(msg.text);

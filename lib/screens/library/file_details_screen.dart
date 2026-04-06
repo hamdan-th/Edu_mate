@@ -90,7 +90,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 width: 42,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: LibraryTheme.border,
+                  color: Theme.of(context).dividerColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -99,22 +99,22 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: LibraryTheme.primary.withOpacity(0.08),
+                  color: Theme.of(context).primaryColor.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.description_rounded,
-                  color: LibraryTheme.primary,
+                  color: Theme.of(context).primaryColor,
                   size: 26,
                 ),
               ),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'ملف Word',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: LibraryTheme.text,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 8),
@@ -123,7 +123,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.2,
-                  color: LibraryTheme.muted,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                   height: 1.5,
                 ),
               ),
@@ -137,8 +137,8 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                         await _downloadFile(url);
                       },
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: LibraryTheme.primary,
-                        side: const BorderSide(color: LibraryTheme.primary),
+                        foregroundColor: Theme.of(context).primaryColor,
+                        side: BorderSide(color: Theme.of(context).primaryColor),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -163,7 +163,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: LibraryTheme.primary,
+                        backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -328,7 +328,7 @@ $url
                         width: 42,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: LibraryTheme.border,
+                          color: Theme.of(context).dividerColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
@@ -454,7 +454,7 @@ $url
                                   }
                                 },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: LibraryTheme.primary,
+                            backgroundColor: Theme.of(context).primaryColor,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
@@ -535,11 +535,11 @@ $url
     final isOwner = FirebaseAuth.instance.currentUser?.uid == file.userId;
 
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('تفاصيل الملف'),
-        backgroundColor: LibraryTheme.surface,
-        foregroundColor: LibraryTheme.text,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         elevation: 0,
         actions: [
           if (isOwner)
@@ -571,12 +571,12 @@ $url
           children: [
             Container(
               decoration: BoxDecoration(
-                color: LibraryTheme.surface,
+                color: Theme.of(context).cardTheme.color,
                 borderRadius: BorderRadius.circular(26),
-                border: Border.all(color: LibraryTheme.border),
+                border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                 boxShadow: [
                   BoxShadow(
-                    color: LibraryTheme.primary.withOpacity(0.05),
+                    color: Theme.of(context).primaryColor.withOpacity(0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),
@@ -689,9 +689,9 @@ $url
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: LibraryTheme.surface,
+                color: Theme.of(context).cardTheme.color,
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: LibraryTheme.border),
+                border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -701,7 +701,7 @@ $url
                     style: TextStyle(
                       fontSize: 16.5,
                       fontWeight: FontWeight.w800,
-                      color: LibraryTheme.text,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -709,9 +709,9 @@ $url
                     file.description.trim().isEmpty
                         ? 'لا يوجد وصف متاح لهذا الملف.'
                         : file.description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14.2,
-                      color: LibraryTheme.text,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       height: 1.65,
                     ),
                   ),
@@ -754,7 +754,7 @@ $url
                               ? Icons.bookmark_rounded
                               : Icons.bookmark_border_rounded,
                           label: isSaved ? 'تم الحفظ' : 'حفظ',
-                          color: LibraryTheme.primary,
+                          color: Theme.of(context).primaryColor,
                           onTap: () async {
                             try {
                               await LibraryReactionsService.toggleSave(
@@ -769,19 +769,19 @@ $url
                         _ActionButton(
                           icon: Icons.share_rounded,
                           label: 'مشاركة',
-                          color: LibraryTheme.accent,
+                          color: Theme.of(context).colorScheme.secondary,
                           onTap: _shareFileExternally,
                         ),
                         _ActionButton(
                           icon: Icons.download_rounded,
                           label: 'تنزيل',
-                          color: LibraryTheme.success,
+                          color: const Color(0xFF4CAF50), // Standard safe green success
                           onTap: () => _downloadFile(file.fileUrl),
                         ),
                         _ActionButton(
                           icon: Icons.open_in_new_rounded,
                           label: 'فتح',
-                          color: LibraryTheme.secondary,
+                          color: Theme.of(context).colorScheme.secondary,
                           onTap: () => _openFile(file.fileUrl),
                         ),
                       ],
@@ -804,14 +804,14 @@ $url
                   icon: Icons.visibility_rounded,
                   label: 'المشاهدات',
                   value: file.views.toString(),
-                  color: LibraryTheme.primary,
+                  color: Theme.of(context).primaryColor,
                 ),
                 const SizedBox(width: 10),
                 _MetricCard(
                   icon: Icons.download_rounded,
                   label: 'التنزيلات',
                   value: file.downloads.toString(),
-                  color: LibraryTheme.success,
+                  color: const Color(0xFF4CAF50),
                 ),
               ],
             ),
@@ -840,13 +840,13 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: LibraryTheme.primary),
+          Icon(icon, size: 18, color: Theme.of(context).primaryColor),
           const SizedBox(width: 10),
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: const TextStyle(
-                  color: LibraryTheme.text,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -928,9 +928,9 @@ class _MetricCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: LibraryTheme.surface,
+          color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: LibraryTheme.border),
+          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
         ),
         child: Column(
           children: [
@@ -938,18 +938,18 @@ class _MetricCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
-                color: LibraryTheme.text,
+                color: Theme.of(context).textTheme.titleLarge?.color,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12.5,
-                color: LibraryTheme.muted,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
           ],
@@ -981,18 +981,18 @@ class _ModernField extends StatelessWidget {
         labelText: label,
         prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border),
+          borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.primary),
+          borderSide: BorderSide(color: Theme.of(context).primaryColor),
         ),
       ),
     );
@@ -1026,14 +1026,14 @@ class _DropdownField extends StatelessWidget {
         labelText: hint,
         prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border),
+          borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
         ),
       ),
       items: safeItems

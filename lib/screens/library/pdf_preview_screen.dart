@@ -15,18 +15,18 @@ class PdfPreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: LibraryTheme.surface,
-        foregroundColor: LibraryTheme.text,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         elevation: 0,
       ),
       body: url.trim().isEmpty
           ? const Center(
               child: Text(
                 'لا يوجد رابط للملف',
-                style: TextStyle(color: LibraryTheme.text),
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
             )
           : SfPdfViewer.network(url),

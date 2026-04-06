@@ -85,14 +85,12 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        backgroundColor: AppColors.background,
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_error != null) {
       return Scaffold(
-        backgroundColor: AppColors.background,
         appBar: AppBar(title: const Text('دعوة مجموعة')),
         body: Center(
           child: Padding(
@@ -100,8 +98,8 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
             child: Text(
               _error!,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.titleLarge?.color,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -113,16 +111,15 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
     final group = _group!;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('دعوة مجموعة')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -136,10 +133,10 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
               Text(
                 group.name,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
               const SizedBox(height: 8),
