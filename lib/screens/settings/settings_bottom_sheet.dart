@@ -22,6 +22,7 @@ class SettingsBottomSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final settingsProvider = context.watch<AppSettingsProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentLocale = settingsProvider.locale ?? Localizations.localeOf(context);
 
     return Container(
       padding: const EdgeInsets.only(top: 16, bottom: 32, left: 24, right: 24),
@@ -69,7 +70,7 @@ class SettingsBottomSheet extends StatelessWidget {
               Expanded(
                 child: _OptionButton(
                   title: 'English',
-                  isSelected: settingsProvider.locale.languageCode == 'en',
+                  isSelected: currentLocale.languageCode == 'en',
                   onTap: () => settingsProvider.setLocale(const Locale('en')),
                   isDark: isDark,
                 ),
@@ -78,7 +79,7 @@ class SettingsBottomSheet extends StatelessWidget {
               Expanded(
                 child: _OptionButton(
                   title: 'العربية',
-                  isSelected: settingsProvider.locale.languageCode == 'ar',
+                  isSelected: currentLocale.languageCode == 'ar',
                   onTap: () => settingsProvider.setLocale(const Locale('ar')),
                   isDark: isDark,
                 ),

@@ -8,14 +8,14 @@ class AppSettingsProvider extends ChangeNotifier {
   final SharedPreferences _prefs;
 
   late ThemeMode _themeMode;
-  late Locale _locale;
+  Locale? _locale;
 
   AppSettingsProvider(this._prefs) {
     _loadSettings();
   }
 
   ThemeMode get themeMode => _themeMode;
-  Locale get locale => _locale;
+  Locale? get locale => _locale;
 
   void _loadSettings() {
     // Load ThemeMode
@@ -35,8 +35,8 @@ class AppSettingsProvider extends ChangeNotifier {
     } else if (localeString == 'en') {
       _locale = const Locale('en');
     } else {
-      // Default to English if not set
-      _locale = const Locale('en');
+      // Default to system locale
+      _locale = null;
     }
   }
 
@@ -56,7 +56,7 @@ class AppSettingsProvider extends ChangeNotifier {
   }
 
   Future<void> setLocale(Locale newLocale) async {
-    if (_locale.languageCode == newLocale.languageCode) return;
+    if (_locale?.languageCode == newLocale.languageCode) return;
     _locale = newLocale;
     await _prefs.setString(_localeKey, newLocale.languageCode);
     notifyListeners();
