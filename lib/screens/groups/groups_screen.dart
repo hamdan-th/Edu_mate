@@ -280,7 +280,6 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
               unselectedLabelColor: Colors.white.withOpacity(0.4),
               indicatorColor: AppColors.primary,
               indicatorWeight: 3.5,
-              indicatorPadding: const EdgeInsets.symmetric(horizontal: 20),
               indicatorSize: TabBarIndicatorSize.label,
               labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0),
               unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, letterSpacing: 0.5),
@@ -288,8 +287,8 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
               splashFactory: NoSplash.splashFactory,
               overlayColor: MaterialStateProperty.all(Colors.transparent),
               tabs: const [
-                Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Text("اكتشف"))),
-                Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Text("مجموعاتي"))),
+                Tab(text: "اكتشف"),
+                Tab(text: "مجموعاتي"),
               ],
             ),
           ),
@@ -628,7 +627,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                           else
                             Text(
                               widget.group.description.isNotEmpty ? widget.group.description : widget.group.specializationName,
-                              style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.50), fontWeight: FontWeight.w500, height: 1.4),
+                              style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.45), fontWeight: FontWeight.w500, height: 1.4),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -642,7 +641,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                   const SizedBox(height: 16),
                   Text(
                     widget.group.description,
-                    style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.50), height: 1.5, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.45), height: 1.5, fontWeight: FontWeight.w500),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
