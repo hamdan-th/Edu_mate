@@ -19,15 +19,14 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  String _selectedFilter = 'For You';
+  String _selectedFilter = 'All Colleges';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
   final List<String> _filters = const [
-    'For You',
-    'Academic',
-    'Popular',
-    'Recent',
+    'All Colleges',
+    'My Major',
+    'Level 3',
   ];
 
   @override
@@ -111,10 +110,12 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 74),
-        child: FloatingStudyBotButton(
-          onTap: _openBot,
+      floatingActionButton: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 96),
+          child: FloatingStudyBotButton(
+            onTap: _openBot,
+          ),
         ),
       ),
       body: Stack(
@@ -129,27 +130,13 @@ class _FeedScreenState extends State<FeedScreen> {
                     children: [
                       Row(
                         children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [AppColors.primary, AppColors.primaryDark],
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.school_rounded, color: Colors.white, size: 18),
-                          ),
-                          const SizedBox(width: 12),
                           const Text(
                             'Edu Mate',
                             style: TextStyle(
                               color: AppColors.textPrimary,
-                              fontSize: 22,
+                              fontSize: 24,
                               fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+                              letterSpacing: -0.8,
                             ),
                           ),
                         ],
@@ -857,9 +844,9 @@ class _PostCardState extends State<PostCard>
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.4)),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
+              Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.3)),
+              const SizedBox(height: 2),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
