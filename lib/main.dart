@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
+import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/home/main_nav_screen.dart';
@@ -30,8 +31,9 @@ class EduApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.lightTheme,
       themeMode: ThemeMode.dark,
-      home: const AuthGate(),
+      home: const SplashScreen(),
       routes: {
+        '/authGate': (_) => const AuthGate(),
         '/login': (_) => const LoginScreen(),
         '/signup': (_) => const SignupScreen(),
         '/mainNav': (_) => const MainNavScreen(),
