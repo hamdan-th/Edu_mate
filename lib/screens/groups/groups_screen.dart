@@ -37,6 +37,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     _tabController = TabController(length: 2, vsync: this, initialIndex: 1); // Default to My Groups
     _discoverStream = GroupService.streamDiscoverGroups(search: '');
     _myGroupsStream = GroupService.streamMyGroups();
+    
     _searchController.addListener(() {
       setState(() {
         _search = _searchController.text.trim().toLowerCase();
@@ -58,49 +59,6 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     );
     if (created == true && mounted) {
       _tabController.animateTo(1);
-    }
-  }
-
-  void _openGroupDetails(GroupModel group) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => GroupDetailsScreen(group: group)));
-  }
-
-  void _openGroupChat(GroupModel group) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => GroupChatScreen(group: group)));
-  }
-
-  Future<void> _handleGroupTap(GroupModel group) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      _openGroupDetails(group);
-      return;
-    }
-    if (group.ownerId == user.uid) {
-      _openGroupChat(group);
-      return;
-    }
-
-    if (!mounted) return;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.transparent,
-      builder: (_) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-    );
-
-    bool isMember = false;
-    try {
-      final doc = await FirebaseFirestore.instance.collection('groups').doc(group.id).collection('members').doc(user.uid).get();
-      if (doc.exists) isMember = true;
-    } catch (_) {}
-
-    if (!mounted) return;
-    Navigator.of(context, rootNavigator: true).pop();
-
-    if (isMember) {
-      _openGroupChat(group);
-    } else {
-      _openGroupDetails(group);
     }
   }
 
@@ -289,7 +247,10 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                   hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                 ),
               )
-            : const Text("المجتمعات", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: AppColors.textPrimary, letterSpacing: 1.2)),
+            : const Text(
+                "المجتمعات", 
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: AppColors.textPrimary, letterSpacing: 1.2)
+              ),
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close_rounded : Icons.search_rounded, color: AppColors.primary),
@@ -310,23 +271,25 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(54),
+          preferredSize: const Size.fromHeight(58), // slightly more space for smooth track
           child: Container(
             color: AppColors.background,
             child: TabBar(
               controller: _tabController,
               labelColor: AppColors.primary,
-              unselectedLabelColor: Colors.white.withOpacity(0.5),
+              unselectedLabelColor: Colors.white.withOpacity(0.4),
               indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
+              indicatorWeight: 3.5,
+              indicatorPadding: const EdgeInsets.symmetric(horizontal: 20),
               indicatorSize: TabBarIndicatorSize.label,
               labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0),
               unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, letterSpacing: 0.5),
-              dividerColor: AppColors.border.withOpacity(0.2),
+              dividerColor: AppColors.border.withOpacity(0.1),
               splashFactory: NoSplash.splashFactory,
+              overlayColor: MaterialStateProperty.all(Colors.transparent),
               tabs: const [
-                Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text("اكتشف"))),
-                Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text("مجموعاتي"))),
+                Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Text("اكتشف"))),
+                Tab(child: Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Text("مجموعاتي"))),
               ],
             ),
           ),
@@ -341,14 +304,14 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
         ],
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 96.0),
+        padding: const EdgeInsets.only(bottom: 110.0), // Floating above bottom nav perfectly
         child: FloatingActionButton(
           onPressed: _openCreateGroup,
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.secondary,
-          elevation: 8,
+          elevation: 10,
           shape: const CircleBorder(),
-          child: const Icon(Icons.add_rounded, size: 28),
+          child: const Icon(Icons.add_rounded, size: 30),
         ),
       ),
     );
@@ -375,7 +338,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
           itemCount: items.length,
           itemBuilder: (context, index) {
-            return _buildDiscoverCard(items[index]);
+            return _PremiumGroupCard(group: items[index], isDiscover: true);
           },
         );
       },
@@ -403,7 +366,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
           itemCount: items.length,
           itemBuilder: (context, index) {
-            return _buildMyGroupTile(items[index]);
+            return _PremiumGroupCard(group: items[index], isDiscover: false);
           },
         );
       },
@@ -428,13 +391,13 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             const SizedBox(height: 24),
             Text(
               title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               subtitle,
-              style: TextStyle(fontSize: 15, color: Colors.white.withOpacity(0.6), height: 1.6, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.5), height: 1.6, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -442,64 +405,144 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
       ),
     );
   }
+}
 
-  Widget _buildDiscoverCard(GroupModel group) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.darkSurface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+class _PremiumGroupCard extends StatefulWidget {
+  final GroupModel group;
+  final bool isDiscover;
+
+  const _PremiumGroupCard({required this.group, required this.isDiscover});
+
+  @override
+  State<_PremiumGroupCard> createState() => _PremiumGroupCardState();
+}
+
+class _PremiumGroupCardState extends State<_PremiumGroupCard> {
+  bool _isPressed = false;
+
+  void _openGroupDetails() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => GroupDetailsScreen(group: widget.group)));
+  }
+
+  void _openGroupChat() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)));
+  }
+
+  Future<void> _handleTap() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _openGroupDetails();
+      return;
+    }
+    if (widget.group.ownerId == user.uid) {
+      _openGroupChat();
+      return;
+    }
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.transparent,
+      builder: (_) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+    );
+
+    bool isMember = false;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('groups').doc(widget.group.id).collection('members').doc(user.uid).get();
+      if (doc.exists) isMember = true;
+    } catch (_) {}
+
+    if (!mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+
+    if (isMember) {
+      _openGroupChat();
+    } else {
+      _openGroupDetails();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        _handleTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 14),
+          decoration: BoxDecoration(
+            color: AppColors.darkSurface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.04), // Subtle depth border
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.35),
+                blurRadius: 20,
+                offset: const Offset(0, 8), // Soft float effect
+              ),
+            ],
           ),
-        ],
-        border: Border.all(color: AppColors.border.withOpacity(0.2)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          splashColor: AppColors.primary.withOpacity(0.15),
-          highlightColor: Colors.transparent,
-          onTap: () => _handleGroupTap(group),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(widget.isDiscover ? 20 : 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header: Avatar + Title + Badge
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Premium Avatar
                     Container(
-                      width: 56,
-                      height: 56,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [AppColors.primary, AppColors.primary.withOpacity(0.6)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.2),
-                            blurRadius: 12,
+                            color: AppColors.primary.withOpacity(0.2), // gentle inner glow spread
+                            blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: group.imageUrl.isNotEmpty
-                          ? ClipOval(child: Image.network(group.imageUrl, fit: BoxFit.cover))
-                          : Center(
-                              child: Text(
-                                group.name.isNotEmpty ? group.name[0].toUpperCase() : 'G',
-                                style: const TextStyle(color: AppColors.secondary, fontWeight: FontWeight.w900, fontSize: 24),
+                      child: ClipOval(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [AppColors.primary, Color(0xFFC79A22)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
                               ),
                             ),
+                            if (widget.group.imageUrl.isNotEmpty)
+                              Image.network(widget.group.imageUrl, fit: BoxFit.cover, width: 52, height: 52)
+                            else
+                              Text(
+                                widget.group.name.isNotEmpty ? widget.group.name[0].toUpperCase() : 'G',
+                                style: const TextStyle(
+                                  color: AppColors.secondary, 
+                                  fontWeight: FontWeight.w900, 
+                                  fontSize: 22,
+                                  letterSpacing: 0,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -511,163 +554,99 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                             children: [
                               Expanded(
                                 child: Text(
-                                  group.name,
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
+                                  widget.group.name,
+                                  style: const TextStyle(
+                                    fontSize: 17, 
+                                    fontWeight: FontWeight.w900, 
+                                    color: Colors.white, 
+                                    letterSpacing: 0.3
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: group.isPublic ? AppColors.success.withOpacity(0.12) : AppColors.warning.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(12),
+                              
+                              // Badges (Count or Public/Private indicator)
+                              if (!widget.isDiscover && widget.group.messagesCount > 0)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 0.5),
+                                  ),
+                                  child: Text(
+                                    widget.group.messagesCount > 99 ? "+99" : "${widget.group.messagesCount}", 
+                                    style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w800)
+                                  ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(group.isPublic ? Icons.public_rounded : Icons.lock_rounded, size: 12, color: group.isPublic ? AppColors.success : AppColors.warning),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      group.isPublic ? "عامة" : "خاصة",
-                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: group.isPublic ? AppColors.success : AppColors.warning),
+                                
+                              if (widget.isDiscover)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: widget.group.isPublic ? AppColors.success.withOpacity(0.10) : AppColors.warning.withOpacity(0.10),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: widget.group.isPublic ? AppColors.success.withOpacity(0.3) : AppColors.warning.withOpacity(0.3),
+                                      width: 0.5,
                                     ),
-                                  ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(widget.group.isPublic ? Icons.public_rounded : Icons.lock_rounded, size: 10, color: widget.group.isPublic ? AppColors.success : AppColors.warning),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        widget.group.isPublic ? "عامة" : "خاصة",
+                                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: widget.group.isPublic ? AppColors.success : AppColors.warning),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                           const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(Icons.school_rounded, size: 14, color: AppColors.primary.withOpacity(0.8)),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  "${group.collegeName} • ${group.specializationName}",
-                                  style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.6), fontWeight: FontWeight.w600),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                          
+                          // Metadata sub-line
+                          if (widget.isDiscover)
+                            Row(
+                              children: [
+                                Icon(Icons.school_rounded, size: 14, color: AppColors.primary.withOpacity(0.8)),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    "${widget.group.collegeName} • ${widget.group.specializationName}",
+                                    style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.55), fontWeight: FontWeight.w600),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            )
+                          else
+                            Text(
+                              widget.group.description.isNotEmpty ? widget.group.description : widget.group.specializationName,
+                              style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.50), fontWeight: FontWeight.w500, height: 1.4),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                if (group.description.isNotEmpty) ...[
+                
+                if (widget.isDiscover && widget.group.description.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Text(
-                    group.description,
-                    style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8), height: 1.5, fontWeight: FontWeight.w500),
+                    widget.group.description,
+                    style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.50), height: 1.5, fontWeight: FontWeight.w500),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMyGroupTile(GroupModel group) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: AppColors.darkSurface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          splashColor: AppColors.primary.withOpacity(0.15),
-          highlightColor: Colors.transparent,
-          onTap: () => _openGroupChat(group),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, Color(0xFFE8C868)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.25),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: group.imageUrl.isNotEmpty
-                      ? ClipOval(child: Image.network(group.imageUrl, fit: BoxFit.cover))
-                      : Center(
-                          child: Text(
-                            group.name.isNotEmpty ? group.name[0].toUpperCase() : 'G',
-                            style: const TextStyle(color: AppColors.secondary, fontWeight: FontWeight.w900, fontSize: 24),
-                          ),
-                        ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              group.name,
-                              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (group.messagesCount > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                              ),
-                              child: Text(
-                                group.messagesCount > 99 ? "+99" : "${group.messagesCount}", 
-                                style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w900)
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        group.description.isNotEmpty ? group.description : group.specializationName,
-                        style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.55), fontWeight: FontWeight.w500),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
