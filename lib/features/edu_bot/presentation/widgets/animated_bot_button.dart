@@ -27,7 +27,7 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
     super.initState();
     _floatController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
 
     _pressController = AnimationController(
@@ -83,7 +83,7 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(
+    final scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
       CurvedAnimation(parent: _pressController, curve: Curves.easeOutCubic)
     );
 
@@ -94,13 +94,18 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
       child: AnimatedBuilder(
         animation: Listenable.merge([_floatController, _pressController]),
         builder: (context, child) {
-          final yOffset = math.sin(_floatController.value * math.pi) * 5;
+          final isRestless = !_isOnline;
+          final shake = isRestless 
+              ? math.sin(_floatController.value * math.pi * 18) * 1.0  // Barely noticeable minimal offline shake
+              : 0.0;
+              
+          final yOffset = math.sin(_floatController.value * math.pi) * 6;
 
           return Transform.scale(
             scale: scaleAnimation.value,
             child: Transform.translate(
-              offset: Offset(0, yOffset),
-              child: _BotCharacter(isOnline: _isOnline),
+              offset: Offset(shake, yOffset),
+              child: _MascotRobot(isOnline: _isOnline, floatValue: _floatController.value),
             ),
           );
         },
@@ -109,52 +114,225 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
   }
 }
 
-class _BotCharacter extends StatelessWidget {
+class _MascotRobot extends StatelessWidget {
   final bool isOnline;
+  final double floatValue;
 
-  const _BotCharacter({required this.isOnline});
+  const _MascotRobot({required this.isOnline, required this.floatValue});
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = isOnline ? AppColors.primary : Colors.redAccent.withOpacity(0.8);
-    final glowOpacity = isOnline ? 0.20 : 0.08;
+    final eyeColor = isOnline ? AppColors.primary : Colors.redAccent;
+    final glowColor = isOnline ? AppColors.primary.withOpacity(0.6) : Colors.redAccent.withOpacity(0.6);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeOutCubic,
+    // 3D Metallic silver body
+    const metalGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFFFFFFFF), Color(0xFFD1D8DD), Color(0xFF78909C)],
+      stops: [0.0, 0.4, 1.0],
+    );
+
+    // Dark glass face
+    const screenGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF263238), Color(0xFF0F171A)],
+    );
+
+    // Common 3D styling edge highlight
+    final borderStyle = Border.all(color: Colors.white.withOpacity(0.8), width: 0.5);
+
+    return SizedBox(
       width: 58,
-      height: 58,
-      decoration: BoxDecoration(
-        color: AppColors.darkSurface,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white.withOpacity(0.05),
-          width: 1,
-        ),
-        boxShadow: [
-          // Ambient dynamic glow based on network state
-          BoxShadow(
-            color: statusColor.withOpacity(glowOpacity),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+      height: 75,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // Ambient Glow behind the robot
+          Positioned(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: glowColor, blurRadius: 28, spreadRadius: -2)
+                ]
+              ),
+            ),
           ),
-          // Structural dark drop shadow for float priority
-          BoxShadow(
-            color: Colors.black.withOpacity(0.35),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          )
+          
+          // ================= EARS =================
+          Positioned(
+            top: 15, left: 2,
+            child: Container(
+              width: 4, height: 10,
+              decoration: BoxDecoration(color: const Color(0xFF78909C), borderRadius: BorderRadius.circular(2)),
+            )
+          ),
+          Positioned(
+            top: 15, right: 2,
+            child: Container(
+              width: 4, height: 10,
+              decoration: BoxDecoration(color: const Color(0xFF78909C), borderRadius: BorderRadius.circular(2)),
+            )
+          ),
+
+          // ================= ARMS =================
+          Positioned(
+            left: 3 + (math.sin(floatValue * math.pi) * 1.5),
+            top: 32 + (math.cos(floatValue * math.pi * 2) * 2), // Inverse arm bobbing
+            child: Transform.rotate(
+              angle: 0.15,
+              child: Container(
+                width: 7, height: 20,
+                decoration: BoxDecoration(
+                  gradient: metalGradient,
+                  borderRadius: BorderRadius.circular(4),
+                  border: borderStyle,
+                  boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(-2, 3))]
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 3 - (math.sin(floatValue * math.pi) * 1.5),
+            top: 32 + (math.cos(floatValue * math.pi * 2) * 2), // Inverse arm bobbing
+            child: Transform.rotate(
+              angle: -0.15,
+              child: Container(
+                width: 7, height: 20,
+                decoration: BoxDecoration(
+                  gradient: metalGradient,
+                  borderRadius: BorderRadius.circular(4),
+                  border: borderStyle,
+                  boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 3))]
+                ),
+              ),
+            ),
+          ),
+
+          // ================= LEGS =================
+          Positioned(
+            bottom: 2,
+            left: 17,
+            child: Container(
+              width: 8, height: 12,
+              decoration: BoxDecoration(
+                gradient: metalGradient,
+                borderRadius: BorderRadius.circular(4),
+                border: borderStyle,
+                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 3, offset: Offset(0, 2))]
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 2,
+            right: 17,
+            child: Container(
+              width: 8, height: 12,
+              decoration: BoxDecoration(
+                gradient: metalGradient,
+                borderRadius: BorderRadius.circular(4),
+                border: borderStyle,
+                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 3, offset: Offset(0, 2))]
+              ),
+            ),
+          ),
+          
+          // ================= NECK =================
+          Positioned(
+            top: 31,
+            child: Container(
+              width: 10, height: 8,
+              decoration: BoxDecoration(
+                color: const Color(0xFF37474F), // dark joint
+                borderRadius: BorderRadius.circular(2),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.8), inset: false, offset: const Offset(0,-2))],
+              ),
+            ),
+          ),
+
+          // ================= BODY =================
+          Positioned(
+            bottom: 12,
+            child: Container(
+              width: 34, height: 26,
+              decoration: BoxDecoration(
+                gradient: metalGradient,
+                borderRadius: BorderRadius.circular(10),
+                border: borderStyle,
+                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 4))],
+              ),
+              child: Center(
+                // Core
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 8, height: 8,
+                  decoration: BoxDecoration(
+                    color: eyeColor, shape: BoxShape.circle,
+                    boxShadow: [BoxShadow(color: glowColor, blurRadius: 6)]
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // ================= HEAD =================
+          Positioned(
+            top: 4,
+            child: Container(
+              width: 46, height: 32,
+              decoration: BoxDecoration(
+                gradient: metalGradient,
+                borderRadius: BorderRadius.circular(14),
+                border: borderStyle,
+                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
+              ),
+              child: Center(
+                // Face Screen
+                child: Container(
+                  width: 36, height: 18,
+                  decoration: BoxDecoration(
+                    gradient: screenGradient,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.black87, width: 1.5),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // left eye
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: 8, height: 10,
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: BoxDecoration(
+                          color: eyeColor,
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [BoxShadow(color: glowColor, blurRadius: 6)]
+                        ),
+                      ),
+                      // right eye
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: 8, height: 10,
+                        decoration: BoxDecoration(
+                          color: eyeColor,
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [BoxShadow(color: glowColor, blurRadius: 6)]
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
         ],
-      ),
-      child: Center(
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 600),
-          child: Icon(
-            Icons.auto_awesome_rounded, // Premium implicit Spark / AI icon
-            color: statusColor,
-            size: 26,
-          ),
-        ),
       ),
     );
   }
