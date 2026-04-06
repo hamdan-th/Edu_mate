@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../services/feed_reactions_service.dart';
@@ -75,25 +73,6 @@ class _FeedScreenState extends State<FeedScreen> {
       _botX = _botX.clamp(8.0, screenWidth - 68.0);
       _botY = _botY.clamp(120.0, screenHeight - 140.0);
     });
-  }
-
-  void _pickPhoto() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تحديد الصورة بنجاح')));
-    }
-  }
-
-  void _pickDocument() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf', 'doc', 'docx']);
-    if (result != null && result.files.isNotEmpty && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تحديد المستند بنجاح')));
-    }
-  }
-
-  void _createGroupPost() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الرجاء التوجه إلى مجتمع معين لنشر المحتوى')));
   }
 
   String _formatTime(dynamic value) {
@@ -218,62 +197,6 @@ class _FeedScreenState extends State<FeedScreen> {
                   ),
                 ),
                 
-                // Composer / Quick Post Area
-                Container(
-                  color: AppColors.darkSurface,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      FutureBuilder<User?>(
-                        future: Future.value(FirebaseAuth.instance.currentUser),
-                        builder: (context, snapshot) {
-                          final user = snapshot.data;
-                          return Container(
-                            width: 38, height: 38,
-                            decoration: const BoxDecoration(color: Color(0xFF1E1E22), shape: BoxShape.circle),
-                            child: ClipOval(
-                              child: (user?.photoURL?.isNotEmpty ?? false)
-                                  ? Image.network(user!.photoURL!, fit: BoxFit.cover)
-                                  : const Icon(Icons.person, color: Colors.white54, size: 20),
-                            ),
-                          );
-                        }
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Container(
-                          height: 40,
-                          padding: const EdgeInsets.only(left: 16, right: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.background,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.white.withOpacity(0.04)),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  "Share an academic update...",
-                                  style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13, fontWeight: FontWeight.w500),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              // Inlaid actions
-                              GestureDetector(onTap: _pickPhoto, child: Icon(Icons.image_rounded, color: Colors.white.withOpacity(0.4), size: 18)),
-                              const SizedBox(width: 12),
-                              GestureDetector(onTap: _pickDocument, child: Icon(Icons.article_rounded, color: Colors.white.withOpacity(0.4), size: 18)),
-                              const SizedBox(width: 12),
-                              GestureDetector(onTap: _createGroupPost, child: Icon(Icons.groups_rounded, color: Colors.white.withOpacity(0.4), size: 18)),
-                              const SizedBox(width: 4),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
                 // Sleek Filters
                 Container(
                   height: 46,

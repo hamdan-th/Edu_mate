@@ -104,7 +104,7 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
       child: AnimatedBuilder(
         animation: Listenable.merge([_floatController, _pressController]),
         builder: (context, child) {
-          double yOffset = math.sin(_floatController.value * math.pi) * 4;
+          double yOffset = math.sin(_floatController.value * math.pi) * 1.5; // Very subtle float
           
           if (widget.isMinimized) {
             return Transform.translate(
