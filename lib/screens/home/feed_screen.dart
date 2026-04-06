@@ -30,7 +30,6 @@ class _FeedScreenState extends State<FeedScreen> {
 
   double _botX = -1;
   double _botY = -1;
-  bool _botMinimized = false;
 
   @override
   void initState() {
@@ -62,7 +61,6 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   void _onBotPanUpdate(DragUpdateDetails details) {
-    if (_botMinimized) return;
     setState(() {
       _botX += details.delta.dx;
       _botY += details.delta.dy;
@@ -70,8 +68,8 @@ class _FeedScreenState extends State<FeedScreen> {
       final screenWidth = MediaQuery.of(context).size.width;
       final screenHeight = MediaQuery.of(context).size.height;
       
-      _botX = _botX.clamp(8.0, screenWidth - 68.0);
-      _botY = _botY.clamp(120.0, screenHeight - 140.0);
+      _botX = _botX.clamp(8.0, screenWidth - 76.0);
+      _botY = _botY.clamp(100.0, screenHeight - 160.0);
     });
   }
 
@@ -105,8 +103,8 @@ class _FeedScreenState extends State<FeedScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     if (_botX == -1) {
-      _botX = screenWidth - 64;
-      _botY = screenHeight - 180;
+      _botX = screenWidth - 76;
+      _botY = screenHeight - 240;
     }
 
     return Scaffold(
@@ -118,7 +116,7 @@ class _FeedScreenState extends State<FeedScreen> {
               children: [
                 // Clean Premium Header
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                   child: Row(
                     children: [
                       if (!_isSearching)
@@ -271,7 +269,7 @@ class _FeedScreenState extends State<FeedScreen> {
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.only(bottom: 120),
                           itemCount: docs.length,
-                          separatorBuilder: (_, __) => Container(height: 8, color: AppColors.background), // social divider
+                          separatorBuilder: (_, __) => const SizedBox(height: 4), // social divider
                           itemBuilder: (context, index) {
                             final data = docs[index];
                             final post = {
@@ -300,16 +298,12 @@ class _FeedScreenState extends State<FeedScreen> {
           
           // Enhanced Floating Draggable Mascot
           Positioned(
-            left: _botMinimized ? (screenWidth - 56) : _botX,
-            top: _botMinimized ? (screenHeight - 140) : _botY,
+            left: _botX,
+            top: _botY,
             child: GestureDetector(
               onPanUpdate: _onBotPanUpdate,
               child: AnimatedBotButton(
                 onTap: _openBot,
-                isMinimized: _botMinimized,
-                onMinimizeToggle: (bool val) {
-                  setState(() => _botMinimized = val);
-                },
               ),
             ),
           ),
@@ -444,8 +438,16 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     final imageUrl = (widget.post['imageUrl'] ?? '').toString();
 
     return Container(
-      color: AppColors.darkSurface, // Flat premium social card feel
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.darkSurface, // Flat premium social card feel
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.03)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.15), spreadRadius: 0, blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -474,16 +476,16 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     children: [
                       Text(
                         widget.post['groupName'] ?? '',
-                        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: -0.2),
                         maxLines: 1, overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Text(widget.post['authorName'] ?? '', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w500)),
-                          Text(' • ${widget.post['time']}', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+                          Text(widget.post['authorName'] ?? '', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w600)),
+                          Text(' • ${widget.post['time']}', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 11)),
                           const SizedBox(width: 4),
-                          Icon(Icons.public, color: Colors.white.withOpacity(0.4), size: 12),
+                          Icon(Icons.public, color: Colors.white.withOpacity(0.3), size: 11),
                         ],
                       ),
                     ],
@@ -525,7 +527,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               widget.post['content'] ?? '',
-              style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14.5, height: 1.4),
+              style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5, letterSpacing: 0.1),
             ),
           ),
           
@@ -561,8 +563,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
           ],
           
           // Action Divider
-          const SizedBox(height: 12),
-          Divider(height: 1, thickness: 1, color: Colors.white.withOpacity(0.04)),
+          const SizedBox(height: 16),
+          Divider(height: 1, thickness: 1, color: Colors.white.withOpacity(0.03)),
           
           // Action Row
           Row(
@@ -616,7 +618,7 @@ class _SocialActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget iconWidget = Icon(icon, color: color, size: 20);
+    Widget iconWidget = Icon(icon, color: color, size: 22);
     if (scale != null) {
       iconWidget = ScaleTransition(scale: scale!, child: iconWidget);
     }
@@ -626,14 +628,17 @@ class _SocialActionButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
+          splashColor: AppColors.primary.withOpacity(0.1),
+          highlightColor: AppColors.primary.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 14),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 iconWidget,
-                const SizedBox(width: 8),
-                Text(label, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 10),
+                Text(label, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600)),
               ],
             ),
           ),
