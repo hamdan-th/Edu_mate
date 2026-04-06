@@ -134,11 +134,9 @@ class MyLibraryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: LibraryTheme.bg,
-      body: SingleChildScrollView(
+      body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        children: [
             _HeroCard(
               onUploadTap: () => _openUpload(context),
             ),
@@ -227,7 +225,6 @@ class MyLibraryScreen extends StatelessWidget {
               ],
             ),
           ],
-        ),
       ),
     );
   }
