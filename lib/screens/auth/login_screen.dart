@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      String message = l10n.signupFailed;
+      String message = l10n.errLoginFailed;
 
       switch (e.code) {
         case 'invalid-email':

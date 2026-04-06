@@ -69,5 +69,16 @@
   "feedJoinedGroup": "تم الانضمام للمجموعة",
   "feedErrUpdateLike": "تعذر تحديث الإعجاب",
   "feedJoinAction": "انضمام",
-  "feedBotName": "Edu Bot"
+  "feedBotName": "Edu Bot",
+  
+  "likeAction": "إعجاب",
+  "commentAction": "تعليق",
+  "shareAction": "مشاركة",
+  "timeNow": "الآن",
+  "timeMinutesAgo": "د ق",
+  "timeHoursAgo": "س ق",
+  "timeDaysAgo": "ي ق",
+  "notificationsTitle": "الإشعارات",
+  "notificationsBody": "الإشعارات ستربط لاحقًا",
+  "errLoginFailed": "فشل تسجيل الدخول"
 }

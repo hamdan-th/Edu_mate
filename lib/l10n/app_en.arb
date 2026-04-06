@@ -69,5 +69,16 @@
   "feedJoinedGroup": "Joined group successfully",
   "feedErrUpdateLike": "Failed to update like",
   "feedJoinAction": "Join",
-  "feedBotName": "Edu Bot"
+  "feedBotName": "Edu Bot",
+  
+  "likeAction": "Like",
+  "commentAction": "Comment",
+  "shareAction": "Share",
+  "timeNow": "now",
+  "timeMinutesAgo": "m ago",
+  "timeHoursAgo": "h ago",
+  "timeDaysAgo": "d ago",
+  "notificationsTitle": "Notifications",
+  "notificationsBody": "Notifications will be connected later",
+  "errLoginFailed": "Login failed"
 }

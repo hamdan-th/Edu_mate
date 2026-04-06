@@ -77,7 +77,7 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  String _formatTime(dynamic value) {
+  String _formatTime(dynamic value, AppLocalizations l10n) {
     if (value == null) return '';
 
     DateTime? date;
@@ -92,10 +92,10 @@ class _FeedScreenState extends State<FeedScreen> {
     final now = DateTime.now();
     final diff = now.difference(date);
 
-    if (diff.inSeconds < 60) return 'now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inSeconds < 60) return l10n.timeNow;
+    if (diff.inMinutes < 60) return '${diff.inMinutes}${l10n.timeMinutesAgo}';
+    if (diff.inHours < 24) return '${diff.inHours}${l10n.timeHoursAgo}';
+    if (diff.inDays < 7) return '${diff.inDays}${l10n.timeDaysAgo}';
 
     return '${date.day}/${date.month}/${date.year}';
   }
@@ -288,7 +288,7 @@ class _FeedScreenState extends State<FeedScreen> {
                               'authorName': data.authorName,
                               'groupName': data.groupName,
                               'groupMeta': 'Public Group',
-                              'time': _formatTime(data.createdAt),
+                              'time': _formatTime(data.createdAt, l10n),
                               'content': data.contentText,
                               'likes': data.likesCount,
                               'comments': data.commentsCount,
@@ -912,9 +912,9 @@ class _PostCardState extends State<PostCard>
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Like',
+                                l10n.likeAction,
                                 style: TextStyle(
-                                  color: isLiked ? Colors.red : AppColors.textSecondary,
+                                  color: isLiked ? Colors.red : (isDark ? AppColors.textSecondary : Colors.black54),
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -946,16 +946,16 @@ class _PostCardState extends State<PostCard>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.chat_bubble_outline_rounded,
                               size: 20,
-                              color: AppColors.textSecondary,
+                              color: isDark ? AppColors.textSecondary : Colors.black45,
                             ),
                             const SizedBox(width: 6),
-                            const Text(
-                              'Comment',
+                            Text(
+                              l10n.commentAction,
                               style: TextStyle(
-                                color: AppColors.textSecondary,
+                                color: isDark ? AppColors.textSecondary : Colors.black54,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -980,16 +980,16 @@ class _PostCardState extends State<PostCard>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.share_outlined,
                               size: 20,
-                              color: AppColors.textSecondary,
+                              color: isDark ? AppColors.textSecondary : Colors.black45,
                             ),
                             const SizedBox(width: 6),
-                            const Text(
-                              'Share',
+                            Text(
+                              l10n.shareAction,
                               style: TextStyle(
-                                color: AppColors.textSecondary,
+                                color: isDark ? AppColors.textSecondary : Colors.black54,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -1080,8 +1080,14 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
 
   @override
   Widget build(BuildContext context) {
-    const base = Color(0xFFF1F4FA);
-    const highlight = Color(0xFFF8FAFE);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseLight = const Color(0xFFF1F4FA);
+    final highlightLight = const Color(0xFFF8FAFE);
+    final baseDark = AppColors.surface;
+    final highlightDark = AppColors.surface.withOpacity(0.5);
+
+    final base = isDark ? baseDark : baseLight;
+    final highlight = isDark ? highlightDark : highlightLight;
 
     return AnimatedBuilder(
       animation: _controller,
@@ -1091,9 +1097,9 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? AppColors.surface : Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: isDark ? AppColors.border : Colors.black12),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1218,12 +1224,13 @@ class EmptyStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: isDark ? AppColors.surface : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: isDark ? AppColors.border : Colors.black12),
       ),
       child: Column(
         children: [
@@ -1239,8 +1246,8 @@ class EmptyStateCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             title,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: isDark ? AppColors.textPrimary : Colors.black87,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -1249,8 +1256,8 @@ class EmptyStateCard extends StatelessWidget {
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: isDark ? AppColors.textSecondary : Colors.black54,
               fontSize: 13.5,
               fontWeight: FontWeight.w500,
             ),
@@ -1266,16 +1273,19 @@ class PlaceholderNotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(l10n.notificationsTitle),
       ),
-      body: const Center(
+      body: Center(
         child: Text(
-          'الإشعارات ستربط لاحقًا',
+          l10n.notificationsBody,
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: isDark ? AppColors.textPrimary : Colors.black87,
             fontWeight: FontWeight.w700,
           ),
         ),
