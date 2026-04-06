@@ -277,7 +277,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
                         return ListView.builder(
                           padding:
-                          const EdgeInsets.fromLTRB(20, 0, 20, 110),
+                          const EdgeInsets.fromLTRB(8, 0, 8, 110),
                           itemCount: docs.length,
                           itemBuilder: (context, index) {
                             final data = docs[index];
@@ -671,9 +671,6 @@ class _PostCardState extends State<PostCard>
 
   @override
   Widget build(BuildContext context) {
-    const primarySoft = Color(0xFFF1F0FF);
-    const accentSoft = Color(0xFFFFF4DD);
-
     final imageUrl = (widget.post['imageUrl'] ?? '').toString();
 
     return GestureDetector(
@@ -685,19 +682,17 @@ class _PostCardState extends State<PostCard>
         scale: isPressed ? 0.985 : 1,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          margin: const EdgeInsets.only(bottom: 24),
-          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.border.withOpacity(0.3)),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border.withOpacity(0.5)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(
-                  isPressed ? 0.08 : 0.02,
-                ),
-                blurRadius: isPressed ? 18 : 12,
-                offset: const Offset(0, 6),
+                color: AppColors.textPrimary.withOpacity(isPressed ? 0.04 : 0.01),
+                blurRadius: isPressed ? 8 : 4,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -705,6 +700,7 @@ class _PostCardState extends State<PostCard>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     width: 44,
@@ -715,12 +711,12 @@ class _PostCardState extends State<PostCard>
                         end: Alignment.bottomRight,
                         colors: [AppColors.primary, AppColors.primaryDark],
                       ),
-                      borderRadius: BorderRadius.circular(14),
+                      shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.groups_rounded,
+                      Icons.person_rounded,
                       color: Colors.white,
-                      size: 20,
+                      size: 24,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -729,90 +725,91 @@ class _PostCardState extends State<PostCard>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          (widget.post['groupName'] ?? '').toString(),
+                          '${widget.post['authorName'] ?? ''}',
                           style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.bold,
                             letterSpacing: -0.2,
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          '${widget.post['authorName'] ?? ''} · ${widget.post['time'] ?? ''}',
-                          style: TextStyle(
-                            color: AppColors.textSecondary.withOpacity(0.8),
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              '${widget.post['time'] ?? ''}',
+                              style: TextStyle(
+                                color: AppColors.textSecondary.withOpacity(0.8),
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Icon(Icons.public, size: 12, color: AppColors.textSecondary.withOpacity(0.8)),
+                            const SizedBox(width: 6),
+                            Text(
+                              '· ${(widget.post['groupName'] ?? '').toString()}',
+                              style: TextStyle(
+                                color: AppColors.textSecondary.withOpacity(0.7),
+                                fontSize: 13,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  InkWell(
-                    onTap: (_isLoadingJoined || _isJoined) ? null : _joinGroup,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      height: 32,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      decoration: BoxDecoration(
-                        color: _isJoined ? Colors.transparent : AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: _isJoined ? Border.all(color: AppColors.primary.withOpacity(0.8)) : null,
-                      ),
-                      child: Center(
-                        child: _isLoadingJoined
-                            ? const SizedBox(
-                                width: 14, 
-                                height: 14, 
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
-                              )
-                            : Text(
-                                _isJoined ? 'Joined' : 'Join',
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
+                  if (!_isJoined)
+                    InkWell(
+                      onTap: _isLoadingJoined ? null : _joinGroup,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        height: 32,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                        ),
+                        child: Center(
+                          child: _isLoadingJoined
+                              ? const SizedBox(
+                                  width: 14, 
+                                  height: 14, 
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
+                                )
+                              : const Text(
+                                  'Join',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
+                        ),
                       ),
                     ),
-                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.more_horiz, color: AppColors.textSecondary, size: 24),
                 ],
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  widget.post['tag'] ?? 'Public',
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               Text(
                 widget.post['content'] ?? '',
                 style: const TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 15,
+                  fontSize: 15.5,
                   height: 1.5,
                   fontWeight: FontWeight.w400,
                 ),
               ),
               if ((widget.post['hasImage'] ?? false) == true) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                   child: Container(
                     width: double.infinity,
-                    height: 200,
+                    height: 220,
                     decoration: BoxDecoration(
                       border: Border.all(color: AppColors.border.withOpacity(0.3)),
                       color: AppColors.surface,
@@ -827,31 +824,108 @@ class _PostCardState extends State<PostCard>
                   ),
                 ),
               ],
-              const SizedBox(height: 16),
-              Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.3)),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: _toggleLike,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                      child: ScaleTransition(
-                        scale: _likeScale,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.redAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.favorite, size: 10, color: Colors.white),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '$_likesCount',
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '${widget.post['comments'] ?? 0} comments',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.4)),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: _toggleLike,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: ScaleTransition(
+                          scale: _likeScale,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                size: 20,
+                                color: isLiked ? Colors.red : AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Like',
+                                style: TextStyle(
+                                  color: isLiked ? Colors.red : AppColors.textSecondary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                            child: PostCommentsSheet(postCardData: widget.post),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                            const Icon(
+                              Icons.chat_bubble_outline_rounded,
                               size: 20,
-                              color: isLiked ? Colors.red : AppColors.textSecondary,
+                              color: AppColors.textSecondary,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              '$_likesCount',
+                            const Text(
+                              'Comment',
                               style: TextStyle(
-                                color: isLiked ? Colors.red : AppColors.textSecondary,
-                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -860,37 +934,39 @@ class _PostCardState extends State<PostCard>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 24),
-                  FlatPostAction(
-                    icon: Icons.chat_bubble_outline_rounded,
-                    label: '${widget.post['comments'] ?? 0}',
-                    color: AppColors.textSecondary,
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => Padding(
-                          padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom,
-                          ),
-                          child: PostCommentsSheet(postCardData: widget.post),
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        final feedPost = FeedPostModel.fromMap(
+                          widget.post,
+                          widget.post['postId']?.toString() ?? '',
+                        );
+                        FeedShareService.sharePost(context, feedPost);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.share_outlined,
+                              size: 20,
+                              color: AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Share',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 20),
-                  FlatPostAction(
-                    icon: Icons.share_outlined,
-                    label: '',
-                    color: AppColors.textSecondary,
-                    onTap: () {
-                      final feedPost = FeedPostModel.fromMap(
-                        widget.post,
-                        widget.post['postId']?.toString() ?? '',
-                      );
-                      FeedShareService.sharePost(context, feedPost);
-                    },
+                      ),
+                    ),
                   ),
                 ],
               ),
