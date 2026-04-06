@@ -83,7 +83,7 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
+    final scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(
       CurvedAnimation(parent: _pressController, curve: Curves.easeOutCubic)
     );
 
@@ -96,10 +96,10 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
         builder: (context, child) {
           final isRestless = !_isOnline;
           final shake = isRestless 
-              ? math.sin(_floatController.value * math.pi * 18) * 1.0  // Barely noticeable minimal offline shake
+              ? math.sin(_floatController.value * math.pi * 18) * 1.0 
               : 0.0;
               
-          final yOffset = math.sin(_floatController.value * math.pi) * 6;
+          final yOffset = math.sin(_floatController.value * math.pi) * 5;
 
           return Transform.scale(
             scale: scaleAnimation.value,
@@ -123,29 +123,30 @@ class _MascotRobot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final eyeColor = isOnline ? AppColors.primary : Colors.redAccent;
-    final glowColor = isOnline ? AppColors.primary.withOpacity(0.6) : Colors.redAccent.withOpacity(0.6);
+    final glowColor = isOnline ? AppColors.primary.withOpacity(0.5) : Colors.redAccent.withOpacity(0.5);
 
-    // 3D Metallic silver body
-    const metalGradient = LinearGradient(
+    // Dark Graphite Body matching Premium Identity
+    const darkBodyGradient = LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFFFFFFFF), Color(0xFFD1D8DD), Color(0xFF78909C)],
+      colors: [Color(0xFF3A3A3D), Color(0xFF1C1C1E), Color(0xFF101013)],
       stops: [0.0, 0.4, 1.0],
     );
 
-    // Dark glass face
+    // Deep void screen for the face
     const screenGradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [Color(0xFF263238), Color(0xFF0F171A)],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFF0C0C0E), Color(0xFF1A1A1E)],
     );
 
-    // Common 3D styling edge highlight
-    final borderStyle = Border.all(color: Colors.white.withOpacity(0.8), width: 0.5);
+    // Minimal gold accent outline
+    final borderStyle = Border.all(color: AppColors.primary.withOpacity(0.3), width: 0.5);
+    final coreBorderStyle = Border.all(color: Colors.white.withOpacity(0.03), width: 1);
 
     return SizedBox(
-      width: 58,
-      height: 75,
+      width: 48,
+      height: 64,
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
@@ -154,62 +155,68 @@ class _MascotRobot extends StatelessWidget {
           Positioned(
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 400),
-              width: 48,
-              height: 48,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: glowColor, blurRadius: 28, spreadRadius: -2)
+                  BoxShadow(color: glowColor, blurRadius: 20, spreadRadius: 2)
                 ]
               ),
             ),
           ),
           
-          // ================= EARS =================
+          // ================= SENSORS / EARS =================
           Positioned(
-            top: 15, left: 2,
+            top: 10, left: 3,
             child: Container(
-              width: 4, height: 10,
-              decoration: BoxDecoration(color: const Color(0xFF78909C), borderRadius: BorderRadius.circular(2)),
+              width: 4, height: 8,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.8), // gold accent sensor
+                borderRadius: BorderRadius.circular(2),
+              ),
             )
           ),
           Positioned(
-            top: 15, right: 2,
+            top: 10, right: 3,
             child: Container(
-              width: 4, height: 10,
-              decoration: BoxDecoration(color: const Color(0xFF78909C), borderRadius: BorderRadius.circular(2)),
+              width: 4, height: 8,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.8), // gold accent sensor
+                borderRadius: BorderRadius.circular(2),
+              ),
             )
           ),
 
           // ================= ARMS =================
           Positioned(
-            left: 3 + (math.sin(floatValue * math.pi) * 1.5),
-            top: 32 + (math.cos(floatValue * math.pi * 2) * 2), // Inverse arm bobbing
+            left: 2 + (math.sin(floatValue * math.pi) * 1.5),
+            top: 26 + (math.cos(floatValue * math.pi * 2) * 2), // Inverse arm bobbing
             child: Transform.rotate(
-              angle: 0.15,
+              angle: 0.1,
               child: Container(
-                width: 7, height: 20,
+                width: 6, height: 18,
                 decoration: BoxDecoration(
-                  gradient: metalGradient,
-                  borderRadius: BorderRadius.circular(4),
+                  gradient: darkBodyGradient,
+                  borderRadius: BorderRadius.circular(3),
                   border: borderStyle,
-                  boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(-2, 3))]
+                  boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(-2, 2))]
                 ),
               ),
             ),
           ),
           Positioned(
-            right: 3 - (math.sin(floatValue * math.pi) * 1.5),
-            top: 32 + (math.cos(floatValue * math.pi * 2) * 2), // Inverse arm bobbing
+            right: 2 - (math.sin(floatValue * math.pi) * 1.5),
+            top: 26 + (math.cos(floatValue * math.pi * 2) * 2), // Inverse arm bobbing
             child: Transform.rotate(
-              angle: -0.15,
+              angle: -0.1,
               child: Container(
-                width: 7, height: 20,
+                width: 6, height: 18,
                 decoration: BoxDecoration(
-                  gradient: metalGradient,
-                  borderRadius: BorderRadius.circular(4),
+                  gradient: darkBodyGradient,
+                  borderRadius: BorderRadius.circular(3),
                   border: borderStyle,
-                  boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 3))]
+                  boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(2, 2))]
                 ),
               ),
             ),
@@ -217,43 +224,43 @@ class _MascotRobot extends StatelessWidget {
 
           // ================= LEGS =================
           Positioned(
-            bottom: 2,
-            left: 17,
+            bottom: 0,
+            left: 14,
             child: Container(
-              width: 8, height: 12,
+              width: 6, height: 10,
               decoration: BoxDecoration(
-                gradient: metalGradient,
-                borderRadius: BorderRadius.circular(4),
+                gradient: darkBodyGradient,
+                borderRadius: BorderRadius.circular(3),
                 border: borderStyle,
-                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 3, offset: Offset(0, 2))]
+                boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 2, offset: Offset(0, 2))]
               ),
             ),
           ),
           Positioned(
-            bottom: 2,
-            right: 17,
+            bottom: 0,
+            right: 14,
             child: Container(
-              width: 8, height: 12,
+              width: 6, height: 10,
               decoration: BoxDecoration(
-                gradient: metalGradient,
-                borderRadius: BorderRadius.circular(4),
+                gradient: darkBodyGradient,
+                borderRadius: BorderRadius.circular(3),
                 border: borderStyle,
-                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 3, offset: Offset(0, 2))]
+                boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 2, offset: Offset(0, 2))]
               ),
             ),
           ),
-          
+
           // ================= NECK =================
           Positioned(
-            top: 31,
+            top: 26,
             child: Container(
-              width: 10, height: 8,
+              width: 8, height: 6,
               decoration: BoxDecoration(
-                color: const Color(0xFF37474F), // dark joint
+                color: const Color(0xFF111113), // dark joint
                 borderRadius: BorderRadius.circular(2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.8),
+                    color: Colors.black.withOpacity(0.9),
                     offset: const Offset(0, -2),
                     blurRadius: 4,
                   )
@@ -264,20 +271,20 @@ class _MascotRobot extends StatelessWidget {
 
           // ================= BODY =================
           Positioned(
-            bottom: 12,
+            bottom: 10,
             child: Container(
-              width: 34, height: 26,
+              width: 28, height: 22,
               decoration: BoxDecoration(
-                gradient: metalGradient,
-                borderRadius: BorderRadius.circular(10),
+                gradient: darkBodyGradient,
+                borderRadius: BorderRadius.circular(8),
                 border: borderStyle,
-                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 4))],
+                boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 3))],
               ),
               child: Center(
                 // Core
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  width: 8, height: 8,
+                  width: 6, height: 6,
                   decoration: BoxDecoration(
                     color: eyeColor, shape: BoxShape.circle,
                     boxShadow: [BoxShadow(color: glowColor, blurRadius: 6)]
@@ -291,21 +298,21 @@ class _MascotRobot extends StatelessWidget {
           Positioned(
             top: 4,
             child: Container(
-              width: 46, height: 32,
+              width: 38, height: 26,
               decoration: BoxDecoration(
-                gradient: metalGradient,
-                borderRadius: BorderRadius.circular(14),
+                gradient: darkBodyGradient,
+                borderRadius: BorderRadius.circular(12),
                 border: borderStyle,
-                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
+                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 4))],
               ),
               child: Center(
                 // Face Screen
                 child: Container(
-                  width: 36, height: 18,
+                  width: 28, height: 14,
                   decoration: BoxDecoration(
                     gradient: screenGradient,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.black87, width: 1.5),
+                    borderRadius: BorderRadius.circular(5),
+                    border: coreBorderStyle, // subtle internal edge
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -313,22 +320,22 @@ class _MascotRobot extends StatelessWidget {
                       // left eye
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        width: 8, height: 10,
-                        margin: const EdgeInsets.only(right: 6),
+                        width: 7, height: 8,
+                        margin: const EdgeInsets.only(right: 5),
                         decoration: BoxDecoration(
                           color: eyeColor,
-                          borderRadius: BorderRadius.circular(4),
-                          boxShadow: [BoxShadow(color: glowColor, blurRadius: 6)]
+                          borderRadius: BorderRadius.circular(3),
+                          boxShadow: [BoxShadow(color: glowColor, blurRadius: 5)]
                         ),
                       ),
                       // right eye
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        width: 8, height: 10,
+                        width: 7, height: 8,
                         decoration: BoxDecoration(
                           color: eyeColor,
-                          borderRadius: BorderRadius.circular(4),
-                          boxShadow: [BoxShadow(color: glowColor, blurRadius: 6)]
+                          borderRadius: BorderRadius.circular(3),
+                          boxShadow: [BoxShadow(color: glowColor, blurRadius: 5)]
                         ),
                       ),
                     ],
