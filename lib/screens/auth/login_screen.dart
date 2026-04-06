@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
     _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 500),
     )..forward();
 
     _floatController = AnimationController(
@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      _showMessage('أدخل البريد الإلكتروني وكلمة المرور');
+      _showMessage('Please enter your email and password');
       return;
     }
 
@@ -97,32 +97,32 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      String message = 'فشل تسجيل الدخول';
+      String message = 'Login failed';
 
       switch (e.code) {
         case 'invalid-email':
-          message = 'البريد الإلكتروني غير صالح';
+          message = 'Invalid email address';
           break;
         case 'user-not-found':
-          message = 'هذا الحساب غير موجود';
+          message = 'Account not found';
           break;
         case 'wrong-password':
-          message = 'كلمة المرور غير صحيحة';
+          message = 'Incorrect password';
           break;
         case 'invalid-credential':
-          message = 'بيانات الدخول غير صحيحة';
+          message = 'Invalid credentials';
           break;
         case 'user-disabled':
-          message = 'تم تعطيل هذا الحساب';
+          message = 'Account disabled';
           break;
         case 'too-many-requests':
-          message = 'محاولات كثيرة، حاول لاحقًا';
+          message = 'Too many requests, try again later';
           break;
       }
 
       _showMessage(message);
     } catch (_) {
-      _showMessage('حدث خطأ غير متوقع');
+      _showMessage('An unexpected error occurred');
     } finally {
       if (mounted) {
         setState(() {
@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final email = _loginController.text.trim();
 
     if (email.isEmpty) {
-      _showMessage('أدخل البريد الإلكتروني أولاً');
+      _showMessage('Please enter your email first');
       return;
     }
 
@@ -146,19 +146,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      _showMessage('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني');
+      _showMessage('Password reset link sent to your email');
     } on FirebaseAuthException catch (e) {
-      String message = 'فشل إرسال رابط إعادة التعيين';
+      String message = 'Failed to send reset link';
 
       if (e.code == 'invalid-email') {
-        message = 'البريد الإلكتروني غير صالح';
+        message = 'Invalid email address';
       } else if (e.code == 'user-not-found') {
-        message = 'هذا البريد غير مسجل';
+        message = 'Email not registered';
       }
 
       _showMessage(message);
     } catch (_) {
-      _showMessage('حدث خطأ غير متوقع');
+      _showMessage('An unexpected error occurred');
     } finally {
       if (mounted) {
         setState(() {
@@ -277,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           },
                         ),
                         
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 36), // Increased spacing
                         
                         // Header Text
                         const Text(
@@ -293,8 +293,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         Text(
                           'Welcome back',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 16,
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 14,
+                            letterSpacing: 2.5,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -328,16 +329,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
-                                      'تسجيل الدخول',
+                                      'Log In',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 22,
+                                        fontSize: 24,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      'ادخل بياناتك للوصول إلى منصتك التعليمية',
+                                      'Sign in to access your platform',
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(0.6),
                                         fontSize: 13,
@@ -353,9 +354,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           filled: true,
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                                           labelStyle: TextStyle(
-                                            color: Colors.white.withOpacity(0.5),
+                                            color: Colors.white.withOpacity(0.4), // improved placeholder contrast
                                           ),
-                                          prefixIconColor: AppColors.primary.withOpacity(0.8),
+                                          prefixIconColor: AppColors.primary.withOpacity(0.6), // reduced opacity
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(16),
                                             borderSide: BorderSide.none,
@@ -370,7 +371,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                             borderRadius: BorderRadius.circular(16),
                                             borderSide: const BorderSide(
                                               color: AppColors.primary,
-                                              width: 1.5,
+                                              width: 2.0, // stronger gold border
                                             ),
                                           ),
                                         ),
@@ -382,7 +383,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                             keyboardType: TextInputType.emailAddress,
                                             style: const TextStyle(color: Colors.white),
                                             decoration: _inputDecoration(
-                                              label: 'البريد الإلكتروني',
+                                              label: 'Email',
                                               icon: Icons.person_outline_rounded,
                                             ),
                                           ),
@@ -392,7 +393,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                             obscureText: _obscurePassword,
                                             style: const TextStyle(color: Colors.white),
                                             decoration: _inputDecoration(
-                                              label: 'كلمة المرور',
+                                              label: 'Password',
                                               icon: Icons.lock_outline_rounded,
                                               suffixIcon: IconButton(
                                                 onPressed: () {
@@ -404,7 +405,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                                   _obscurePassword
                                                       ? Icons.visibility_off_outlined
                                                       : Icons.visibility_outlined,
-                                                  color: Colors.white.withOpacity(0.5),
+                                                  color: Colors.white.withOpacity(0.4),
                                                 ),
                                               ),
                                             ),
@@ -415,40 +416,50 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     
                                     const SizedBox(height: 12),
                                     
-                                    // Secondary Elements
+                                    // Secondary Elements -> Forgot Password
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: TextButton(
                                         onPressed: _isLoading ? null : _resetPassword,
                                         style: TextButton.styleFrom(
-                                          foregroundColor: Colors.white.withOpacity(0.6),
+                                          foregroundColor: Colors.white.withOpacity(0.4), // subtle
                                         ),
-                                        child: const Text('نسيت كلمة المرور؟', style: TextStyle(fontSize: 13)),
+                                        child: const Text('Forgot password?', style: TextStyle(fontSize: 12)),
                                       ),
                                     ),
                                     
                                     const SizedBox(height: 20),
                                     
                                     // 5. Login Button
-                                    SizedBox(
+                                    Container(
                                       width: double.infinity,
                                       height: 54,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFFE8C868), // Soft lighter gold
+                                            AppColors.primary, // Base gold
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primary.withOpacity(0.5),
+                                            blurRadius: 16,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
                                       child: ElevatedButton(
                                         onPressed: _isLoading ? null : _handleLogin,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.primary,
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
                                           foregroundColor: AppColors.secondary, // Dark text
-                                          elevation: 0,
-                                          shadowColor: AppColors.primary.withOpacity(0.4),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(16),
-                                          ),
-                                        ).copyWith(
-                                          elevation: MaterialStateProperty.resolveWith<double>(
-                                            (Set<MaterialState> states) {
-                                              if (states.contains(MaterialState.pressed)) return 2;
-                                              return 8; // glow effect baseline
-                                            },
                                           ),
                                         ),
                                         child: _isLoading
@@ -461,10 +472,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                                 ),
                                               )
                                             : const Text(
-                                                'تسجيل الدخول',
+                                                'Log In',
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w800,
+                                                  letterSpacing: 0.5,
                                                 ),
                                               ),
                                       ),
@@ -476,7 +488,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'ليس لديك حساب؟',
+                                          "Don't have an account?",
                                           style: textTheme.bodyMedium?.copyWith(
                                             color: Colors.white.withOpacity(0.5),
                                             fontSize: 13,
@@ -488,7 +500,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                             foregroundColor: AppColors.primary,
                                           ),
                                           child: const Text(
-                                            'إنشاء حساب',
+                                            'Sign up',
                                             style: TextStyle(
                                               fontWeight: FontWeight.w800,
                                               fontSize: 13,
