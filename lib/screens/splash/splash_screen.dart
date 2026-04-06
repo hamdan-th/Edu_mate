@@ -131,30 +131,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                 width: 140,
                                 height: 140,
                                 fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    width: 140,
-                                    height: 140,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: gold.withOpacity(0.3),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'LOGO\nMISSING',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: gold.withOpacity(0.6),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
                               ),
                             ),
                             const SizedBox(height: 36),
