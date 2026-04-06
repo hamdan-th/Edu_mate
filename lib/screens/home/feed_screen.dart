@@ -10,6 +10,7 @@ import 'widgets/post_comments_sheet.dart';
 import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 import '../../features/edu_bot/presentation/screens/bot_screen.dart';
+import '../../features/edu_bot/presentation/widgets/animated_bot_button.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -90,7 +91,7 @@ class _FeedScreenState extends State<FeedScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 96),
-        child: FloatingStudyBotButton(onTap: _openBot),
+        child: AnimatedBotButton(onTap: _openBot),
       ),
       body: Stack(
         children: [
@@ -276,51 +277,6 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 }
 
-class FloatingStudyBotButton extends StatefulWidget {
-  final VoidCallback onTap;
-  const FloatingStudyBotButton({super.key, required this.onTap});
-
-  @override
-  State<FloatingStudyBotButton> createState() => _FloatingStudyBotButtonState();
-}
-
-class _FloatingStudyBotButtonState extends State<FloatingStudyBotButton> {
-  bool _isPressed = false;
-  
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedScale(
-        scale: _isPressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 6)),
-            ],
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.auto_awesome_rounded, color: AppColors.secondary, size: 22),
-              SizedBox(width: 8),
-              Text('Edu Bot', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: AppColors.secondary)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class FeedTopActionButton extends StatefulWidget {
   final IconData icon;
