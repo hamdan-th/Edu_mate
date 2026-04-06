@@ -1,0 +1,12 @@
+{
+  "@@locale": "ar",
+  "app_name": "رائدة التعليم",
+  "settings": "الإعدادات",
+  "language": "اللغة",
+  "theme": "المظهر",
+  "themeSystem": "النظام",
+  "themeLight": "فاتح",
+  "themeDark": "داكن",
+  "save": "حفظ",
+  "close": "إغلاق"
+}

@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+  "app_name": "Edu Mate",
+  "settings": "Settings",
+  "language": "Language",
+  "theme": "AppearanceMode",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "save": "Save",
+  "close": "Close"
+}

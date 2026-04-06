@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/providers/app_settings_provider.dart';
 import 'firebase_options.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
@@ -13,11 +18,18 @@ import 'screens/home/main_nav_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final prefs = await SharedPreferences.getInstance();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const EduApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AppSettingsProvider(prefs),
+      child: const EduApp(),
+    ),
+  );
 }
 
 class EduApp extends StatelessWidget {
@@ -25,12 +37,25 @@ class EduApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appSettings = context.watch<AppSettingsProvider>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Edu Mate',
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.lightTheme,
-      themeMode: ThemeMode.dark,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: appSettings.themeMode,
+      locale: appSettings.locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('ar'),
+      ],
       home: const SplashScreen(),
       routes: {
         '/authGate': (_) => const AuthGate(),

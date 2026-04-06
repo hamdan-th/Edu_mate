@@ -9,6 +9,7 @@ import '../../models/feed_post_model.dart';
 import 'widgets/post_comments_sheet.dart';
 import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
+import '../settings/settings_bottom_sheet.dart';
 import '../../features/edu_bot/presentation/screens/bot_screen.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -143,6 +144,11 @@ class _FeedScreenState extends State<FeedScreen> {
                       ),
                       Row(
                         children: [
+                          FeedTopActionButton(
+                            icon: Icons.settings_rounded,
+                            onTap: () => SettingsBottomSheet.show(context),
+                          ),
+                          const SizedBox(width: 8),
                           FeedTopActionButton(
                             icon: Icons.notifications_none_rounded,
                             hasBadge: true,
