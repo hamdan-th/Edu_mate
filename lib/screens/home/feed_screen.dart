@@ -12,6 +12,7 @@ import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 import '../../features/edu_bot/presentation/screens/bot_screen.dart';
 import '../../features/edu_bot/presentation/widgets/animated_bot_button.dart';
+import '../notifications/notifications_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -27,9 +28,6 @@ class _FeedScreenState extends State<FeedScreen> {
   bool _isSearching = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
-
-  double _botX = -1;
-  double _botY = -1;
 
   @override
   void initState() {
@@ -60,19 +58,6 @@ class _FeedScreenState extends State<FeedScreen> {
     Navigator.push(context, MaterialPageRoute(builder: (_) => const BotScreen()));
   }
 
-  void _onBotPanUpdate(DragUpdateDetails details) {
-    setState(() {
-      _botX += details.delta.dx;
-      _botY += details.delta.dy;
-      
-      final screenWidth = MediaQuery.of(context).size.width;
-      final screenHeight = MediaQuery.of(context).size.height;
-      
-      _botX = _botX.clamp(8.0, screenWidth - 76.0);
-      _botY = _botY.clamp(100.0, screenHeight - 160.0);
-    });
-  }
-
   String _formatTime(dynamic value) {
     if (value == null) return '';
     DateTime? date;
@@ -100,13 +85,6 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    if (_botX == -1) {
-      _botX = screenWidth - 76;
-      _botY = screenHeight - 240;
-    }
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -159,14 +137,30 @@ class _FeedScreenState extends State<FeedScreen> {
                         }
                       ),
                       const SizedBox(width: 12),
-                      _HeaderAction(icon: Icons.notifications_none_rounded, hasBadge: true, onTap: () {}),
+                      _HeaderAction(
+                        icon: Icons.notifications_none_rounded, 
+                        hasBadge: true, 
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPlaceholderScreen()));
+                        }
+                      ),
                       const SizedBox(width: 12),
                       
                       // Authenticated User Avatar
-                      FutureBuilder<User?>(
-                        future: Future.value(FirebaseAuth.instance.currentUser),
+                      StreamBuilder<DocumentSnapshot>(
+                        stream: FirebaseAuth.instance.currentUser != null 
+                          ? FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).snapshots()
+                          : const Stream.empty(),
                         builder: (context, snapshot) {
-                          final user = snapshot.data;
+                          final authUser = FirebaseAuth.instance.currentUser;
+                          String? finalPhotoUrl = authUser?.photoURL;
+                          if (snapshot.hasData && snapshot.data!.exists) {
+                            final data = snapshot.data!.data() as Map<String, dynamic>?;
+                            if (data != null && data['photoUrl'] != null && data['photoUrl'].toString().isNotEmpty) {
+                              finalPhotoUrl = data['photoUrl'];
+                            }
+                          }
+
                           return GestureDetector(
                             onTap: _openProfile,
                             child: Container(
@@ -178,11 +172,20 @@ class _FeedScreenState extends State<FeedScreen> {
                                 color: AppColors.primary.withOpacity(0.1),
                               ),
                               child: ClipOval(
-                                child: (user?.photoURL?.isNotEmpty ?? false)
-                                    ? Image.network(user!.photoURL!, fit: BoxFit.cover)
+                                child: (finalPhotoUrl != null && finalPhotoUrl.isNotEmpty)
+                                    ? Image.network(
+                                        finalPhotoUrl, 
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Center(
+                                          child: Text(
+                                            authUser?.displayName?.isNotEmpty == true ? authUser!.displayName![0].toUpperCase() : 'U',
+                                            style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 16),
+                                          ),
+                                        ),
+                                      )
                                     : Center(
                                         child: Text(
-                                          user?.displayName?.isNotEmpty == true ? user!.displayName![0].toUpperCase() : 'U',
+                                          authUser?.displayName?.isNotEmpty == true ? authUser!.displayName![0].toUpperCase() : 'U',
                                           style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: 16),
                                         ),
                                       ),
@@ -297,16 +300,7 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           
           // Enhanced Floating Draggable Mascot
-          Positioned(
-            left: _botX,
-            top: _botY,
-            child: GestureDetector(
-              onPanUpdate: _onBotPanUpdate,
-              child: AnimatedBotButton(
-                onTap: _openBot,
-              ),
-            ),
-          ),
+          _DraggableBotWrapper(onOpenBot: _openBot),
         ],
       ),
     );
@@ -365,6 +359,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   int _likesCount = 0;
   bool _isJoined = false;
   bool _isJoining = false;
+  bool _isLiking = false;
 
   late final AnimationController _likeController;
   late final Animation<double> _likeScale;
@@ -396,20 +391,29 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   }
 
   Future<void> _toggleLike() async {
+    if (_isLiking) return;
     final postId = widget.post['postId']?.toString() ?? '';
     if (postId.isEmpty) return;
     
+    _isLiking = true;
     final oldIsLiked = isLiked;
     setState(() {
       isLiked = !isLiked;
       _likesCount += isLiked ? 1 : -1;
+      if (_likesCount < 0) _likesCount = 0;
     });
 
     _likeController.forward().then((_) => _likeController.reverse());
     try {
       await FeedReactionsService.toggleLike(postId: postId, isCurrentlyLiked: oldIsLiked);
     } catch (_) {
-      if (mounted) setState(() { isLiked = oldIsLiked; _likesCount += oldIsLiked ? 1 : -1; });
+      if (mounted) setState(() { 
+        isLiked = oldIsLiked; 
+        _likesCount += oldIsLiked ? 1 : -1; 
+        if (_likesCount < 0) _likesCount = 0;
+      });
+    } finally {
+      if (mounted) _isLiking = false;
     }
   }
 
@@ -496,7 +500,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _isJoined ? Colors.transparent : AppColors.primary.withOpacity(0.12),
+                      color: _isJoined ? Colors.white.withOpacity(0.05) : AppColors.primary.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: _isJoined ? Colors.white.withOpacity(0.1) : AppColors.primary.withOpacity(0.8), width: 1),
                     ),
@@ -516,7 +520,23 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   )
                 ),
                 const SizedBox(width: 12),
-                Icon(Icons.more_horiz_rounded, color: Colors.white.withOpacity(0.6), size: 20),
+                if (FirebaseAuth.instance.currentUser?.uid == widget.post['authorId'])
+                  PopupMenuButton<String>(
+                    icon: Icon(Icons.more_horiz_rounded, color: Colors.white.withOpacity(0.6), size: 20),
+                    color: AppColors.darkSurface,
+                    offset: const Offset(0, 40),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    onSelected: (value) {
+                      if (value == 'edit') _editPost();
+                      if (value == 'delete') _deletePost();
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(value: 'edit', child: Text('Edit', style: TextStyle(color: Colors.white))),
+                      const PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: Colors.redAccent))),
+                    ],
+                  )
+                else
+                  const SizedBox(width: 20),
               ],
             ),
           ),
@@ -605,6 +625,52 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
       builder: (_) => Padding(padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom), child: PostCommentsSheet(postCardData: widget.post)),
     );
   }
+
+  Future<void> _deletePost() async {
+    final confirm = await showDialog<bool>(context: context, builder: (_) => AlertDialog(
+      backgroundColor: AppColors.darkSurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('Delete Post', style: TextStyle(color: Colors.white)),
+      content: const Text('Are you sure you want to delete this post?', style: TextStyle(color: Colors.white70)),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
+        TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))),
+      ],
+    ));
+    if (confirm != true) return;
+    try {
+      await FirebaseFirestore.instance.collection('posts').doc(widget.post['postId']).delete();
+    } catch (_) {}
+  }
+
+  Future<void> _editPost() async {
+    final TextEditingController ctrl = TextEditingController(text: widget.post['content']);
+    final newContent = await showDialog<String>(context: context, builder: (_) => AlertDialog(
+      backgroundColor: AppColors.darkSurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('Edit Post', style: TextStyle(color: Colors.white)),
+      content: TextField(
+        controller: ctrl,
+        style: const TextStyle(color: Colors.white),
+        maxLines: 5,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.05),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary)),
+        ),
+      ),
+      actions: [
+         TextButton(onPressed: () => Navigator.pop(context, null), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
+         TextButton(onPressed: () => Navigator.pop(context, ctrl.text), child: const Text('Save', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
+      ],
+    ));
+    if (newContent != null && newContent.trim().isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance.collection('posts').doc(widget.post['postId']).update({'contentText': newContent.trim()});
+      } catch (_) {}
+    }
+  }
 }
 
 class _SocialActionButton extends StatelessWidget {
@@ -672,6 +738,47 @@ class SkeletonPostCard extends StatelessWidget {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+class _DraggableBotWrapper extends StatefulWidget {
+  final VoidCallback onOpenBot;
+  const _DraggableBotWrapper({required this.onOpenBot});
+  @override
+  State<_DraggableBotWrapper> createState() => _DraggableBotWrapperState();
+}
+
+class _DraggableBotWrapperState extends State<_DraggableBotWrapper> {
+  double _botX = -1;
+  double _botY = -1;
+
+  void _onBotPanUpdate(DragUpdateDetails details) {
+    setState(() {
+      _botX += details.delta.dx;
+      _botY += details.delta.dy;
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight = MediaQuery.of(context).size.height;
+      _botX = _botX.clamp(8.0, screenWidth - 76.0);
+      _botY = _botY.clamp(100.0, screenHeight - 160.0);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_botX == -1) {
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight = MediaQuery.of(context).size.height;
+      _botX = screenWidth - 76;
+      _botY = screenHeight - 240;
+    }
+    return Positioned(
+      left: _botX,
+      top: _botY,
+      child: GestureDetector(
+        onPanUpdate: _onBotPanUpdate,
+        child: AnimatedBotButton(onTap: widget.onOpenBot),
       ),
     );
   }
