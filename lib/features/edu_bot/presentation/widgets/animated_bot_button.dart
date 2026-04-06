@@ -7,8 +7,15 @@ import '../../../../core/theme/app_colors.dart';
 
 class AnimatedBotButton extends StatefulWidget {
   final VoidCallback onTap;
+  final double screenWidth;
+  final double screenHeight;
 
-  const AnimatedBotButton({super.key, required this.onTap});
+  const AnimatedBotButton({
+    super.key, 
+    required this.onTap,
+    required this.screenWidth,
+    required this.screenHeight,
+  });
 
   @override
   State<AnimatedBotButton> createState() => _AnimatedBotButtonState();
@@ -20,14 +27,22 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
   
   bool _isOnline = true;
   Timer? _connectivityTimer;
+  Timer? _blinkTimer;
   bool _isPressed = false;
+  
+  bool _isBlinking = false;
+  bool _isMinimized = false;
+
+  double _x = 0;
+  double _y = 0;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _floatController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 3500),
     )..repeat(reverse: true);
 
     _pressController = AnimationController(
@@ -36,7 +51,8 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
     );
 
     _checkConnectivity();
-    _connectivityTimer = Timer.periodic(const Duration(seconds: 5), (_) => _checkConnectivity());
+    _connectivityTimer = Timer.periodic(const Duration(seconds: 4), (_) => _checkConnectivity());
+    _scheduleBlink();
   }
 
   @override
@@ -44,7 +60,22 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
     _floatController.dispose();
     _pressController.dispose();
     _connectivityTimer?.cancel();
+    _blinkTimer?.cancel();
     super.dispose();
+  }
+
+  void _scheduleBlink() {
+    if (!mounted) return;
+    final int delay = math.Random().nextInt(3000) + 2500;
+    _blinkTimer = Timer(Duration(milliseconds: delay), () {
+      if (!mounted) return;
+      setState(() => _isBlinking = true);
+      Future.delayed(const Duration(milliseconds: 120), () {
+        if (!mounted) return;
+        setState(() => _isBlinking = false);
+        _scheduleBlink();
+      });
+    });
   }
 
   Future<void> _checkConnectivity() async {
@@ -65,50 +96,119 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
     }
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    setState(() => _isPressed = true);
-    _pressController.forward();
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    setState(() => _isPressed = false);
-    _pressController.reverse();
-    widget.onTap();
-  }
-
-  void _handleTapCancel() {
-    setState(() => _isPressed = false);
-    _pressController.reverse();
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (_isMinimized) return;
+    setState(() {
+      _x += details.delta.dx;
+      _y += details.delta.dy;
+      // Keep boundaries safe
+      _x = _x.clamp(8.0, widget.screenWidth - 68.0);
+      _y = _y.clamp(SafeArea(child: Container()).minimum.top + kToolbarHeight, widget.screenHeight - 120.0);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized && widget.screenWidth > 0) {
+      _x = widget.screenWidth - 76; 
+      _y = widget.screenHeight - (widget.screenHeight * 0.25); 
+      _isInitialized = true;
+    }
+
     final scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(
       CurvedAnimation(parent: _pressController, curve: Curves.easeOutCubic)
     );
 
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([_floatController, _pressController]),
-        builder: (context, child) {
-          final isRestless = !_isOnline;
-          final shake = isRestless 
-              ? math.sin(_floatController.value * math.pi * 18) * 1.0 
-              : 0.0;
-              
-          final yOffset = math.sin(_floatController.value * math.pi) * 5;
+    return Positioned(
+      left: _isMinimized ? widget.screenWidth - 56 : _x,
+      top: _isMinimized ? widget.screenHeight - 140 : _y,
+      child: GestureDetector(
+        onPanUpdate: _onPanUpdate,
+        onTapDown: (_) { if(!_isMinimized){ setState(() => _isPressed = true); _pressController.forward(); } },
+        onTapUp: (_) { if(!_isMinimized){ setState(() => _isPressed = false); _pressController.reverse(); widget.onTap(); } },
+        onTapCancel: () { if(!_isMinimized){ setState(() => _isPressed = false); _pressController.reverse(); } },
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_floatController, _pressController]),
+          builder: (context, child) {
+            double yOffset = math.sin(_floatController.value * math.pi) * 4;
+            
+            if (_isMinimized) {
+              return Transform.translate(
+                offset: Offset(0, yOffset),
+                child: _MinimizedBubble(
+                  isOnline: _isOnline,
+                  onRestore: () => setState(() => _isMinimized = false),
+                ),
+              );
+            }
 
-          return Transform.scale(
-            scale: scaleAnimation.value,
-            child: Transform.translate(
-              offset: Offset(shake, yOffset),
-              child: _MascotRobot(isOnline: _isOnline, floatValue: _floatController.value),
-            ),
-          );
-        },
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Transform.scale(
+                  scale: scaleAnimation.value,
+                  child: Transform.translate(
+                    offset: Offset(0, yOffset),
+                    child: _MascotRobot(
+                      isOnline: _isOnline, 
+                      floatValue: _floatController.value,
+                      isBlinking: _isBlinking,
+                    ),
+                  ),
+                ),
+                // Minimize Icon
+                Positioned(
+                  top: yOffset - 6,
+                  right: -6,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _isMinimized = true),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 4, offset: const Offset(0,2))],
+                      ),
+                      child: const Icon(Icons.close_rounded, size: 12, color: Colors.white),
+                    ),
+                  ),
+                )
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _MinimizedBubble extends StatelessWidget {
+  final bool isOnline;
+  final VoidCallback onRestore;
+
+  const _MinimizedBubble({required this.isOnline, required this.onRestore});
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = isOnline ? AppColors.primary : Colors.redAccent;
+    return GestureDetector(
+      onTap: onRestore,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E22),
+          shape: BoxShape.circle,
+          border: Border.all(color: statusColor.withOpacity(0.5), width: 1.5),
+          boxShadow: [
+            BoxShadow(color: statusColor.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
+            BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Center(
+          child: Icon(Icons.auto_awesome_rounded, color: statusColor, size: 20),
+        ),
       ),
     );
   }
@@ -117,89 +217,83 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
 class _MascotRobot extends StatelessWidget {
   final bool isOnline;
   final double floatValue;
+  final bool isBlinking;
 
-  const _MascotRobot({required this.isOnline, required this.floatValue});
+  const _MascotRobot({
+    required this.isOnline, 
+    required this.floatValue,
+    required this.isBlinking,
+  });
 
   @override
   Widget build(BuildContext context) {
     final eyeColor = isOnline ? AppColors.primary : Colors.redAccent;
-    final glowColor = isOnline ? AppColors.primary.withOpacity(0.5) : Colors.redAccent.withOpacity(0.5);
+    final glowColor = isOnline ? AppColors.primary.withOpacity(0.8) : Colors.redAccent.withOpacity(0.8);
 
-    // Dark Graphite Body matching Premium Identity
-    const darkBodyGradient = LinearGradient(
+    // Contrasting clear carbon/graphite surface against dark feed
+    const carbonGradient = LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFF3A3A3D), Color(0xFF1C1C1E), Color(0xFF101013)],
-      stops: [0.0, 0.4, 1.0],
+      colors: [Color(0xFF63636B), Color(0xFF2C2C32), Color(0xFF16161A)],
+      stops: [0.0, 0.5, 1.0],
     );
 
-    // Deep void screen for the face
+    // Deep Face View
     const screenGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0xFF0C0C0E), Color(0xFF1A1A1E)],
+      colors: [Color(0xFF0A0A0C), Color(0xFF000000)],
     );
 
-    // Minimal gold accent outline
-    final borderStyle = Border.all(color: AppColors.primary.withOpacity(0.3), width: 0.5);
-    final coreBorderStyle = Border.all(color: Colors.white.withOpacity(0.03), width: 1);
+    // Stronger gold accents
+    final goldBorder = Border.all(color: AppColors.primary.withOpacity(0.6), width: 0.5);
 
     return SizedBox(
-      width: 48,
-      height: 64,
+      width: 52,
+      height: 68,
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // Ambient Glow behind the robot
+          // Ambient Glow
           Positioned(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              width: 36,
-              height: 36,
+            child: Container(
+              width: 32, height: 32,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(color: glowColor, blurRadius: 20, spreadRadius: 2)
-                ]
+                boxShadow: [BoxShadow(color: glowColor, blurRadius: 28, spreadRadius: 4)]
               ),
             ),
           ),
           
-          // ================= SENSORS / EARS =================
+          // ================= SENSORS =================
           Positioned(
-            top: 10, left: 3,
+            top: 14, left: 3,
             child: Container(
-              width: 4, height: 8,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.8), // gold accent sensor
-                borderRadius: BorderRadius.circular(2),
-              ),
+              width: 6, height: 8,
+              decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2)),
             )
           ),
           Positioned(
-            top: 10, right: 3,
+            top: 14, right: 3,
             child: Container(
-              width: 4, height: 8,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.8), // gold accent sensor
-                borderRadius: BorderRadius.circular(2),
-              ),
+              width: 6, height: 8,
+              decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2)),
             )
           ),
 
           // ================= ARMS =================
           Positioned(
             left: 2 + (math.sin(floatValue * math.pi) * 1.5),
-            top: 26 + (math.cos(floatValue * math.pi * 2) * 2), // Inverse arm bobbing
+            top: 30 + (math.cos(floatValue * math.pi * 2) * 2), 
             child: Transform.rotate(
               angle: 0.1,
               child: Container(
-                width: 6, height: 18,
+                width: 7, height: 20,
                 decoration: BoxDecoration(
-                  gradient: darkBodyGradient,
-                  borderRadius: BorderRadius.circular(3),
-                  border: borderStyle,
+                  gradient: carbonGradient,
+                  borderRadius: BorderRadius.circular(4),
+                  border: goldBorder,
                   boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(-2, 2))]
                 ),
               ),
@@ -207,15 +301,15 @@ class _MascotRobot extends StatelessWidget {
           ),
           Positioned(
             right: 2 - (math.sin(floatValue * math.pi) * 1.5),
-            top: 26 + (math.cos(floatValue * math.pi * 2) * 2), // Inverse arm bobbing
+            top: 30 + (math.cos(floatValue * math.pi * 2) * 2), 
             child: Transform.rotate(
               angle: -0.1,
               child: Container(
-                width: 6, height: 18,
+                width: 7, height: 20,
                 decoration: BoxDecoration(
-                  gradient: darkBodyGradient,
-                  borderRadius: BorderRadius.circular(3),
-                  border: borderStyle,
+                  gradient: carbonGradient,
+                  borderRadius: BorderRadius.circular(4),
+                  border: goldBorder,
                   boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(2, 2))]
                 ),
               ),
@@ -224,118 +318,84 @@ class _MascotRobot extends StatelessWidget {
 
           // ================= LEGS =================
           Positioned(
-            bottom: 0,
-            left: 14,
-            child: Container(
-              width: 6, height: 10,
-              decoration: BoxDecoration(
-                gradient: darkBodyGradient,
-                borderRadius: BorderRadius.circular(3),
-                border: borderStyle,
-                boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 2, offset: Offset(0, 2))]
-              ),
-            ),
+            bottom: 2, left: 16,
+            child: Container(width: 6, height: 8, decoration: BoxDecoration(gradient: carbonGradient, borderRadius: BorderRadius.circular(3), border: goldBorder)),
           ),
           Positioned(
-            bottom: 0,
-            right: 14,
-            child: Container(
-              width: 6, height: 10,
-              decoration: BoxDecoration(
-                gradient: darkBodyGradient,
-                borderRadius: BorderRadius.circular(3),
-                border: borderStyle,
-                boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 2, offset: Offset(0, 2))]
-              ),
-            ),
-          ),
-
-          // ================= NECK =================
-          Positioned(
-            top: 26,
-            child: Container(
-              width: 8, height: 6,
-              decoration: BoxDecoration(
-                color: const Color(0xFF111113), // dark joint
-                borderRadius: BorderRadius.circular(2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.9),
-                    offset: const Offset(0, -2),
-                    blurRadius: 4,
-                  )
-                ],
-              ),
-            ),
+            bottom: 2, right: 16,
+            child: Container(width: 6, height: 8, decoration: BoxDecoration(gradient: carbonGradient, borderRadius: BorderRadius.circular(3), border: goldBorder)),
           ),
 
           // ================= BODY =================
           Positioned(
             bottom: 10,
             child: Container(
-              width: 28, height: 22,
+              width: 30, height: 22,
               decoration: BoxDecoration(
-                gradient: darkBodyGradient,
-                borderRadius: BorderRadius.circular(8),
-                border: borderStyle,
+                gradient: carbonGradient,
+                borderRadius: BorderRadius.circular(10),
+                border: goldBorder,
                 boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 3))],
               ),
               child: Center(
-                // Core
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: 6, height: 6,
+                child: Container(
+                  width: 8, height: 8,
                   decoration: BoxDecoration(
-                    color: eyeColor, shape: BoxShape.circle,
-                    boxShadow: [BoxShadow(color: glowColor, blurRadius: 6)]
+                    color: AppColors.primary, shape: BoxShape.circle,
+                    boxShadow: [BoxShadow(color: AppColors.primary, blurRadius: 8)]
                   ),
                 ),
               ),
             ),
           ),
 
+          // ================= NECK =================
+          Positioned(top: 26, child: Container(width: 10, height: 6, color: Colors.black)),
+
           // ================= HEAD =================
           Positioned(
             top: 4,
             child: Container(
-              width: 38, height: 26,
+              width: 42, height: 28,
               decoration: BoxDecoration(
-                gradient: darkBodyGradient,
+                gradient: carbonGradient,
                 borderRadius: BorderRadius.circular(12),
-                border: borderStyle,
+                border: goldBorder,
                 boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 4))],
               ),
               child: Center(
-                // Face Screen
+                // Screen Glass
                 child: Container(
-                  width: 28, height: 14,
+                  width: 32, height: 16,
                   decoration: BoxDecoration(
                     gradient: screenGradient,
-                    borderRadius: BorderRadius.circular(5),
-                    border: coreBorderStyle, // subtle internal edge
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.white.withOpacity(0.04), width: 1),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // left eye
                       AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        width: 7, height: 8,
-                        margin: const EdgeInsets.only(right: 5),
+                        duration: const Duration(milliseconds: 50),
+                        width: 7, 
+                        height: isBlinking ? 1 : 9,
+                        margin: const EdgeInsets.only(right: 6),
                         decoration: BoxDecoration(
                           color: eyeColor,
                           borderRadius: BorderRadius.circular(3),
-                          boxShadow: [BoxShadow(color: glowColor, blurRadius: 5)]
+                          boxShadow: isBlinking ? [] : [BoxShadow(color: glowColor, blurRadius: 6)]
                         ),
                       ),
                       // right eye
                       AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        width: 7, height: 8,
+                        duration: const Duration(milliseconds: 50),
+                        width: 7, 
+                        height: isBlinking ? 1 : 9,
                         decoration: BoxDecoration(
                           color: eyeColor,
                           borderRadius: BorderRadius.circular(3),
-                          boxShadow: [BoxShadow(color: glowColor, blurRadius: 5)]
+                          boxShadow: isBlinking ? [] : [BoxShadow(color: glowColor, blurRadius: 6)]
                         ),
                       ),
                     ],
@@ -344,7 +404,6 @@ class _MascotRobot extends StatelessWidget {
               ),
             ),
           ),
-
         ],
       ),
     );
