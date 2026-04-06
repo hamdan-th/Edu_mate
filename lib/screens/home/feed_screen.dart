@@ -19,14 +19,14 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  String _selectedFilter = 'All Colleges';
+  String _selectedFilter = 'College';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
   final List<String> _filters = const [
-    'All Colleges',
-    'My Major',
-    'Level 3',
+    'College',
+    'Major',
+    'Courses',
   ];
 
   @override
@@ -429,25 +429,41 @@ class ModernChip extends StatelessWidget {
     this.active = false,
   });
 
+  IconData _getIcon() {
+    if (label.contains('College')) return Icons.account_balance_rounded;
+    if (label.contains('Major')) return Icons.school_rounded;
+    if (label.contains('Course')) return Icons.menu_book_rounded;
+    return Icons.filter_list_rounded;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: active ? AppColors.primary.withOpacity(0.12) : AppColors.surface.withOpacity(0.3),
         borderRadius: BorderRadius.circular(20),
         border: active ? Border.all(color: AppColors.primary.withOpacity(0.3)) : Border.all(color: AppColors.border.withOpacity(0.3)),
       ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: active ? AppColors.primary : AppColors.textSecondary,
-            fontSize: 13,
-            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _getIcon(),
+            size: 14,
+            color: active ? AppColors.primary : AppColors.textSecondary.withOpacity(0.8),
           ),
-        ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: active ? AppColors.primary : AppColors.textSecondary,
+              fontSize: 13,
+              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -813,19 +829,12 @@ class _PostCardState extends State<PostCard>
               ],
               const SizedBox(height: 14),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.redAccent,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.favorite, size: 10, color: Colors.white),
-                      ),
-                      const SizedBox(width: 6),
+                      const Text('❤️', style: TextStyle(fontSize: 11)),
+                      const SizedBox(width: 4),
                       Text(
                         '$_likesCount',
                         style: const TextStyle(
@@ -835,12 +844,19 @@ class _PostCardState extends State<PostCard>
                       ),
                     ],
                   ),
-                  Text(
-                    '${widget.post['comments'] ?? 0} comments',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
+                  const SizedBox(width: 14),
+                  Row(
+                    children: [
+                      const Text('💬', style: TextStyle(fontSize: 11)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${widget.post['comments'] ?? 0}',
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
