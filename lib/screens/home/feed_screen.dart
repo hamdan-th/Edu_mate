@@ -503,21 +503,10 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              widget.post['groupName'] ?? '',
-                              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
-                              maxLines: 1, overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (!_isJoined)
-                            GestureDetector(
-                              onTap: () {}, // Future logic
-                              child: const Text(' • Follow', style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600)),
-                            ),
-                        ],
+                      Text(
+                        widget.post['groupName'] ?? '',
+                        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+                        maxLines: 1, overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Row(
@@ -531,10 +520,34 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.more_horiz_rounded, color: Colors.white.withOpacity(0.6)),
-                  onPressed: () {},
+                GestureDetector(
+                  onTap: () async {
+                    if (_isJoined) return;
+                    final groupId = widget.post['groupId']?.toString() ?? '';
+                    if (groupId.isNotEmpty) {
+                      await GroupService.joinGroup(groupId);
+                      if (mounted) setState(() => _isJoined = true);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _isJoined ? Colors.transparent : AppColors.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: _isJoined ? Colors.white.withOpacity(0.1) : AppColors.primary.withOpacity(0.8), width: 1),
+                    ),
+                    child: Text(
+                      _isJoined ? 'Joined' : 'Join',
+                      style: TextStyle(
+                        color: _isJoined ? Colors.white.withOpacity(0.5) : AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      )
+                    )
+                  )
                 ),
+                const SizedBox(width: 12),
+                Icon(Icons.more_horiz_rounded, color: Colors.white.withOpacity(0.6), size: 20),
               ],
             ),
           ),
