@@ -196,54 +196,54 @@ class _FeedScreenState extends State<FeedScreen> {
                 // Composer / Quick Post Area
                 Container(
                   color: AppColors.darkSurface,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   margin: const EdgeInsets.only(bottom: 8),
-                  child: Column(
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          FutureBuilder<User?>(
-                            future: Future.value(FirebaseAuth.instance.currentUser),
-                            builder: (context, snapshot) {
-                              final user = snapshot.data;
-                              return Container(
-                                width: 40, height: 40,
-                                decoration: const BoxDecoration(color: Color(0xFF1E1E22), shape: BoxShape.circle),
-                                child: ClipOval(
-                                  child: (user?.photoURL?.isNotEmpty ?? false)
-                                      ? Image.network(user!.photoURL!, fit: BoxFit.cover)
-                                      : const Icon(Icons.person, color: Colors.white54),
-                                ),
-                              );
-                            }
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Container(
-                              height: 40,
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: AppColors.background,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.white.withOpacity(0.04)),
-                              ),
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "Share an academic update...",
-                                style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14, fontWeight: FontWeight.w500),
-                              ),
+                      FutureBuilder<User?>(
+                        future: Future.value(FirebaseAuth.instance.currentUser),
+                        builder: (context, snapshot) {
+                          final user = snapshot.data;
+                          return Container(
+                            width: 38, height: 38,
+                            decoration: const BoxDecoration(color: Color(0xFF1E1E22), shape: BoxShape.circle),
+                            child: ClipOval(
+                              child: (user?.photoURL?.isNotEmpty ?? false)
+                                  ? Image.network(user!.photoURL!, fit: BoxFit.cover)
+                                  : const Icon(Icons.person, color: Colors.white54, size: 20),
                             ),
-                          ),
-                        ],
+                          );
+                        }
                       ),
-                      const SizedBox(height: 14),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _ComposerAction(icon: Icons.image_rounded, label: 'Photo', color: AppColors.primary, onTap: _pickPhoto),
-                          _ComposerAction(icon: Icons.article_rounded, label: 'Document', color: AppColors.primary, onTap: _pickDocument),
-                          _ComposerAction(icon: Icons.groups_rounded, label: 'Group', color: AppColors.primary, onTap: _createGroupPost),
-                        ],
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Container(
+                          height: 40,
+                          padding: const EdgeInsets.only(left: 16, right: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.background,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.white.withOpacity(0.04)),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  "Share an academic update...",
+                                  style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13, fontWeight: FontWeight.w500),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              // Inlaid actions
+                              GestureDetector(onTap: _pickPhoto, child: Icon(Icons.image_rounded, color: Colors.white.withOpacity(0.4), size: 18)),
+                              const SizedBox(width: 12),
+                              GestureDetector(onTap: _pickDocument, child: Icon(Icons.article_rounded, color: Colors.white.withOpacity(0.4), size: 18)),
+                              const SizedBox(width: 12),
+                              GestureDetector(onTap: _createGroupPost, child: Icon(Icons.groups_rounded, color: Colors.white.withOpacity(0.4), size: 18)),
+                              const SizedBox(width: 4),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -405,32 +405,7 @@ class _HeaderAction extends StatelessWidget {
   }
 }
 
-class _ComposerAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
 
-  const _ComposerAction({required this.icon, required this.label, required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            Icon(icon, color: color, size: 18),
-            const SizedBox(width: 8),
-            Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class PostCard extends StatefulWidget {
   final Map<String, dynamic> post;
