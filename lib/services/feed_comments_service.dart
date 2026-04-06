@@ -138,10 +138,19 @@ class FeedCommentsService {
     final postRef = _firestore.collection('posts').doc(postId);
     final commentRef = postRef.collection('comments').doc(commentId);
     
-    final batch = _firestore.batch();
-    batch.delete(commentRef);
-    batch.update(postRef, {'commentsCount': FieldValue.increment(-1)}); // Approximation safety
-    await batch.commit();
+    await _firestore.runTransaction((transaction) async {
+      final postSnapshot = await transaction.get(postRef);
+      if (!postSnapshot.exists) {
+        transaction.delete(commentRef);
+        return;
+      }
+      
+      final data = postSnapshot.data() as Map<String, dynamic>?;
+      int currentComments = data?['commentsCount'] as int? ?? 0;
+      
+      transaction.delete(commentRef);
+      transaction.update(postRef, {'commentsCount': currentComments > 0 ? currentComments - 1 : 0});
+    });
   }
 
   static Future<void> editReply({

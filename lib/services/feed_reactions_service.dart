@@ -36,19 +36,22 @@ class FeedReactionsService {
         .doc(user.uid);
     final postRef = _firestore.collection('posts').doc(postId);
 
-    final batch = _firestore.batch();
+    await _firestore.runTransaction((transaction) async {
+      final postSnapshot = await transaction.get(postRef);
+      if (!postSnapshot.exists) return;
 
-    if (isCurrentlyLiked) {
-      batch.delete(docRef);
-      // Ensure it doesn't go below 0 natively using data checking if possible, but FieldValue.increment(-1) is standard.
-      batch.update(postRef, {'likesCount': FieldValue.increment(-1)});
-    } else {
-      batch.set(docRef, {
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-      batch.update(postRef, {'likesCount': FieldValue.increment(1)});
-    }
+      final data = postSnapshot.data() as Map<String, dynamic>?;
+      int currentLikes = data?['likesCount'] as int? ?? 0;
 
-    await batch.commit();
+      if (isCurrentlyLiked) {
+        transaction.delete(docRef);
+        transaction.update(postRef, {'likesCount': currentLikes > 0 ? currentLikes - 1 : 0});
+      } else {
+        transaction.set(docRef, {
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        transaction.update(postRef, {'likesCount': currentLikes + 1});
+      }
+    });
   }
 }

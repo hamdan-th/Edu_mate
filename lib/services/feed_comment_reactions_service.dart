@@ -49,19 +49,23 @@ class FeedCommentReactionsService {
         .collection('comments')
         .doc(commentId);
 
-    final batch = _firestore.batch();
+    await _firestore.runTransaction((transaction) async {
+      final commentSnapshot = await transaction.get(commentRef);
+      if (!commentSnapshot.exists) return;
 
-    if (isCurrentlyLiked) {
-      batch.delete(docRef);
-      batch.update(commentRef, {'likesCount': FieldValue.increment(-1)});
-    } else {
-      batch.set(docRef, {
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-      batch.update(commentRef, {'likesCount': FieldValue.increment(1)});
-    }
+      final data = commentSnapshot.data() as Map<String, dynamic>?;
+      int currentLikes = data?['likesCount'] as int? ?? 0;
 
-    await batch.commit();
+      if (isCurrentlyLiked) {
+        transaction.delete(docRef);
+        transaction.update(commentRef, {'likesCount': currentLikes > 0 ? currentLikes - 1 : 0});
+      } else {
+        transaction.set(docRef, {
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        transaction.update(commentRef, {'likesCount': currentLikes + 1});
+      }
+    });
   }
 
   static Future<void> reportComment({
