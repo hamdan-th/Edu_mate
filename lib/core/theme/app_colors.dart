@@ -4,24 +4,24 @@ class AppColors {
   AppColors._();
 
   // Primary identity
-  static const Color primary = Color(0xFF1D4ED8);
-  static const Color primaryDark = Color(0xFF14213D);
-  static const Color secondary = Color(0xFFFACC15);
+  static const Color primary = Color(0xFFD4AF37);
+  static const Color primaryDark = Color(0xFF8C6B1F);
+  static const Color secondary = Color(0xFF111111);
 
   // Backgrounds
-  static const Color background = Color(0xFFF8FAFC);
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color darkSurface = Color(0xFF1A2C52);
+  static const Color background = Color(0xFF0F1115);
+  static const Color surface = Color(0xFF1A1D23);
+  static const Color darkSurface = Color(0xFF0B0D11);
 
   // Text
-  static const Color textPrimary = Color(0xFF0F172A);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color textOnDark = Color(0xFFF8FAFC);
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFF9CA3AF);
+  static const Color textOnDark = Color(0xFFFFFFFF);
 
   // Inputs / borders
-  static const Color inputFill = Color(0xFFF1F5F9);
-  static const Color inputDarkFill = Color(0xFF162544);
-  static const Color border = Color(0xFFE2E8F0);
+  static const Color inputFill = Color(0xFF1A1D23);
+  static const Color inputDarkFill = Color(0xFF111318);
+  static const Color border = Color(0xFF2A2E35);
 
   // Feedback
   static const Color success = Color(0xFF16A34A);
@@ -29,5 +29,5 @@ class AppColors {
   static const Color warning = Color(0xFFF59E0B);
 
   // Accent glow
-  static const Color blueGlow = Color(0xFF60A5FA);
+  static const Color blueGlow = Color(0xFFD4AF37);
 }

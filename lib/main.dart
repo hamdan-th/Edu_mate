@@ -28,6 +28,8 @@ class EduApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Edu Mate',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.lightTheme,
+      themeMode: ThemeMode.dark,
       home: const AuthGate(),
       routes: {
         '/login': (_) => const LoginScreen(),
