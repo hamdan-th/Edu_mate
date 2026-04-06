@@ -119,151 +119,84 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
       body: Stack(
         children: [
-          Positioned(
-            top: -110,
-            right: -60,
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.05),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 140,
-            left: -35,
-            child: Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.secondary.withOpacity(0.04),
-              ),
-            ),
-          ),
           SafeArea(
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface.withOpacity(0.97),
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(color: AppColors.border),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.06),
-                                blurRadius: 14,
-                                offset: const Offset(0, 8),
+                      Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [AppColors.primary, AppColors.primaryDark],
                               ),
-                            ],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.school_rounded, color: Colors.white, size: 18),
                           ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      AppColors.primary,
-                                      AppColors.primaryDark,
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Icon(
-                                  Icons.school_rounded,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Edu Mate',
-                                      style: TextStyle(
-                                        color: AppColors.textPrimary,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    SizedBox(height: 3),
-                                    Text(
-                                      'Public groups feed',
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Edu Mate',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      FeedTopActionButton(
-                        icon: Icons.notifications_none_rounded,
-                        hasBadge: true,
-                        onTap: _openNotifications,
-                      ),
-                      const SizedBox(width: 10),
-                      FeedTopActionButton(
-                        icon: Icons.person_outline_rounded,
-                        onTap: _openProfile,
+                      Row(
+                        children: [
+                          FeedTopActionButton(
+                            icon: Icons.notifications_none_rounded,
+                            hasBadge: true,
+                            onTap: _openNotifications,
+                          ),
+                          const SizedBox(width: 8),
+                          FeedTopActionButton(
+                            icon: Icons.person_outline_rounded,
+                            onTap: _openProfile,
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   child: Container(
-                    height: 54,
+                    height: 44,
                     decoration: BoxDecoration(
-                      color: AppColors.surface.withOpacity(0.98),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: AppColors.border),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
+                      color: AppColors.surface.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border.withOpacity(0.4)),
                     ),
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
-                        hintText: 'Search public posts or groups',
+                        hintText: 'Search feed...',
                         hintStyle: TextStyle(
                           color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14,
                         ),
                         prefixIcon: Icon(
                           Icons.search_rounded,
                           color: AppColors.textSecondary,
+                          size: 20,
                         ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 15),
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
@@ -512,29 +445,20 @@ class ModernChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: active ? AppColors.primary : AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: active ? null : Border.all(color: AppColors.border),
-        boxShadow: active
-            ? [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.14),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ]
-            : [],
+        color: active ? AppColors.primary.withOpacity(0.12) : AppColors.surface.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
+        border: active ? Border.all(color: AppColors.primary.withOpacity(0.3)) : Border.all(color: AppColors.border.withOpacity(0.3)),
       ),
       child: Center(
         child: Text(
           label,
           style: TextStyle(
-            color: active ? Colors.white : AppColors.textSecondary,
-            fontSize: 12.3,
-            fontWeight: FontWeight.w700,
+            color: active ? AppColors.primary : AppColors.textSecondary,
+            fontSize: 13,
+            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
       ),
@@ -761,16 +685,16 @@ class _PostCardState extends State<PostCard>
         scale: isPressed ? 0.985 : 1,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.border),
+            color: AppColors.surface.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border.withOpacity(0.3)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.textPrimary.withOpacity(
-                  isPressed ? 0.07 : 0.04,
+                color: AppColors.primary.withOpacity(
+                  isPressed ? 0.08 : 0.02,
                 ),
                 blurRadius: isPressed ? 18 : 12,
                 offset: const Offset(0, 6),
@@ -783,20 +707,20 @@ class _PostCardState extends State<PostCard>
               Row(
                 children: [
                   Container(
-                    width: 46,
-                    height: 46,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [AppColors.primary, AppColors.primaryDark],
                       ),
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
                       Icons.groups_rounded,
                       color: Colors.white,
-                      size: 22,
+                      size: 20,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -808,16 +732,17 @@ class _PostCardState extends State<PostCard>
                           (widget.post['groupName'] ?? '').toString(),
                           style: const TextStyle(
                             color: AppColors.textPrimary,
-                            fontSize: 15,
+                            fontSize: 16,
                             fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 2),
                         Text(
                           '${widget.post['authorName'] ?? ''} · ${widget.post['time'] ?? ''}',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
+                          style: TextStyle(
+                            color: AppColors.textSecondary.withOpacity(0.8),
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -826,25 +751,26 @@ class _PostCardState extends State<PostCard>
                   ),
                   InkWell(
                     onTap: (_isLoadingJoined || _isJoined) ? null : _joinGroup,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      height: 34,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      height: 32,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
-                        color: _isJoined ? primarySoft : AppColors.primary,
-                        borderRadius: BorderRadius.circular(10),
+                        color: _isJoined ? Colors.transparent : AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: _isJoined ? Border.all(color: AppColors.primary.withOpacity(0.8)) : null,
                       ),
                       child: Center(
                         child: _isLoadingJoined
                             ? const SizedBox(
-                                width: 16, 
-                                height: 16, 
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                                width: 14, 
+                                height: 14, 
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
                               )
                             : Text(
                                 _isJoined ? 'Joined' : 'Join',
                                 style: TextStyle(
-                                  color: _isJoined ? AppColors.primary : Colors.white,
+                                  color: AppColors.primary,
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -854,19 +780,18 @@ class _PostCardState extends State<PostCard>
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: accentSoft,
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   widget.post['tag'] ?? 'Public',
                   style: const TextStyle(
-                    color: Color(0xFFB7791F),
-                    fontSize: 11.5,
+                    color: AppColors.primary,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -876,82 +801,57 @@ class _PostCardState extends State<PostCard>
                 widget.post['content'] ?? '',
                 style: const TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 14,
-                  height: 1.6,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                  height: 1.5,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               if ((widget.post['hasImage'] ?? false) == true) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(16),
                   child: Container(
                     width: double.infinity,
-                    height: 190,
+                    height: 200,
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.border),
-                      color: const Color(0xFFF8FAFF),
+                      border: Border.all(color: AppColors.border.withOpacity(0.3)),
+                      color: AppColors.surface,
                     ),
                     child: imageUrl.isNotEmpty
                         ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return const Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            color: AppColors.textSecondary,
-                            size: 34,
-                          ),
-                        );
-                      },
-                    )
-                        : const Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        color: AppColors.textSecondary,
-                        size: 34,
-                      ),
-                    ),
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_not_supported_outlined, color: AppColors.textSecondary, size: 34)),
+                          )
+                        : const Center(child: Icon(Icons.image_outlined, color: AppColors.textSecondary, size: 34)),
                   ),
                 ),
               ],
-              const SizedBox(height: 14),
-              const Divider(
-                height: 1,
-                thickness: 1,
-                color: AppColors.border,
-              ),
+              const SizedBox(height: 16),
+              Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.3)),
               const SizedBox(height: 12),
               Row(
                 children: [
                   InkWell(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     onTap: _toggleLike,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 2,
-                        vertical: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                       child: ScaleTransition(
                         scale: _likeScale,
                         child: Row(
                           children: [
                             Icon(
-                              isLiked
-                                  ? Icons.favorite_rounded
-                                  : Icons.favorite_border_rounded,
-                              size: 18,
-                              color: isLiked
-                                  ? Colors.red
-                                  : AppColors.textSecondary,
+                              isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                              size: 20,
+                              color: isLiked ? Colors.red : AppColors.textSecondary,
                             ),
-                            const SizedBox(width: 5),
+                            const SizedBox(width: 6),
                             Text(
                               '$_likesCount',
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 12.5,
+                              style: TextStyle(
+                                color: isLiked ? Colors.red : AppColors.textSecondary,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -960,7 +860,7 @@ class _PostCardState extends State<PostCard>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 24),
                   FlatPostAction(
                     icon: Icons.chat_bubble_outline_rounded,
                     label: '${widget.post['comments'] ?? 0}',
@@ -1019,20 +919,20 @@ class FlatPostAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
       onTap: onTap ?? () {},
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: color),
-            if (label.isNotEmpty) const SizedBox(width: 5),
+            Icon(icon, size: 20, color: color),
+            if (label.isNotEmpty) const SizedBox(width: 6),
             if (label.isNotEmpty)
               Text(
                 label,
                 style: TextStyle(
                   color: color,
-                  fontSize: 12.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),
