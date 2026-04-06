@@ -7,14 +7,14 @@ import '../../../../core/theme/app_colors.dart';
 
 class AnimatedBotButton extends StatefulWidget {
   final VoidCallback onTap;
-  final double screenWidth;
-  final double screenHeight;
+  final bool isMinimized;
+  final ValueChanged<bool> onMinimizeToggle;
 
   const AnimatedBotButton({
     super.key, 
     required this.onTap,
-    required this.screenWidth,
-    required this.screenHeight,
+    required this.isMinimized,
+    required this.onMinimizeToggle,
   });
 
   @override
@@ -31,11 +31,6 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
   bool _isPressed = false;
   
   bool _isBlinking = false;
-  bool _isMinimized = false;
-
-  double _x = 0;
-  double _y = 0;
-  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -96,88 +91,66 @@ class _AnimatedBotButtonState extends State<AnimatedBotButton> with TickerProvid
     }
   }
 
-  void _onPanUpdate(DragUpdateDetails details) {
-    if (_isMinimized) return;
-    setState(() {
-      _x += details.delta.dx;
-      _y += details.delta.dy;
-      // Keep boundaries safe without arbitrary context lookups
-      _x = _x.clamp(8.0, widget.screenWidth - 68.0);
-      _y = _y.clamp(120.0, widget.screenHeight - 140.0);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized && widget.screenWidth > 0) {
-      _x = widget.screenWidth - 64; 
-      _y = widget.screenHeight - 180; 
-      _isInitialized = true;
-    }
-
     final scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(
       CurvedAnimation(parent: _pressController, curve: Curves.easeOutCubic)
     );
 
-    return Positioned(
-      left: _isMinimized ? widget.screenWidth - 56 : _x,
-      top: _isMinimized ? widget.screenHeight - 140 : _y,
-      child: GestureDetector(
-        onPanUpdate: _onPanUpdate,
-        onTapDown: (_) { if(!_isMinimized){ setState(() => _isPressed = true); _pressController.forward(); } },
-        onTapUp: (_) { if(!_isMinimized){ setState(() => _isPressed = false); _pressController.reverse(); widget.onTap(); } },
-        onTapCancel: () { if(!_isMinimized){ setState(() => _isPressed = false); _pressController.reverse(); } },
-        child: AnimatedBuilder(
-          animation: Listenable.merge([_floatController, _pressController]),
-          builder: (context, child) {
-            double yOffset = math.sin(_floatController.value * math.pi) * 4;
-            
-            if (_isMinimized) {
-              return Transform.translate(
-                offset: Offset(0, yOffset),
-                child: _MinimizedBubble(
-                  isOnline: _isOnline,
-                  onRestore: () => setState(() => _isMinimized = false),
-                ),
-              );
-            }
-
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Transform.scale(
-                  scale: scaleAnimation.value,
-                  child: Transform.translate(
-                    offset: Offset(0, yOffset),
-                    child: _MascotRobot(
-                      isOnline: _isOnline, 
-                      floatValue: _floatController.value,
-                      isBlinking: _isBlinking,
-                    ),
-                  ),
-                ),
-                // Minimize Icon
-                Positioned(
-                  top: yOffset - 6,
-                  right: -6,
-                  child: GestureDetector(
-                    onTap: () => setState(() => _isMinimized = true),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withOpacity(0.1)),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 4, offset: const Offset(0,2))],
-                      ),
-                      child: const Icon(Icons.close_rounded, size: 12, color: Colors.white),
-                    ),
-                  ),
-                )
-              ],
+    return GestureDetector(
+      onTapDown: (_) { if(!widget.isMinimized){ setState(() => _isPressed = true); _pressController.forward(); } },
+      onTapUp: (_) { if(!widget.isMinimized){ setState(() => _isPressed = false); _pressController.reverse(); widget.onTap(); } },
+      onTapCancel: () { if(!widget.isMinimized){ setState(() => _isPressed = false); _pressController.reverse(); } },
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_floatController, _pressController]),
+        builder: (context, child) {
+          double yOffset = math.sin(_floatController.value * math.pi) * 4;
+          
+          if (widget.isMinimized) {
+            return Transform.translate(
+              offset: Offset(0, yOffset),
+              child: _MinimizedBubble(
+                isOnline: _isOnline,
+                onRestore: () => widget.onMinimizeToggle(false),
+              ),
             );
-          },
-        ),
+          }
+
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Transform.scale(
+                scale: scaleAnimation.value,
+                child: Transform.translate(
+                  offset: Offset(0, yOffset),
+                  child: _MascotRobot(
+                    isOnline: _isOnline, 
+                    floatValue: _floatController.value,
+                    isBlinking: _isBlinking,
+                  ),
+                ),
+              ),
+              // Minimize Icon
+              Positioned(
+                top: yOffset - 6,
+                right: -6,
+                child: GestureDetector(
+                  onTap: () => widget.onMinimizeToggle(true),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 4, offset: const Offset(0,2))],
+                    ),
+                    child: const Icon(Icons.close_rounded, size: 12, color: Colors.white),
+                  ),
+                ),
+              )
+            ],
+          );
+        },
       ),
     );
   }

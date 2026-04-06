@@ -30,6 +30,10 @@ class _FeedScreenState extends State<FeedScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
+  double _botX = -1;
+  double _botY = -1;
+  bool _botMinimized = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +61,20 @@ class _FeedScreenState extends State<FeedScreen> {
 
   void _openBot() {
     Navigator.push(context, MaterialPageRoute(builder: (_) => const BotScreen()));
+  }
+
+  void _onBotPanUpdate(DragUpdateDetails details) {
+    if (_botMinimized) return;
+    setState(() {
+      _botX += details.delta.dx;
+      _botY += details.delta.dy;
+      
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight = MediaQuery.of(context).size.height;
+      
+      _botX = _botX.clamp(8.0, screenWidth - 68.0);
+      _botY = _botY.clamp(120.0, screenHeight - 140.0);
+    });
   }
 
   void _pickPhoto() async {
@@ -105,6 +123,13 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    if (_botX == -1) {
+      _botX = screenWidth - 64;
+      _botY = screenHeight - 180;
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -351,15 +376,18 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           
           // Enhanced Floating Draggable Mascot
-          Positioned.fill(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return AnimatedBotButton(
-                  onTap: _openBot,
-                  screenWidth: constraints.maxWidth,
-                  screenHeight: constraints.maxHeight,
-                );
-              }
+          Positioned(
+            left: _botMinimized ? (screenWidth - 56) : _botX,
+            top: _botMinimized ? (screenHeight - 140) : _botY,
+            child: GestureDetector(
+              onPanUpdate: _onBotPanUpdate,
+              child: AnimatedBotButton(
+                onTap: _openBot,
+                isMinimized: _botMinimized,
+                onMinimizeToggle: (bool val) {
+                  setState(() => _botMinimized = val);
+                },
+              ),
             ),
           ),
         ],
