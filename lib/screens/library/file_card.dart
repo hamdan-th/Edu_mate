@@ -91,6 +91,43 @@ class FileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: fileColor.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        file.fileType,
+                        style: TextStyle(
+                          color: fileColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _statusColor(file.status).withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _statusText(file.status),
+                        style: TextStyle(
+                          color: _statusColor(file.status),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 Text(
                   file.title,
                   maxLines: 2,
@@ -112,6 +149,18 @@ class FileCard extends StatelessWidget {
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
+                ),
+                const SizedBox(height: 8),
+                Divider(height: 1, color: LibraryTheme.border),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _MetricChip(icon: Icons.thumb_up_alt_rounded, value: file.likes),
+                    const SizedBox(width: 8),
+                    _MetricChip(icon: Icons.bookmark_rounded, value: file.saves),
+                    const Spacer(),
+                    _MetricChip(icon: Icons.visibility_rounded, value: file.views),
+                  ],
                 ),
               ],
             ),
