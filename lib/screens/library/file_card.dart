@@ -72,7 +72,7 @@ class FileCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: LibraryTheme.surface(context),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: LibraryTheme.border(context)),
+        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
         boxShadow: [
           BoxShadow(
             color: LibraryTheme.primary(context).withOpacity(0.05),
@@ -140,19 +140,41 @@ class FileCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${file.author} • ${file.college}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: LibraryTheme.muted(context),
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        file.author,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: LibraryTheme.muted(context),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text('•', style: TextStyle(color: LibraryTheme.muted(context).withOpacity(0.4), fontSize: 10)),
+                    ),
+                    Flexible(
+                      child: Text(
+                        file.college,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: LibraryTheme.muted(context),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  spacing: 16,
                   children: [
                     _MetricChip(icon: Icons.thumb_up_alt_outlined, value: file.likes),
                     _MetricChip(icon: Icons.bookmark_border_rounded, value: file.saves),
@@ -206,7 +228,7 @@ class GridFileCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: LibraryTheme.surface(context),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: LibraryTheme.border(context)),
+        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
         boxShadow: [
           BoxShadow(
             color: LibraryTheme.primary(context).withOpacity(0.05),
@@ -247,11 +269,29 @@ class GridFileCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              '${file.author} • ${file.college}',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 11, color: LibraryTheme.muted(context), height: 1.3),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    file.author,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: LibraryTheme.muted(context), height: 1.3),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text('•', style: TextStyle(color: LibraryTheme.muted(context).withOpacity(0.4), fontSize: 9)),
+                ),
+                Flexible(
+                  child: Text(
+                    file.college,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: LibraryTheme.muted(context), height: 1.3),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

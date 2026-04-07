@@ -269,11 +269,11 @@ class _HeroCard extends StatelessWidget {
             Colors.white,
             LibraryTheme.primary(context).withOpacity(0.06),
           ],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: LibraryTheme.border(context)),
+        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.035),
@@ -296,8 +296,8 @@ class _HeroCard extends StatelessWidget {
                       Color(0xFF5B8CFF),
                       Color(0xFF7B61FF),
                     ],
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
+                    begin: AlignmentDirectional.topStart,
+                    end: AlignmentDirectional.bottomEnd,
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -314,7 +314,7 @@ class _HeroCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -346,7 +346,7 @@ class _HeroCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: LibraryTheme.bg(context),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: LibraryTheme.border(context)),
+              border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
             ),
             child: const Row(
               children: [
@@ -414,7 +414,7 @@ class _MiniFeature extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: LibraryTheme.border(context)),
+          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -482,8 +482,8 @@ class _StatCardState extends State<_StatCard> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: widget.colors,
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
             ),
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
@@ -498,7 +498,7 @@ class _StatCardState extends State<_StatCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Align(
-                alignment: Alignment.topRight,
+                alignment: AlignmentDirectional.topStart,
                 child: Container(
                   width: 34,
                   height: 34,
@@ -509,8 +509,8 @@ class _StatCardState extends State<_StatCard> {
                         Colors.white.withOpacity(0.28),
                         Colors.white.withOpacity(0.08),
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                     ),
                     border: Border.all(
                       color: Colors.white.withOpacity(0.22),
@@ -624,7 +624,7 @@ class _InfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: LibraryTheme.surface(context),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: LibraryTheme.border(context)),
+        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),

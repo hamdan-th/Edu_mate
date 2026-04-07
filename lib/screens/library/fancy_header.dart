@@ -15,8 +15,8 @@ class FancyHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     LinearGradient gradient = LinearGradient(
       colors: [LibraryTheme.primary(context), LibraryTheme.secondary(context)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
     );
 
     return Padding(

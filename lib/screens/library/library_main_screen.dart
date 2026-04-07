@@ -109,8 +109,8 @@ class _ModernHeader extends StatelessWidget {
             LibraryTheme.primary(context),
             LibraryTheme.secondary(context),
           ],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
@@ -234,7 +234,7 @@ class _ModernHeader extends StatelessWidget {
                           children: [
                             AnimatedScale(
                               duration: const Duration(milliseconds: 200),
-                              scale: active ? 1.15 : 1,
+                              scale: active ? 1.05 : 1,
                               child: Icon(
                                 tab.icon,
                                 color: active

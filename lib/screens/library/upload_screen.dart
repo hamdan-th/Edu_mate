@@ -375,7 +375,7 @@ class _TopBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: LibraryTheme.border(context)),
+              border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.03),
@@ -415,8 +415,8 @@ class _HeroUploadCard extends StatelessWidget {
             Color(0xFF5B8CFF),
             Color(0xFF7B61FF),
           ],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
         ),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
@@ -580,7 +580,7 @@ class _FilePickerCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: LibraryTheme.border(context)),
+                    border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                   ),
                   child: Text(
                     hasFile ? 'تغيير الملف' : 'اختيار ملف',
@@ -618,7 +618,7 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: LibraryTheme.border(context)),
+        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),

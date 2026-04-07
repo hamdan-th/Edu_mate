@@ -542,7 +542,7 @@ $url
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFD),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: LibraryTheme.border(context)),
+        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
       ),
       child: Row(
         children: [
@@ -699,11 +699,11 @@ $url
                               Colors.white,
                               fileColor.withOpacity(0.05),
                             ],
-                            begin: Alignment.topRight,
-                            end: Alignment.bottomLeft,
+                            begin: AlignmentDirectional.topStart,
+                            end: AlignmentDirectional.bottomEnd,
                           ),
                           borderRadius: BorderRadius.circular(22),
-                          border: Border.all(color: LibraryTheme.border(context)),
+                          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.03),
@@ -945,7 +945,7 @@ $url
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: LibraryTheme.border(context)),
+                            border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -976,7 +976,7 @@ $url
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: LibraryTheme.border(context)),
+                          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1074,7 +1074,7 @@ class _CircleAction extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: LibraryTheme.border(context)),
+          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
         ),
         child: Icon(icon, size: 20, color: color ?? LibraryTheme.text(context)),
       ),
