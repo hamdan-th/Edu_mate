@@ -262,7 +262,7 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -288,10 +288,10 @@ class _HeroCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(14),
                   gradient: const LinearGradient(
                     colors: [
                       Color(0xFF5B8CFF),
@@ -311,7 +311,7 @@ class _HeroCard extends StatelessWidget {
                 child: const Icon(
                   Icons.folder_copy_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 12),
@@ -480,7 +480,7 @@ class _StatCardState extends State<_StatCard> {
         duration: const Duration(milliseconds: 120),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.all(15),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: widget.colors,
@@ -502,10 +502,10 @@ class _StatCardState extends State<_StatCard> {
               Align(
                 alignment: Alignment.topRight,
                 child: Container(
-                  width: 40,
-                  height: 40,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                     gradient: LinearGradient(
                       colors: [
                         Colors.white.withOpacity(0.28),

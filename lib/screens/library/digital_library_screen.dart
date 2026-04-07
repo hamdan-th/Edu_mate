@@ -145,9 +145,9 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
 
                 return Card(
                   elevation: 0,
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: InkWell(
                     onTap: () {
@@ -163,7 +163,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                       );
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(12.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -171,7 +171,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                             title,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 15,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -182,12 +182,12 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                               authors,
                               style: const TextStyle(
                                 color: LibraryTheme.muted,
-                                fontSize: 14,
+                                fontSize: 13,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -266,13 +266,13 @@ class _ActionButton extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: LibraryTheme.primary),
-            const SizedBox(height: 4),
+            Icon(icon, color: LibraryTheme.primary, size: 18),
+            const SizedBox(height: 2),
             Text(
               label,
               style: const TextStyle(
                 color: LibraryTheme.primary,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
             ),

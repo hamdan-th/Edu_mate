@@ -586,27 +586,27 @@ $url
   Widget _statItem(IconData icon, String label, int count, {Color? color}) {
     final effectiveColor = color ?? LibraryTheme.primary;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: effectiveColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [
-          Icon(icon, color: effectiveColor, size: 18),
-          const SizedBox(height: 6),
+          Icon(icon, color: effectiveColor, size: 16),
+          const SizedBox(height: 4),
           Text(
             '$count',
             style: const TextStyle(
               fontWeight: FontWeight.w800,
-              fontSize: 15,
+              fontSize: 14,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 11.5,
+              fontSize: 11,
               color: LibraryTheme.muted,
             ),
           ),
@@ -692,7 +692,7 @@ $url
                       const SizedBox(height: 16),
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(18),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -702,13 +702,13 @@ $url
                             begin: Alignment.topRight,
                             end: Alignment.bottomLeft,
                           ),
-                          borderRadius: BorderRadius.circular(28),
+                          borderRadius: BorderRadius.circular(22),
                           border: Border.all(color: LibraryTheme.border),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.03),
-                              blurRadius: 14,
-                              offset: const Offset(0, 8),
+                              blurRadius: 10,
+                              offset: const Offset(0, 6),
                             ),
                           ],
                         ),
@@ -718,8 +718,8 @@ $url
                             Row(
                               children: [
                                 Container(
-                                  width: 58,
-                                  height: 58,
+                                  width: 44,
+                                  height: 44,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
@@ -727,14 +727,14 @@ $url
                                         fileColor.withOpacity(0.08),
                                       ],
                                     ),
-                                    borderRadius: BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
                                   child: Icon(
                                     updatedFile.isPdf
                                         ? Icons.picture_as_pdf_rounded
                                         : Icons.description_rounded,
                                     color: fileColor,
-                                    size: 28,
+                                    size: 22,
                                   ),
                                 ),
                                 const SizedBox(width: 14),
@@ -762,12 +762,12 @@ $url
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: 8),
                                       Text(
                                         updatedFile.title,
                                         style: const TextStyle(
-                                          fontSize: 21,
-                                          height: 1.35,
+                                          fontSize: 18,
+                                          height: 1.3,
                                           fontWeight: FontWeight.w800,
                                           color: LibraryTheme.text,
                                         ),
@@ -941,10 +941,10 @@ $url
                       if (updatedFile.description.trim().isNotEmpty)
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(18),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(18),
                             border: Border.all(color: LibraryTheme.border),
                           ),
                           child: Column(
@@ -972,10 +972,10 @@ $url
                       const SizedBox(height: 16),
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(18),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(18),
                           border: Border.all(color: LibraryTheme.border),
                         ),
                         child: Column(

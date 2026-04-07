@@ -89,44 +89,6 @@ class FileCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: fileColor.withOpacity(0.10),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        file.fileType,
-                        style: TextStyle(
-                          color: fileColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    if (file.status.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _statusColor(file.status).withOpacity(0.10),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          _statusText(file.status),
-                          style: TextStyle(
-                            color: _statusColor(file.status),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 10),
                 Text(
                   file.title,
                   maxLines: 2,
@@ -138,7 +100,7 @@ class FileCard extends StatelessWidget {
                     height: 1.3,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   '${file.author} • ${file.college}',
                   maxLines: 1,
@@ -148,16 +110,6 @@ class FileCard extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _MetricChip(icon: Icons.thumb_up_alt_outlined, value: file.likes),
-                    const SizedBox(width: 8),
-                    _MetricChip(icon: Icons.bookmark_border_rounded, value: file.saves),
-                    const SizedBox(width: 8),
-                    _MetricChip(icon: Icons.visibility_outlined, value: file.views),
-                  ],
                 ),
               ],
             ),
@@ -251,18 +203,6 @@ class GridFileCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12, color: LibraryTheme.muted),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '${file.likes} إعجاب',
-                    style: const TextStyle(fontSize: 12, color: LibraryTheme.muted),
-                  ),
-                ),
-                Icon(_getIconForFileType(file.fileType), size: 16, color: color),
-              ],
             ),
           ],
         ),
