@@ -67,7 +67,7 @@ class FileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fileColor = _getColorForFileType(context, file.fileType);
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = Theme.of(context).dividerColor;
+    final borderColor = Theme.of(context).dividerColor.withOpacity(0.06);
     final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey;
     final primaryColor = Theme.of(context).colorScheme.primary;
@@ -209,7 +209,7 @@ class GridFileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _getColorForFileType(context, file.fileType);
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = Theme.of(context).dividerColor;
+    final borderColor = Theme.of(context).dividerColor.withOpacity(0.06);
     final primaryColor = Theme.of(context).colorScheme.primary;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey;

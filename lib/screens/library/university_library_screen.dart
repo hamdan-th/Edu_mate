@@ -189,7 +189,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: Theme.of(context).dividerColor),
+                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.06)),
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -372,7 +372,7 @@ class _BottomSheetDropdown extends StatelessWidget {
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: Theme.of(context).dividerColor)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.06))),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4)),
       ),
       items: items.map((e) => DropdownMenuItem<String>(value: e, child: Text(e))).toList(),
