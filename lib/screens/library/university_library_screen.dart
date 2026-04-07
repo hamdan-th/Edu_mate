@@ -178,7 +178,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           Padding(
@@ -188,22 +188,22 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.06)),
+                    borderRadius: BorderRadius.circular(LibraryRadius.card),
+                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.08)),
                   ),
                   child: TextField(
                     controller: _searchController,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       hintText: 'ابحث باسم المادة أو الدكتور أو التخصص...',
-                      hintStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey),
+                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.primary),
                       suffixIcon: IconButton(
                         onPressed: _showFilterPanel,
                         icon: const Icon(Icons.tune_rounded),
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(LibraryRadius.card), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                     ),
                   ),
@@ -216,8 +216,8 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: Theme.of(context).dividerColor),
+                          borderRadius: BorderRadius.circular(LibraryRadius.card),
+                          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.08)),
                         ),
                         child: Text(
                           'الترتيب: $_sortOrder',
@@ -228,14 +228,14 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     const SizedBox(width: 10),
                     InkWell(
                       onTap: () => setState(() => _isGridView = !_isGridView),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(LibraryRadius.card),
                       child: Container(
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: Theme.of(context).dividerColor),
+                          borderRadius: BorderRadius.circular(LibraryRadius.card),
+                          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.08)),
                         ),
                         child: Icon(
                           _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
@@ -345,7 +345,7 @@ class _EmptyLibraryState extends StatelessWidget {
             Text(
               'جرّب تغيير كلمات البحث أو تخفيف الفلاتر حتى تظهر لك نتائج أكثر.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey, height: 1.5),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
             ),
           ],
         ),
@@ -371,9 +371,9 @@ class _BottomSheetDropdown extends StatelessWidget {
         labelText: label,
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.06))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(LibraryRadius.card), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(LibraryRadius.card), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.08))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(LibraryRadius.card), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4)),
       ),
       items: items.map((e) => DropdownMenuItem<String>(value: e, child: Text(e))).toList(),
       onChanged: onChanged,

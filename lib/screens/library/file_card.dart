@@ -25,7 +25,7 @@ Color _getColorForFileType(BuildContext context, String fileType) {
     case 'image':
       return const Color(0xFFF59E0B); // Gold accents can remain
     default:
-      return Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.72) ?? Colors.grey;
+      return Theme.of(context).colorScheme.onSurfaceVariant;
   }
 }
 
@@ -67,24 +67,15 @@ class FileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fileColor = _getColorForFileType(context, file.fileType);
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = Theme.of(context).dividerColor.withOpacity(0.06);
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
-    final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey;
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final borderColor = Theme.of(context).dividerColor.withOpacity(0.08);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      padding: LibrarySpacing.card,
       decoration: BoxDecoration(
         color: surfaceColor,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(LibraryRadius.card),
         border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: LibraryShadows.soft(context),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -101,33 +92,25 @@ class FileCard extends StatelessWidget {
                   runSpacing: 4,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: LibrarySpacing.badge,
                       decoration: BoxDecoration(
                         color: fileColor.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(LibraryRadius.badge),
                       ),
                       child: Text(
                         file.fileType,
-                        style: TextStyle(
-                          color: fileColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: LibraryTextStyles.badge(context, fileColor),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: LibrarySpacing.badge,
                       decoration: BoxDecoration(
                         color: _statusColor(context, file.status).withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(LibraryRadius.badge),
                       ),
                       child: Text(
                         _statusText(file.status),
-                        style: TextStyle(
-                          color: _statusColor(context, file.status),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: LibraryTextStyles.badge(context, _statusColor(context, file.status)),
                       ),
                     ),
                   ],
@@ -137,23 +120,14 @@ class FileCard extends StatelessWidget {
                   file.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                    color: textColor,
-                    height: 1.3,
-                  ),
+                  style: LibraryTextStyles.title(context),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${file.author} • ${file.college}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: mutedColor,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: LibraryTextStyles.subtitle(context),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -183,7 +157,7 @@ class FileCard extends StatelessWidget {
       case 'rejected':
         return Theme.of(context).colorScheme.error;
       default:
-        return Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
+        return Theme.of(context).colorScheme.onSurfaceVariant;
     }
   }
 
@@ -209,26 +183,17 @@ class GridFileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _getColorForFileType(context, file.fileType);
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = Theme.of(context).dividerColor.withOpacity(0.06);
-    final primaryColor = Theme.of(context).colorScheme.primary;
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
-    final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey;
+    final borderColor = Theme.of(context).dividerColor.withOpacity(0.08);
 
     return Container(
       decoration: BoxDecoration(
         color: surfaceColor,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(LibraryRadius.card),
         border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.05),
-            blurRadius: 14,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: LibraryShadows.soft(context),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: LibrarySpacing.gridCard,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -251,19 +216,14 @@ class GridFileCard extends StatelessWidget {
               file.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 13,
-                color: textColor,
-                height: 1.2,
-              ),
+              style: LibraryTextStyles.title(context).copyWith(fontSize: 13, height: 1.2),
             ),
             const SizedBox(height: 4),
             Text(
               '${file.author} • ${file.college}',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 11, color: mutedColor, height: 1.3),
+              style: LibraryTextStyles.subtitle(context).copyWith(fontSize: 11),
             ),
           ],
         ),
@@ -279,8 +239,12 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey;
-    final mutedTextColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.9) ?? Colors.black54;
+    final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: mutedColor,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -290,12 +254,7 @@ class _MetricChip extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           '$value',
-          style: TextStyle(
-            color: mutedTextColor,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            height: 1.0,
-          ),
+          style: textStyle,
         ),
       ],
     );

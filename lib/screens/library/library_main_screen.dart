@@ -101,13 +101,16 @@ class _ModernHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final primaryDark = Theme.of(context).colorScheme.secondary;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            LibraryTheme.primary,
-            LibraryTheme.secondary,
+            primaryColor,
+            primaryDark,
           ],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
@@ -115,7 +118,7 @@ class _ModernHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: LibraryTheme.primary.withOpacity(0.25),
+            color: primaryColor.withOpacity(0.25),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -196,7 +199,7 @@ class _ModernHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.12),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
@@ -217,7 +220,7 @@ class _ModernHeader extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: active
-                              ? Colors.white
+                              ? Theme.of(context).colorScheme.surface
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: active
@@ -238,8 +241,8 @@ class _ModernHeader extends StatelessWidget {
                               child: Icon(
                                 tab.icon,
                                 color: active
-                                    ? LibraryTheme.primary
-                                    : Colors.white,
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -251,8 +254,8 @@ class _ModernHeader extends StatelessWidget {
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w800,
                                 color: active
-                                    ? LibraryTheme.primary
-                                    : Colors.white,
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
                           ],

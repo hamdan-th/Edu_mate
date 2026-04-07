@@ -4,38 +4,71 @@ import '../../core/theme/app_colors.dart';
 class LibraryTheme {
   LibraryTheme._();
 
-  static const Color primary = AppColors.primary;
-  static const Color secondary = AppColors.primaryDark;
-  static const Color accent = AppColors.secondary;
-  static const Color success = AppColors.success;
-  static const Color danger = AppColors.error;
-  static const Color bg = AppColors.background;
-  static const Color surface = AppColors.surface;
-  static const Color text = AppColors.textPrimary;
-  static const Color muted = AppColors.textSecondary;
-  static const Color border = AppColors.border;
-
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primary, secondary],
+    colors: [AppColors.primary, AppColors.primaryDark],
   );
 
   static const LinearGradient aquaGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [AppColors.blueGlow, primary],
+    colors: [AppColors.blueGlow, AppColors.primary],
   );
 
   static const LinearGradient amberGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [accent, Color(0xFFF59E0B)],
+    colors: [AppColors.secondary, Color(0xFFF59E0B)],
   );
 
   static const LinearGradient mintGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [success, primary],
+    colors: [AppColors.success, AppColors.primary],
   );
+}
+
+class LibrarySpacing {
+  static const EdgeInsets card = EdgeInsets.symmetric(horizontal: 14, vertical: 14);
+  static const EdgeInsets gridCard = EdgeInsets.all(12);
+  static const EdgeInsets badge = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+}
+
+class LibraryRadius {
+  static const double card = 20.0;
+  static const double badge = 999.0;
+}
+
+class LibraryShadows {
+  static List<BoxShadow> soft(BuildContext context) => [
+        BoxShadow(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+          blurRadius: 16,
+          offset: const Offset(0, 8),
+        ),
+      ];
+}
+
+class LibraryTextStyles {
+  static TextStyle badge(BuildContext context, Color color) {
+    return Theme.of(context).textTheme.labelSmall!.copyWith(
+          color: color,
+          fontWeight: FontWeight.w700,
+        );
+  }
+
+  static TextStyle title(BuildContext context) {
+    return Theme.of(context).textTheme.bodyLarge!.copyWith(
+          fontWeight: FontWeight.w800,
+          height: 1.3,
+        );
+  }
+
+  static TextStyle subtitle(BuildContext context) {
+    return Theme.of(context).textTheme.bodyMedium!.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        );
+  }
 }
