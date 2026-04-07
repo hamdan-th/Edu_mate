@@ -25,185 +25,194 @@ class CoreResultDetailsScreen extends StatelessWidget {
         .join(', ') ??
         'مؤلف غير معروف';
     final abstract = resultData['abstract'] ?? 'لا يوجد ملخص متاح.';
-    final publisher = resultData['publisher'] ?? 'غير معروف';
     final year = resultData['yearPublished']?.toString() ?? 'غير معروف';
-    final journal = resultData['journals'] != null && (resultData['journals'] as List).isNotEmpty
+    final publisher = resultData['publisher'] ?? 'غير معروف';
+    final journal = resultData['journals'] is List &&
+        (resultData['journals'] as List).isNotEmpty
         ? (resultData['journals'] as List).first.toString()
         : 'غير معروف';
+    final articleId = resultData['id']?.toString();
+    final downloadableLink = resultData['downloadUrl']?.toString();
+
+    final String articleUrl = (articleId != null && articleId.isNotEmpty)
+        ? 'https://core.ac.uk/display/$articleId'
+        : '';
 
     return Scaffold(
       backgroundColor: LibraryTheme.bg,
       appBar: AppBar(
-        title: const Text('تفاصيل الورقة البحثية'),
+        title: const Text('تفاصيل البحث'),
         backgroundColor: LibraryTheme.surface,
-        centerTitle: true,
+        foregroundColor: LibraryTheme.text,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 📄 Card: Basic Info
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildInfoRow(Icons.person, 'المؤلفون', authors),
-                    const Divider(height: 24),
-                    _buildInfoRow(Icons.business, 'الناشر', publisher),
-                    const Divider(height: 24),
-                    _buildInfoRow(Icons.book, 'المجلة', journal),
-                    const Divider(height: 24),
-                    _buildInfoRow(Icons.calendar_today, 'سنة النشر', year),
-                  ],
-                ),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: LibraryTheme.text,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            _buildInfoRow(Icons.people_alt_outlined, 'المؤلفون:', authors),
+            const SizedBox(height: 8),
+            _buildInfoRow(Icons.business_rounded, 'الناشر:', publisher.toString()),
+            const SizedBox(height: 8),
+            _buildInfoRow(Icons.calendar_today_rounded, 'سنة النشر:', year),
+            const SizedBox(height: 8),
+            _buildInfoRow(Icons.menu_book_rounded, 'المجلة:', journal),
+            const Divider(height: 30, thickness: 1),
 
-            /// 📝 Card: Abstract
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.notes, color: LibraryTheme.primary),
-                        SizedBox(width: 8),
-                        Text(
-                          'الملخص',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      abstract,
-                      style: const TextStyle(fontSize: 16, height: 1.5),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            /// 🔘 Action Buttons
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      onToggleSave(); // Update state in parent UI
-                      if (!isSaved) {
-                        DigitalLibraryFirestoreService.saveReference(resultData);
-                      } else {
-                        // TODO: Implement removal from Firestore if needed
-                      }
-                    },
+                  child: OutlinedButton.icon(
                     icon: Icon(
-                      isSaved ? Icons.bookmark_added : Icons.bookmark_add_outlined,
-                      color: isSaved ? Colors.white : LibraryTheme.primary,
+                      isSaved
+                          ? Icons.bookmark_rounded
+                          : Icons.bookmark_border_rounded,
                     ),
-                    label: Text(
-                      isSaved ? 'تم الحفظ' : 'حفظ كمرجع',
-                      style: TextStyle(
-                        color: isSaved ? Colors.white : LibraryTheme.primary,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isSaved ? LibraryTheme.primary : Colors.white,
-                      side: BorderSide(color: LibraryTheme.primary),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
+                    label: Text(isSaved ? 'محفوظ' : 'حفظ'),
                     onPressed: () async {
-                      final url = resultData['downloadUrl'] as String?;
-                      final String? articleId = resultData['id']?.toString();
-                      final sourceUrl = articleId != null
-                          ? 'https://core.ac.uk/display/$articleId'
-                          : null;
-
-                      final targetUrl = (url != null && url.isNotEmpty)
-                          ? url
-                          : sourceUrl;
-
-                      if (targetUrl != null && targetUrl.isNotEmpty) {
-                        final uri = Uri.parse(targetUrl);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                          DigitalLibraryFirestoreService.registerDownload(resultData);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('لا يمكن فتح الرابط')),
+                      try {
+                        if (!isSaved) {
+                          await DigitalLibraryFirestoreService.saveReference(
+                            resultData,
                           );
                         }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('لا يتوفر رابط لهذه الورقة')),
-                        );
+                        onToggleSave();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isSaved
+                                    ? 'تمت الإزالة من الحفظ داخل الواجهة'
+                                    : 'تم حفظ المرجع في مكتبتي',
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('تعذر حفظ المرجع: $e')),
+                          );
+                        }
                       }
                     },
-                    icon: const Icon(Icons.open_in_new, color: Colors.white),
-                    label: const Text(
-                      'فتح المصدر',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.share_outlined),
+                    label: const Text('مشاركة'),
+                    onPressed: () async {
+                      if (articleUrl.isEmpty) return;
+                      await Share.share(
+                        'اطلع على هذه الورقة البحثية:\n$title\n$articleUrl',
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: LibraryTheme.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      foregroundColor: LibraryTheme.surface,
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton.icon(
-                onPressed: () async {
-                  final String? articleId = resultData['id']?.toString();
-                  if (articleId != null) {
-                    final String url = 'https://core.ac.uk/display/$articleId';
-                    await Share.share('اطلع على هذه الورقة البحثية:\n$title\n$url');
-                  }
-                },
-                icon: const Icon(Icons.share, color: LibraryTheme.primary),
-                label: const Text(
-                  'مشاركة رابط الورقة',
-                  style: TextStyle(color: LibraryTheme.primary, fontSize: 16),
+
+            if (downloadableLink != null && downloadableLink.isNotEmpty)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.download_rounded),
+                  label: const Text('تنزيل PDF'),
+                  onPressed: () async {
+                    try {
+                      await DigitalLibraryFirestoreService.registerDownload(
+                        resultData,
+                      );
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('تعذر تسجيل التنزيل: $e')),
+                        );
+                      }
+                    }
+
+                    final Uri? url = Uri.tryParse(downloadableLink);
+                    if (url != null) {
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: LibraryTheme.primary,
+                    foregroundColor: LibraryTheme.surface,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                  ),
                 ),
               ),
+
+            if (articleUrl.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.open_in_browser_rounded),
+                  label: const Text('فتح المصدر'),
+                  onPressed: () async {
+                    final Uri url = Uri.parse(articleUrl);
+                    await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: LibraryTheme.primary,
+                    side: const BorderSide(color: LibraryTheme.primary),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            const Divider(height: 30, thickness: 1),
+            const Text(
+              'الملخص (Abstract)',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: LibraryTheme.text,
+              ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
+            Text(
+              abstract.toString().trim().isEmpty
+                  ? 'لا يوجد ملخص متاح.'
+                  : abstract.toString(),
+              style: TextStyle(
+                fontSize: 16,
+                height: 1.5,
+                color: LibraryTheme.text.withOpacity(0.72),
+              ),
+            ),
           ],
         ),
       ),
@@ -214,26 +223,24 @@ class CoreResultDetailsScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: LibraryTheme.muted),
+        Icon(icon, color: LibraryTheme.primary, size: 20),
         const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: LibraryTheme.text,
+          ),
+        ),
+        const SizedBox(width: 5),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: LibraryTheme.muted,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value.isNotEmpty ? value : 'غير متوفر',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-              ),
-            ],
+          child: Text(
+            value.isEmpty ? 'غير معروف' : value,
+            style: const TextStyle(
+              fontSize: 16,
+              color: LibraryTheme.text,
+            ),
           ),
         ),
       ],

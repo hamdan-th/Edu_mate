@@ -34,36 +34,71 @@ class _EditFileScreenState extends State<EditFileScreen> {
 
   String? _normalizeCollege(String? college) {
     if (college == null) return null;
+
     switch (college.trim()) {
       case 'كلية الهندسة':
         return 'كلية الهندسة وتكنولوجيا المعلومات';
       default:
-        return college.trim().isEmpty ? null : college.trim();
+        return college.trim();
     }
   }
 
   String? _normalizeSpecialization(String? specialization) {
     if (specialization == null) return null;
-    final value = specialization.trim();
-    return value.isEmpty ? null : value;
+    return specialization.trim();
   }
 
   @override
   void initState() {
     super.initState();
-    final d = widget.fileData;
 
-    _subjectNameController =
-        TextEditingController(text: d['subjectName'] ?? d['title'] ?? '');
-    _doctorNameController =
-        TextEditingController(text: d['doctorName'] ?? d['author'] ?? '');
-    _descriptionController =
-        TextEditingController(text: d['description'] ?? '');
+    final data = widget.fileData;
 
-    _selectedCollege = _normalizeCollege(d['college']?.toString());
-    _selectedSpecialization = _normalizeSpecialization(d['specialization']?.toString() ?? d['major']?.toString());
-    _selectedLevel = d['level']?.toString();
-    _selectedTerm = d['term']?.toString();
+    _subjectNameController = TextEditingController(
+      text: (data['subjectName'] ?? data['title'] ?? '').toString(),
+    );
+    _doctorNameController = TextEditingController(
+      text: (data['doctorName'] ?? '').toString(),
+    );
+    _descriptionController = TextEditingController(
+      text: (data['description'] ?? '').toString(),
+    );
+
+    _selectedCollege = _normalizeCollege((data['college'] ?? '').toString());
+    _selectedSpecialization =
+        _normalizeSpecialization((data['specialization'] ?? '').toString());
+    _selectedLevel = (data['level'] ?? '').toString().trim().isEmpty
+        ? null
+        : (data['level'] ?? '').toString().trim();
+    _selectedTerm = (data['term'] ?? '').toString().trim().isEmpty
+        ? null
+        : (data['term'] ?? '').toString().trim();
+
+    final colleges = UniversityAcademicData.colleges.toSet().toList();
+    if (_selectedCollege != null && !colleges.contains(_selectedCollege)) {
+      _selectedCollege = null;
+    }
+
+    final specializations = _selectedCollege == null
+        ? <String>[]
+        : (UniversityAcademicData.majorsByCollege[_selectedCollege!] ?? <String>[])
+        .toSet()
+        .toList();
+
+    if (_selectedSpecialization != null &&
+        !specializations.contains(_selectedSpecialization)) {
+      _selectedSpecialization = null;
+    }
+
+    final levels = UniversityAcademicData.levels.toSet().toList();
+    if (_selectedLevel != null && !levels.contains(_selectedLevel)) {
+      _selectedLevel = null;
+    }
+
+    final terms = UniversityAcademicData.terms.toSet().toList();
+    if (_selectedTerm != null && !terms.contains(_selectedTerm)) {
+      _selectedTerm = null;
+    }
   }
 
   @override
@@ -74,8 +109,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
     super.dispose();
   }
 
-  Future<void> _submitForm() async {
-    if (_isSaving) return;
+  Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedCollege == null ||
@@ -83,7 +117,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
         _selectedLevel == null ||
         _selectedTerm == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى استكمال اختيار جميع التصنيفات')),
+        const SnackBar(content: Text('أكمل جميع القوائم المطلوبة')),
       );
       return;
     }
@@ -102,228 +136,154 @@ class _EditFileScreenState extends State<EditFileScreen> {
         'specialization': _selectedSpecialization,
         'level': _selectedLevel,
         'term': _selectedTerm,
-        'visibility': 'public',
-        'status': 'approved',
+        'status': 'pending',
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حفظ التعديلات بنجاح')),
+        const SnackBar(
+          content: Text('تم تعديل الملف بنجاح، وحالته الآن: قيد المراجعة'),
+        ),
       );
+
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ أثناء حفظ التعديلات')),
+        SnackBar(content: Text('فشل تعديل الملف: $e')),
       );
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final normalizedCollege = _normalizeCollege(_selectedCollege);
-    final normalizedSpecialization =
-    _normalizeSpecialization(_selectedSpecialization);
+    final colleges = UniversityAcademicData.colleges.toSet().toList();
 
-    final specializations = normalizedCollege == null
+    final specializations = _selectedCollege == null
         ? <String>[]
-        : (UniversityAcademicData.majorsByCollege[normalizedCollege] ??
-        <String>[])
+        : (UniversityAcademicData.majorsByCollege[_selectedCollege!] ?? <String>[])
         .toSet()
         .toList();
 
+    final levels = UniversityAcademicData.levels.toSet().toList();
+    final terms = UniversityAcademicData.terms.toSet().toList();
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: LibraryTheme.bg,
       appBar: AppBar(
-        title: const Text('تعديل وعرض عام'),
-        backgroundColor: LibraryTheme.surface,
-        foregroundColor: LibraryTheme.text,
+        title: const Text('تعديل الملف'),
+        backgroundColor: LibraryTheme.bg,
         elevation: 0,
       ),
-      body: Form(
+      body: _isSaving
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
         key: _formKey,
-        child: SingleChildScrollView(
+        child: ListView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SectionCard(
-                title: 'بيانات الملف',
-                subtitle: 'أدخل المعلومات الأساسية للبحث',
-                child: Column(
-                  children: [
-                    _ModernTextField(
-                      controller: _subjectNameController,
-                      label: 'اسم المادة / عنوان الملف',
-                      icon: Icons.menu_book_rounded,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'مطلوب';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _ModernTextField(
-                      controller: _doctorNameController,
-                      label: 'اسم الدكتور',
-                      icon: Icons.person_rounded,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'مطلوب';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _ModernTextField(
-                      controller: _descriptionController,
-                      label: 'وصف',
-                      icon: Icons.notes_rounded,
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              _SectionCard(
-                title: 'التصنيف الأكاديمي',
-                subtitle: 'أين يجب ظهور هذا الملف؟',
-                child: Column(
-                  children: [
-                    _ModernDropdown(
-                      value: normalizedCollege,
-                      label: 'الكلية',
-                      icon: Icons.account_balance_rounded,
-                      items: UniversityAcademicData.colleges,
-                      onChanged: (val) => setState(() {
-                        _selectedCollege = val;
-                        _selectedSpecialization = null;
-                      }),
-                    ),
-                    const SizedBox(height: 12),
-                    _ModernDropdown(
-                      value: normalizedSpecialization,
-                      label: 'التخصص',
-                      icon: Icons.auto_awesome_mosaic_rounded,
-                      items: specializations,
-                      onChanged: (val) =>
-                          setState(() => _selectedSpecialization = val),
-                    ),
-                    const SizedBox(height: 12),
-                    _ModernDropdown(
-                      value: _selectedLevel,
-                      label: 'المستوى',
-                      icon: Icons.layers_rounded,
-                      items: UniversityAcademicData.levels,
-                      onChanged: (val) => setState(() => _selectedLevel = val),
-                    ),
-                    const SizedBox(height: 12),
-                    _ModernDropdown(
-                      value: _selectedTerm,
-                      label: 'الترم',
-                      icon: Icons.calendar_month_rounded,
-                      items: UniversityAcademicData.terms,
-                      onChanged: (val) => setState(() => _selectedTerm = val),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isSaving ? null : _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: LibraryTheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: _isSaving
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                    'تعديل ونشر للعام',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+          children: [
+            _Field(
+              controller: _subjectNameController,
+              label: 'اسم المادة / العنوان',
+              validator: true,
+            ),
+            const SizedBox(height: 12),
+            _Field(
+              controller: _doctorNameController,
+              label: 'اسم الدكتور',
+              validator: true,
+            ),
+            const SizedBox(height: 12),
+            _Field(
+              controller: _descriptionController,
+              label: 'الوصف',
+              maxLines: 4,
+            ),
+            const SizedBox(height: 12),
+            _Dropdown(
+              value: _selectedCollege,
+              label: 'الكلية',
+              items: colleges,
+              onChanged: (value) {
+                setState(() {
+                  _selectedCollege = value;
+                  _selectedSpecialization = null;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            _Dropdown(
+              value: _selectedSpecialization,
+              label: 'التخصص',
+              items: specializations,
+              onChanged: (value) {
+                setState(() {
+                  _selectedSpecialization = value;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            _Dropdown(
+              value: _selectedLevel,
+              label: 'المستوى',
+              items: levels,
+              onChanged: (value) {
+                setState(() {
+                  _selectedLevel = value;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            _Dropdown(
+              value: _selectedTerm,
+              label: 'الترم',
+              items: terms,
+              onChanged: (value) {
+                setState(() {
+                  _selectedTerm = value;
+                });
+              },
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveChanges,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: LibraryTheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
+                child: const Text('حفظ التعديلات'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget child;
-
-  const _SectionCard({
-    required this.title,
-    required this.subtitle,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: LibraryTheme.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: LibraryTheme.text,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              fontSize: 12.5,
-              color: LibraryTheme.muted,
-            ),
-          ),
-          const SizedBox(height: 16),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _ModernTextField extends StatelessWidget {
+class _Field extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  final IconData icon;
   final int maxLines;
-  final String? Function(String?)? validator;
+  final bool validator;
 
-  const _ModernTextField({
+  const _Field({
     required this.controller,
     required this.label,
-    required this.icon,
     this.maxLines = 1,
-    this.validator,
+    this.validator = false,
   });
 
   @override
@@ -331,40 +291,41 @@ class _ModernTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
-      validator: validator,
+      validator: validator
+          ? (value) =>
+      (value == null || value.trim().isEmpty) ? 'هذا الحقل مطلوب' : null
+          : null,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: LibraryTheme.bg,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: LibraryTheme.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: LibraryTheme.primary, width: 1.4),
+          borderRadius: BorderRadius.circular(18),
+          borderSide:
+          const BorderSide(color: LibraryTheme.primary, width: 1.4),
         ),
       ),
     );
   }
 }
 
-class _ModernDropdown extends StatelessWidget {
+class _Dropdown extends StatelessWidget {
   final String? value;
   final String label;
-  final IconData icon;
   final List<String> items;
   final ValueChanged<String?> onChanged;
 
-  const _ModernDropdown({
+  const _Dropdown({
     required this.value,
     required this.label,
-    required this.icon,
     required this.items,
     required this.onChanged,
   });
@@ -373,32 +334,36 @@ class _ModernDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final uniqueItems = items.toSet().toList();
     final safeValue =
-    value != null && uniqueItems.contains(value) ? value : null;
+    (value != null && uniqueItems.contains(value)) ? value : null;
 
     return DropdownButtonFormField<String>(
       value: safeValue,
       isExpanded: true,
-      icon: const Icon(Icons.expand_more_rounded),
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: LibraryTheme.bg,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: LibraryTheme.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: LibraryTheme.primary, width: 1.4),
+          borderRadius: BorderRadius.circular(18),
+          borderSide:
+          const BorderSide(color: LibraryTheme.primary, width: 1.4),
         ),
       ),
       items: uniqueItems
-          .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+          .map(
+            (item) => DropdownMenuItem<String>(
+          value: item,
+          child: Text(item),
+        ),
+      )
           .toList(),
       onChanged: onChanged,
     );

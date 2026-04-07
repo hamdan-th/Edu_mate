@@ -37,88 +37,126 @@ class FileCard extends StatelessWidget {
     final icon = _getIconForFileType(file.fileType);
     final color = _getColorForFileType(file.fileType);
 
-    if (file.thumbnailUrl.isNotEmpty) {
+    if (file.thumbnailUrl.trim().isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Image.network(
           file.thumbnailUrl,
-          width: 86,
-          height: 110,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildFallbackThumbnail(icon, color),
+          errorBuilder: (_, __, ___) => _fallback(icon, color),
         ),
       );
     }
-    return _buildFallbackThumbnail(icon, color);
+
+    return _fallback(icon, color);
   }
 
-  Widget _buildFallbackThumbnail(IconData icon, Color color) {
+  Widget _fallback(IconData icon, Color color) {
     return Container(
-      width: 86,
-      height: 110,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withOpacity(0.10),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Center(
-        child: Icon(icon, color: color, size: 36),
+        child: Icon(icon, size: 36, color: color),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final fileColor = _getColorForFileType(file.fileType);
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: LibraryTheme.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: LibraryTheme.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: LibraryTheme.primary.withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildThumbnail(),
+          SizedBox(width: 86, height: 86, child: _buildThumbnail()),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: fileColor.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        file.fileType,
+                        style: TextStyle(
+                          color: fileColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (file.status.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _statusColor(file.status).withOpacity(0.10),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          _statusText(file.status),
+                          style: TextStyle(
+                            color: _statusColor(file.status),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
                 Text(
                   file.title,
-                  style: const TextStyle(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.bold,
-                    color: LibraryTheme.text,
-                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    color: LibraryTheme.text,
+                    height: 1.3,
+                  ),
                 ),
                 const SizedBox(height: 6),
-                _InfoRow(icon: Icons.person_outline_rounded, text: file.author),
-                const SizedBox(height: 4),
-                _InfoRow(icon: Icons.account_balance_rounded, text: file.college),
-                const SizedBox(height: 4),
-                _InfoRow(icon: Icons.auto_awesome_mosaic_rounded, text: file.major),
-                const SizedBox(height: 4),
-                _InfoRow(icon: Icons.access_time_rounded, text: file.semester),
+                Text(
+                  '${file.author} • ${file.college}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: LibraryTheme.muted,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    _StatBadge(icon: Icons.favorite_rounded, count: file.likes, color: LibraryTheme.danger),
-                    const SizedBox(width: 10),
-                    _StatBadge(icon: Icons.bookmark_rounded, count: file.saves, color: LibraryTheme.primary),
-                    const SizedBox(width: 10),
-                    _StatBadge(icon: Icons.file_download_rounded, count: file.downloads, color: LibraryTheme.success),
+                    _MetricChip(icon: Icons.thumb_up_alt_outlined, value: file.likes),
+                    const SizedBox(width: 8),
+                    _MetricChip(icon: Icons.bookmark_border_rounded, value: file.saves),
+                    const SizedBox(width: 8),
+                    _MetricChip(icon: Icons.visibility_outlined, value: file.views),
                   ],
                 ),
               ],
@@ -127,6 +165,32 @@ class FileCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static Color _statusColor(String status) {
+    switch (status) {
+      case 'approved':
+        return LibraryTheme.success;
+      case 'pending':
+        return LibraryTheme.accent;
+      case 'rejected':
+        return LibraryTheme.danger;
+      default:
+        return LibraryTheme.muted;
+    }
+  }
+
+  static String _statusText(String status) {
+    switch (status) {
+      case 'approved':
+        return 'منشور';
+      case 'pending':
+        return 'قيد المراجعة';
+      case 'rejected':
+        return 'مرفوض';
+      default:
+        return status;
+    }
   }
 }
 
@@ -134,164 +198,105 @@ class GridFileCard extends StatelessWidget {
   final FileModel file;
   const GridFileCard({Key? key, required this.file}) : super(key: key);
 
-  Widget _buildThumbnail() {
-    final icon = _getIconForFileType(file.fileType);
-    final color = _getColorForFileType(file.fileType);
-
-    if (file.thumbnailUrl.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Image.network(
-          file.thumbnailUrl,
-          width: double.infinity,
-          height: double.infinity,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildFallbackThumbnail(icon, color),
-        ),
-      );
-    }
-    return _buildFallbackThumbnail(icon, color);
-  }
-
-  Widget _buildFallbackThumbnail(IconData icon, Color color) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Center(
-        child: Icon(icon, color: color, size: 40),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final color = _getColorForFileType(file.fileType);
+
     return Container(
-      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: LibraryTheme.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: LibraryTheme.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: LibraryTheme.primary.withOpacity(0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: _buildThumbnail(),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(
+                  _getIconForFileType(file.fileType),
+                  size: 42,
+                  color: color,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              file.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                color: LibraryTheme.text,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              file.author,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: LibraryTheme.muted),
+            ),
+            const SizedBox(height: 8),
+            Row(
               children: [
-                Text(
-                  file.title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: LibraryTheme.text,
-                    height: 1.3,
+                Expanded(
+                  child: Text(
+                    '${file.likes} إعجاب',
+                    style: const TextStyle(fontSize: 12, color: LibraryTheme.muted),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  file.major,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: LibraryTheme.muted,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _StatBadge(icon: Icons.favorite_rounded, count: file.likes, color: LibraryTheme.danger),
-                    _StatBadge(icon: Icons.bookmark_rounded, count: file.saves, color: LibraryTheme.primary),
-                  ],
-                ),
+                Icon(_getIconForFileType(file.fileType), size: 16, color: color),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _InfoRow extends StatelessWidget {
+class _MetricChip extends StatelessWidget {
   final IconData icon;
-  final String text;
-
-  const _InfoRow({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: LibraryTheme.muted),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(color: LibraryTheme.muted, fontSize: 13),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatBadge extends StatelessWidget {
-  final IconData icon;
-  final int count;
-  final Color color;
-
-  const _StatBadge({
-    required this.icon,
-    required this.count,
-    required this.color,
-  });
+  final int value;
+  const _MetricChip({required this.icon, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
+        color: LibraryTheme.bg,
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
-          if (count > 0) ...[
-            const SizedBox(width: 4),
-            Text(
-              '$count',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+          Icon(icon, size: 14, color: LibraryTheme.muted),
+          const SizedBox(width: 4),
+          Text(
+            '$value',
+            style: const TextStyle(
+              color: LibraryTheme.muted,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
             ),
-          ],
+          ),
         ],
       ),
     );
