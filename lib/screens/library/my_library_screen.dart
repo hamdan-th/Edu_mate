@@ -268,9 +268,11 @@ class _HeroCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isNarrow = constraints.maxWidth < 340;
+          
+          final iconBlock = Container(
             width: 58,
             height: 58,
             decoration: BoxDecoration(
@@ -283,34 +285,32 @@ class _HeroCard extends StatelessWidget {
               color: Colors.white,
               size: 28,
             ),
-          ),
-          const SizedBox(width: 14),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'مكتبتي الشخصية',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 21,
-                    fontWeight: FontWeight.w900,
-                  ),
+          );
+          
+          final textBlock = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'مكتبتي الشخصية',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w900,
                 ),
-                SizedBox(height: 6),
-                Text(
-                  'أدر ملفاتك المرفوعة والمحفوظة والتنزيلات من مكان واحد.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13.2,
-                    height: 1.5,
-                  ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'أدر ملفاتك المرفوعة والمحفوظة والتنزيلات من مكان واحد.',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13.2,
+                  height: 1.5,
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          ElevatedButton.icon(
+              ),
+            ],
+          );
+          
+          final buttonBlock = ElevatedButton.icon(
             onPressed: onUploadTap,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
@@ -326,8 +326,38 @@ class _HeroCard extends StatelessWidget {
               'رفع',
               style: TextStyle(fontWeight: FontWeight.w800),
             ),
-          ),
-        ],
+          );
+
+          if (isNarrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    iconBlock,
+                    const SizedBox(width: 14),
+                    Expanded(child: textBlock),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: buttonBlock,
+                ),
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              iconBlock,
+              const SizedBox(width: 14),
+              Expanded(child: textBlock),
+              const SizedBox(width: 10),
+              buttonBlock,
+            ],
+          );
+        },
       ),
     );
   }
