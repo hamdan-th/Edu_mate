@@ -150,16 +150,13 @@ class FileCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Divider(height: 1, color: LibraryTheme.border),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _MetricChip(icon: Icons.thumb_up_alt_rounded, value: file.likes),
-                    const SizedBox(width: 8),
-                    _MetricChip(icon: Icons.bookmark_rounded, value: file.saves),
-                    const Spacer(),
-                    _MetricChip(icon: Icons.visibility_rounded, value: file.views),
+                    _MetricChip(icon: Icons.thumb_up_alt_outlined, value: file.likes),
+                    _MetricChip(icon: Icons.bookmark_border_rounded, value: file.saves),
+                    _MetricChip(icon: Icons.visibility_outlined, value: file.views),
                   ],
                 ),
               ],
@@ -270,27 +267,21 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: LibraryTheme.bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: LibraryTheme.muted),
-          const SizedBox(width: 4),
-          Text(
-            '$value',
-            style: const TextStyle(
-              color: LibraryTheme.muted,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(icon, size: 13, color: LibraryTheme.muted.withOpacity(0.7)),
+        const SizedBox(width: 4),
+        Text(
+          '$value',
+          style: TextStyle(
+            color: LibraryTheme.muted.withOpacity(0.9),
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
