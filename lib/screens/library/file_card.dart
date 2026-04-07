@@ -16,7 +16,7 @@ IconData _getIconForFileType(String fileType) {
   }
 }
 
-Color _getColorForFileType(String fileType) {
+Color _getColorForFileType(BuildContext context, String fileType) {
   switch (fileType.toLowerCase()) {
     case 'pdf':
       return LibraryTheme.danger(context);
@@ -33,9 +33,9 @@ class FileCard extends StatelessWidget {
   final FileModel file;
   const FileCard({super.key, required this.file});
 
-  Widget _buildThumbnail() {
+  Widget _buildThumbnail(BuildContext context) {
     final icon = _getIconForFileType(file.fileType);
-    final color = _getColorForFileType(file.fileType);
+    final color = _getColorForFileType(context, file.fileType);
 
     if (file.thumbnailUrl.trim().isNotEmpty) {
       return ClipRRect(
@@ -65,7 +65,7 @@ class FileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fileColor = _getColorForFileType(file.fileType);
+    final fileColor = _getColorForFileType(context, file.fileType);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -84,7 +84,7 @@ class FileCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(width: 58, height: 58, child: _buildThumbnail()),
+          SizedBox(width: 58, height: 58, child: _buildThumbnail(context)),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -113,13 +113,13 @@ class FileCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _statusColor(file.status).withOpacity(0.08),
+                        color: _statusColor(context, file.status).withOpacity(0.08),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
                         _statusText(file.status),
                         style: TextStyle(
-                          color: _statusColor(file.status),
+                          color: _statusColor(context, file.status),
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                         ),
@@ -167,7 +167,7 @@ class FileCard extends StatelessWidget {
     );
   }
 
-  static Color _statusColor(String status) {
+  static Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'approved':
         return LibraryTheme.success(context);
@@ -200,7 +200,7 @@ class GridFileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColorForFileType(file.fileType);
+    final color = _getColorForFileType(context, file.fileType);
 
     return Container(
       decoration: BoxDecoration(
