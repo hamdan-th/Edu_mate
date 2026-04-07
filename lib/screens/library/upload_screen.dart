@@ -696,14 +696,14 @@ class _ModernTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.border(context),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),
@@ -772,14 +772,14 @@ class _ModernDropdown extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.border(context),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),

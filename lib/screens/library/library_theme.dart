@@ -1,41 +1,44 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
 
 class LibraryTheme {
-  LibraryTheme._();
+  // ========================
+  // SAFE THEME ACCESS
+  // ========================
 
-  static const Color primary = AppColors.primary;
-  static const Color secondary = AppColors.primaryDark;
-  static const Color accent = AppColors.secondary;
-  static const Color success = AppColors.success;
-  static const Color danger = AppColors.error;
-  static const Color bg = AppColors.background;
-  static const Color surface = AppColors.surface;
-  static const Color text = AppColors.textPrimary;
-  static const Color muted = AppColors.textSecondary;
-  static const Color border = AppColors.border;
+  static Color bg(BuildContext context) =>
+      Theme.of(context).scaffoldBackgroundColor;
 
-  static const LinearGradient primaryGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [primary, secondary],
-  );
+  static Color surface(BuildContext context) =>
+      Theme.of(context).cardColor;
 
-  static const LinearGradient aquaGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [AppColors.blueGlow, primary],
-  );
+  static Color text(BuildContext context) =>
+      Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
 
-  static const LinearGradient amberGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [accent, Color(0xFFF59E0B)],
-  );
+  static Color muted(BuildContext context) =>
+      Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
 
-  static const LinearGradient mintGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [success, primary],
-  );
+  static Color border(BuildContext context) =>
+      Theme.of(context).dividerColor;
+
+  // ========================
+  // BRAND COLORS (ثابتة)
+  // ========================
+
+  static const Color primaryColor = Color(0xFFD4AF37);
+  static const Color secondaryColor = Color(0xFFFFC107);
+  static const Color accentColor = Color(0xFFB8962E);
+
+  static const Color dangerColor = Color(0xFFE53935);
+  static const Color successColor = Color(0xFF43A047);
+
+  // ========================
+  // SAFE WRAPPERS (مهم جدا)
+  // ========================
+
+  static Color primary(BuildContext context) => primaryColor;
+  static Color secondary(BuildContext context) => secondaryColor;
+  static Color accent(BuildContext context) => accentColor;
+
+  static Color danger(BuildContext context) => dangerColor;
+  static Color success(BuildContext context) => successColor;
 }

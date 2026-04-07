@@ -305,12 +305,12 @@ class _Field extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide:
-          const BorderSide(color: LibraryTheme.primary(context), width: 1.4),
+          BorderSide(color: LibraryTheme.primary(context), width: 1.4),
         ),
       ),
     );
@@ -349,12 +349,12 @@ class _Dropdown extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide:
-          const BorderSide(color: LibraryTheme.primary(context), width: 1.4),
+          BorderSide(color: LibraryTheme.primary(context), width: 1.4),
         ),
       ),
       items: uniqueItems

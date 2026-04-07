@@ -136,7 +136,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: LibraryTheme.primary(context),
-                        side: const BorderSide(color: LibraryTheme.primary(context)),
+                        side: BorderSide(color: LibraryTheme.primary(context)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -925,7 +925,7 @@ $url
                               onPressed: () => _downloadFile(updatedFile.fileUrl),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: LibraryTheme.primary(context),
-                                side: const BorderSide(color: LibraryTheme.primary(context)),
+                                side: BorderSide(color: LibraryTheme.primary(context)),
                                 padding: const EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
@@ -1173,11 +1173,11 @@ class _ModernField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),
@@ -1222,11 +1222,11 @@ class _DropdownField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),

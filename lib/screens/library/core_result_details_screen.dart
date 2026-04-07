@@ -183,7 +183,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: LibraryTheme.primary(context),
-                    side: const BorderSide(color: LibraryTheme.primary(context)),
+                    side: BorderSide(color: LibraryTheme.primary(context)),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
