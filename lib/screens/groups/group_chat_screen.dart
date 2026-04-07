@@ -1,15 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
-import '../../models/group_membership_state.dart';
 import 'group_details_screen.dart';
 import 'invite_group_screen.dart';
 import 'package:flutter/gestures.dart';
@@ -47,7 +44,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
-  Map<String, Map<String, dynamic>> _userCache = {};
+  final Map<String, Map<String, dynamic>> _userCache = {};
   Map<String, dynamic>? _replyMessage;
 
   Future<void> _fetchUserIfNeeded(String userId) async {
@@ -275,7 +272,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 decoration: InputDecoration(
                   hintText: "ابحث في المحادثة...",
                   hintStyle: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)?.withOpacity(0.7),
+                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7),
                     fontSize: 15,
                   ),
                   filled: true,
@@ -321,7 +318,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       const SizedBox(height: 1),
                       Text(
                         "${_membersCount > 0 ? '$_membersCount أعضاء • ' : ''}${widget.group.specializationName}".trim(),
-                        style: TextStyle(fontSize: 13, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)?.withOpacity(0.7), height: 1.1),
+                        style: TextStyle(fontSize: 13, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7), height: 1.1),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -531,12 +528,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     
     final timestamp = data['createdAt'] as Timestamp?;
 
-    final List<Color> _nameColors = [
+    final List<Color> nameColors = [
       const Color(0xFFE53935), const Color(0xFFD81B60), const Color(0xFF8E24AA), 
       const Color(0xFF3949AB), const Color(0xFF039BE5), const Color(0xFF00897B), 
       const Color(0xFF7CB342), const Color(0xFFF4511E)
     ];
-    final senderColor = _nameColors[senderName.length % _nameColors.length];
+    final senderColor = nameColors[senderName.length % nameColors.length];
     
     final String? replyToText = data['replyToText'];
     final String? replyToSender = data['replyToSender'];
@@ -803,7 +800,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   decoration: InputDecoration(
                     hintText: "اكتب رسالة...",
                     hintStyle: TextStyle(
-                      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)?.withOpacity(0.7),
+                      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7),
                       fontSize: 15,
                     ),
                     filled: true,
@@ -822,7 +819,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 child: Container(
                   height: 48,
                   width: 48,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
@@ -881,7 +878,7 @@ class _EmptyChatState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               decoration: BoxDecoration(
-                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white)?.withOpacity(0.9),
+                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white).withOpacity(0.9),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Text(

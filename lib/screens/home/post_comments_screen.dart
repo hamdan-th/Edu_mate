@@ -156,7 +156,7 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                               children: [
                                 Text(
                                   comment.authorName,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w800,
                                     fontSize: 13,

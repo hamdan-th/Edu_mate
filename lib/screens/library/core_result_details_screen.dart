@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,11 +11,11 @@ class CoreResultDetailsScreen extends StatelessWidget {
   final VoidCallback onToggleSave;
 
   const CoreResultDetailsScreen({
-    Key? key,
+    super.key,
     required this.resultData,
     required this.isSaved,
     required this.onToggleSave,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: LibraryTheme.text(context),
@@ -183,7 +183,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: LibraryTheme.primary(context),
-                    side: const BorderSide(color: LibraryTheme.primary(context)),
+                    side: BorderSide(color: LibraryTheme.primary(context)),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
@@ -194,7 +194,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
             ],
 
             const Divider(height: 30, thickness: 1),
-            const Text(
+            Text(
               'ط§ظ„ظ…ظ„ط®طµ (Abstract)',
               style: TextStyle(
                 fontSize: 18,
@@ -227,7 +227,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
             color: LibraryTheme.text(context),
@@ -237,7 +237,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
         Expanded(
           child: Text(
             value.isEmpty ? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ' : value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               color: LibraryTheme.text(context),
             ),
@@ -247,3 +247,4 @@ class CoreResultDetailsScreen extends StatelessWidget {
     );
   }
 }
+

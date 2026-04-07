@@ -6,14 +6,14 @@ class FancyHeader extends StatelessWidget {
   final IconData icon;
 
   const FancyHeader({
-    Key? key,
+    super.key,
     required this.title,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    const LinearGradient gradient = LibraryTheme.primaryGradient;
+    LinearGradient gradient = LibraryTheme.primaryGradient;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -47,3 +47,4 @@ class FancyHeader extends StatelessWidget {
     );
   }
 }
+

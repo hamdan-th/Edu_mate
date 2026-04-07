@@ -1,4 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'library_theme.dart';
@@ -305,12 +305,12 @@ class _Field extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide:
-          const BorderSide(color: LibraryTheme.primary(context), width: 1.4),
+          BorderSide(color: LibraryTheme.primary(context), width: 1.4),
         ),
       ),
     );
@@ -337,7 +337,7 @@ class _Dropdown extends StatelessWidget {
     (value != null && uniqueItems.contains(value)) ? value : null;
 
     return DropdownButtonFormField<String>(
-      value: safeValue,
+      initialValue: safeValue,
       isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
@@ -349,12 +349,12 @@ class _Dropdown extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide:
-          const BorderSide(color: LibraryTheme.primary(context), width: 1.4),
+          BorderSide(color: LibraryTheme.primary(context), width: 1.4),
         ),
       ),
       items: uniqueItems
@@ -369,3 +369,4 @@ class _Dropdown extends StatelessWidget {
     );
   }
 }
+

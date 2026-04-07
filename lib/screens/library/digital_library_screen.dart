@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'core_api_service.dart';
@@ -6,7 +6,7 @@ import 'core_result_details_screen.dart';
 import 'library_theme.dart';
 
 class DigitalLibraryScreen extends StatefulWidget {
-  const DigitalLibraryScreen({Key? key}) : super(key: key);
+  const DigitalLibraryScreen({super.key});
 
   @override
   State<DigitalLibraryScreen> createState() => _DigitalLibraryScreenState();
@@ -180,7 +180,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                           if (authors.isNotEmpty)
                             Text(
                               authors,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: LibraryTheme.muted(context),
                                 fontSize: 13,
                               ),
@@ -232,7 +232,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
               child: Text(
                 _message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   color: LibraryTheme.muted(context),
                 ),
@@ -270,7 +270,7 @@ class _ActionButton extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: LibraryTheme.primary(context),
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -282,3 +282,4 @@ class _ActionButton extends StatelessWidget {
     );
   }
 }
+

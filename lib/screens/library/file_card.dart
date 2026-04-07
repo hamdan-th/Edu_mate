@@ -31,7 +31,7 @@ Color _getColorForFileType(BuildContext context, String fileType) {
 
 class FileCard extends StatelessWidget {
   final FileModel file;
-  const FileCard({Key? key, required this.file}) : super(key: key);
+  const FileCard({super.key, required this.file});
 
   Widget _buildThumbnail(BuildContext context) {
     final icon = _getIconForFileType(file.fileType);
@@ -124,7 +124,7 @@ class FileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${file.author} • ${file.college}',
+                  '${file.author} â€¢ ${file.college}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: LibraryTextStyles.subtitle(context),
@@ -164,11 +164,11 @@ class FileCard extends StatelessWidget {
   static String _statusText(String status) {
     switch (status) {
       case 'approved':
-        return 'منشور';
+        return 'ظ…ظ†ط´ظˆط±';
       case 'pending':
-        return 'قيد المراجعة';
+        return 'ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©';
       case 'rejected':
-        return 'مرفوض';
+        return 'ظ…ط±ظپظˆط¶';
       default:
         return status;
     }
@@ -177,7 +177,7 @@ class FileCard extends StatelessWidget {
 
 class GridFileCard extends StatelessWidget {
   final FileModel file;
-  const GridFileCard({Key? key, required this.file}) : super(key: key);
+  const GridFileCard({super.key, required this.file});
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +220,7 @@ class GridFileCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${file.author} • ${file.college}',
+              '${file.author} â€¢ ${file.college}',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: LibraryTextStyles.subtitle(context).copyWith(fontSize: 11),
@@ -260,3 +260,4 @@ class _MetricChip extends StatelessWidget {
     );
   }
 }
+

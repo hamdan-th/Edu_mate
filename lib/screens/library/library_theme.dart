@@ -15,25 +15,25 @@ class LibraryTheme {
   static Color muted(BuildContext context) => Theme.of(context).colorScheme.onSurfaceVariant;
   static Color border(BuildContext context) => Theme.of(context).dividerColor.withOpacity(0.08);
 
-  static const LinearGradient primaryGradient = LinearGradient(
+  static LinearGradient primaryGradient = const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [AppColors.primary, AppColors.primaryDark],
   );
 
-  static const LinearGradient aquaGradient = LinearGradient(
+  static LinearGradient aquaGradient = const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [AppColors.blueGlow, AppColors.primary],
   );
 
-  static const LinearGradient amberGradient = LinearGradient(
+  static LinearGradient amberGradient = const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [AppColors.secondary, Color(0xFFF59E0B)],
   );
 
-  static const LinearGradient mintGradient = LinearGradient(
+  static LinearGradient mintGradient = const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [AppColors.success, AppColors.primary],
@@ -41,9 +41,9 @@ class LibraryTheme {
 }
 
 class LibrarySpacing {
-  static const EdgeInsets card = EdgeInsets.symmetric(horizontal: 14, vertical: 14);
-  static const EdgeInsets gridCard = EdgeInsets.all(12);
-  static const EdgeInsets badge = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+  static EdgeInsets card = const EdgeInsets.symmetric(horizontal: 14, vertical: 14);
+  static EdgeInsets gridCard = const EdgeInsets.all(12);
+  static EdgeInsets badge = const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 }
 
 class LibraryRadius {
@@ -83,3 +83,4 @@ class LibraryTextStyles {
         );
   }
 }
+

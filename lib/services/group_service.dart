@@ -548,7 +548,7 @@ class GroupService {
           .ref()
           .child('groups_chat')
           .child(groupId)
-          .child('${DateTime.now().millisecondsSinceEpoch}_${currentUid}.jpg');
+          .child('${DateTime.now().millisecondsSinceEpoch}_$currentUid.jpg');
       final uploadTask = await ref.putFile(imageFile);
       imageUrl = await uploadTask.ref.getDownloadURL();
     }

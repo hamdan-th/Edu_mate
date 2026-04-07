@@ -1,17 +1,16 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'library_theme.dart';
 import 'library_upload_service.dart';
 import 'university_academic_data.dart';
 
 class UploadScreen extends StatefulWidget {
-  const UploadScreen({Key? key}) : super(key: key);
+  const UploadScreen({super.key});
 
   @override
   State<UploadScreen> createState() => _UploadScreenState();
@@ -336,7 +335,7 @@ class _UploadScreenState extends State<UploadScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Center(
+                    Center(
                       child: Text(
                         'ط³ظٹطھظ… ط±ظپط¹ ط§ظ„ظ…ظ„ظپ ط«ظ… ظ…ط±ط§ط¬ط¹طھظ‡ ظ‚ط¨ظ„ ط¸ظ‡ظˆط±ظ‡ ط¯ط§ط®ظ„ ظ…ظƒطھط¨ط© ط§ظ„ط¬ط§ظ…ط¹ط©',
                         textAlign: TextAlign.center,
@@ -389,7 +388,7 @@ class _TopBar extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        const Text(
+        Text(
           'ط±ظپط¹ ظ…ظ„ظپ ط¬ط¯ظٹط¯',
           style: TextStyle(
             fontSize: 21,
@@ -554,7 +553,7 @@ class _FilePickerCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14.6,
                     fontWeight: FontWeight.w700,
                     color: LibraryTheme.text(context),
@@ -566,7 +565,7 @@ class _FilePickerCard extends StatelessWidget {
                       ? 'طھظ… ط§ط®طھظٹط§ط± ط§ظ„ظ…ظ„ظپ ط¨ظ†ط¬ط§ط­طŒ ظˆظٹظ…ظƒظ†ظƒ ط§ظ„ط¢ظ† ط¥ظƒظ…ط§ظ„ ط¨ظ‚ظٹط© ط§ظ„ط¨ظٹط§ظ†ط§طھ'
                       : 'ط§ظ„ط£ظ†ظˆط§ط¹ ط§ظ„ظ…ط¯ط¹ظˆظ…ط©: PDF / DOC / DOCX / JPG / PNG',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12.5,
                     color: LibraryTheme.muted(context),
                     height: 1.5,
@@ -585,7 +584,7 @@ class _FilePickerCard extends StatelessWidget {
                   ),
                   child: Text(
                     hasFile ? 'طھط؛ظٹظٹط± ط§ظ„ظ…ظ„ظپ' : 'ط§ط®طھظٹط§ط± ظ…ظ„ظپ',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: LibraryTheme.primary(context),
@@ -633,7 +632,7 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17.5,
               fontWeight: FontWeight.w800,
               color: LibraryTheme.text(context),
@@ -642,7 +641,7 @@ class _SectionCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12.8,
               color: LibraryTheme.muted(context),
               height: 1.45,
@@ -677,7 +676,7 @@ class _ModernTextField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14.5,
         color: LibraryTheme.text(context),
         fontWeight: FontWeight.w600,
@@ -697,14 +696,14 @@ class _ModernTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.border(context),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),
@@ -750,10 +749,10 @@ class _ModernDropdown extends StatelessWidget {
     value != null && uniqueItems.contains(value) ? value : null;
 
     return DropdownButtonFormField<String>(
-      value: safeValue,
+      initialValue: safeValue,
       isExpanded: true,
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14.5,
         color: LibraryTheme.text(context),
         fontWeight: FontWeight.w600,
@@ -773,14 +772,14 @@ class _ModernDropdown extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.border(context),
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),
@@ -801,3 +800,4 @@ class _ModernDropdown extends StatelessWidget {
     );
   }
 }
+

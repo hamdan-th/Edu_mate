@@ -329,7 +329,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
-                  value: _selectedCollegeId,
+                  initialValue: _selectedCollegeId,
                   decoration: const InputDecoration(
                     labelText: 'الكلية',
                     prefixIcon: Icon(Icons.account_balance_rounded),
@@ -360,7 +360,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
-                  value: _selectedSpecializationId,
+                  initialValue: _selectedSpecializationId,
                   decoration: const InputDecoration(
                     labelText: 'التخصص',
                     prefixIcon: Icon(Icons.school_rounded),

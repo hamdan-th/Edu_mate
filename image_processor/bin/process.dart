@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:image/image.dart' as img;
 
 void main() {
-  final inputPath = r'C:\Users\Abdulaziz\.gemini\antigravity\brain\aaf180ad-5274-4b28-8f5c-c14803ac291b\media__1775442994875.jpg';
-  final outputPath = r'C:\Users\Abdulaziz\IdeaProjects\edu_mate\assets\images\university_logo.png';
+  const inputPath = r'C:\Users\Abdulaziz\.gemini\antigravity\brain\aaf180ad-5274-4b28-8f5c-c14803ac291b\media__1775442994875.jpg';
+  const outputPath = r'C:\Users\Abdulaziz\IdeaProjects\edu_mate\assets\images\university_logo.png';
   
   final bytes = File(inputPath).readAsBytesSync();
   final image = img.decodeImage(bytes);

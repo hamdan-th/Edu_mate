@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
-import '../../models/group_membership_state.dart';
 
 class ManageMembersScreen extends StatefulWidget {
   final GroupModel group;
@@ -281,18 +280,18 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     final imageUrl = data['imageUrl'] as String?;
 
     final bool isMe = memberId == _auth.currentUser?.uid;
-    final bool _isTargetOwner = role == 'owner' || memberId == widget.group.ownerId;
-    final bool _isTargetAdmin = role == 'admin';
+    final bool isTargetOwner = role == 'owner' || memberId == widget.group.ownerId;
+    final bool isTargetAdmin = role == 'admin';
 
     String roleLabel = "عضو";
     Color roleColor = AppColors.textSecondary;
     Widget roleIcon = const SizedBox.shrink();
 
-    if (_isTargetOwner) {
+    if (isTargetOwner) {
       roleLabel = "مالك";
       roleColor = AppColors.error;
       roleIcon = const Icon(Icons.workspace_premium, color: Colors.purple, size: 18);
-    } else if (_isTargetAdmin) {
+    } else if (isTargetAdmin) {
       roleLabel = "مشرف";
       roleColor = AppColors.warning;
       roleIcon = const Icon(Icons.headset_mic, color: Colors.orange, size: 18);
@@ -358,7 +357,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
               ),
             ),
             if (!isMe)
-              _buildPopupMenu(memberId, data, _isTargetOwner, _isTargetAdmin),
+              _buildPopupMenu(memberId, data, isTargetOwner, isTargetAdmin),
           ],
         ),
       ),

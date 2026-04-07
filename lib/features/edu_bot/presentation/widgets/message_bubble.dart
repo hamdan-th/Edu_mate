@@ -133,12 +133,12 @@ class MessageBubble extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.error_outline_rounded, color: AppColors.error, size: 16),
+                                  const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 16),
                                   const SizedBox(width: 8),
                                   Flexible(
                                     child: Text(
                                       message.errorMessage ?? 'فشل الإرسال',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: AppColors.error,
                                         fontSize: 12.5,
                                         fontWeight: FontWeight.w600,

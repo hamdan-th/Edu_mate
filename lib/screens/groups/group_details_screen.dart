@@ -7,8 +7,6 @@ import '../../models/group_message_model.dart';
 import '../../models/group_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/group_service.dart';
-import '../../models/group_membership_state.dart';
-import 'manage_members_screen.dart';
 import 'group_chat_screen.dart';
 import 'create_group_feed_post_screen.dart';
 import 'invite_group_screen.dart';
@@ -522,7 +520,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.school_rounded, size: 16, color: AppColors.textSecondary),
+                  const Icon(Icons.school_rounded, size: 16, color: AppColors.textSecondary),
                   const SizedBox(width: 6),
                   Text(
                     "${widget.group.collegeName} • ${widget.group.specializationName}",
@@ -727,7 +725,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                                 ],
                                 SwitchListTile(
                                   title: const Text("السماح للأعضاء بالمشاركة في الدردشة", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-                                  activeColor: AppColors.primary,
+                                  activeThumbColor: AppColors.primary,
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 24),
                                   value: canChat,
                                   onChanged: (val) => _firestore.collection('groups').doc(widget.group.id).update({'membersCanChat': val}),
@@ -741,7 +739,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: const SizedBox(height: 8)),
+              const SliverToBoxAdapter(child: SizedBox(height: 8)),
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _StickyTabBarDelegate(

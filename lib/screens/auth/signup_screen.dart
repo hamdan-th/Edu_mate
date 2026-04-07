@@ -109,7 +109,7 @@ class _SignupScreenState extends State<SignupScreen>
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Positioned(
+                const Positioned(
                   top: 22,
                   child: Icon(
                     Icons.school_rounded,
@@ -375,7 +375,7 @@ class _SignupScreenState extends State<SignupScreen>
                                   ),
                                   const SizedBox(height: 14),
                                   DropdownButtonFormField<String>(
-                                    value: _selectedCollege,
+                                    initialValue: _selectedCollege,
                                     dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
                                     style: textTheme.bodyLarge,
                                     decoration: _inputDecoration(
@@ -400,7 +400,7 @@ class _SignupScreenState extends State<SignupScreen>
                                   ),
                                   const SizedBox(height: 14),
                                   DropdownButtonFormField<String>(
-                                    value: _specializationId,
+                                    initialValue: _specializationId,
                                     dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
                                     style: textTheme.bodyLarge,
                                     decoration: _inputDecoration(

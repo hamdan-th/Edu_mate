@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FileModel {
   final String id;
@@ -25,7 +25,7 @@ class FileModel {
   final String? userId;
   final String? storagePath;
 
-  const FileModel({
+  FileModel({
     required this.id,
     required this.title,
     required this.author,
@@ -58,7 +58,7 @@ class FileModel {
   String get displayUploader {
     if (uploaderUsername.trim().isNotEmpty) return '@$uploaderUsername';
     if (uploaderName.trim().isNotEmpty) return uploaderName;
-    return 'غير معروف';
+    return 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
   }
 
   FileModel copyWith({
@@ -107,8 +107,8 @@ class FileModel {
     }
 
     final Timestamp? createdAtTimestamp = data['createdAt'] as Timestamp?;
-    final subjectName = (data['subjectName'] ?? data['title'] ?? 'بدون عنوان').toString();
-    final doctorName = (data['doctorName'] ?? data['author'] ?? 'غير معروف').toString();
+    final subjectName = (data['subjectName'] ?? data['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString();
+    final doctorName = (data['doctorName'] ?? data['author'] ?? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString();
     final college = (data['college'] ?? '').toString();
     final specialization = (data['specialization'] ?? data['major'] ?? '').toString();
     final level = (data['level'] ?? '').toString();
@@ -119,10 +119,10 @@ class FileModel {
       title: subjectName,
       author: doctorName,
       course: subjectName,
-      university: (data['university'] ?? 'جامعة صنعاء').toString(),
+      university: (data['university'] ?? 'ط¬ط§ظ…ط¹ط© طµظ†ط¹ط§ط،').toString(),
       college: college,
       major: specialization,
-      semester: '$level${term.isNotEmpty ? ' • $term' : ''}',
+      semester: '$level${term.isNotEmpty ? ' â€¢ $term' : ''}',
       fileType: (data['fileType'] ?? 'File').toString(),
       thumbnailUrl: (data['thumbnailUrl'] ?? '').toString(),
       fileUrl: (data['fileUrl'] ?? '').toString(),
@@ -141,3 +141,4 @@ class FileModel {
     );
   }
 }
+

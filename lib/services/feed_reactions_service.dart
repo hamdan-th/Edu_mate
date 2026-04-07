@@ -40,7 +40,7 @@ class FeedReactionsService {
       final postSnapshot = await transaction.get(postRef);
       if (!postSnapshot.exists) return;
 
-      final data = postSnapshot.data() as Map<String, dynamic>?;
+      final data = postSnapshot.data();
       int currentLikes = data?['likesCount'] as int? ?? 0;
 
       final likeSnapshot = await transaction.get(docRef);

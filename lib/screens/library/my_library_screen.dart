@@ -1,15 +1,14 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'digital_library_firestore_service.dart';
 import 'library_files_service.dart';
 import 'library_theme.dart';
 import 'my_files_list_screen.dart';
 import 'upload_screen.dart';
 
 class MyLibraryScreen extends StatelessWidget {
-  const MyLibraryScreen({Key? key}) : super(key: key);
+  const MyLibraryScreen({super.key});
 
   Stream<int> _collectionGroupCount(String collectionName) {
     final user = FirebaseAuth.instance.currentUser;
@@ -225,12 +224,12 @@ class MyLibraryScreen extends StatelessWidget {
                 ),
               ],
             ),
-            // const SizedBox(height: 22),
+            // SizedBox(height: 22),
             // const _SectionHeader(
             //  title: 'ظ†ط¸ط±ط© ط³ط±ظٹط¹ط©',
             //  subtitle: 'ظ…ط¹ظ„ظˆظ…ط§طھ ظ…ظ‡ظ…ط© ط¹ظ† ط­ط§ظ„ط© ط§ظ„ظ…ظ„ظپط§طھ ط¯ط§ط®ظ„ ظ…ظƒطھط¨طھظƒ',
             // ),
-            // const SizedBox(height: 12),
+            // SizedBox(height: 12),
             // const _InfoCard(
             //  items: [
             // _InfoItemData(
@@ -315,7 +314,7 @@ class _HeroCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -327,7 +326,7 @@ class _HeroCard extends StatelessWidget {
                         color: LibraryTheme.text(context),
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'ظ…ط³ط§ط­ط© ظ…ط±طھط¨ط© ظ„ظ…ظ„ظپط§طھظƒطŒ ظ…ط­ظپظˆط¸ط§طھظƒطŒ ظˆطھظ†ط²ظٹظ„ط§طھظƒ ط¯ط§ط®ظ„ ط§ظ„طھط·ط¨ظٹظ‚.',
                       style: TextStyle(
@@ -349,8 +348,8 @@ class _HeroCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: LibraryTheme.border(context)),
             ),
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 _MiniFeature(
                   icon: Icons.upload_file_rounded,
                   label: 'ط±ظپط¹',
@@ -427,7 +426,7 @@ class _MiniFeature extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                   color: LibraryTheme.text(context),
@@ -450,14 +449,13 @@ class _StatCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const _StatCard({
-    Key? key,
     required this.title,
     required this.subtitle,
     required this.count,
     required this.icon,
     required this.colors,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<_StatCard> createState() => _StatCardState();
@@ -594,7 +592,7 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: LibraryTheme.text(context),
@@ -603,7 +601,7 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             color: LibraryTheme.muted(context),
             height: 1.45,
@@ -678,7 +676,7 @@ class _InfoTile extends StatelessWidget {
             children: [
               Text(
                 item.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
                   color: LibraryTheme.text(context),
@@ -687,7 +685,7 @@ class _InfoTile extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 item.subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   color: LibraryTheme.muted(context),
                   fontSize: 12.8,
                   height: 1.5,
@@ -712,3 +710,4 @@ class _InfoItemData {
     required this.subtitle,
   });
 }
+

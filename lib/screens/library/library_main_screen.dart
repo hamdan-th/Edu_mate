@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'digital_library_screen.dart';
-import 'library_theme.dart';
 import 'my_library_screen.dart';
 import 'university_library_screen.dart';
 
 class LibraryMainScreen extends StatefulWidget {
-  const LibraryMainScreen({Key? key}) : super(key: key);
+  const LibraryMainScreen({super.key});
 
   @override
   State<LibraryMainScreen> createState() => _LibraryMainScreenState();
@@ -15,23 +14,23 @@ class LibraryMainScreen extends StatefulWidget {
 class _LibraryMainScreenState extends State<LibraryMainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = const [
-    UniversityLibraryScreen(),
-    DigitalLibraryScreen(),
-    MyLibraryScreen(),
+  final List<Widget> _pages = [
+    const UniversityLibraryScreen(),
+    const DigitalLibraryScreen(),
+    const MyLibraryScreen(),
   ];
 
-  final List<_LibraryTabItem> _tabs = const [
-    _LibraryTabItem(
-      title: 'مكتبة الجامعة',
+  final List<_LibraryTabItem> _tabs = [
+    const _LibraryTabItem(
+      title: 'ظ…ظƒطھط¨ط© ط§ظ„ط¬ط§ظ…ط¹ط©',
       icon: Icons.school_rounded,
     ),
-    _LibraryTabItem(
-      title: 'المكتبة الرقمية',
+    const _LibraryTabItem(
+      title: 'ط§ظ„ظ…ظƒطھط¨ط© ط§ظ„ط±ظ‚ظ…ظٹط©',
       icon: Icons.language_rounded,
     ),
-    _LibraryTabItem(
-      title: 'مكتبتي',
+    const _LibraryTabItem(
+      title: 'ظ…ظƒطھط¨طھظٹ',
       icon: Icons.folder_copy_rounded,
     ),
   ];
@@ -57,7 +56,7 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
 
             const SizedBox(height: 12),
 
-            /// 🔥 Animated page switch
+            /// ًں”¥ Animated page switch
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
@@ -126,10 +125,10 @@ class _ModernHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          /// 🔥 HEADER
+          /// ًں”¥ HEADER
           Row(
             children: [
-              /// 🔥 Glass Icon
+              /// ًں”¥ Glass Icon
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 width: 60,
@@ -181,7 +180,7 @@ class _ModernHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'استكشف وادِر مكتبتك الجامعية بسهولة',
+                      'ط§ط³طھظƒط´ظپ ظˆط§ط¯ظگط± ظ…ظƒطھط¨طھظƒ ط§ظ„ط¬ط§ظ…ط¹ظٹط© ط¨ط³ظ‡ظˆظ„ط©',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.85),
                         fontSize: 13,
@@ -195,7 +194,7 @@ class _ModernHeader extends StatelessWidget {
 
           const SizedBox(height: 18),
 
-          /// 🔥 MODERN TABS
+          /// ًں”¥ MODERN TABS
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(

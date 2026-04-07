@@ -189,12 +189,12 @@ class _FeedScreenState extends State<FeedScreen> {
                           fontWeight: FontWeight.w400,
                           fontSize: 14,
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.search_rounded,
                           color: AppColors.textSecondary,
                           size: 20,
                         ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
@@ -1088,9 +1088,9 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseLight = const Color(0xFFF1F4FA);
-    final highlightLight = const Color(0xFFF8FAFE);
-    final baseDark = AppColors.surface;
+    const baseLight = Color(0xFFF1F4FA);
+    const highlightLight = Color(0xFFF8FAFE);
+    const baseDark = AppColors.surface;
     final highlightDark = AppColors.surface.withOpacity(0.5);
 
     final base = isDark ? baseDark : baseLight;

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:edu_mate/l10n/app_localizations.dart';
 
 import '../../core/providers/app_settings_provider.dart';
-import '../../core/theme/app_colors.dart';
 
 class SettingsBottomSheet extends StatelessWidget {
   const SettingsBottomSheet({super.key});

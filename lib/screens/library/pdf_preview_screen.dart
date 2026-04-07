@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'library_theme.dart';
 
@@ -23,7 +23,7 @@ class PdfPreviewScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: url.trim().isEmpty
-          ? const Center(
+          ? Center(
         child: Text(
           'ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„ظ…ظ„ظپ',
           style: TextStyle(color: LibraryTheme.text(context)),
@@ -33,3 +33,4 @@ class PdfPreviewScreen extends StatelessWidget {
     );
   }
 }
+

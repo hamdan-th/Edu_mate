@@ -1,4 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,7 +13,7 @@ import 'pdf_preview_screen.dart';
 
 class MyFilesListScreen extends StatelessWidget {
   final String title;
-  const MyFilesListScreen({Key? key, required this.title}) : super(key: key);
+  const MyFilesListScreen({super.key, required this.title});
 
   FileModel _mapDocToFileModel(Map<String, dynamic> data, String docId) {
     final subjectName = (data['subjectName'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString();
@@ -145,7 +145,7 @@ class MyFilesListScreen extends StatelessWidget {
       return Center(
         child: Text(
           emptyMessage,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             color: LibraryTheme.text(context),
           ),
@@ -211,7 +211,7 @@ class MyFilesListScreen extends StatelessWidget {
               ),
               title: Text(
                 data['subjectName'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: LibraryTheme.text(context),
                 ),
@@ -220,7 +220,7 @@ class MyFilesListScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   '${data['doctorName'] ?? ''} â€¢ ${data['college'] ?? ''}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: LibraryTheme.muted(context),
                     height: 1.4,
                   ),
@@ -231,7 +231,7 @@ class MyFilesListScreen extends StatelessWidget {
                 children: [
                   Text(
                     (data['fileType'] ?? '').toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: LibraryTheme.text(context),
                     ),
@@ -239,7 +239,7 @@ class MyFilesListScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     (data['term'] ?? '').toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       color: LibraryTheme.muted(context),
                     ),
@@ -265,7 +265,7 @@ class MyFilesListScreen extends StatelessWidget {
           return Center(
             child: Text(
               'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text(context)),
+              style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -280,7 +280,7 @@ class MyFilesListScreen extends StatelessWidget {
   Widget _buildSavedReferences() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Center(
+      return Center(
         child: Text(
           'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
@@ -302,7 +302,7 @@ class MyFilesListScreen extends StatelessWidget {
           return Center(
             child: Text(
               'ط­ط¯ط« ط®ط·ط£: ${saveSnapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text(context)),
+              style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -321,7 +321,7 @@ class MyFilesListScreen extends StatelessWidget {
               return Center(
                 child: Text(
                   'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
-                  style: const TextStyle(color: LibraryTheme.text(context)),
+                  style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
               );
@@ -339,7 +339,7 @@ class MyFilesListScreen extends StatelessWidget {
   Widget _buildDownloads() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Center(
+      return Center(
         child: Text(
           'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
@@ -361,7 +361,7 @@ class MyFilesListScreen extends StatelessWidget {
           return Center(
             child: Text(
               'ط­ط¯ط« ط®ط·ط£: ${downloadSnapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text(context)),
+              style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -380,7 +380,7 @@ class MyFilesListScreen extends StatelessWidget {
               return Center(
                 child: Text(
                   'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
-                  style: const TextStyle(color: LibraryTheme.text(context)),
+                  style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
               );
@@ -398,7 +398,7 @@ class MyFilesListScreen extends StatelessWidget {
   Widget _buildShares() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Center(
+      return Center(
         child: Text(
           'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
@@ -420,7 +420,7 @@ class MyFilesListScreen extends StatelessWidget {
           return Center(
             child: Text(
               'ط­ط¯ط« ط®ط·ط£: ${shareSnapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text(context)),
+              style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -439,7 +439,7 @@ class MyFilesListScreen extends StatelessWidget {
               return Center(
                 child: Text(
                   'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
-                  style: const TextStyle(color: LibraryTheme.text(context)),
+                  style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
               );
@@ -465,7 +465,7 @@ class MyFilesListScreen extends StatelessWidget {
           return Center(
             child: Text(
               'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text(context)),
+              style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -516,14 +516,14 @@ class MyFilesListScreen extends StatelessWidget {
                       color: LibraryTheme.primary(context).withOpacity(0.10),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.menu_book_rounded,
                       color: LibraryTheme.primary(context),
                     ),
                   ),
                   title: Text(
                     (data['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: LibraryTheme.text(context),
                     ),
@@ -532,13 +532,13 @@ class MyFilesListScreen extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       (data['authors'] ?? 'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: LibraryTheme.muted(context),
                         height: 1.4,
                       ),
                     ),
                   ),
-                  trailing: const Text(
+                  trailing: Text(
                     'CORE',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
@@ -566,7 +566,7 @@ class MyFilesListScreen extends StatelessWidget {
           return Center(
             child: Text(
               'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text(context)),
+              style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -629,14 +629,14 @@ class MyFilesListScreen extends StatelessWidget {
                       color: LibraryTheme.primary(context).withOpacity(0.10),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.download_rounded,
                       color: LibraryTheme.primary(context),
                     ),
                   ),
                   title: Text(
                     (data['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: LibraryTheme.text(context),
                     ),
@@ -645,13 +645,13 @@ class MyFilesListScreen extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       (data['authors'] ?? 'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: LibraryTheme.muted(context),
                         height: 1.4,
                       ),
                     ),
                   ),
-                  trailing: const Text(
+                  trailing: Text(
                     'ظپطھط­',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
@@ -725,7 +725,7 @@ class MyFilesListScreen extends StatelessWidget {
           : Center(
         child: Text(
           'ط³ظٹطھظ… ط¹ط±ط¶ ظ‚ط§ط¦ظ…ط© "$title" ظ‡ظ†ط§ ظ„ط§ط­ظ‚ظ‹ط§',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             color: LibraryTheme.text(context),
           ),
@@ -761,3 +761,4 @@ class _WrappedQueryDocumentSnapshot
   dynamic noSuchMethod(Invocation invocation) =>
       super.noSuchMethod(invocation);
 }
+

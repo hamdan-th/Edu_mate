@@ -93,7 +93,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
       decoration: BoxDecoration(
-        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : Color(0xFFF8F9FA)),
+        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
@@ -162,7 +162,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                         children: [
                           Icon(Icons.chat_bubble_outline_rounded,
                               size: 48, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(
                             'لا توجد تعليقات بعد\nكُن أول من يعلق!',
                             textAlign: TextAlign.center,

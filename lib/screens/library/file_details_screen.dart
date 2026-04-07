@@ -1,4 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -13,7 +13,7 @@ import 'university_academic_data.dart';
 
 class FileDetailsScreen extends StatefulWidget {
   final FileModel file;
-  const FileDetailsScreen({Key? key, required this.file}) : super(key: key);
+  const FileDetailsScreen({super.key, required this.file});
 
   @override
   State<FileDetailsScreen> createState() => _FileDetailsScreenState();
@@ -100,14 +100,14 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                   color: LibraryTheme.primary(context).withOpacity(0.08),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.description_rounded,
                   color: LibraryTheme.primary(context),
                   size: 26,
                 ),
               ),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'ظ…ظ„ظپ Word',
                 style: TextStyle(
                   fontSize: 18,
@@ -116,7 +116,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'ظ‡ط°ط§ ط§ظ„ظ†ظˆط¹ ظ„ط§ ظٹظڈط¹ط±ط¶ ط¯ط§ط®ظ„ ط§ظ„طھط·ط¨ظٹظ‚ ط­ط§ظ„ظٹظ‹ط§.\nط§ط®طھط± ظپطھط­ظ‡ ط®ط§ط±ط¬ظٹظ‹ط§ ط£ظˆ طھظ†ط²ظٹظ„ظ‡.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -136,7 +136,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: LibraryTheme.primary(context),
-                        side: const BorderSide(color: LibraryTheme.primary(context)),
+                        side: BorderSide(color: LibraryTheme.primary(context)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -498,7 +498,7 @@ $url
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
+            child: Text(
               'ط­ط°ظپ',
               style: TextStyle(color: LibraryTheme.danger(context)),
             ),
@@ -558,7 +558,7 @@ $url
           const SizedBox(width: 10),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13.2,
               fontWeight: FontWeight.w700,
               color: LibraryTheme.text(context),
@@ -605,7 +605,7 @@ $url
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               color: LibraryTheme.muted(context),
             ),
@@ -765,7 +765,7 @@ $url
                                       const SizedBox(height: 8),
                                       Text(
                                         updatedFile.title,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 18,
                                           height: 1.3,
                                           fontWeight: FontWeight.w800,
@@ -780,7 +780,7 @@ $url
                             const SizedBox(height: 14),
                             Text(
                               'ط¯. ${updatedFile.author}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14.5,
                                 color: LibraryTheme.muted(context),
                                 fontWeight: FontWeight.w600,
@@ -789,7 +789,7 @@ $url
                             const SizedBox(height: 4),
                             Text(
                               'ط±ظپط¹ظ‡: ${updatedFile.displayUploader}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12.8,
                                 color: LibraryTheme.muted(context),
                               ),
@@ -925,7 +925,7 @@ $url
                               onPressed: () => _downloadFile(updatedFile.fileUrl),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: LibraryTheme.primary(context),
-                                side: const BorderSide(color: LibraryTheme.primary(context)),
+                                side: BorderSide(color: LibraryTheme.primary(context)),
                                 padding: const EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
@@ -1132,7 +1132,7 @@ class _ReactionButton extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               '$count',
-              style: const TextStyle(
+              style: TextStyle(
                 color: LibraryTheme.muted(context),
                 fontSize: 11.5,
               ),
@@ -1173,11 +1173,11 @@ class _ModernField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),
@@ -1208,7 +1208,7 @@ class _DropdownField extends StatelessWidget {
     (value != null && uniqueItems.contains(value)) ? value : null;
 
     return DropdownButtonFormField<String>(
-      value: safeValue,
+      initialValue: safeValue,
       isExpanded: true,
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
       decoration: InputDecoration(
@@ -1222,11 +1222,11 @@ class _DropdownField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
+          borderSide: BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),
@@ -1247,3 +1247,4 @@ class _DropdownField extends StatelessWidget {
     );
   }
 }
+
