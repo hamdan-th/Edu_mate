@@ -60,13 +60,13 @@ class CoreResultDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.people_alt_outlined, 'ط§ظ„ظ…ط¤ظ„ظپظˆظ†:', authors),
+            _buildInfoRow(context, Icons.people_alt_outlined, 'المؤلفون:', authors),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.business_rounded, 'ط§ظ„ظ†ط§ط´ط±:', publisher.toString()),
+            _buildInfoRow(context, Icons.business_rounded, 'الناشر:', publisher.toString()),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.calendar_today_rounded, 'ط³ظ†ط© ط§ظ„ظ†ط´ط±:', year),
+            _buildInfoRow(context, Icons.calendar_today_rounded, 'سنة النشر:', year),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.menu_book_rounded, 'ط§ظ„ظ…ط¬ظ„ط©:', journal),
+            _buildInfoRow(context, Icons.menu_book_rounded, 'المجلة:', journal),
             const Divider(height: 30, thickness: 1),
 
             Row(
@@ -219,7 +219,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

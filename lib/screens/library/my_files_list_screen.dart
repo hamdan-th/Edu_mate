@@ -253,7 +253,7 @@ class MyFilesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMyUploads() {
+  Widget _buildMyUploads(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: LibraryFilesService.myUploadedFiles(),
       builder: (context, snapshot) {
@@ -277,7 +277,7 @@ class MyFilesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSavedReferences() {
+  Widget _buildSavedReferences(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Center(
@@ -336,7 +336,7 @@ class MyFilesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDownloads() {
+  Widget _buildDownloads(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Center(
@@ -395,7 +395,7 @@ class MyFilesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildShares() {
+  Widget _buildShares(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Center(
@@ -453,7 +453,7 @@ class MyFilesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDigitalSavedReferences() {
+  Widget _buildDigitalSavedReferences(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: DigitalLibraryFirestoreService.savedReferences(),
       builder: (context, snapshot) {
@@ -554,7 +554,7 @@ class MyFilesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDigitalDownloads() {
+  Widget _buildDigitalDownloads(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: DigitalLibraryFirestoreService.downloadedReferences(),
       builder: (context, snapshot) {
@@ -701,13 +701,13 @@ class MyFilesListScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: isMyUploads
-          ? _buildMyUploads()
+          ? _buildMyUploads(context)
           : isReferences
           ? SingleChildScrollView(
         child: Column(
           children: [
-            _buildSavedReferences(),
-            _buildDigitalSavedReferences(),
+            _buildSavedReferences(context),
+            _buildDigitalSavedReferences(context),
           ],
         ),
       )
@@ -715,13 +715,13 @@ class MyFilesListScreen extends StatelessWidget {
           ? SingleChildScrollView(
         child: Column(
           children: [
-            _buildDownloads(),
-            _buildDigitalDownloads(),
+            _buildDownloads(context),
+            _buildDigitalDownloads(context),
           ],
         ),
       )
           : isShares
-          ? _buildShares()
+          ? _buildShares(context)
           : Center(
         child: Text(
           'ط³ظٹطھظ… ط¹ط±ط¶ ظ‚ط§ط¦ظ…ط© "$title" ظ‡ظ†ط§ ظ„ط§ط­ظ‚ظ‹ط§',
