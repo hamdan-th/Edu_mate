@@ -16,16 +16,16 @@ IconData _getIconForFileType(String fileType) {
   }
 }
 
-Color _getColorForFileType(BuildContext context, String fileType) {
+Color _getColorForFileType(String fileType) {
   switch (fileType.toLowerCase()) {
     case 'pdf':
-      return Theme.of(context).colorScheme.error;
+      return LibraryTheme.danger(context);
     case 'word':
-      return Theme.of(context).colorScheme.primary;
+      return LibraryTheme.primary(context);
     case 'image':
-      return const Color(0xFFF59E0B); // Gold accents can remain
+      return LibraryTheme.accent(context);
     default:
-      return Theme.of(context).colorScheme.onSurfaceVariant;
+      return LibraryTheme.text(context).withOpacity(0.72);
   }
 }
 
@@ -33,9 +33,9 @@ class FileCard extends StatelessWidget {
   final FileModel file;
   const FileCard({super.key, required this.file});
 
-  Widget _buildThumbnail(BuildContext context) {
+  Widget _buildThumbnail() {
     final icon = _getIconForFileType(file.fileType);
-    final color = _getColorForFileType(context, file.fileType);
+    final color = _getColorForFileType(file.fileType);
 
     if (file.thumbnailUrl.trim().isNotEmpty) {
       return ClipRRect(
@@ -65,22 +65,26 @@ class FileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fileColor = _getColorForFileType(context, file.fileType);
-    final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = Theme.of(context).dividerColor.withOpacity(0.08);
+    final fileColor = _getColorForFileType(file.fileType);
 
     return Container(
-      padding: LibrarySpacing.card,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(LibraryRadius.card),
-        border: Border.all(color: borderColor),
-        boxShadow: LibraryShadows.soft(context),
+        color: LibraryTheme.surface(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: LibraryTheme.border(context)),
+        boxShadow: [
+          BoxShadow(
+            color: LibraryTheme.primary(context).withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(width: 58, height: 58, child: _buildThumbnail(context)),
+          SizedBox(width: 58, height: 58, child: _buildThumbnail()),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -92,25 +96,33 @@ class FileCard extends StatelessWidget {
                   runSpacing: 4,
                   children: [
                     Container(
-                      padding: LibrarySpacing.badge,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: fileColor.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(LibraryRadius.badge),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
                         file.fileType,
-                        style: LibraryTextStyles.badge(context, fileColor),
+                        style: TextStyle(
+                          color: fileColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     Container(
-                      padding: LibrarySpacing.badge,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _statusColor(context, file.status).withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(LibraryRadius.badge),
+                        color: _statusColor(file.status).withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
                         _statusText(file.status),
-                        style: LibraryTextStyles.badge(context, _statusColor(context, file.status)),
+                        style: TextStyle(
+                          color: _statusColor(file.status),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
@@ -120,23 +132,30 @@ class FileCard extends StatelessWidget {
                   file.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: LibraryTextStyles.title(context),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    color: LibraryTheme.text(context),
+                    height: 1.3,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${file.author} â€¢ ${file.college}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: LibraryTextStyles.subtitle(context),
+                  style: TextStyle(
+                    color: LibraryTheme.muted(context),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _MetricChip(icon: Icons.thumb_up_alt_outlined, value: file.likes),
-                    const SizedBox(width: 18),
                     _MetricChip(icon: Icons.bookmark_border_rounded, value: file.saves),
-                    const SizedBox(width: 18),
                     _MetricChip(icon: Icons.visibility_outlined, value: file.views),
                   ],
                 ),
@@ -148,16 +167,16 @@ class FileCard extends StatelessWidget {
     );
   }
 
-  static Color _statusColor(BuildContext context, String status) {
+  static Color _statusColor(String status) {
     switch (status) {
       case 'approved':
-        return Colors.green;
+        return LibraryTheme.success(context);
       case 'pending':
-        return const Color(0xFFF59E0B);
+        return LibraryTheme.accent(context);
       case 'rejected':
-        return Theme.of(context).colorScheme.error;
+        return LibraryTheme.danger(context);
       default:
-        return Theme.of(context).colorScheme.onSurfaceVariant;
+        return LibraryTheme.muted(context);
     }
   }
 
@@ -181,19 +200,23 @@ class GridFileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColorForFileType(context, file.fileType);
-    final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = Theme.of(context).dividerColor.withOpacity(0.08);
+    final color = _getColorForFileType(file.fileType);
 
     return Container(
       decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(LibraryRadius.card),
-        border: Border.all(color: borderColor),
-        boxShadow: LibraryShadows.soft(context),
+        color: LibraryTheme.surface(context),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: LibraryTheme.border(context)),
+        boxShadow: [
+          BoxShadow(
+            color: LibraryTheme.primary(context).withOpacity(0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Padding(
-        padding: LibrarySpacing.gridCard,
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -216,14 +239,19 @@ class GridFileCard extends StatelessWidget {
               file.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: LibraryTextStyles.title(context).copyWith(fontSize: 13, height: 1.2),
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                color: LibraryTheme.text(context),
+                height: 1.2,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               '${file.author} â€¢ ${file.college}',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: LibraryTextStyles.subtitle(context).copyWith(fontSize: 11),
+              style: TextStyle(fontSize: 11, color: LibraryTheme.muted(context), height: 1.3),
             ),
           ],
         ),
@@ -239,25 +267,23 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
-    final textStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: mutedColor,
-      fontWeight: FontWeight.w500,
-      height: 1.0,
-    );
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 14, color: mutedColor),
+        Icon(icon, size: 13, color: LibraryTheme.muted(context).withOpacity(0.7)),
         const SizedBox(width: 4),
         Text(
           '$value',
-          style: textStyle,
+          style: TextStyle(
+            color: LibraryTheme.muted(context).withOpacity(0.9),
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
   }
 }
+
 

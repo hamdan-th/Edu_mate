@@ -84,7 +84,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
+                color: LibraryTheme.surface(context),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: Column(
@@ -92,7 +92,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: Theme.of(context).dividerColor)),
+                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: LibraryTheme.border(context))),
                   ),
                   const SizedBox(height: 12),
                   const Text('ظپظ„طھط±ط© ظˆطھط±طھظٹط¨', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
@@ -158,7 +158,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            backgroundColor: LibraryTheme.primary(context),
                             foregroundColor: Colors.white,
                           ),
                           child: const Text('طھط·ط¨ظٹظ‚'),
@@ -178,7 +178,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           Padding(
@@ -187,23 +187,23 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(LibraryRadius.card),
-                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.08)),
+                    color: LibraryTheme.surface(context),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: LibraryTheme.border(context)),
                   ),
                   child: TextField(
                     controller: _searchController,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       hintText: 'ط§ط¨ط­ط« ط¨ط§ط³ظ… ط§ظ„ظ…ط§ط¯ط© ط£ظˆ ط§ظ„ط¯ظƒطھظˆط± ط£ظˆ ط§ظ„طھط®طµطµ...',
-                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.primary),
+                      hintStyle: TextStyle(color: LibraryTheme.muted(context)),
+                      prefixIcon: Icon(Icons.search_rounded, color: LibraryTheme.primary(context)),
                       suffixIcon: IconButton(
                         onPressed: _showFilterPanel,
                         icon: const Icon(Icons.tune_rounded),
-                        color: Theme.of(context).colorScheme.primary,
+                        color: LibraryTheme.primary(context),
                       ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(LibraryRadius.card), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                     ),
                   ),
@@ -215,9 +215,9 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(LibraryRadius.card),
-                          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.08)),
+                          color: LibraryTheme.surface(context),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: LibraryTheme.border(context)),
                         ),
                         child: Text(
                           'ط§ظ„طھط±طھظٹط¨: $_sortOrder',
@@ -228,18 +228,18 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     const SizedBox(width: 10),
                     InkWell(
                       onTap: () => setState(() => _isGridView = !_isGridView),
-                      borderRadius: BorderRadius.circular(LibraryRadius.card),
+                      borderRadius: BorderRadius.circular(18),
                       child: Container(
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(LibraryRadius.card),
-                          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.08)),
+                          color: LibraryTheme.surface(context),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: LibraryTheme.border(context)),
                         ),
                         child: Icon(
                           _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: LibraryTheme.primary(context),
                         ),
                       ),
                     ),
@@ -253,7 +253,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
               stream: LibraryFilesService.universityFiles(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary));
+                  return Center(child: CircularProgressIndicator(color: LibraryTheme.primary(context)));
                 }
                 if (snapshot.hasError) {
                   return Center(child: Text('ط­ط¯ط« ط®ط·ط£: ${snapshot.error}'));
@@ -331,10 +331,10 @@ class _EmptyLibraryState extends StatelessWidget {
               width: 84,
               height: 84,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.10),
+                color: LibraryTheme.primary(context).withOpacity(0.10),
                 borderRadius: BorderRadius.circular(26),
               ),
-              child: Icon(Icons.library_books_rounded, size: 42, color: Theme.of(context).colorScheme.primary),
+              child: Icon(Icons.library_books_rounded, size: 42, color: LibraryTheme.primary(context)),
             ),
             const SizedBox(height: 18),
             const Text(
@@ -345,7 +345,7 @@ class _EmptyLibraryState extends StatelessWidget {
             Text(
               'ط¬ط±ظ‘ط¨ طھط؛ظٹظٹط± ظƒظ„ظ…ط§طھ ط§ظ„ط¨ط­ط« ط£ظˆ طھط®ظپظٹظپ ط§ظ„ظپظ„ط§طھط± ط­طھظ‰ طھط¸ظ‡ط± ظ„ظƒ ظ†طھط§ط¦ط¬ ط£ظƒط«ط±.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
+              style: TextStyle(color: LibraryTheme.muted(context), height: 1.5),
             ),
           ],
         ),
@@ -370,14 +370,15 @@ class _BottomSheetDropdown extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: Theme.of(context).colorScheme.surface,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(LibraryRadius.card), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(LibraryRadius.card), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.08))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(LibraryRadius.card), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4)),
+        fillColor: LibraryTheme.bg(context),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: LibraryTheme.border(context))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: LibraryTheme.primary(context), width: 1.4)),
       ),
       items: items.map((e) => DropdownMenuItem<String>(value: e, child: Text(e))).toList(),
       onChanged: onChanged,
     );
   }
 }
+
 

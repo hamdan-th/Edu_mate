@@ -1,5 +1,5 @@
 $dir = "c:\Users\hamda\StudioProjects\Edu_mate\lib\screens\library"
-$pattern = "LibraryTheme\.(primary|secondary|bg|surface|text|muted|border|danger|success|accent)\b(?!\()"
+$pattern = "LibraryTheme\.([a-zA-Z0-9_]+)\b(?!\()"
 $replacement = 'LibraryTheme.$1(context)'
 
 Get-ChildItem -Path $dir -Filter "*.dart" -Recurse | Where-Object { $_.Name -ne "library_theme.dart" } | ForEach-Object {

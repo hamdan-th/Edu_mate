@@ -131,7 +131,7 @@ class MyLibraryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: LibraryTheme.bg(context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         child: Column(

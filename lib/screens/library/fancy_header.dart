@@ -13,7 +13,7 @@ class FancyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    LinearGradient gradient = LibraryTheme.primaryGradient;
+    LinearGradient gradient = LibraryTheme.primaryGradient(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -47,4 +47,5 @@ class FancyHeader extends StatelessWidget {
     );
   }
 }
+
 

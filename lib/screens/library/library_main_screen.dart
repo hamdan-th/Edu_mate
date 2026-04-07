@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'digital_library_screen.dart';
+import 'library_theme.dart';
 import 'my_library_screen.dart';
 import 'university_library_screen.dart';
 
@@ -40,7 +41,7 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
     final currentTab = _tabs[_selectedIndex];
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: LibraryTheme.bg(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -100,16 +101,13 @@ class _ModernHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
-    final primaryDark = Theme.of(context).colorScheme.secondary;
-
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            primaryColor,
-            primaryDark,
+            LibraryTheme.primary(context),
+            LibraryTheme.secondary(context),
           ],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
@@ -117,7 +115,7 @@ class _ModernHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.25),
+            color: LibraryTheme.primary(context).withOpacity(0.25),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -198,7 +196,7 @@ class _ModernHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.12),
+              color: Colors.white.withOpacity(0.12),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
@@ -219,7 +217,7 @@ class _ModernHeader extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: active
-                              ? Theme.of(context).colorScheme.surface
+                              ? Colors.white
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: active
@@ -240,8 +238,8 @@ class _ModernHeader extends StatelessWidget {
                               child: Icon(
                                 tab.icon,
                                 color: active
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.onPrimary,
+                                    ? LibraryTheme.primary(context)
+                                    : Colors.white,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -253,8 +251,8 @@ class _ModernHeader extends StatelessWidget {
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w800,
                                 color: active
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.onPrimary,
+                                    ? LibraryTheme.primary(context)
+                                    : Colors.white,
                               ),
                             ),
                           ],
@@ -281,3 +279,4 @@ class _LibraryTabItem {
     required this.icon,
   });
 }
+
