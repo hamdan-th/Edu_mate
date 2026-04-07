@@ -23,15 +23,15 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
 
   final List<_LibraryTabItem> _tabs = [
     const _LibraryTabItem(
-      title: 'ظ…ظƒطھط¨ط© ط§ظ„ط¬ط§ظ…ط¹ط©',
+      title: 'مكتبة الجامعة',
       icon: Icons.school_rounded,
     ),
     const _LibraryTabItem(
-      title: 'ط§ظ„ظ…ظƒطھط¨ط© ط§ظ„ط±ظ‚ظ…ظٹط©',
+      title: 'المكتبة الرقمية',
       icon: Icons.language_rounded,
     ),
     const _LibraryTabItem(
-      title: 'ظ…ظƒطھط¨طھظٹ',
+      title: 'مكتبتي',
       icon: Icons.folder_copy_rounded,
     ),
   ];
@@ -57,7 +57,7 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
 
             const SizedBox(height: 12),
 
-            /// ًں”¥ Animated page switch
+            /// 🔥 Animated page switch
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
@@ -123,10 +123,10 @@ class _ModernHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          /// ًں”¥ HEADER
+          /// 🔥 HEADER
           Row(
             children: [
-              /// ًں”¥ Glass Icon
+              /// 🔥 Glass Icon
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 width: 60,
@@ -178,7 +178,7 @@ class _ModernHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'ط§ط³طھظƒط´ظپ ظˆط§ط¯ظگط± ظ…ظƒطھط¨طھظƒ ط§ظ„ط¬ط§ظ…ط¹ظٹط© ط¨ط³ظ‡ظˆظ„ط©',
+                      'استكشف وادِر مكتبتك الجامعية بسهولة',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.85),
                         fontSize: 13,
@@ -192,7 +192,7 @@ class _ModernHeader extends StatelessWidget {
 
           const SizedBox(height: 18),
 
-          /// ًں”¥ MODERN TABS
+          /// 🔥 MODERN TABS
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
@@ -279,4 +279,3 @@ class _LibraryTabItem {
     required this.icon,
   });
 }
-

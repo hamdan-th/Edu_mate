@@ -30,15 +30,15 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
       LibraryReactionsService.registerViewOnce(widget.file.id);    }}
 
   String _formatDate(DateTime? date) {
-    if (date == null) return 'ط؛ظٹط± ظ…ط­ط¯ط¯';
+    if (date == null) return 'غير محدد';
     return '${date.year}/${date.month}/${date.day}';
   }
 
   String? _normalizeCollege(String? college) {
     if (college == null) return null;
     switch (college.trim()) {
-      case 'ظƒظ„ظٹط© ط§ظ„ظ‡ظ†ط¯ط³ط©':
-        return 'ظƒظ„ظٹط© ط§ظ„ظ‡ظ†ط¯ط³ط© ظˆطھظƒظ†ظˆظ„ظˆط¬ظٹط§ ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ';
+      case 'كلية الهندسة':
+        return 'كلية الهندسة وتكنولوجيا المعلومات';
       default:
         return college.trim().isEmpty ? null : college.trim();
     }
@@ -52,7 +52,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
 
   Future<void> _openFile(String url) async {
     if (url.trim().isEmpty) {
-      _snack('ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„ظ…ظ„ظپ');
+      _snack('لا يوجد رابط للملف');
       return;
     }
 
@@ -108,7 +108,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
               ),
               const SizedBox(height: 14),
               Text(
-                'ظ…ظ„ظپ Word',
+                'ملف Word',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -117,7 +117,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'ظ‡ط°ط§ ط§ظ„ظ†ظˆط¹ ظ„ط§ ظٹظڈط¹ط±ط¶ ط¯ط§ط®ظ„ ط§ظ„طھط·ط¨ظٹظ‚ ط­ط§ظ„ظٹظ‹ط§.\nط§ط®طھط± ظپطھط­ظ‡ ط®ط§ط±ط¬ظٹظ‹ط§ ط£ظˆ طھظ†ط²ظٹظ„ظ‡.',
+                'هذا النوع لا يُعرض داخل التطبيق حاليًا.\nاختر فتحه خارجيًا أو تنزيله.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.2,
@@ -136,14 +136,14 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: LibraryTheme.primary(context),
-                        side: BorderSide(color: LibraryTheme.primary(context)),
+                        side: const BorderSide(color: LibraryTheme.primary(context)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       icon: const Icon(Icons.download_rounded, size: 18),
-                      label: const Text('طھظ†ط²ظٹظ„'),
+                      label: const Text('تنزيل'),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -157,7 +157,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                           mode: LaunchMode.externalApplication,
                         );
                         if (!launched && mounted) {
-                          _snack('طھط¹ط°ط± ظپطھط­ ط§ظ„ظ…ظ„ظپ');
+                          _snack('تعذر فتح الملف');
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -170,7 +170,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                         ),
                       ),
                       icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                      label: const Text('ظپطھط­ ط®ط§ط±ط¬ظٹ'),
+                      label: const Text('فتح خارجي'),
                     ),
                   ),
                 ],
@@ -185,32 +185,32 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
   Future<void> _shareFileExternally() async {
     final url = widget.file.fileUrl.trim();
     if (url.isEmpty) {
-      _snack('ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ…ط´ط§ط±ظƒط© ط§ظ„ظ…ظ„ظپ');
+      _snack('لا يوجد رابط لمشاركة الملف');
       return;
     }
 
     try {
       await LibraryReactionsService.registerShare(widget.file.id);
       final text = '''
-ًں“ک ${widget.file.title}
+📘 ${widget.file.title}
 
-ط§ظ„ط¯ظƒطھظˆط±: ${widget.file.author}
-ط§ظ„ظ…ط§ط¯ط©: ${widget.file.course}
-ط§ظ„ظƒظ„ظٹط©: ${widget.file.college}
-ط§ظ„طھط®طµطµ: ${widget.file.major}
-ط§ظ„ظ…ط³طھظˆظ‰: ${widget.file.semester}
+الدكتور: ${widget.file.author}
+المادة: ${widget.file.course}
+الكلية: ${widget.file.college}
+التخصص: ${widget.file.major}
+المستوى: ${widget.file.semester}
 
 $url
 ''';
       await Share.share(text);
     } catch (e) {
-      _snack('طھط¹ط°ط± طھط³ط¬ظٹظ„ ط§ظ„ظ…ط´ط§ط±ظƒط©: $e');
+      _snack('تعذر تسجيل المشاركة: $e');
     }
   }
 
   Future<void> _downloadFile(String url) async {
     if (url.trim().isEmpty) {
-      _snack('ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„طھظ†ط²ظٹظ„');
+      _snack('لا يوجد رابط للتنزيل');
       return;
     }
 
@@ -227,10 +227,10 @@ $url
       await LibraryReactionsService.registerDownload(widget.file.id);
 
       if (mounted) {
-        _snack('طھظ… طھظ†ط²ظٹظ„ ط§ظ„ظ…ظ„ظپ ظˆط­ظپط¸ظ‡ ط¯ط§ط®ظ„ ط§ظ„طھط·ط¨ظٹظ‚');
+        _snack('تم تنزيل الملف وحفظه داخل التطبيق');
       }
     } catch (e) {
-      _snack('ظپط´ظ„ ط§ظ„طھظ†ط²ظٹظ„: $e');
+      _snack('فشل التنزيل: $e');
     }
   }
 
@@ -334,7 +334,7 @@ $url
                       const Row(
                         children: [
                           Text(
-                            'طھط¹ط¯ظٹظ„ ط§ظ„ظ…ظ„ظپ',
+                            'تعديل الملف',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
@@ -345,26 +345,26 @@ $url
                       const SizedBox(height: 16),
                       _ModernField(
                         controller: subjectController,
-                        label: 'ط§ط³ظ… ط§ظ„ظ…ط§ط¯ط© / ط§ظ„ط¹ظ†ظˆط§ظ†',
+                        label: 'اسم المادة / العنوان',
                         icon: Icons.menu_book_rounded,
                       ),
                       const SizedBox(height: 12),
                       _ModernField(
                         controller: doctorController,
-                        label: 'ط§ط³ظ… ط§ظ„ط¯ظƒطھظˆط±',
+                        label: 'اسم الدكتور',
                         icon: Icons.person_rounded,
                       ),
                       const SizedBox(height: 12),
                       _ModernField(
                         controller: descriptionController,
-                        label: 'ط§ظ„ظˆطµظپ',
+                        label: 'الوصف',
                         icon: Icons.notes_rounded,
                         maxLines: 4,
                       ),
                       const SizedBox(height: 12),
                       _DropdownField(
                         value: selectedCollege,
-                        hint: 'ط§ظ„ظƒظ„ظٹط©',
+                        hint: 'الكلية',
                         icon: Icons.account_balance_rounded,
                         items: UniversityAcademicData.colleges,
                         onChanged: (value) => setModalState(() {
@@ -375,7 +375,7 @@ $url
                       const SizedBox(height: 12),
                       _DropdownField(
                         value: selectedSpecialization,
-                        hint: 'ط§ظ„طھط®طµطµ',
+                        hint: 'التخصص',
                         icon: Icons.auto_awesome_mosaic_rounded,
                         items: majors,
                         onChanged: (value) => setModalState(() {
@@ -385,7 +385,7 @@ $url
                       const SizedBox(height: 12),
                       _DropdownField(
                         value: selectedLevel,
-                        hint: 'ط§ظ„ظ…ط³طھظˆظ‰',
+                        hint: 'المستوى',
                         icon: Icons.layers_rounded,
                         items: UniversityAcademicData.levels,
                         onChanged: (value) => setModalState(() {
@@ -395,7 +395,7 @@ $url
                       const SizedBox(height: 12),
                       _DropdownField(
                         value: selectedTerm,
-                        hint: 'ط§ظ„طھط±ظ…',
+                        hint: 'الترم',
                         icon: Icons.calendar_month_rounded,
                         items: UniversityAcademicData.terms,
                         onChanged: (value) => setModalState(() {
@@ -415,7 +415,7 @@ $url
                                 selectedSpecialization == null ||
                                 selectedLevel == null ||
                                 selectedTerm == null) {
-                              _snack('ط£ظƒظ…ظ„ ط¬ظ…ظٹط¹ ط§ظ„ط­ظ‚ظˆظ„ ط§ظ„ظ…ط·ظ„ظˆط¨ط©');
+                              _snack('أكمل جميع الحقول المطلوبة');
                               return;
                             }
 
@@ -437,10 +437,10 @@ $url
 
                               if (mounted) {
                                 Navigator.pop(context);
-                                _snack('طھظ… طھط­ط¯ظٹط« ط§ظ„ظ…ظ„ظپ');
+                                _snack('تم تحديث الملف');
                               }
                             } catch (e) {
-                              _snack('ظپط´ظ„ ط§ظ„طھط¹ط¯ظٹظ„: $e');
+                              _snack('فشل التعديل: $e');
                             } finally {
                               if (mounted) {
                                 setModalState(() => isSaving = false);
@@ -466,7 +466,7 @@ $url
                             ),
                           )
                               : const Text(
-                            'ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ',
+                            'حفظ التعديلات',
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
@@ -489,17 +489,17 @@ $url
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ط­ط°ظپ ط§ظ„ظ…ظ„ظپ'),
-        content: const Text('ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯طں'),
+        title: const Text('حذف الملف'),
+        content: const Text('هل أنت متأكد؟'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('ط¥ظ„ط؛ط§ط،'),
+            child: const Text('إلغاء'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              'ط­ط°ظپ',
+              'حذف',
               style: TextStyle(color: LibraryTheme.danger(context)),
             ),
           ),
@@ -517,10 +517,10 @@ $url
       );
       if (mounted) {
         Navigator.pop(context);
-        _snack('طھظ… ط­ط°ظپ ط§ظ„ظ…ظ„ظپ');
+        _snack('تم حذف الملف');
       }
     } catch (e) {
-      _snack('ظپط´ظ„ ط­ط°ظپ ط§ظ„ظ…ظ„ظپ: $e');
+      _snack('فشل حذف الملف: $e');
     }
   }
 
@@ -779,7 +779,7 @@ $url
                             ),
                             const SizedBox(height: 14),
                             Text(
-                              'ط¯. ${updatedFile.author}',
+                              'د. ${updatedFile.author}',
                               style: TextStyle(
                                 fontSize: 14.5,
                                 color: LibraryTheme.muted(context),
@@ -788,7 +788,7 @@ $url
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'ط±ظپط¹ظ‡: ${updatedFile.displayUploader}',
+                              'رفعه: ${updatedFile.displayUploader}',
                               style: TextStyle(
                                 fontSize: 12.8,
                                 color: LibraryTheme.muted(context),
@@ -800,7 +800,7 @@ $url
                                 Expanded(
                                   child: _statItem(
                                     Icons.visibility_outlined,
-                                    'ظ…ط´ط§ظ‡ط¯ط©',
+                                    'مشاهدة',
                                     updatedFile.views,
                                     color: LibraryTheme.primary(context),
                                   ),
@@ -809,7 +809,7 @@ $url
                                 Expanded(
                                   child: _statItem(
                                     Icons.download_rounded,
-                                    'طھظ†ط²ظٹظ„',
+                                    'تنزيل',
                                     updatedFile.downloads,
                                     color: LibraryTheme.success(context),
                                   ),
@@ -818,7 +818,7 @@ $url
                                 Expanded(
                                   child: _statItem(
                                     Icons.share_outlined,
-                                    'ظ…ط´ط§ط±ظƒط©',
+                                    'مشاركة',
                                     updatedFile.shares,
                                     color: LibraryTheme.accent(context),
                                   ),
@@ -842,7 +842,7 @@ $url
                                   icon: liked
                                       ? Icons.thumb_up_alt_rounded
                                       : Icons.thumb_up_alt_outlined,
-                                  label: 'ط¥ط¹ط¬ط§ط¨',
+                                  label: 'إعجاب',
                                   count: updatedFile.likes,
                                   active: liked,
                                   onTap: () async {
@@ -852,7 +852,7 @@ $url
                                         isCurrentlyLiked: liked,
                                       );
                                     } catch (e) {
-                                      _snack('طھط¹ط°ط± طھظ†ظپظٹط° ط§ظ„ط¥ط¹ط¬ط§ط¨: $e');
+                                      _snack('تعذر تنفيذ الإعجاب: $e');
                                     }
                                   },
                                 ),
@@ -871,7 +871,7 @@ $url
                                   icon: saved
                                       ? Icons.bookmark_rounded
                                       : Icons.bookmark_border_rounded,
-                                  label: 'ط­ظپط¸',
+                                  label: 'حفظ',
                                   count: updatedFile.saves,
                                   active: saved,
                                   onTap: () async {
@@ -881,7 +881,7 @@ $url
                                         isCurrentlySaved: saved,
                                       );
                                     } catch (e) {
-                                      _snack('طھط¹ط°ط± طھظ†ظپظٹط° ط§ظ„ط­ظپط¸: $e');
+                                      _snack('تعذر تنفيذ الحفظ: $e');
                                     }
                                   },
                                 ),
@@ -892,7 +892,7 @@ $url
                           Expanded(
                             child: _ReactionButton(
                               icon: Icons.share_outlined,
-                              label: 'ظ…ط´ط§ط±ظƒط©',
+                              label: 'مشاركة',
                               count: updatedFile.shares,
                               active: false,
                               onTap: _shareFileExternally,
@@ -916,7 +916,7 @@ $url
                                 ),
                               ),
                               icon: const Icon(Icons.visibility_rounded, size: 18),
-                              label: const Text('ظپطھط­ ط§ظ„ظ…ظ„ظپ'),
+                              label: const Text('فتح الملف'),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -925,14 +925,14 @@ $url
                               onPressed: () => _downloadFile(updatedFile.fileUrl),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: LibraryTheme.primary(context),
-                                side: BorderSide(color: LibraryTheme.primary(context)),
+                                side: const BorderSide(color: LibraryTheme.primary(context)),
                                 padding: const EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
                                 ),
                               ),
                               icon: const Icon(Icons.download_rounded, size: 18),
-                              label: const Text('طھظ†ط²ظٹظ„'),
+                              label: const Text('تنزيل'),
                             ),
                           ),
                         ],
@@ -951,7 +951,7 @@ $url
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'ط§ظ„ظˆطµظپ',
+                                'الوصف',
                                 style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w800,
@@ -982,7 +982,7 @@ $url
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„ظ…ظ„ظپ',
+                              'معلومات الملف',
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w800,
@@ -991,37 +991,37 @@ $url
                             const SizedBox(height: 12),
                             _buildInfoTile(
                               icon: Icons.menu_book_rounded,
-                              label: 'ط§ظ„ظ…ط§ط¯ط©',
+                              label: 'المادة',
                               value: updatedFile.course,
                             ),
                             _buildInfoTile(
                               icon: Icons.account_balance_rounded,
-                              label: 'ط§ظ„ظƒظ„ظٹط©',
+                              label: 'الكلية',
                               value: updatedFile.college,
                             ),
                             _buildInfoTile(
                               icon: Icons.auto_awesome_mosaic_rounded,
-                              label: 'ط§ظ„طھط®طµطµ',
+                              label: 'التخصص',
                               value: updatedFile.major,
                             ),
                             _buildInfoTile(
                               icon: Icons.layers_rounded,
-                              label: 'ط§ظ„ظ…ط³طھظˆظ‰',
+                              label: 'المستوى',
                               value: updatedFile.semester,
                             ),
                             _buildInfoTile(
                               icon: Icons.description_rounded,
-                              label: 'ط§ظ„ظ†ظˆط¹',
+                              label: 'النوع',
                               value: updatedFile.fileType,
                             ),
                             _buildInfoTile(
                               icon: Icons.verified_rounded,
-                              label: 'ط§ظ„ط­ط§ظ„ط©',
+                              label: 'الحالة',
                               value: _statusText(updatedFile.status),
                             ),
                             _buildInfoTile(
                               icon: Icons.calendar_today_rounded,
-                              label: 'طھط§ط±ظٹط® ط§ظ„ط±ظپط¹',
+                              label: 'تاريخ الرفع',
                               value: _formatDate(updatedFile.createdAt),
                             ),
                           ],
@@ -1041,11 +1041,11 @@ $url
   static String _statusText(String status) {
     switch (status) {
       case 'approved':
-        return 'ظ…ظ†ط´ظˆط±';
+        return 'منشور';
       case 'pending':
-        return 'ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©';
+        return 'قيد المراجعة';
       case 'rejected':
-        return 'ظ…ط±ظپظˆط¶';
+        return 'مرفوض';
       default:
         return status;
     }
@@ -1173,11 +1173,11 @@ class _ModernField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: LibraryTheme.border(context)),
+          borderSide: const BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),
@@ -1222,11 +1222,11 @@ class _DropdownField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: LibraryTheme.border(context)),
+          borderSide: const BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: LibraryTheme.primary(context),
             width: 1.4,
           ),
@@ -1247,4 +1247,3 @@ class _DropdownField extends StatelessWidget {
     );
   }
 }
-

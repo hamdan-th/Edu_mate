@@ -25,7 +25,7 @@ class PdfPreviewScreen extends StatelessWidget {
       body: url.trim().isEmpty
           ? Center(
         child: Text(
-          'ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„ظ…ظ„ظپ',
+          'لا يوجد رابط للملف',
           style: TextStyle(color: LibraryTheme.text(context)),
         ),
       )
@@ -33,4 +33,3 @@ class PdfPreviewScreen extends StatelessWidget {
     );
   }
 }
-

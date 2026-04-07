@@ -35,8 +35,8 @@ class AppSettingsProvider extends ChangeNotifier {
     } else if (localeString == 'en') {
       _locale = const Locale('en');
     } else {
-      // Default to system locale
-      _locale = null;
+      // Default to Arabic locale
+      _locale = const Locale('ar');
     }
   }
 

@@ -19,18 +19,18 @@ class CoreResultDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = resultData['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†';
+    final title = resultData['title'] ?? 'بدون عنوان';
     final authors = (resultData['authors'] as List<dynamic>?)
         ?.map((author) => author['name'].toString())
         .join(', ') ??
-        'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
-    final abstract = resultData['abstract'] ?? 'ظ„ط§ ظٹظˆط¬ط¯ ظ…ظ„ط®طµ ظ…طھط§ط­.';
-    final year = resultData['yearPublished']?.toString() ?? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
-    final publisher = resultData['publisher'] ?? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
+        'مؤلف غير معروف';
+    final abstract = resultData['abstract'] ?? 'لا يوجد ملخص متاح.';
+    final year = resultData['yearPublished']?.toString() ?? 'غير معروف';
+    final publisher = resultData['publisher'] ?? 'غير معروف';
     final journal = resultData['journals'] is List &&
         (resultData['journals'] as List).isNotEmpty
         ? (resultData['journals'] as List).first.toString()
-        : 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
+        : 'غير معروف';
     final articleId = resultData['id']?.toString();
     final downloadableLink = resultData['downloadUrl']?.toString();
 
@@ -41,7 +41,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: LibraryTheme.bg(context),
       appBar: AppBar(
-        title: const Text('طھظپط§طµظٹظ„ ط§ظ„ط¨ط­ط«'),
+        title: const Text('تفاصيل البحث'),
         backgroundColor: LibraryTheme.surface(context),
         foregroundColor: LibraryTheme.text(context),
         elevation: 0,
@@ -78,7 +78,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                           ? Icons.bookmark_rounded
                           : Icons.bookmark_border_rounded,
                     ),
-                    label: Text(isSaved ? 'ظ…ط­ظپظˆط¸' : 'ط­ظپط¸'),
+                    label: Text(isSaved ? 'محفوظ' : 'حفظ'),
                     onPressed: () async {
                       try {
                         if (!isSaved) {
@@ -92,8 +92,8 @@ class CoreResultDetailsScreen extends StatelessWidget {
                             SnackBar(
                               content: Text(
                                 isSaved
-                                    ? 'طھظ…طھ ط§ظ„ط¥ط²ط§ظ„ط© ظ…ظ† ط§ظ„ط­ظپط¸ ط¯ط§ط®ظ„ ط§ظ„ظˆط§ط¬ظ‡ط©'
-                                    : 'طھظ… ط­ظپط¸ ط§ظ„ظ…ط±ط¬ط¹ ظپظٹ ظ…ظƒطھط¨طھظٹ',
+                                    ? 'تمت الإزالة من الحفظ داخل الواجهة'
+                                    : 'تم حفظ المرجع في مكتبتي',
                               ),
                             ),
                           );
@@ -101,7 +101,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                       } catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('طھط¹ط°ط± ط­ظپط¸ ط§ظ„ظ…ط±ط¬ط¹: $e')),
+                            SnackBar(content: Text('تعذر حفظ المرجع: $e')),
                           );
                         }
                       }
@@ -112,11 +112,11 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.share_outlined),
-                    label: const Text('ظ…ط´ط§ط±ظƒط©'),
+                    label: const Text('مشاركة'),
                     onPressed: () async {
                       if (articleUrl.isEmpty) return;
                       await Share.share(
-                        'ط§ط·ظ„ط¹ ط¹ظ„ظ‰ ظ‡ط°ظ‡ ط§ظ„ظˆط±ظ‚ط© ط§ظ„ط¨ط­ط«ظٹط©:\n$title\n$articleUrl',
+                        'اطلع على هذه الورقة البحثية:\n$title\n$articleUrl',
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -134,7 +134,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.download_rounded),
-                  label: const Text('طھظ†ط²ظٹظ„ PDF'),
+                  label: const Text('تنزيل PDF'),
                   onPressed: () async {
                     try {
                       await DigitalLibraryFirestoreService.registerDownload(
@@ -143,7 +143,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('طھط¹ط°ط± طھط³ط¬ظٹظ„ ط§ظ„طھظ†ط²ظٹظ„: $e')),
+                          SnackBar(content: Text('تعذر تسجيل التنزيل: $e')),
                         );
                       }
                     }
@@ -173,7 +173,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.open_in_browser_rounded),
-                  label: const Text('ظپطھط­ ط§ظ„ظ…طµط¯ط±'),
+                  label: const Text('فتح المصدر'),
                   onPressed: () async {
                     final Uri url = Uri.parse(articleUrl);
                     await launchUrl(
@@ -183,7 +183,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: LibraryTheme.primary(context),
-                    side: BorderSide(color: LibraryTheme.primary(context)),
+                    side: const BorderSide(color: LibraryTheme.primary(context)),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
@@ -195,7 +195,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
 
             const Divider(height: 30, thickness: 1),
             Text(
-              'ط§ظ„ظ…ظ„ط®طµ (Abstract)',
+              'الملخص (Abstract)',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -205,7 +205,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               abstract.toString().trim().isEmpty
-                  ? 'ظ„ط§ ظٹظˆط¬ط¯ ظ…ظ„ط®طµ ظ…طھط§ط­.'
+                  ? 'لا يوجد ملخص متاح.'
                   : abstract.toString(),
               style: TextStyle(
                 fontSize: 16,
@@ -236,7 +236,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
         const SizedBox(width: 5),
         Expanded(
           child: Text(
-            value.isEmpty ? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ' : value,
+            value.isEmpty ? 'غير معروف' : value,
             style: TextStyle(
               fontSize: 16,
               color: LibraryTheme.text(context),
@@ -247,4 +247,3 @@ class CoreResultDetailsScreen extends StatelessWidget {
     );
   }
 }
-

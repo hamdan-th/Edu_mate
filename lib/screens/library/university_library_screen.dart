@@ -22,7 +22,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
   String? _selectedCollege;
   String? _selectedMajor;
   String? _selectedLevel;
-  String _sortOrder = 'ط§ظ„ط£ط­ط¯ط«';
+  String _sortOrder = 'الأحدث';
 
   @override
   void dispose() {
@@ -51,10 +51,10 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
     }).toList();
 
     switch (_sortOrder) {
-      case 'ط§ظ„ط£ظƒط«ط± ط¥ط¹ط¬ط§ط¨ط§ظ‹':
+      case 'الأكثر إعجاباً':
         filtered.sort((a, b) => b.likes.compareTo(a.likes));
         break;
-      case 'ط§ظ„ط£ظƒط«ط± ظ…ط´ط§ظ‡ط¯ط©':
+      case 'الأكثر مشاهدة':
         filtered.sort((a, b) => b.views.compareTo(a.views));
         break;
       default:
@@ -95,11 +95,11 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     child: SizedBox(width: 42, child: Divider(thickness: 4, color: LibraryTheme.border(context))),
                   ),
                   const SizedBox(height: 12),
-                  const Text('ظپظ„طھط±ط© ظˆطھط±طھظٹط¨', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
+                  const Text('فلترة وترتيب', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 16),
                   _BottomSheetDropdown(
                     value: _selectedCollege,
-                    label: 'ط§ظ„ظƒظ„ظٹط©',
+                    label: 'الكلية',
                     items: UniversityAcademicData.colleges,
                     onChanged: (value) => setModalState(() {
                       _selectedCollege = value;
@@ -109,14 +109,14 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                   const SizedBox(height: 12),
                   _BottomSheetDropdown(
                     value: _selectedMajor,
-                    label: 'ط§ظ„طھط®طµطµ',
+                    label: 'التخصص',
                     items: majors,
                     onChanged: (value) => setModalState(() => _selectedMajor = value),
                   ),
                   const SizedBox(height: 12),
                   _BottomSheetDropdown(
                     value: _selectedLevel,
-                    label: 'ط§ظ„ظ…ط³طھظˆظ‰',
+                    label: 'المستوى',
                     items: UniversityAcademicData.levels,
                     onChanged: (value) => setModalState(() => _selectedLevel = value),
                   ),
@@ -125,7 +125,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     spacing: 10,
                     runSpacing: 10,
                     children: [
-                      for (final option in ['ط§ظ„ط£ط­ط¯ط«', 'ط§ظ„ط£ظƒط«ط± ط¥ط¹ط¬ط§ط¨ط§ظ‹', 'ط§ظ„ط£ظƒط«ط± ظ…ط´ط§ظ‡ط¯ط©'])
+                      for (final option in ['الأحدث', 'الأكثر إعجاباً', 'الأكثر مشاهدة'])
                         ChoiceChip(
                           label: Text(option),
                           selected: _sortOrder == option,
@@ -143,11 +143,11 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                               _selectedCollege = null;
                               _selectedMajor = null;
                               _selectedLevel = null;
-                              _sortOrder = 'ط§ظ„ط£ط­ط¯ط«';
+                              _sortOrder = 'الأحدث';
                             });
                             Navigator.pop(context);
                           },
-                          child: const Text('ط¥ط¹ط§ط¯ط© ط¶ط¨ط·'),
+                          child: const Text('إعادة ضبط'),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -161,7 +161,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                             backgroundColor: LibraryTheme.primary(context),
                             foregroundColor: Colors.white,
                           ),
-                          child: const Text('طھط·ط¨ظٹظ‚'),
+                          child: const Text('تطبيق'),
                         ),
                       ),
                     ],
@@ -195,7 +195,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     controller: _searchController,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      hintText: 'ط§ط¨ط­ط« ط¨ط§ط³ظ… ط§ظ„ظ…ط§ط¯ط© ط£ظˆ ط§ظ„ط¯ظƒطھظˆط± ط£ظˆ ط§ظ„طھط®طµطµ...',
+                      hintText: 'ابحث باسم المادة أو الدكتور أو التخصص...',
                       hintStyle: TextStyle(color: LibraryTheme.muted(context)),
                       prefixIcon: Icon(Icons.search_rounded, color: LibraryTheme.primary(context)),
                       suffixIcon: IconButton(
@@ -220,7 +220,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                           border: Border.all(color: LibraryTheme.border(context)),
                         ),
                         child: Text(
-                          'ط§ظ„طھط±طھظٹط¨: $_sortOrder',
+                          'الترتيب: $_sortOrder',
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -256,7 +256,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                   return Center(child: CircularProgressIndicator(color: LibraryTheme.primary(context)));
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text('ط­ط¯ط« ط®ط·ط£: ${snapshot.error}'));
+                  return Center(child: Text('حدث خطأ: ${snapshot.error}'));
                 }
 
                 final docs = snapshot.data?.docs ?? [];
@@ -338,12 +338,12 @@ class _EmptyLibraryState extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             const Text(
-              'ظ„ط§ طھظˆط¬ط¯ ظ…ظ„ظپط§طھ ظ…ط·ط§ط¨ظ‚ط©',
+              'لا توجد ملفات مطابقة',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
-              'ط¬ط±ظ‘ط¨ طھط؛ظٹظٹط± ظƒظ„ظ…ط§طھ ط§ظ„ط¨ط­ط« ط£ظˆ طھط®ظپظٹظپ ط§ظ„ظپظ„ط§طھط± ط­طھظ‰ طھط¸ظ‡ط± ظ„ظƒ ظ†طھط§ط¦ط¬ ط£ظƒط«ط±.',
+              'جرّب تغيير كلمات البحث أو تخفيف الفلاتر حتى تظهر لك نتائج أكثر.',
               textAlign: TextAlign.center,
               style: TextStyle(color: LibraryTheme.muted(context), height: 1.5),
             ),
@@ -372,13 +372,11 @@ class _BottomSheetDropdown extends StatelessWidget {
         filled: true,
         fillColor: LibraryTheme.bg(context),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: LibraryTheme.border(context))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: LibraryTheme.primary(context), width: 1.4)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: const BorderSide(color: LibraryTheme.border(context))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: const BorderSide(color: LibraryTheme.primary(context), width: 1.4)),
       ),
       items: items.map((e) => DropdownMenuItem<String>(value: e, child: Text(e))).toList(),
       onChanged: onChanged,
     );
   }
 }
-
-

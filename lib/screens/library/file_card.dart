@@ -141,7 +141,7 @@ class FileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${file.author} â€¢ ${file.college}',
+                  '${file.author} • ${file.college}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -183,11 +183,11 @@ class FileCard extends StatelessWidget {
   static String _statusText(String status) {
     switch (status) {
       case 'approved':
-        return 'ظ…ظ†ط´ظˆط±';
+        return 'منشور';
       case 'pending':
-        return 'ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©';
+        return 'قيد المراجعة';
       case 'rejected':
-        return 'ظ…ط±ظپظˆط¶';
+        return 'مرفوض';
       default:
         return status;
     }
@@ -248,7 +248,7 @@ class GridFileCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${file.author} â€¢ ${file.college}',
+              '${file.author} • ${file.college}',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 11, color: LibraryTheme.muted(context), height: 1.3),
@@ -285,5 +285,3 @@ class _MetricChip extends StatelessWidget {
     );
   }
 }
-
-

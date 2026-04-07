@@ -16,8 +16,8 @@ class MyFilesListScreen extends StatelessWidget {
   const MyFilesListScreen({super.key, required this.title});
 
   FileModel _mapDocToFileModel(Map<String, dynamic> data, String docId) {
-    final subjectName = (data['subjectName'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString();
-    final doctorName = (data['doctorName'] ?? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString();
+    final subjectName = (data['subjectName'] ?? 'بدون عنوان').toString();
+    final doctorName = (data['doctorName'] ?? 'غير معروف').toString();
     final college = (data['college'] ?? '').toString();
     final specialization = (data['specialization'] ?? '').toString();
     final level = (data['level'] ?? '').toString();
@@ -45,10 +45,10 @@ class MyFilesListScreen extends StatelessWidget {
       title: subjectName,
       author: doctorName,
       course: subjectName,
-      university: 'ط¬ط§ظ…ط¹ط© طµظ†ط¹ط§ط،',
+      university: 'جامعة صنعاء',
       college: college,
       major: specialization,
-      semester: '$level${term.isNotEmpty ? ' â€¢ $term' : ''}',
+      semester: '$level${term.isNotEmpty ? ' • $term' : ''}',
       fileType: fileType,
       thumbnailUrl: thumbnailUrl,
       fileUrl: fileUrl,
@@ -97,7 +97,7 @@ class MyFilesListScreen extends StatelessWidget {
 
     if (url.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„ظ…ظ„ظپ')),
+        const SnackBar(content: Text('لا يوجد رابط للملف')),
       );
       return;
     }
@@ -126,7 +126,7 @@ class MyFilesListScreen extends StatelessWidget {
 
     if (!launched) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('طھط¹ط°ط± ظپطھط­ ط§ظ„ظ…ظ„ظپ')),
+        const SnackBar(content: Text('تعذر فتح الملف')),
       );
     }
   }
@@ -135,11 +135,11 @@ class MyFilesListScreen extends StatelessWidget {
       BuildContext context,
       List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
       ) {
-    String emptyMessage = 'ظ„ط§ طھظˆط¬ط¯ ظ…ظ„ظپط§طھ';
-    if (title == 'ط§ظ„ظ…ط±ط§ط¬ط¹') emptyMessage = 'ظ„ظ… طھظ‚ظ… ط¨ط­ظپط¸ ط£ظٹ ظ…ظ„ظپط§طھ ط¨ط¹ط¯';
-    if (title == 'ظ…ط§ ط±ظپط¹طھظ‡') emptyMessage = 'ظ„ظ… طھظ‚ظ… ط¨ط±ظپط¹ ط£ظٹ ظ…ظ„ظپط§طھ ط¨ط¹ط¯';
-    if (title == 'طھظ†ط²ظٹظ„ط§طھظٹ') emptyMessage = 'ظ„ظ… طھظ‚ظ… ط¨طھظ†ط²ظٹظ„ ط£ظٹ ظ…ظ„ظپط§طھ ط¨ط¹ط¯';
-    if (title == 'ظ…ط§ ط´ط§ط±ظƒطھظ‡') emptyMessage = 'ظ„ظ… طھظ‚ظ… ط¨ظ…ط´ط§ط±ظƒط© ط£ظٹ ظ…ظ„ظپط§طھ ط¨ط¹ط¯';
+    String emptyMessage = 'لا توجد ملفات';
+    if (title == 'المراجع') emptyMessage = 'لم تقم بحفظ أي ملفات بعد';
+    if (title == 'ما رفعته') emptyMessage = 'لم تقم برفع أي ملفات بعد';
+    if (title == 'تنزيلاتي') emptyMessage = 'لم تقم بتنزيل أي ملفات بعد';
+    if (title == 'ما شاركته') emptyMessage = 'لم تقم بمشاركة أي ملفات بعد';
 
     if (docs.isEmpty) {
       return Center(
@@ -167,7 +167,7 @@ class MyFilesListScreen extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
-            if (title == 'طھظ†ط²ظٹظ„ط§طھظٹ') {
+            if (title == 'تنزيلاتي') {
               _openDownloadedFile(context, file);
             } else {
               Navigator.push(
@@ -210,7 +210,7 @@ class MyFilesListScreen extends StatelessWidget {
                 ),
               ),
               title: Text(
-                data['subjectName'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†',
+                data['subjectName'] ?? 'بدون عنوان',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: LibraryTheme.text(context),
@@ -219,7 +219,7 @@ class MyFilesListScreen extends StatelessWidget {
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  '${data['doctorName'] ?? ''} â€¢ ${data['college'] ?? ''}',
+                  '${data['doctorName'] ?? ''} • ${data['college'] ?? ''}',
                   style: TextStyle(
                     color: LibraryTheme.muted(context),
                     height: 1.4,
@@ -264,7 +264,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
+              'حدث خطأ: ${snapshot.error}',
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -282,7 +282,7 @@ class MyFilesListScreen extends StatelessWidget {
     if (user == null) {
       return Center(
         child: Text(
-          'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
+          'يجب تسجيل الدخول أولاً',
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
@@ -301,7 +301,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (saveSnapshot.hasError) {
           return Center(
             child: Text(
-              'ط­ط¯ط« ط®ط·ط£: ${saveSnapshot.error}',
+              'حدث خطأ: ${saveSnapshot.error}',
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -320,7 +320,7 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
+                  'حدث خطأ: ${filesSnapshot.error}',
                   style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
@@ -341,7 +341,7 @@ class MyFilesListScreen extends StatelessWidget {
     if (user == null) {
       return Center(
         child: Text(
-          'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
+          'يجب تسجيل الدخول أولاً',
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
@@ -360,7 +360,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (downloadSnapshot.hasError) {
           return Center(
             child: Text(
-              'ط­ط¯ط« ط®ط·ط£: ${downloadSnapshot.error}',
+              'حدث خطأ: ${downloadSnapshot.error}',
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -379,7 +379,7 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
+                  'حدث خطأ: ${filesSnapshot.error}',
                   style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
@@ -400,7 +400,7 @@ class MyFilesListScreen extends StatelessWidget {
     if (user == null) {
       return Center(
         child: Text(
-          'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
+          'يجب تسجيل الدخول أولاً',
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
@@ -419,7 +419,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (shareSnapshot.hasError) {
           return Center(
             child: Text(
-              'ط­ط¯ط« ط®ط·ط£: ${shareSnapshot.error}',
+              'حدث خطأ: ${shareSnapshot.error}',
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -438,7 +438,7 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
+                  'حدث خطأ: ${filesSnapshot.error}',
                   style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
@@ -464,7 +464,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
+              'حدث خطأ: ${snapshot.error}',
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -522,7 +522,7 @@ class MyFilesListScreen extends StatelessWidget {
                     ),
                   ),
                   title: Text(
-                    (data['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString(),
+                    (data['title'] ?? 'بدون عنوان').toString(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: LibraryTheme.text(context),
@@ -531,7 +531,7 @@ class MyFilesListScreen extends StatelessWidget {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      (data['authors'] ?? 'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString(),
+                      (data['authors'] ?? 'مؤلف غير معروف').toString(),
                       style: TextStyle(
                         color: LibraryTheme.muted(context),
                         height: 1.4,
@@ -565,7 +565,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
+              'حدث خطأ: ${snapshot.error}',
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -596,7 +596,7 @@ class MyFilesListScreen extends StatelessWidget {
 
                 if (targetUrl.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„ظپطھط­')),
+                    const SnackBar(content: Text('لا يوجد رابط للفتح')),
                   );
                   return;
                 }
@@ -609,7 +609,7 @@ class MyFilesListScreen extends StatelessWidget {
 
                 if (!launched) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('طھط¹ط°ط± ظپطھط­ ط§ظ„ظ…ظ„ظپ')),
+                    const SnackBar(content: Text('تعذر فتح الملف')),
                   );
                 }
               },
@@ -635,7 +635,7 @@ class MyFilesListScreen extends StatelessWidget {
                     ),
                   ),
                   title: Text(
-                    (data['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString(),
+                    (data['title'] ?? 'بدون عنوان').toString(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: LibraryTheme.text(context),
@@ -644,7 +644,7 @@ class MyFilesListScreen extends StatelessWidget {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      (data['authors'] ?? 'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString(),
+                      (data['authors'] ?? 'مؤلف غير معروف').toString(),
                       style: TextStyle(
                         color: LibraryTheme.muted(context),
                         height: 1.4,
@@ -652,7 +652,7 @@ class MyFilesListScreen extends StatelessWidget {
                     ),
                   ),
                   trailing: Text(
-                    'ظپطھط­',
+                    'فتح',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: LibraryTheme.primary(context),
@@ -687,10 +687,10 @@ class MyFilesListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMyUploads = title == 'ظ…ط§ ط±ظپط¹طھظ‡';
-    final bool isReferences = title == 'ط§ظ„ظ…ط±ط§ط¬ط¹';
-    final bool isDownloads = title == 'طھظ†ط²ظٹظ„ط§طھظٹ';
-    final bool isShares = title == 'ظ…ط§ ط´ط§ط±ظƒطھظ‡';
+    final bool isMyUploads = title == 'ما رفعته';
+    final bool isReferences = title == 'المراجع';
+    final bool isDownloads = title == 'تنزيلاتي';
+    final bool isShares = title == 'ما شاركته';
 
     return Scaffold(
       backgroundColor: LibraryTheme.bg(context),
@@ -724,7 +724,7 @@ class MyFilesListScreen extends StatelessWidget {
           ? _buildShares(context)
           : Center(
         child: Text(
-          'ط³ظٹطھظ… ط¹ط±ط¶ ظ‚ط§ط¦ظ…ط© "$title" ظ‡ظ†ط§ ظ„ط§ط­ظ‚ظ‹ط§',
+          'سيتم عرض قائمة "$title" هنا لاحقًا',
           style: TextStyle(
             fontSize: 18,
             color: LibraryTheme.text(context),
@@ -761,4 +761,3 @@ class _WrappedQueryDocumentSnapshot
   dynamic noSuchMethod(Invocation invocation) =>
       super.noSuchMethod(invocation);
 }
-

@@ -45,17 +45,17 @@ class LibraryFilesService {
     required String term,
   }) async {
     final uid = currentUserId;
-    if (uid == null) throw Exception('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹');
+    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final docRef = _firestore.collection('library_files').doc(fileId);
     final snapshot = await docRef.get();
     final data = snapshot.data();
     if (!snapshot.exists || data == null) {
-      throw Exception('ط§ظ„ظ…ظ„ظپ ط؛ظٹط± ظ…ظˆط¬ظˆط¯');
+      throw Exception('الملف غير موجود');
     }
 
     if ((data['userId'] ?? '') != uid) {
-      throw Exception('ط؛ظٹط± ظ…طµط±ط­ ظ„ظƒ ط¨طھط¹ط¯ظٹظ„ ظ‡ط°ط§ ط§ظ„ظ…ظ„ظپ');
+      throw Exception('غير مصرح لك بتعديل هذا الملف');
     }
 
     await docRef.update({
@@ -77,17 +77,17 @@ class LibraryFilesService {
     required String storagePath,
   }) async {
     final uid = currentUserId;
-    if (uid == null) throw Exception('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹');
+    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final docRef = _firestore.collection('library_files').doc(fileId);
     final snapshot = await docRef.get();
     final data = snapshot.data();
     if (!snapshot.exists || data == null) {
-      throw Exception('ط§ظ„ظ…ظ„ظپ ط؛ظٹط± ظ…ظˆط¬ظˆط¯');
+      throw Exception('الملف غير موجود');
     }
 
     if ((data['userId'] ?? '') != uid) {
-      throw Exception('ط؛ظٹط± ظ…طµط±ط­ ظ„ظƒ ط¨ط­ط°ظپ ظ‡ط°ط§ ط§ظ„ظ…ظ„ظپ');
+      throw Exception('غير مصرح لك بحذف هذا الملف');
     }
 
     if (storagePath.trim().isNotEmpty) {

@@ -9,10 +9,10 @@ class DigitalLibraryFirestoreService {
 
   static Future<void> saveReference(Map<String, dynamic> result) async {
     final uid = currentUserId;
-    if (uid == null) throw Exception('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹');
+    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final articleId = (result['id'] ?? '').toString();
-    if (articleId.isEmpty) throw Exception('ظ…ط¹ط±ظپ ط§ظ„ظˆط±ظ‚ط© ط؛ظٹط± ظ…ظˆط¬ظˆط¯');
+    if (articleId.isEmpty) throw Exception('معرف الورقة غير موجود');
 
     final authors = (result['authors'] as List<dynamic>?)
         ?.map((author) => author['name'].toString())
@@ -46,10 +46,10 @@ class DigitalLibraryFirestoreService {
 
   static Future<void> registerDownload(Map<String, dynamic> result) async {
     final uid = currentUserId;
-    if (uid == null) throw Exception('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹');
+    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final articleId = (result['id'] ?? '').toString();
-    if (articleId.isEmpty) throw Exception('ظ…ط¹ط±ظپ ط§ظ„ظˆط±ظ‚ط© ط؛ظٹط± ظ…ظˆط¬ظˆط¯');
+    if (articleId.isEmpty) throw Exception('معرف الورقة غير موجود');
 
     final authors = (result['authors'] as List<dynamic>?)
         ?.map((author) => author['name'].toString())

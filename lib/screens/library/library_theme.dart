@@ -4,39 +4,38 @@ import '../../core/theme/app_colors.dart';
 class LibraryTheme {
   LibraryTheme._();
 
-  static Color primary(BuildContext context) => Theme.of(context).colorScheme.primary;
-  static Color secondary(BuildContext context) => Theme.of(context).colorScheme.secondary;
-  static Color accent(BuildContext context) => const Color(0xFFF59E0B);
-  static Color success(BuildContext context) => Colors.green;
-  static Color danger(BuildContext context) => Theme.of(context).colorScheme.error;
-  static Color bg(BuildContext context) => Theme.of(context).scaffoldBackgroundColor;
-  static Color surface(BuildContext context) => Theme.of(context).colorScheme.surface;
-  static Color text(BuildContext context) => Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
-  static Color muted(BuildContext context) => Theme.of(context).colorScheme.onSurfaceVariant;
-  static Color border(BuildContext context) => Theme.of(context).dividerColor.withOpacity(0.08);
+  static const Color primary = AppColors.primary;
+  static const Color secondary = AppColors.primaryDark;
+  static const Color accent = AppColors.secondary;
+  static const Color success = AppColors.success;
+  static const Color danger = AppColors.error;
+  static const Color bg = AppColors.background;
+  static const Color surface = AppColors.surface;
+  static const Color text = AppColors.textPrimary;
+  static const Color muted = AppColors.textSecondary;
+  static const Color border = AppColors.border;
 
-  static LinearGradient primaryGradient(BuildContext context) => LinearGradient(
+  static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primary(context), secondary(context)],
+    colors: [primary, secondary],
   );
 
-  static LinearGradient aquaGradient(BuildContext context) => LinearGradient(
+  static const LinearGradient aquaGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [AppColors.blueGlow, primary(context)],
+    colors: [AppColors.blueGlow, primary],
   );
 
-  static LinearGradient amberGradient(BuildContext context) => LinearGradient(
+  static const LinearGradient amberGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [accent(context), const Color(0xFFF59E0B)],
+    colors: [accent, Color(0xFFF59E0B)],
   );
 
-  static LinearGradient mintGradient(BuildContext context) => LinearGradient(
+  static const LinearGradient mintGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [success(context), primary(context)],
+    colors: [success, primary],
   );
 }
-

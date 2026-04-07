@@ -38,7 +38,7 @@ class LibraryReactionsService {
     required bool isCurrentlyLiked,
   }) async {
     final uid = currentUserId;
-    if (uid == null) throw Exception('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹');
+    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final fileRef = _firestore.collection('library_files').doc(fileId);
     final likeRef = fileRef.collection('likes').doc(uid);
@@ -70,7 +70,7 @@ class LibraryReactionsService {
     required bool isCurrentlySaved,
   }) async {
     final uid = currentUserId;
-    if (uid == null) throw Exception('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹');
+    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final fileRef = _firestore.collection('library_files').doc(fileId);
     final saveRef = fileRef.collection('saves').doc(uid);
@@ -124,7 +124,7 @@ class LibraryReactionsService {
 
   static Future<void> registerDownload(String fileId) async {
     final uid = currentUserId;
-    if (uid == null) throw Exception('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹');
+    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final fileRef = _firestore.collection('library_files').doc(fileId);
     final downloadRef = fileRef.collection('downloads').doc(uid);
@@ -150,7 +150,7 @@ class LibraryReactionsService {
 
   static Future<void> registerShare(String fileId) async {
     final uid = currentUserId;
-    if (uid == null) throw Exception('ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹');
+    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final fileRef = _firestore.collection('library_files').doc(fileId);
     final shareRef = fileRef.collection('shares').doc(uid);

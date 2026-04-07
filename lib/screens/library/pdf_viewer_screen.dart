@@ -10,7 +10,7 @@ class PdfViewerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('طھطµظپط­ ط§ظ„ظ…ظ„ظپ'),
+        title: const Text('تصفح الملف'),
         centerTitle: true,
       ),
       body: PDFView(
@@ -19,4 +19,3 @@ class PdfViewerScreen extends StatelessWidget {
     );
   }
 }
-

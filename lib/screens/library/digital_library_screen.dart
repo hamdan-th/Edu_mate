@@ -16,7 +16,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _searchResults = [];
   bool _isLoading = false;
-  String _message = 'ط§ط¨ط­ط« ظپظٹ ظ…ظ„ط§ظٹظٹظ† ط§ظ„ط£ظˆط±ط§ظ‚ ط§ظ„ط¨ط­ط«ظٹط© ط§ظ„ظ…ظپطھظˆط­ط©...';
+  String _message = 'ابحث في ملايين الأوراق البحثية المفتوحة...';
   final Set<String> _savedItems = {};
 
   @override
@@ -41,12 +41,12 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
       setState(() {
         _searchResults = results;
         if (_searchResults.isEmpty) {
-          _message = 'ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ظ†طھط§ط¦ط¬ ظ„ظ€ "${_searchController.text}"';
+          _message = 'لم يتم العثور على نتائج لـ "${_searchController.text}"';
         }
       });
     } catch (e) {
       setState(() {
-        _message = 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط§ظ„ط¨ط­ط«. ظٹط±ط¬ظ‰ ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§طھطµط§ظ„ظƒ ط¨ط§ظ„ط¥ظ†طھط±ظ†طھ.';
+        _message = 'حدث خطأ أثناء البحث. يرجى التحقق من اتصالك بالإنترنت.';
       });
     } finally {
       setState(() {
@@ -74,7 +74,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
       ..showSnackBar(
         SnackBar(
           content: Text(
-            isSaved ? 'طھظ…طھ ط§ظ„ط¥ط²ط§ظ„ط© ظ…ظ† ط§ظ„ظ…ط­ظپظˆط¸ط§طھ' : 'طھظ… ط§ظ„ط­ظپط¸ ظƒظ…ط±ط¬ط¹ ط¨ظ†ط¬ط§ط­',
+            isSaved ? 'تمت الإزالة من المحفوظات' : 'تم الحفظ كمرجع بنجاح',
           ),
         ),
       );
@@ -86,13 +86,13 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ…ط´ط§ط±ظƒط© ظ‡ط°ط§ ط§ظ„ط¹ظ†طµط±')),
+          const SnackBar(content: Text('لا يوجد رابط لمشاركة هذا العنصر')),
         );
       return;
     }
 
     final String articleUrl = 'https://core.ac.uk/display/$articleId';
-    final String shareText = 'ط§ط·ظ„ط¹ ط¹ظ„ظ‰ ظ‡ط°ظ‡ ط§ظ„ظˆط±ظ‚ط© ط§ظ„ط¨ط­ط«ظٹط©:\n$title\n$articleUrl';
+    final String shareText = 'اطلع على هذه الورقة البحثية:\n$title\n$articleUrl';
     await Share.share(shareText);
   }
 
@@ -109,7 +109,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
               textInputAction: TextInputAction.search,
               onSubmitted: (value) => _performSearch(),
               decoration: InputDecoration(
-                hintText: 'ط§ط¨ط­ط« ظپظٹ CORE (ظ…ط«ط§ظ„: AI in Medicine)',
+                hintText: 'ابحث في CORE (مثال: AI in Medicine)',
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.send_rounded),
@@ -134,11 +134,11 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 final result = _searchResults[index];
-                final title = result['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†';
+                final title = result['title'] ?? 'بدون عنوان';
                 final authors = (result['authors'] as List<dynamic>?)
                     ?.map((author) => author['name'].toString())
                     .join(', ') ??
-                    'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
+                    'مؤلف غير معروف';
 
                 final String articleId = result['id']?.toString() ?? '';
                 final bool isSaved = _savedItems.contains(articleId);
@@ -195,17 +195,17 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                                 icon: isSaved
                                     ? Icons.bookmark_added
                                     : Icons.bookmark_add_outlined,
-                                label: isSaved ? 'طھظ… ط§ظ„ط­ظپط¸' : 'ط­ظپط¸',
+                                label: isSaved ? 'تم الحفظ' : 'حفظ',
                                 onPressed: () => _toggleSave(result),
                               ),
                               _ActionButton(
                                 icon: Icons.share_outlined,
-                                label: 'ظ…ط´ط§ط±ظƒط©',
+                                label: 'مشاركة',
                                 onPressed: () => _shareResult(result, title),
                               ),
                               _ActionButton(
                                 icon: Icons.arrow_forward_ios_rounded,
-                                label: 'ط§ظ„طھظپط§طµظٹظ„',
+                                label: 'التفاصيل',
                                 onPressed: () {
                                   Navigator.push(
                                     context,
@@ -282,4 +282,3 @@ class _ActionButton extends StatelessWidget {
     );
   }
 }
-
