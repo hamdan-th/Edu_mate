@@ -43,7 +43,9 @@ class FeedReactionsService {
       final data = postSnapshot.data() as Map<String, dynamic>?;
       int currentLikes = data?['likesCount'] as int? ?? 0;
 
-      if (isCurrentlyLiked) {
+      final likeSnapshot = await transaction.get(docRef);
+
+      if (likeSnapshot.exists) {
         transaction.delete(docRef);
         transaction.update(postRef, {'likesCount': currentLikes > 0 ? currentLikes - 1 : 0});
       } else {
