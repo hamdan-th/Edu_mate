@@ -55,10 +55,10 @@ class FileCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: color.withOpacity(0.10),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Center(
-        child: Icon(icon, size: 36, color: color),
+        child: Icon(icon, size: 28, color: color),
       ),
     );
   }
@@ -68,10 +68,10 @@ class FileCard extends StatelessWidget {
     final fileColor = _getColorForFileType(file.fileType);
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
         color: LibraryTheme.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: LibraryTheme.border),
         boxShadow: [
           BoxShadow(
@@ -82,12 +82,14 @@ class FileCard extends StatelessWidget {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(width: 86, height: 86, child: _buildThumbnail()),
+          SizedBox(width: 58, height: 58, child: _buildThumbnail()),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   file.title,
@@ -95,7 +97,7 @@ class FileCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.w800,
-                    fontSize: 16,
+                    fontSize: 15,
                     color: LibraryTheme.text,
                     height: 1.3,
                   ),
@@ -107,8 +109,8 @@ class FileCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: LibraryTheme.muted,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
