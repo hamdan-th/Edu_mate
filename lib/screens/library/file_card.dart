@@ -150,12 +150,14 @@ class FileCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _MetricChip(icon: Icons.thumb_up_alt_outlined, value: file.likes),
+                    const SizedBox(width: 18),
                     _MetricChip(icon: Icons.bookmark_border_rounded, value: file.saves),
+                    const SizedBox(width: 18),
                     _MetricChip(icon: Icons.visibility_outlined, value: file.views),
                   ],
                 ),
@@ -271,14 +273,15 @@ class _MetricChip extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 13, color: LibraryTheme.muted.withOpacity(0.7)),
+        Icon(icon, size: 14, color: LibraryTheme.muted.withOpacity(0.7)),
         const SizedBox(width: 4),
         Text(
           '$value',
           style: TextStyle(
             color: LibraryTheme.muted.withOpacity(0.9),
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
+            height: 1.0,
           ),
         ),
       ],
