@@ -16,16 +16,16 @@ IconData _getIconForFileType(String fileType) {
   }
 }
 
-Color _getColorForFileType(String fileType) {
+Color _getColorForFileType(BuildContext context, String fileType) {
   switch (fileType.toLowerCase()) {
     case 'pdf':
-      return LibraryTheme.danger;
+      return Theme.of(context).colorScheme.error;
     case 'word':
-      return LibraryTheme.primary;
+      return Theme.of(context).colorScheme.primary;
     case 'image':
-      return LibraryTheme.accent;
+      return const Color(0xFFF59E0B); // Gold accents can remain
     default:
-      return LibraryTheme.text.withOpacity(0.72);
+      return Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.72) ?? Colors.grey;
   }
 }
 
@@ -33,9 +33,9 @@ class FileCard extends StatelessWidget {
   final FileModel file;
   const FileCard({Key? key, required this.file}) : super(key: key);
 
-  Widget _buildThumbnail() {
+  Widget _buildThumbnail(BuildContext context) {
     final icon = _getIconForFileType(file.fileType);
-    final color = _getColorForFileType(file.fileType);
+    final color = _getColorForFileType(context, file.fileType);
 
     if (file.thumbnailUrl.trim().isNotEmpty) {
       return ClipRRect(
@@ -65,17 +65,22 @@ class FileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fileColor = _getColorForFileType(file.fileType);
+    final fileColor = _getColorForFileType(context, file.fileType);
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor = Theme.of(context).dividerColor;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey;
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: LibraryTheme.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: LibraryTheme.border),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: LibraryTheme.primary.withOpacity(0.05),
+            color: primaryColor.withOpacity(0.05),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -84,7 +89,7 @@ class FileCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(width: 58, height: 58, child: _buildThumbnail()),
+          SizedBox(width: 58, height: 58, child: _buildThumbnail(context)),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -113,13 +118,13 @@ class FileCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _statusColor(file.status).withOpacity(0.08),
+                        color: _statusColor(context, file.status).withOpacity(0.08),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
                         _statusText(file.status),
                         style: TextStyle(
-                          color: _statusColor(file.status),
+                          color: _statusColor(context, file.status),
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                         ),
@@ -132,10 +137,10 @@ class FileCard extends StatelessWidget {
                   file.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
-                    color: LibraryTheme.text,
+                    color: textColor,
                     height: 1.3,
                   ),
                 ),
@@ -144,8 +149,8 @@ class FileCard extends StatelessWidget {
                   '${file.author} • ${file.college}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: LibraryTheme.muted,
+                  style: TextStyle(
+                    color: mutedColor,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -169,16 +174,16 @@ class FileCard extends StatelessWidget {
     );
   }
 
-  static Color _statusColor(String status) {
+  static Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'approved':
-        return LibraryTheme.success;
+        return Colors.green;
       case 'pending':
-        return LibraryTheme.accent;
+        return const Color(0xFFF59E0B);
       case 'rejected':
-        return LibraryTheme.danger;
+        return Theme.of(context).colorScheme.error;
       default:
-        return LibraryTheme.muted;
+        return Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
     }
   }
 
@@ -202,16 +207,21 @@ class GridFileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColorForFileType(file.fileType);
+    final color = _getColorForFileType(context, file.fileType);
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor = Theme.of(context).dividerColor;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey;
 
     return Container(
       decoration: BoxDecoration(
-        color: LibraryTheme.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: LibraryTheme.border),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: LibraryTheme.primary.withOpacity(0.05),
+            color: primaryColor.withOpacity(0.05),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -241,10 +251,10 @@ class GridFileCard extends StatelessWidget {
               file.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
-                color: LibraryTheme.text,
+                color: textColor,
                 height: 1.2,
               ),
             ),
@@ -253,7 +263,7 @@ class GridFileCard extends StatelessWidget {
               '${file.author} • ${file.college}',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, color: LibraryTheme.muted, height: 1.3),
+              style: TextStyle(fontSize: 11, color: mutedColor, height: 1.3),
             ),
           ],
         ),
@@ -269,16 +279,19 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7) ?? Colors.grey;
+    final mutedTextColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.9) ?? Colors.black54;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 14, color: LibraryTheme.muted.withOpacity(0.7)),
+        Icon(icon, size: 14, color: mutedColor),
         const SizedBox(width: 4),
         Text(
           '$value',
           style: TextStyle(
-            color: LibraryTheme.muted.withOpacity(0.9),
+            color: mutedTextColor,
             fontSize: 12,
             fontWeight: FontWeight.w500,
             height: 1.0,
