@@ -20,6 +20,7 @@ class MyLibraryScreen extends StatelessWidget {
         .snapshots()
         .map((snapshot) => snapshot.docs.length);
   }
+
   Stream<int> _combinedReferencesCount() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return Stream.value(0);
@@ -152,7 +153,7 @@ class MyLibraryScreen extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 14,
               mainAxisSpacing: 14,
-              childAspectRatio: 0.88,
+              childAspectRatio: 1.02,
               children: [
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: LibraryFilesService.myUploadedFiles(),
@@ -163,10 +164,6 @@ class MyLibraryScreen extends StatelessWidget {
                       subtitle: 'ملفاتي المضافة',
                       count: count,
                       icon: Icons.cloud_upload_rounded,
-                      colors: const [
-                        Color(0xFF5B8CFF),
-                        Color(0xFF7B61FF),
-                      ],
                       onTap: () => _openList(context, 'ما رفعته'),
                     );
                   },
@@ -180,10 +177,6 @@ class MyLibraryScreen extends StatelessWidget {
                       subtitle: 'مشاركاتي',
                       count: count,
                       icon: Icons.send_rounded,
-                      colors: const [
-                        Color(0xFF12B3A8),
-                        Color(0xFF1FC8B3),
-                      ],
                       onTap: () => _openList(context, 'ما شاركته'),
                     );
                   },
@@ -197,10 +190,6 @@ class MyLibraryScreen extends StatelessWidget {
                       subtitle: 'المحفوظات',
                       count: count,
                       icon: Icons.bookmark_rounded,
-                      colors: const [
-                        Color(0xFFF59E0B),
-                        Color(0xFFF7B84B),
-                      ],
                       onTap: () => _openList(context, 'المراجع'),
                     );
                   },
@@ -214,40 +203,14 @@ class MyLibraryScreen extends StatelessWidget {
                       subtitle: 'المنزّل',
                       count: count,
                       icon: Icons.download_rounded,
-                      colors: const [
-                        Color(0xFF10B981),
-                        Color(0xFF34D399),
-                      ],
                       onTap: () => _openList(context, 'تنزيلاتي'),
                     );
                   },
                 ),
               ],
             ),
-            // SizedBox(height: 22),
-            // const _SectionHeader(
-            //  title: 'نظرة سريعة',
-            //  subtitle: 'معلومات مهمة عن حالة الملفات داخل مكتبتك',
-            // ),
-            // SizedBox(height: 12),
-            // const _InfoCard(
-            //  items: [
-            // _InfoItemData(
-            // icon: Icons.pending_actions_rounded,
-            // title: 'الملفات الجديدة تدخل للمراجعة',
-            // subtitle:
-            // 'أي ملف ترفعه يظهر لك في مكتبتي مباشرة، لكن نشره العام يكون بعد الاعتماد.',
-            // ),
-            //_InfoItemData(
-            // icon: Icons.edit_note_rounded,
-            // title: 'التعديل يعيد الملف للمراجعة',
-            // subtitle:
-            // 'عند تعديل بيانات الملف، يعود لقيد المراجعة للحفاظ على جودة المكتبة.',
-            // ),
           ],
         ),
-        //  ],
-        // ),
       ),
     );
   }
@@ -261,19 +224,14 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            LibraryTheme.surface(context),
-            Colors.white,
-            LibraryTheme.primary(context).withOpacity(0.06),
-          ],
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-        ),
+        color: LibraryTheme.surface(context),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+        border: Border.all(
+          color: LibraryTheme.border(context).withOpacity(0.22),
+          width: 0.8,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.035),
@@ -287,50 +245,43 @@ class _HeroCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  gradient: const LinearGradient(
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: LinearGradient(
                     colors: [
-                      Color(0xFF5B8CFF),
-                      Color(0xFF7B61FF),
+                      LibraryTheme.primary(context),
+                      LibraryTheme.secondary(context),
                     ],
-                    begin: AlignmentDirectional.topStart,
-                    end: AlignmentDirectional.bottomEnd,
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF7B61FF).withOpacity(0.22),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
                 ),
                 child: const Icon(
                   Icons.folder_copy_rounded,
                   color: Colors.white,
-                  size: 20,
+                  size: 24,
                 ),
               ),
               const SizedBox(width: 12),
-               Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'مكتبتي الشخصية',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 21,
                         fontWeight: FontWeight.w800,
                         color: LibraryTheme.text(context),
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'مساحة مرتبة لملفاتك، محفوظاتك، وتنزيلاتك داخل التطبيق.',
                       style: TextStyle(
-                        fontSize: 13.2,
+                        fontSize: 13.4,
                         color: LibraryTheme.muted(context),
                         height: 1.45,
                       ),
@@ -346,7 +297,10 @@ class _HeroCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: LibraryTheme.bg(context),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+              border: Border.all(
+                color: LibraryTheme.border(context).withOpacity(0.22),
+                width: 0.8,
+              ),
             ),
             child: const Row(
               children: [
@@ -412,14 +366,21 @@ class _MiniFeature extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: LibraryTheme.surface(context),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+          border: Border.all(
+            color: LibraryTheme.border(context).withOpacity(0.2),
+            width: 0.8,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: LibraryTheme.primary(context)),
+            Icon(
+              icon,
+              size: 16,
+              color: LibraryTheme.primary(context),
+            ),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
@@ -439,13 +400,11 @@ class _MiniFeature extends StatelessWidget {
     );
   }
 }
-
 class _StatCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final int count;
   final IconData icon;
-  final List<Color> colors;
   final VoidCallback onTap;
 
   const _StatCard({
@@ -453,7 +412,6 @@ class _StatCard extends StatefulWidget {
     required this.subtitle,
     required this.count,
     required this.icon,
-    required this.colors,
     required this.onTap,
   });
 
@@ -474,96 +432,84 @@ class _StatCardState extends State<_StatCard> {
         widget.onTap();
       },
       child: AnimatedScale(
-        scale: _pressed ? 0.975 : 1,
+        scale: _pressed ? 0.98 : 1,
         duration: const Duration(milliseconds: 120),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.all(12),
+        child: Container(
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: widget.colors,
-              begin: AlignmentDirectional.topStart,
-              end: AlignmentDirectional.bottomEnd,
+            color: LibraryTheme.surface(context),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: LibraryTheme.border(context).withOpacity(0.2),
             ),
-            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: widget.colors.last.withOpacity(0.22),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
               ),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: AlignmentDirectional.topStart,
-                child: Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white.withOpacity(0.28),
-                        Colors.white.withOpacity(0.08),
-                      ],
-                      begin: AlignmentDirectional.topStart,
-                      end: AlignmentDirectional.bottomEnd,
-                    ),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.22),
-                    ),
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    color: Colors.white,
-                    size: 18,
-                  ),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: LibraryTheme.primary(context).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  widget.icon,
+                  size: 18,
+                  color: LibraryTheme.primary(context),
                 ),
               ),
-              const Spacer(),
+
+              const SizedBox(height: 10),
+
               Text(
                 widget.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 17,
+                style: TextStyle(
+                  fontSize: 14,
                   fontWeight: FontWeight.w800,
+                  color: LibraryTheme.text(context),
                 ),
               ),
-              const SizedBox(height: 4),
+
+              const SizedBox(height: 2),
+
               Text(
                 widget.subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.86),
-                  fontSize: 12.2,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
+                  color: LibraryTheme.muted(context),
                 ),
               ),
-              const SizedBox(height: 12),
+
+              const Spacer(),
+
               Row(
                 children: [
                   Text(
                     '${widget.count}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
+                    style: TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.w900,
-                      height: 1,
+                      color: LibraryTheme.text(context),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 4),
                   Text(
                     'عنصر',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.88),
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                      color: LibraryTheme.muted(context),
                     ),
                   ),
                 ],
@@ -575,7 +521,6 @@ class _StatCardState extends State<_StatCard> {
     );
   }
 }
-
 class _SectionHeader extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -610,103 +555,4 @@ class _SectionHeader extends StatelessWidget {
       ],
     );
   }
-}
-
-class _InfoCard extends StatelessWidget {
-  final List<_InfoItemData> items;
-
-  const _InfoCard({required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: LibraryTheme.surface(context),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        children: List.generate(items.length, (index) {
-          final item = items[index];
-          return Padding(
-            padding: EdgeInsets.only(bottom: index == items.length - 1 ? 0 : 14),
-            child: _InfoTile(item: item),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  final _InfoItemData item;
-
-  const _InfoTile({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: LibraryTheme.primary(context).withOpacity(0.08),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(
-            item.icon,
-            color: LibraryTheme.primary(context),
-            size: 18,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.title,
-                style: TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w700,
-                  color: LibraryTheme.text(context),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                item.subtitle,
-                style: TextStyle(
-                  color: LibraryTheme.muted(context),
-                  fontSize: 12.8,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InfoItemData {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _InfoItemData({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
 }
