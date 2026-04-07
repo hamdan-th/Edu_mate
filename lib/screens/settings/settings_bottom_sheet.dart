@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:edu_mate/l10n/app_localizations.dart';
 
 import '../../core/providers/app_settings_provider.dart';
 import '../../core/theme/app_colors.dart';

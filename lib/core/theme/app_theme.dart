@@ -87,13 +87,13 @@ class AppTheme {
           ),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.border),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          side: BorderSide(color: AppColors.border),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
@@ -224,13 +224,13 @@ class AppTheme {
           ),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: Colors.white,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          side: BorderSide(color: Color(0xFFE5E7EB)),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
