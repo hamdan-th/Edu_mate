@@ -99,7 +99,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           Padding(

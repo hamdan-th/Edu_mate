@@ -41,7 +41,7 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
     final currentTab = _tabs[_selectedIndex];
 
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
