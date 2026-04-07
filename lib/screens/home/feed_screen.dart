@@ -21,14 +21,15 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  String _selectedFilter = 'College';
+  String _selectedFilter = 'For You';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
   final List<String> _filters = const [
-    'College',
-    'Major',
-    'Courses',
+    'For You',
+    'Recent',
+    'Popular',
+    'Academic',
   ];
 
   @override
@@ -210,12 +211,14 @@ class _FeedScreenState extends State<FeedScreen> {
                       final active = _selectedFilter == label;
                       
                       String displayLabel = label;
-                      if (label == 'College') {
-                        displayLabel = l10n.filterCollege;
-                      } else if (label == 'Major') {
-                        displayLabel = l10n.filterMajor;
-                      } else if (label == 'Courses') {
-                        displayLabel = l10n.filterCourses;
+                      if (label == 'For You') {
+                        displayLabel = l10n.filterForYou;
+                      } else if (label == 'Recent') {
+                        displayLabel = l10n.filterRecent;
+                      } else if (label == 'Popular') {
+                        displayLabel = l10n.filterPopular;
+                      } else if (label == 'Academic') {
+                        displayLabel = l10n.filterAcademic;
                       }
                       return GestureDetector(
                         onTap: () {
@@ -452,9 +455,10 @@ class ModernChip extends StatelessWidget {
 
   IconData _getIcon() {
     final checkLabel = originalValue ?? label;
-    if (checkLabel.contains('College')) return Icons.account_balance_rounded;
-    if (checkLabel.contains('Major')) return Icons.school_rounded;
-    if (checkLabel.contains('Course')) return Icons.menu_book_rounded;
+    if (checkLabel.contains('For You')) return Icons.auto_awesome_rounded;
+    if (checkLabel.contains('Recent')) return Icons.access_time_rounded;
+    if (checkLabel.contains('Popular')) return Icons.local_fire_department_rounded;
+    if (checkLabel.contains('Academic')) return Icons.account_balance_rounded;
     return Icons.filter_list_rounded;
   }
 

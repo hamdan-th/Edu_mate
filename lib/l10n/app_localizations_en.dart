@@ -172,6 +172,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedSearchHint => 'Search feed...';
 
   @override
+  String get filterForYou => 'For You';
+
+  @override
+  String get filterRecent => 'Recent';
+
+  @override
+  String get filterPopular => 'Popular';
+
+  @override
+  String get filterAcademic => 'Academic';
+
+  @override
   String get filterCollege => 'College';
 
   @override

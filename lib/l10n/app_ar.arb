@@ -59,6 +59,10 @@
   "navLibrary": "المكتبة",
 
   "feedSearchHint": "البحث...",
+  "filterForYou": "لك",
+  "filterRecent": "الأحدث",
+  "filterPopular": "الرائجة",
+  "filterAcademic": "أكاديمي",
   "filterCollege": "الكلية",
   "filterMajor": "التخصص",
   "filterCourses": "المقررات",

@@ -59,6 +59,10 @@
   "navLibrary": "Library",
 
   "feedSearchHint": "Search feed...",
+  "filterForYou": "For You",
+  "filterRecent": "Recent",
+  "filterPopular": "Popular",
+  "filterAcademic": "Academic",
   "filterCollege": "College",
   "filterMajor": "Major",
   "filterCourses": "Courses",

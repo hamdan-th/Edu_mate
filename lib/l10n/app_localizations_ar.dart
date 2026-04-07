@@ -171,6 +171,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get feedSearchHint => 'البحث...';
 
   @override
+  String get filterForYou => 'لك';
+
+  @override
+  String get filterRecent => 'الأحدث';
+
+  @override
+  String get filterPopular => 'الرائجة';
+
+  @override
+  String get filterAcademic => 'أكاديمي';
+
+  @override
   String get filterCollege => 'الكلية';
 
   @override

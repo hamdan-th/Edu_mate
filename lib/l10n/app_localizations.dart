@@ -422,6 +422,30 @@ abstract class AppLocalizations {
   /// **'Search feed...'**
   String get feedSearchHint;
 
+  /// No description provided for @filterForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'For You'**
+  String get filterForYou;
+
+  /// No description provided for @filterRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get filterRecent;
+
+  /// No description provided for @filterPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get filterPopular;
+
+  /// No description provided for @filterAcademic.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic'**
+  String get filterAcademic;
+
   /// No description provided for @filterCollege.
   ///
   /// In en, this message translates to:
