@@ -1186,7 +1186,7 @@ class _ModernField extends StatelessWidget {
     );
   }
 }
-  class _DropdownField extends StatelessWidget {
+class _DropdownField extends StatelessWidget {
   final String? value;
   final String hint;
   final IconData icon;
@@ -1194,56 +1194,56 @@ class _ModernField extends StatelessWidget {
   final ValueChanged<String?> onChanged;
 
   const _DropdownField({
-  required this.value,
-  required this.hint,
-  required this.icon,
-  required this.items,
-  required this.onChanged,
+    required this.value,
+    required this.hint,
+    required this.icon,
+    required this.items,
+    required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-  final uniqueItems = items.toSet().toList();
-  final safeValue =
-  (value != null && uniqueItems.contains(value)) ? value : null;
+    final uniqueItems = items.toSet().toList();
+    final safeValue =
+    (value != null && uniqueItems.contains(value)) ? value : null;
 
-  return DropdownButtonFormField<String>(
-  value: safeValue,
-  isExpanded: true,
-  icon: const Icon(Icons.keyboard_arrow_down_rounded),
-  decoration: InputDecoration(
-  labelText: hint,
-  prefixIcon: Icon(icon, size: 18),
-  filled: true,
-  fillColor: const Color(0xFFF8FAFD),
-  border: OutlineInputBorder(
-  borderRadius: BorderRadius.circular(18),
-  borderSide: BorderSide.none,
-  ),
-  enabledBorder: OutlineInputBorder(
-  borderRadius: BorderRadius.circular(18),
-  borderSide: const BorderSide(color: LibraryTheme.border),
-  ),
-  focusedBorder: OutlineInputBorder(
-  borderRadius: BorderRadius.circular(18),
-  borderSide: const BorderSide(
-  color: LibraryTheme.primary,
-  width: 1.4,
-  ),
-  ),
-  ),
-  items: uniqueItems
-      .map(
-  (e) => DropdownMenuItem<String>(
-  value: e,
-  child: Text(
-  e,
-  overflow: TextOverflow.ellipsis,
-  ),
-  ),
-  )
-      .toList(),
-  onChanged: onChanged,
-  );
+    return DropdownButtonFormField<String>(
+      value: safeValue,
+      isExpanded: true,
+      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+      decoration: InputDecoration(
+        labelText: hint,
+        prefixIcon: Icon(icon, size: 18),
+        filled: true,
+        fillColor: const Color(0xFFF8FAFD),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: LibraryTheme.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(
+            color: LibraryTheme.primary,
+            width: 1.4,
+          ),
+        ),
+      ),
+      items: uniqueItems
+          .map(
+            (e) => DropdownMenuItem<String>(
+          value: e,
+          child: Text(
+            e,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      )
+          .toList(),
+      onChanged: onChanged,
+    );
   }
-  }
+}
