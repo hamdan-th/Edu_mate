@@ -4,6 +4,17 @@ import '../../core/theme/app_colors.dart';
 class LibraryTheme {
   LibraryTheme._();
 
+  static Color primary(BuildContext context) => Theme.of(context).colorScheme.primary;
+  static Color secondary(BuildContext context) => Theme.of(context).colorScheme.secondary;
+  static Color accent(BuildContext context) => Theme.of(context).colorScheme.secondary;
+  static Color success(BuildContext context) => Colors.green;
+  static Color danger(BuildContext context) => Theme.of(context).colorScheme.error;
+  static Color bg(BuildContext context) => Theme.of(context).scaffoldBackgroundColor;
+  static Color surface(BuildContext context) => Theme.of(context).colorScheme.surface;
+  static Color text(BuildContext context) => Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+  static Color muted(BuildContext context) => Theme.of(context).colorScheme.onSurfaceVariant;
+  static Color border(BuildContext context) => Theme.of(context).dividerColor.withOpacity(0.08);
+
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,

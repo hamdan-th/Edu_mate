@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'library_theme.dart';
@@ -36,8 +36,8 @@ class _EditFileScreenState extends State<EditFileScreen> {
     if (college == null) return null;
 
     switch (college.trim()) {
-      case 'كلية الهندسة':
-        return 'كلية الهندسة وتكنولوجيا المعلومات';
+      case 'ظƒظ„ظٹط© ط§ظ„ظ‡ظ†ط¯ط³ط©':
+        return 'ظƒظ„ظٹط© ط§ظ„ظ‡ظ†ط¯ط³ط© ظˆطھظƒظ†ظˆظ„ظˆط¬ظٹط§ ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ';
       default:
         return college.trim();
     }
@@ -117,7 +117,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
         _selectedLevel == null ||
         _selectedTerm == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('أكمل جميع القوائم المطلوبة')),
+        const SnackBar(content: Text('ط£ظƒظ…ظ„ ط¬ظ…ظٹط¹ ط§ظ„ظ‚ظˆط§ط¦ظ… ط§ظ„ظ…ط·ظ„ظˆط¨ط©')),
       );
       return;
     }
@@ -144,7 +144,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('تم تعديل الملف بنجاح، وحالته الآن: قيد المراجعة'),
+          content: Text('طھظ… طھط¹ط¯ظٹظ„ ط§ظ„ظ…ظ„ظپ ط¨ظ†ط¬ط§ط­طŒ ظˆط­ط§ظ„طھظ‡ ط§ظ„ط¢ظ†: ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©'),
         ),
       );
 
@@ -152,7 +152,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل تعديل الملف: $e')),
+        SnackBar(content: Text('ظپط´ظ„ طھط¹ط¯ظٹظ„ ط§ظ„ظ…ظ„ظپ: $e')),
       );
     } finally {
       if (mounted) {
@@ -175,10 +175,10 @@ class _EditFileScreenState extends State<EditFileScreen> {
     final terms = UniversityAcademicData.terms.toSet().toList();
 
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: LibraryTheme.bg(context),
       appBar: AppBar(
-        title: const Text('تعديل الملف'),
-        backgroundColor: LibraryTheme.bg,
+        title: const Text('طھط¹ط¯ظٹظ„ ط§ظ„ظ…ظ„ظپ'),
+        backgroundColor: LibraryTheme.bg(context),
         elevation: 0,
       ),
       body: _isSaving
@@ -190,25 +190,25 @@ class _EditFileScreenState extends State<EditFileScreen> {
           children: [
             _Field(
               controller: _subjectNameController,
-              label: 'اسم المادة / العنوان',
+              label: 'ط§ط³ظ… ط§ظ„ظ…ط§ط¯ط© / ط§ظ„ط¹ظ†ظˆط§ظ†',
               validator: true,
             ),
             const SizedBox(height: 12),
             _Field(
               controller: _doctorNameController,
-              label: 'اسم الدكتور',
+              label: 'ط§ط³ظ… ط§ظ„ط¯ظƒطھظˆط±',
               validator: true,
             ),
             const SizedBox(height: 12),
             _Field(
               controller: _descriptionController,
-              label: 'الوصف',
+              label: 'ط§ظ„ظˆطµظپ',
               maxLines: 4,
             ),
             const SizedBox(height: 12),
             _Dropdown(
               value: _selectedCollege,
-              label: 'الكلية',
+              label: 'ط§ظ„ظƒظ„ظٹط©',
               items: colleges,
               onChanged: (value) {
                 setState(() {
@@ -220,7 +220,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
             const SizedBox(height: 12),
             _Dropdown(
               value: _selectedSpecialization,
-              label: 'التخصص',
+              label: 'ط§ظ„طھط®طµطµ',
               items: specializations,
               onChanged: (value) {
                 setState(() {
@@ -231,7 +231,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
             const SizedBox(height: 12),
             _Dropdown(
               value: _selectedLevel,
-              label: 'المستوى',
+              label: 'ط§ظ„ظ…ط³طھظˆظ‰',
               items: levels,
               onChanged: (value) {
                 setState(() {
@@ -242,7 +242,7 @@ class _EditFileScreenState extends State<EditFileScreen> {
             const SizedBox(height: 12),
             _Dropdown(
               value: _selectedTerm,
-              label: 'الترم',
+              label: 'ط§ظ„طھط±ظ…',
               items: terms,
               onChanged: (value) {
                 setState(() {
@@ -256,14 +256,14 @@ class _EditFileScreenState extends State<EditFileScreen> {
               child: ElevatedButton(
                 onPressed: _saveChanges,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: LibraryTheme.primary,
+                  backgroundColor: LibraryTheme.primary(context),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('حفظ التعديلات'),
+                child: const Text('ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ط§طھ'),
               ),
             ),
           ],
@@ -293,24 +293,24 @@ class _Field extends StatelessWidget {
       maxLines: maxLines,
       validator: validator
           ? (value) =>
-      (value == null || value.trim().isEmpty) ? 'هذا الحقل مطلوب' : null
+      (value == null || value.trim().isEmpty) ? 'ظ‡ط°ط§ ط§ظ„ط­ظ‚ظ„ ظ…ط·ظ„ظˆط¨' : null
           : null,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: LibraryTheme.bg,
+        fillColor: LibraryTheme.bg(context),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border),
+          borderSide: const BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide:
-          const BorderSide(color: LibraryTheme.primary, width: 1.4),
+          const BorderSide(color: LibraryTheme.primary(context), width: 1.4),
         ),
       ),
     );
@@ -342,19 +342,19 @@ class _Dropdown extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: LibraryTheme.bg,
+        fillColor: LibraryTheme.bg(context),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: LibraryTheme.border),
+          borderSide: const BorderSide(color: LibraryTheme.border(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide:
-          const BorderSide(color: LibraryTheme.primary, width: 1.4),
+          const BorderSide(color: LibraryTheme.primary(context), width: 1.4),
         ),
       ),
       items: uniqueItems

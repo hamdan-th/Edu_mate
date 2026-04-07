@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'library_theme.dart';
 
@@ -15,18 +15,18 @@ class PdfPreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: LibraryTheme.bg(context),
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: LibraryTheme.surface,
-        foregroundColor: LibraryTheme.text,
+        backgroundColor: LibraryTheme.surface(context),
+        foregroundColor: LibraryTheme.text(context),
         elevation: 0,
       ),
       body: url.trim().isEmpty
           ? const Center(
         child: Text(
-          'لا يوجد رابط للملف',
-          style: TextStyle(color: LibraryTheme.text),
+          'ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„ظ…ظ„ظپ',
+          style: TextStyle(color: LibraryTheme.text(context)),
         ),
       )
           : SfPdfViewer.network(url),

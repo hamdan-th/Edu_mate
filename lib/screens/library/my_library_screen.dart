@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -114,7 +114,7 @@ class MyLibraryScreen extends StatelessWidget {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           const SnackBar(
-            content: Text('تم رفع الملف بنجاح، ويمكنك متابعته من مكتبتي'),
+            content: Text('طھظ… ط±ظپط¹ ط§ظ„ظ…ظ„ظپ ط¨ظ†ط¬ط§ط­طŒ ظˆظٹظ…ظƒظ†ظƒ ظ…طھط§ط¨ط¹طھظ‡ ظ…ظ† ظ…ظƒطھط¨طھظٹ'),
           ),
         );
     }
@@ -143,8 +143,8 @@ class MyLibraryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 22),
             const _SectionHeader(
-              title: 'مؤشرات مكتبتي',
-              subtitle: 'إحصائيات سريعة لكل ما يتعلق بملفاتك وتفاعلاتك',
+              title: 'ظ…ط¤ط´ط±ط§طھ ظ…ظƒطھط¨طھظٹ',
+              subtitle: 'ط¥ط­طµط§ط¦ظٹط§طھ ط³ط±ظٹط¹ط© ظ„ظƒظ„ ظ…ط§ ظٹطھط¹ظ„ظ‚ ط¨ظ…ظ„ظپط§طھظƒ ظˆطھظپط§ط¹ظ„ط§طھظƒ',
             ),
             const SizedBox(height: 14),
             GridView.count(
@@ -160,15 +160,15 @@ class MyLibraryScreen extends StatelessWidget {
                   builder: (context, snapshot) {
                     final count = snapshot.data?.docs.length ?? 0;
                     return _StatCard(
-                      title: 'ما رفعته',
-                      subtitle: 'ملفاتي المضافة',
+                      title: 'ظ…ط§ ط±ظپط¹طھظ‡',
+                      subtitle: 'ظ…ظ„ظپط§طھظٹ ط§ظ„ظ…ط¶ط§ظپط©',
                       count: count,
                       icon: Icons.cloud_upload_rounded,
                       colors: const [
                         Color(0xFF5B8CFF),
                         Color(0xFF7B61FF),
                       ],
-                      onTap: () => _openList(context, 'ما رفعته'),
+                      onTap: () => _openList(context, 'ظ…ط§ ط±ظپط¹طھظ‡'),
                     );
                   },
                 ),
@@ -177,15 +177,15 @@ class MyLibraryScreen extends StatelessWidget {
                   builder: (context, snapshot) {
                     final count = snapshot.data ?? 0;
                     return _StatCard(
-                      title: 'ما شاركته',
-                      subtitle: 'مشاركاتي',
+                      title: 'ظ…ط§ ط´ط§ط±ظƒطھظ‡',
+                      subtitle: 'ظ…ط´ط§ط±ظƒط§طھظٹ',
                       count: count,
                       icon: Icons.send_rounded,
                       colors: const [
                         Color(0xFF12B3A8),
                         Color(0xFF1FC8B3),
                       ],
-                      onTap: () => _openList(context, 'ما شاركته'),
+                      onTap: () => _openList(context, 'ظ…ط§ ط´ط§ط±ظƒطھظ‡'),
                     );
                   },
                 ),
@@ -194,15 +194,15 @@ class MyLibraryScreen extends StatelessWidget {
                   builder: (context, snapshot) {
                     final count = snapshot.data ?? 0;
                     return _StatCard(
-                      title: 'المراجع',
-                      subtitle: 'المحفوظات',
+                      title: 'ط§ظ„ظ…ط±ط§ط¬ط¹',
+                      subtitle: 'ط§ظ„ظ…ط­ظپظˆط¸ط§طھ',
                       count: count,
                       icon: Icons.bookmark_rounded,
                       colors: const [
                         Color(0xFFF59E0B),
                         Color(0xFFF7B84B),
                       ],
-                      onTap: () => _openList(context, 'المراجع'),
+                      onTap: () => _openList(context, 'ط§ظ„ظ…ط±ط§ط¬ط¹'),
                     );
                   },
                 ),
@@ -211,15 +211,15 @@ class MyLibraryScreen extends StatelessWidget {
                   builder: (context, snapshot) {
                     final count = snapshot.data ?? 0;
                     return _StatCard(
-                      title: 'تنزيلاتي',
-                      subtitle: 'المنزّل',
+                      title: 'طھظ†ط²ظٹظ„ط§طھظٹ',
+                      subtitle: 'ط§ظ„ظ…ظ†ط²ظ‘ظ„',
                       count: count,
                       icon: Icons.download_rounded,
                       colors: const [
                         Color(0xFF10B981),
                         Color(0xFF34D399),
                       ],
-                      onTap: () => _openList(context, 'تنزيلاتي'),
+                      onTap: () => _openList(context, 'طھظ†ط²ظٹظ„ط§طھظٹ'),
                     );
                   },
                 ),
@@ -227,23 +227,23 @@ class MyLibraryScreen extends StatelessWidget {
             ),
             // const SizedBox(height: 22),
             // const _SectionHeader(
-            //  title: 'نظرة سريعة',
-            //  subtitle: 'معلومات مهمة عن حالة الملفات داخل مكتبتك',
+            //  title: 'ظ†ط¸ط±ط© ط³ط±ظٹط¹ط©',
+            //  subtitle: 'ظ…ط¹ظ„ظˆظ…ط§طھ ظ…ظ‡ظ…ط© ط¹ظ† ط­ط§ظ„ط© ط§ظ„ظ…ظ„ظپط§طھ ط¯ط§ط®ظ„ ظ…ظƒطھط¨طھظƒ',
             // ),
             // const SizedBox(height: 12),
             // const _InfoCard(
             //  items: [
             // _InfoItemData(
             // icon: Icons.pending_actions_rounded,
-            // title: 'الملفات الجديدة تدخل للمراجعة',
+            // title: 'ط§ظ„ظ…ظ„ظپط§طھ ط§ظ„ط¬ط¯ظٹط¯ط© طھط¯ط®ظ„ ظ„ظ„ظ…ط±ط§ط¬ط¹ط©',
             // subtitle:
-            // 'أي ملف ترفعه يظهر لك في مكتبتي مباشرة، لكن نشره العام يكون بعد الاعتماد.',
+            // 'ط£ظٹ ظ…ظ„ظپ طھط±ظپط¹ظ‡ ظٹط¸ظ‡ط± ظ„ظƒ ظپظٹ ظ…ظƒطھط¨طھظٹ ظ…ط¨ط§ط´ط±ط©طŒ ظ„ظƒظ† ظ†ط´ط±ظ‡ ط§ظ„ط¹ط§ظ… ظٹظƒظˆظ† ط¨ط¹ط¯ ط§ظ„ط§ط¹طھظ…ط§ط¯.',
             // ),
             //_InfoItemData(
             // icon: Icons.edit_note_rounded,
-            // title: 'التعديل يعيد الملف للمراجعة',
+            // title: 'ط§ظ„طھط¹ط¯ظٹظ„ ظٹط¹ظٹط¯ ط§ظ„ظ…ظ„ظپ ظ„ظ„ظ…ط±ط§ط¬ط¹ط©',
             // subtitle:
-            // 'عند تعديل بيانات الملف، يعود لقيد المراجعة للحفاظ على جودة المكتبة.',
+            // 'ط¹ظ†ط¯ طھط¹ط¯ظٹظ„ ط¨ظٹط§ظ†ط§طھ ط§ظ„ظ…ظ„ظپطŒ ظٹط¹ظˆط¯ ظ„ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط© ظ„ظ„ط­ظپط§ط¸ ط¹ظ„ظ‰ ط¬ظˆط¯ط© ط§ظ„ظ…ظƒطھط¨ط©.',
             // ),
           ],
         ),
@@ -266,15 +266,15 @@ class _HeroCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            LibraryTheme.surface,
+            LibraryTheme.surface(context),
             Colors.white,
-            LibraryTheme.primary.withOpacity(0.06),
+            LibraryTheme.primary(context).withOpacity(0.06),
           ],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: LibraryTheme.border),
+        border: Border.all(color: LibraryTheme.border(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.035),
@@ -320,19 +320,19 @@ class _HeroCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'مكتبتي الشخصية',
+                      'ظ…ظƒطھط¨طھظٹ ط§ظ„ط´ط®طµظٹط©',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: LibraryTheme.text,
+                        color: LibraryTheme.text(context),
                       ),
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'مساحة مرتبة لملفاتك، محفوظاتك، وتنزيلاتك داخل التطبيق.',
+                      'ظ…ط³ط§ط­ط© ظ…ط±طھط¨ط© ظ„ظ…ظ„ظپط§طھظƒطŒ ظ…ط­ظپظˆط¸ط§طھظƒطŒ ظˆطھظ†ط²ظٹظ„ط§طھظƒ ط¯ط§ط®ظ„ ط§ظ„طھط·ط¨ظٹظ‚.',
                       style: TextStyle(
                         fontSize: 13.2,
-                        color: LibraryTheme.muted,
+                        color: LibraryTheme.muted(context),
                         height: 1.45,
                       ),
                     ),
@@ -345,25 +345,25 @@ class _HeroCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: LibraryTheme.bg,
+              color: LibraryTheme.bg(context),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: LibraryTheme.border),
+              border: Border.all(color: LibraryTheme.border(context)),
             ),
             child: Row(
               children: const [
                 _MiniFeature(
                   icon: Icons.upload_file_rounded,
-                  label: 'رفع',
+                  label: 'ط±ظپط¹',
                 ),
                 SizedBox(width: 10),
                 _MiniFeature(
                   icon: Icons.bookmark_rounded,
-                  label: 'حفظ',
+                  label: 'ط­ظپط¸',
                 ),
                 SizedBox(width: 10),
                 _MiniFeature(
                   icon: Icons.download_rounded,
-                  label: 'تنزيل',
+                  label: 'طھظ†ط²ظٹظ„',
                 ),
               ],
             ),
@@ -374,7 +374,7 @@ class _HeroCard extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: onUploadTap,
               style: ElevatedButton.styleFrom(
-                backgroundColor: LibraryTheme.primary,
+                backgroundColor: LibraryTheme.primary(context),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -384,7 +384,7 @@ class _HeroCard extends StatelessWidget {
               ),
               icon: const Icon(Icons.add_rounded, size: 20),
               label: const Text(
-                'رفع ملف جديد',
+                'ط±ظپط¹ ظ…ظ„ظپ ط¬ط¯ظٹط¯',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
@@ -415,12 +415,12 @@ class _MiniFeature extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: LibraryTheme.border),
+          border: Border.all(color: LibraryTheme.border(context)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: LibraryTheme.primary),
+            Icon(icon, size: 16, color: LibraryTheme.primary(context)),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
@@ -430,7 +430,7 @@ class _MiniFeature extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
-                  color: LibraryTheme.text,
+                  color: LibraryTheme.text(context),
                 ),
               ),
             ),
@@ -561,7 +561,7 @@ class _StatCardState extends State<_StatCard> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'عنصر',
+                    'ط¹ظ†طµط±',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.88),
                       fontSize: 12.5,
@@ -597,7 +597,7 @@ class _SectionHeader extends StatelessWidget {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
-            color: LibraryTheme.text,
+            color: LibraryTheme.text(context),
           ),
         ),
         const SizedBox(height: 4),
@@ -605,7 +605,7 @@ class _SectionHeader extends StatelessWidget {
           subtitle,
           style: const TextStyle(
             fontSize: 13,
-            color: LibraryTheme.muted,
+            color: LibraryTheme.muted(context),
             height: 1.45,
           ),
         ),
@@ -624,9 +624,9 @@ class _InfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: LibraryTheme.surface,
+        color: LibraryTheme.surface(context),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: LibraryTheme.border),
+        border: Border.all(color: LibraryTheme.border(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -662,12 +662,12 @@ class _InfoTile extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: LibraryTheme.primary.withOpacity(0.08),
+            color: LibraryTheme.primary(context).withOpacity(0.08),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(
             item.icon,
-            color: LibraryTheme.primary,
+            color: LibraryTheme.primary(context),
             size: 18,
           ),
         ),
@@ -681,14 +681,14 @@ class _InfoTile extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
-                  color: LibraryTheme.text,
+                  color: LibraryTheme.text(context),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 item.subtitle,
                 style: const TextStyle(
-                  color: LibraryTheme.muted,
+                  color: LibraryTheme.muted(context),
                   fontSize: 12.8,
                   height: 1.5,
                 ),

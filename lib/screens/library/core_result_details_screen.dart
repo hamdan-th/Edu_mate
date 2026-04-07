@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,18 +19,18 @@ class CoreResultDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = resultData['title'] ?? 'بدون عنوان';
+    final title = resultData['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†';
     final authors = (resultData['authors'] as List<dynamic>?)
         ?.map((author) => author['name'].toString())
         .join(', ') ??
-        'مؤلف غير معروف';
-    final abstract = resultData['abstract'] ?? 'لا يوجد ملخص متاح.';
-    final year = resultData['yearPublished']?.toString() ?? 'غير معروف';
-    final publisher = resultData['publisher'] ?? 'غير معروف';
+        'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
+    final abstract = resultData['abstract'] ?? 'ظ„ط§ ظٹظˆط¬ط¯ ظ…ظ„ط®طµ ظ…طھط§ط­.';
+    final year = resultData['yearPublished']?.toString() ?? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
+    final publisher = resultData['publisher'] ?? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
     final journal = resultData['journals'] is List &&
         (resultData['journals'] as List).isNotEmpty
         ? (resultData['journals'] as List).first.toString()
-        : 'غير معروف';
+        : 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
     final articleId = resultData['id']?.toString();
     final downloadableLink = resultData['downloadUrl']?.toString();
 
@@ -39,11 +39,11 @@ class CoreResultDetailsScreen extends StatelessWidget {
         : '';
 
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: LibraryTheme.bg(context),
       appBar: AppBar(
-        title: const Text('تفاصيل البحث'),
-        backgroundColor: LibraryTheme.surface,
-        foregroundColor: LibraryTheme.text,
+        title: const Text('طھظپط§طµظٹظ„ ط§ظ„ط¨ط­ط«'),
+        backgroundColor: LibraryTheme.surface(context),
+        foregroundColor: LibraryTheme.text(context),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -56,17 +56,17 @@ class CoreResultDetailsScreen extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: LibraryTheme.text,
+                color: LibraryTheme.text(context),
               ),
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.people_alt_outlined, 'المؤلفون:', authors),
+            _buildInfoRow(Icons.people_alt_outlined, 'ط§ظ„ظ…ط¤ظ„ظپظˆظ†:', authors),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.business_rounded, 'الناشر:', publisher.toString()),
+            _buildInfoRow(Icons.business_rounded, 'ط§ظ„ظ†ط§ط´ط±:', publisher.toString()),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.calendar_today_rounded, 'سنة النشر:', year),
+            _buildInfoRow(Icons.calendar_today_rounded, 'ط³ظ†ط© ط§ظ„ظ†ط´ط±:', year),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.menu_book_rounded, 'المجلة:', journal),
+            _buildInfoRow(Icons.menu_book_rounded, 'ط§ظ„ظ…ط¬ظ„ط©:', journal),
             const Divider(height: 30, thickness: 1),
 
             Row(
@@ -78,7 +78,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                           ? Icons.bookmark_rounded
                           : Icons.bookmark_border_rounded,
                     ),
-                    label: Text(isSaved ? 'محفوظ' : 'حفظ'),
+                    label: Text(isSaved ? 'ظ…ط­ظپظˆط¸' : 'ط­ظپط¸'),
                     onPressed: () async {
                       try {
                         if (!isSaved) {
@@ -92,8 +92,8 @@ class CoreResultDetailsScreen extends StatelessWidget {
                             SnackBar(
                               content: Text(
                                 isSaved
-                                    ? 'تمت الإزالة من الحفظ داخل الواجهة'
-                                    : 'تم حفظ المرجع في مكتبتي',
+                                    ? 'طھظ…طھ ط§ظ„ط¥ط²ط§ظ„ط© ظ…ظ† ط§ظ„ط­ظپط¸ ط¯ط§ط®ظ„ ط§ظ„ظˆط§ط¬ظ‡ط©'
+                                    : 'طھظ… ط­ظپط¸ ط§ظ„ظ…ط±ط¬ط¹ ظپظٹ ظ…ظƒطھط¨طھظٹ',
                               ),
                             ),
                           );
@@ -101,7 +101,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                       } catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('تعذر حفظ المرجع: $e')),
+                            SnackBar(content: Text('طھط¹ط°ط± ط­ظپط¸ ط§ظ„ظ…ط±ط¬ط¹: $e')),
                           );
                         }
                       }
@@ -112,16 +112,16 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.share_outlined),
-                    label: const Text('مشاركة'),
+                    label: const Text('ظ…ط´ط§ط±ظƒط©'),
                     onPressed: () async {
                       if (articleUrl.isEmpty) return;
                       await Share.share(
-                        'اطلع على هذه الورقة البحثية:\n$title\n$articleUrl',
+                        'ط§ط·ظ„ط¹ ط¹ظ„ظ‰ ظ‡ط°ظ‡ ط§ظ„ظˆط±ظ‚ط© ط§ظ„ط¨ط­ط«ظٹط©:\n$title\n$articleUrl',
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: LibraryTheme.primary,
-                      foregroundColor: LibraryTheme.surface,
+                      backgroundColor: LibraryTheme.primary(context),
+                      foregroundColor: LibraryTheme.surface(context),
                     ),
                   ),
                 ),
@@ -134,7 +134,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.download_rounded),
-                  label: const Text('تنزيل PDF'),
+                  label: const Text('طھظ†ط²ظٹظ„ PDF'),
                   onPressed: () async {
                     try {
                       await DigitalLibraryFirestoreService.registerDownload(
@@ -143,7 +143,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('تعذر تسجيل التنزيل: $e')),
+                          SnackBar(content: Text('طھط¹ط°ط± طھط³ط¬ظٹظ„ ط§ظ„طھظ†ط²ظٹظ„: $e')),
                         );
                       }
                     }
@@ -157,8 +157,8 @@ class CoreResultDetailsScreen extends StatelessWidget {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: LibraryTheme.primary,
-                    foregroundColor: LibraryTheme.surface,
+                    backgroundColor: LibraryTheme.primary(context),
+                    foregroundColor: LibraryTheme.surface(context),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
@@ -173,7 +173,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.open_in_browser_rounded),
-                  label: const Text('فتح المصدر'),
+                  label: const Text('ظپطھط­ ط§ظ„ظ…طµط¯ط±'),
                   onPressed: () async {
                     final Uri url = Uri.parse(articleUrl);
                     await launchUrl(
@@ -182,8 +182,8 @@ class CoreResultDetailsScreen extends StatelessWidget {
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: LibraryTheme.primary,
-                    side: const BorderSide(color: LibraryTheme.primary),
+                    foregroundColor: LibraryTheme.primary(context),
+                    side: const BorderSide(color: LibraryTheme.primary(context)),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
@@ -195,22 +195,22 @@ class CoreResultDetailsScreen extends StatelessWidget {
 
             const Divider(height: 30, thickness: 1),
             const Text(
-              'الملخص (Abstract)',
+              'ط§ظ„ظ…ظ„ط®طµ (Abstract)',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: LibraryTheme.text,
+                color: LibraryTheme.text(context),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               abstract.toString().trim().isEmpty
-                  ? 'لا يوجد ملخص متاح.'
+                  ? 'ظ„ط§ ظٹظˆط¬ط¯ ظ…ظ„ط®طµ ظ…طھط§ط­.'
                   : abstract.toString(),
               style: TextStyle(
                 fontSize: 16,
                 height: 1.5,
-                color: LibraryTheme.text.withOpacity(0.72),
+                color: LibraryTheme.text(context).withOpacity(0.72),
               ),
             ),
           ],
@@ -223,23 +223,23 @@ class CoreResultDetailsScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: LibraryTheme.primary, size: 20),
+        Icon(icon, color: LibraryTheme.primary(context), size: 20),
         const SizedBox(width: 8),
         Text(
           label,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            color: LibraryTheme.text,
+            color: LibraryTheme.text(context),
           ),
         ),
         const SizedBox(width: 5),
         Expanded(
           child: Text(
-            value.isEmpty ? 'غير معروف' : value,
+            value.isEmpty ? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ' : value,
             style: const TextStyle(
               fontSize: 16,
-              color: LibraryTheme.text,
+              color: LibraryTheme.text(context),
             ),
           ),
         ),

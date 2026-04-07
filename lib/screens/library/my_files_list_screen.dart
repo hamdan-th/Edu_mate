@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,8 +16,8 @@ class MyFilesListScreen extends StatelessWidget {
   const MyFilesListScreen({Key? key, required this.title}) : super(key: key);
 
   FileModel _mapDocToFileModel(Map<String, dynamic> data, String docId) {
-    final subjectName = (data['subjectName'] ?? 'بدون عنوان').toString();
-    final doctorName = (data['doctorName'] ?? 'غير معروف').toString();
+    final subjectName = (data['subjectName'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString();
+    final doctorName = (data['doctorName'] ?? 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString();
     final college = (data['college'] ?? '').toString();
     final specialization = (data['specialization'] ?? '').toString();
     final level = (data['level'] ?? '').toString();
@@ -45,10 +45,10 @@ class MyFilesListScreen extends StatelessWidget {
       title: subjectName,
       author: doctorName,
       course: subjectName,
-      university: 'جامعة صنعاء',
+      university: 'ط¬ط§ظ…ط¹ط© طµظ†ط¹ط§ط،',
       college: college,
       major: specialization,
-      semester: '$level${term.isNotEmpty ? ' • $term' : ''}',
+      semester: '$level${term.isNotEmpty ? ' â€¢ $term' : ''}',
       fileType: fileType,
       thumbnailUrl: thumbnailUrl,
       fileUrl: fileUrl,
@@ -97,7 +97,7 @@ class MyFilesListScreen extends StatelessWidget {
 
     if (url.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا يوجد رابط للملف')),
+        const SnackBar(content: Text('ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„ظ…ظ„ظپ')),
       );
       return;
     }
@@ -126,7 +126,7 @@ class MyFilesListScreen extends StatelessWidget {
 
     if (!launched) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر فتح الملف')),
+        const SnackBar(content: Text('طھط¹ط°ط± ظپطھط­ ط§ظ„ظ…ظ„ظپ')),
       );
     }
   }
@@ -135,11 +135,11 @@ class MyFilesListScreen extends StatelessWidget {
       BuildContext context,
       List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
       ) {
-    String emptyMessage = 'لا توجد ملفات';
-    if (title == 'المراجع') emptyMessage = 'لم تقم بحفظ أي ملفات بعد';
-    if (title == 'ما رفعته') emptyMessage = 'لم تقم برفع أي ملفات بعد';
-    if (title == 'تنزيلاتي') emptyMessage = 'لم تقم بتنزيل أي ملفات بعد';
-    if (title == 'ما شاركته') emptyMessage = 'لم تقم بمشاركة أي ملفات بعد';
+    String emptyMessage = 'ظ„ط§ طھظˆط¬ط¯ ظ…ظ„ظپط§طھ';
+    if (title == 'ط§ظ„ظ…ط±ط§ط¬ط¹') emptyMessage = 'ظ„ظ… طھظ‚ظ… ط¨ط­ظپط¸ ط£ظٹ ظ…ظ„ظپط§طھ ط¨ط¹ط¯';
+    if (title == 'ظ…ط§ ط±ظپط¹طھظ‡') emptyMessage = 'ظ„ظ… طھظ‚ظ… ط¨ط±ظپط¹ ط£ظٹ ظ…ظ„ظپط§طھ ط¨ط¹ط¯';
+    if (title == 'طھظ†ط²ظٹظ„ط§طھظٹ') emptyMessage = 'ظ„ظ… طھظ‚ظ… ط¨طھظ†ط²ظٹظ„ ط£ظٹ ظ…ظ„ظپط§طھ ط¨ط¹ط¯';
+    if (title == 'ظ…ط§ ط´ط§ط±ظƒطھظ‡') emptyMessage = 'ظ„ظ… طھظ‚ظ… ط¨ظ…ط´ط§ط±ظƒط© ط£ظٹ ظ…ظ„ظپط§طھ ط¨ط¹ط¯';
 
     if (docs.isEmpty) {
       return Center(
@@ -147,7 +147,7 @@ class MyFilesListScreen extends StatelessWidget {
           emptyMessage,
           style: const TextStyle(
             fontSize: 18,
-            color: LibraryTheme.text,
+            color: LibraryTheme.text(context),
           ),
         ),
       );
@@ -167,7 +167,7 @@ class MyFilesListScreen extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
-            if (title == 'تنزيلاتي') {
+            if (title == 'طھظ†ط²ظٹظ„ط§طھظٹ') {
               _openDownloadedFile(context, file);
             } else {
               Navigator.push(
@@ -181,12 +181,12 @@ class MyFilesListScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: LibraryTheme.surface,
+              color: LibraryTheme.surface(context),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: LibraryTheme.border),
+              border: Border.all(color: LibraryTheme.border(context)),
               boxShadow: [
                 BoxShadow(
-                  color: LibraryTheme.primary.withOpacity(0.04),
+                  color: LibraryTheme.primary(context).withOpacity(0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -198,7 +198,7 @@ class MyFilesListScreen extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: (isPdf ? LibraryTheme.danger : LibraryTheme.primary)
+                  color: (isPdf ? LibraryTheme.danger(context) : LibraryTheme.primary(context))
                       .withOpacity(0.10),
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -206,22 +206,22 @@ class MyFilesListScreen extends StatelessWidget {
                   isPdf
                       ? Icons.picture_as_pdf_rounded
                       : Icons.description_rounded,
-                  color: isPdf ? LibraryTheme.danger : LibraryTheme.primary,
+                  color: isPdf ? LibraryTheme.danger(context) : LibraryTheme.primary(context),
                 ),
               ),
               title: Text(
-                data['subjectName'] ?? 'بدون عنوان',
+                data['subjectName'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: LibraryTheme.text,
+                  color: LibraryTheme.text(context),
                 ),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  '${data['doctorName'] ?? ''} • ${data['college'] ?? ''}',
+                  '${data['doctorName'] ?? ''} â€¢ ${data['college'] ?? ''}',
                   style: const TextStyle(
-                    color: LibraryTheme.muted,
+                    color: LibraryTheme.muted(context),
                     height: 1.4,
                   ),
                 ),
@@ -233,7 +233,7 @@ class MyFilesListScreen extends StatelessWidget {
                     (data['fileType'] ?? '').toString(),
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: LibraryTheme.text,
+                      color: LibraryTheme.text(context),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -241,7 +241,7 @@ class MyFilesListScreen extends StatelessWidget {
                     (data['term'] ?? '').toString(),
                     style: const TextStyle(
                       fontSize: 11,
-                      color: LibraryTheme.muted,
+                      color: LibraryTheme.muted(context),
                     ),
                   ),
                 ],
@@ -264,8 +264,8 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${snapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text),
+              'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -282,8 +282,8 @@ class MyFilesListScreen extends StatelessWidget {
     if (user == null) {
       return const Center(
         child: Text(
-          'يجب تسجيل الدخول أولاً',
-          style: TextStyle(fontSize: 18, color: LibraryTheme.text),
+          'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
+          style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
     }
@@ -301,8 +301,8 @@ class MyFilesListScreen extends StatelessWidget {
         if (saveSnapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${saveSnapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text),
+              'ط­ط¯ط« ط®ط·ط£: ${saveSnapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -320,8 +320,8 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'حدث خطأ: ${filesSnapshot.error}',
-                  style: const TextStyle(color: LibraryTheme.text),
+                  'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
+                  style: const TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
               );
@@ -341,8 +341,8 @@ class MyFilesListScreen extends StatelessWidget {
     if (user == null) {
       return const Center(
         child: Text(
-          'يجب تسجيل الدخول أولاً',
-          style: TextStyle(fontSize: 18, color: LibraryTheme.text),
+          'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
+          style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
     }
@@ -360,8 +360,8 @@ class MyFilesListScreen extends StatelessWidget {
         if (downloadSnapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${downloadSnapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text),
+              'ط­ط¯ط« ط®ط·ط£: ${downloadSnapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -379,8 +379,8 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'حدث خطأ: ${filesSnapshot.error}',
-                  style: const TextStyle(color: LibraryTheme.text),
+                  'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
+                  style: const TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
               );
@@ -400,8 +400,8 @@ class MyFilesListScreen extends StatelessWidget {
     if (user == null) {
       return const Center(
         child: Text(
-          'يجب تسجيل الدخول أولاً',
-          style: TextStyle(fontSize: 18, color: LibraryTheme.text),
+          'ظٹط¬ط¨ طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط£ظˆظ„ط§ظ‹',
+          style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
     }
@@ -419,8 +419,8 @@ class MyFilesListScreen extends StatelessWidget {
         if (shareSnapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${shareSnapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text),
+              'ط­ط¯ط« ط®ط·ط£: ${shareSnapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -438,8 +438,8 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'حدث خطأ: ${filesSnapshot.error}',
-                  style: const TextStyle(color: LibraryTheme.text),
+                  'ط­ط¯ط« ط®ط·ط£: ${filesSnapshot.error}',
+                  style: const TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
               );
@@ -464,8 +464,8 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${snapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text),
+              'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -503,9 +503,9 @@ class MyFilesListScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: LibraryTheme.surface,
+                  color: LibraryTheme.surface(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: LibraryTheme.border),
+                  border: Border.all(color: LibraryTheme.border(context)),
                 ),
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -513,27 +513,27 @@ class MyFilesListScreen extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: LibraryTheme.primary.withOpacity(0.10),
+                      color: LibraryTheme.primary(context).withOpacity(0.10),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
                       Icons.menu_book_rounded,
-                      color: LibraryTheme.primary,
+                      color: LibraryTheme.primary(context),
                     ),
                   ),
                   title: Text(
-                    (data['title'] ?? 'بدون عنوان').toString(),
+                    (data['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString(),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: LibraryTheme.text,
+                      color: LibraryTheme.text(context),
                     ),
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      (data['authors'] ?? 'مؤلف غير معروف').toString(),
+                      (data['authors'] ?? 'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString(),
                       style: const TextStyle(
-                        color: LibraryTheme.muted,
+                        color: LibraryTheme.muted(context),
                         height: 1.4,
                       ),
                     ),
@@ -542,7 +542,7 @@ class MyFilesListScreen extends StatelessWidget {
                     'CORE',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: LibraryTheme.primary,
+                      color: LibraryTheme.primary(context),
                     ),
                   ),
                 ),
@@ -565,8 +565,8 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${snapshot.error}',
-              style: const TextStyle(color: LibraryTheme.text),
+              'ط­ط¯ط« ط®ط·ط£: ${snapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
           );
@@ -596,7 +596,7 @@ class MyFilesListScreen extends StatelessWidget {
 
                 if (targetUrl.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('لا يوجد رابط للفتح')),
+                    const SnackBar(content: Text('ظ„ط§ ظٹظˆط¬ط¯ ط±ط§ط¨ط· ظ„ظ„ظپطھط­')),
                   );
                   return;
                 }
@@ -609,16 +609,16 @@ class MyFilesListScreen extends StatelessWidget {
 
                 if (!launched) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تعذر فتح الملف')),
+                    const SnackBar(content: Text('طھط¹ط°ط± ظپطھط­ ط§ظ„ظ…ظ„ظپ')),
                   );
                 }
               },
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: LibraryTheme.surface,
+                  color: LibraryTheme.surface(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: LibraryTheme.border),
+                  border: Border.all(color: LibraryTheme.border(context)),
                 ),
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -626,36 +626,36 @@ class MyFilesListScreen extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: LibraryTheme.primary.withOpacity(0.10),
+                      color: LibraryTheme.primary(context).withOpacity(0.10),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
                       Icons.download_rounded,
-                      color: LibraryTheme.primary,
+                      color: LibraryTheme.primary(context),
                     ),
                   ),
                   title: Text(
-                    (data['title'] ?? 'بدون عنوان').toString(),
+                    (data['title'] ?? 'ط¨ط¯ظˆظ† ط¹ظ†ظˆط§ظ†').toString(),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: LibraryTheme.text,
+                      color: LibraryTheme.text(context),
                     ),
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      (data['authors'] ?? 'مؤلف غير معروف').toString(),
+                      (data['authors'] ?? 'ظ…ط¤ظ„ظپ ط؛ظٹط± ظ…ط¹ط±ظˆظپ').toString(),
                       style: const TextStyle(
-                        color: LibraryTheme.muted,
+                        color: LibraryTheme.muted(context),
                         height: 1.4,
                       ),
                     ),
                   ),
                   trailing: const Text(
-                    'فتح',
+                    'ظپطھط­',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: LibraryTheme.primary,
+                      color: LibraryTheme.primary(context),
                     ),
                   ),
                 ),
@@ -687,17 +687,17 @@ class MyFilesListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMyUploads = title == 'ما رفعته';
-    final bool isReferences = title == 'المراجع';
-    final bool isDownloads = title == 'تنزيلاتي';
-    final bool isShares = title == 'ما شاركته';
+    final bool isMyUploads = title == 'ظ…ط§ ط±ظپط¹طھظ‡';
+    final bool isReferences = title == 'ط§ظ„ظ…ط±ط§ط¬ط¹';
+    final bool isDownloads = title == 'طھظ†ط²ظٹظ„ط§طھظٹ';
+    final bool isShares = title == 'ظ…ط§ ط´ط§ط±ظƒطھظ‡';
 
     return Scaffold(
-      backgroundColor: LibraryTheme.bg,
+      backgroundColor: LibraryTheme.bg(context),
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: LibraryTheme.surface,
-        foregroundColor: LibraryTheme.text,
+        backgroundColor: LibraryTheme.surface(context),
+        foregroundColor: LibraryTheme.text(context),
         elevation: 0,
       ),
       body: isMyUploads
@@ -724,10 +724,10 @@ class MyFilesListScreen extends StatelessWidget {
           ? _buildShares()
           : Center(
         child: Text(
-          'سيتم عرض قائمة "$title" هنا لاحقًا',
+          'ط³ظٹطھظ… ط¹ط±ط¶ ظ‚ط§ط¦ظ…ط© "$title" ظ‡ظ†ط§ ظ„ط§ط­ظ‚ظ‹ط§',
           style: const TextStyle(
             fontSize: 18,
-            color: LibraryTheme.text,
+            color: LibraryTheme.text(context),
           ),
           textAlign: TextAlign.center,
         ),
