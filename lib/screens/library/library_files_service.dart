@@ -74,6 +74,7 @@ class LibraryFilesService {
 
   static Future<void> deleteLibraryFile({
     required String fileId,
+    required String storagePath,
   }) async {
     final uid = currentUserId;
     if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
@@ -81,7 +82,6 @@ class LibraryFilesService {
     final docRef = _firestore.collection('library_files').doc(fileId);
     final snapshot = await docRef.get();
     final data = snapshot.data();
-
     if (!snapshot.exists || data == null) {
       throw Exception('الملف غير موجود');
     }
@@ -90,14 +90,27 @@ class LibraryFilesService {
       throw Exception('غير مصرح لك بحذف هذا الملف');
     }
 
-    final storagePath = (data['storagePath'] ?? '').toString();
-
-    await docRef.delete();
-
-    if (storagePath.isNotEmpty) {
+    if (storagePath.trim().isNotEmpty) {
       try {
         await _storage.ref(storagePath).delete();
       } catch (_) {}
     }
+
+    await docRef.delete();
+  }
+
+  static Future<void> approveFile(String fileId) async {
+    await _firestore.collection('library_files').doc(fileId).update({
+      'visibility': 'public',
+      'status': 'approved',
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  static Future<void> rejectFile(String fileId) async {
+    await _firestore.collection('library_files').doc(fileId).update({
+      'status': 'rejected',
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 }

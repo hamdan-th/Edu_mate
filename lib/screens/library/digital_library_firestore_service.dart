@@ -15,12 +15,12 @@ class DigitalLibraryFirestoreService {
     if (articleId.isEmpty) throw Exception('معرف الورقة غير موجود');
 
     final authors = (result['authors'] as List<dynamic>?)
-            ?.map((author) => author['name'].toString())
-            .join(', ') ??
+        ?.map((author) => author['name'].toString())
+        .join(', ') ??
         '';
 
     final journal = result['journals'] is List &&
-            (result['journals'] as List).isNotEmpty
+        (result['journals'] as List).isNotEmpty
         ? (result['journals'] as List).first.toString()
         : '';
 
@@ -52,12 +52,12 @@ class DigitalLibraryFirestoreService {
     if (articleId.isEmpty) throw Exception('معرف الورقة غير موجود');
 
     final authors = (result['authors'] as List<dynamic>?)
-            ?.map((author) => author['name'].toString())
-            .join(', ') ??
+        ?.map((author) => author['name'].toString())
+        .join(', ') ??
         '';
 
     final journal = result['journals'] is List &&
-            (result['journals'] as List).isNotEmpty
+        (result['journals'] as List).isNotEmpty
         ? (result['journals'] as List).first.toString()
         : '';
 
@@ -81,37 +81,35 @@ class DigitalLibraryFirestoreService {
     });
   }
 
-  static Future<void> registerShare(Map<String, dynamic> result) async {
+  static Stream<QuerySnapshot<Map<String, dynamic>>> savedReferences() {
     final uid = currentUserId;
-    if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
+    if (uid == null) {
+      return const Stream.empty();
+    }
 
-    final articleId = (result['id'] ?? '').toString();
-    if (articleId.isEmpty) throw Exception('معرف الورقة غير موجود');
+    return _firestore
+        .collection('digital_saved_references')
+        .where('userId', isEqualTo: uid)
+        .snapshots();
+  }
 
-    final authors = (result['authors'] as List<dynamic>?)
-            ?.map((author) => author['name'].toString())
-            .join(', ') ??
-        '';
+  static Stream<QuerySnapshot<Map<String, dynamic>>> downloadedReferences() {
+    final uid = currentUserId;
+    if (uid == null) {
+      return const Stream.empty();
+    }
 
-    final journal = result['journals'] is List &&
-            (result['journals'] as List).isNotEmpty
-        ? (result['journals'] as List).first.toString()
-        : '';
+    return _firestore
+        .collection('digital_downloads')
+        .where('userId', isEqualTo: uid)
+        .snapshots();
+  }
 
-    final sourceUrl = 'https://core.ac.uk/display/$articleId';
+  static Stream<int> savedReferencesCount() {
+    return savedReferences().map((snapshot) => snapshot.docs.length);
+  }
 
-    await _firestore.collection('digital_shares').add({
-      'userId': uid,
-      'articleId': articleId,
-      'title': (result['title'] ?? '').toString(),
-      'authors': authors,
-      'abstract': (result['abstract'] ?? '').toString(),
-      'publisher': (result['publisher'] ?? '').toString(),
-      'yearPublished': (result['yearPublished'] ?? '').toString(),
-      'journal': journal,
-      'downloadUrl': (result['downloadUrl'] ?? '').toString(),
-      'sourceUrl': sourceUrl,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+  static Stream<int> downloadedReferencesCount() {
+    return downloadedReferences().map((snapshot) => snapshot.docs.length);
   }
 }

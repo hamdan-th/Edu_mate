@@ -7,7 +7,6 @@ import 'file_model.dart';
 import 'library_files_service.dart';
 import 'library_theme.dart';
 import 'university_academic_data.dart';
-import '../../core/theme/app_colors.dart';
 
 class UniversityLibraryScreen extends StatefulWidget {
   const UniversityLibraryScreen({Key? key}) : super(key: key);
@@ -84,16 +83,16 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 top: 20,
                 bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).bottomSheetTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              decoration: const BoxDecoration(
+                color: LibraryTheme.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12))),
+                  const Center(
+                    child: SizedBox(width: 42, child: Divider(thickness: 4, color: LibraryTheme.border)),
                   ),
                   const SizedBox(height: 12),
                   const Text('فلترة وترتيب', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
@@ -159,7 +158,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: LibraryTheme.primary,
                             foregroundColor: Colors.white,
                           ),
                           child: const Text('تطبيق'),
@@ -176,120 +175,134 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
     );
   }
 
-  Widget _buildSearchAndActions() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                hintText: 'ابحث عن مادة أو دكتور أو تخصص...',
-                prefixIcon: const Icon(Icons.search_rounded),
-                filled: true,
-                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12)),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          _ActionIconButton(
-            icon: Icons.tune_rounded,
-            onTap: _showFilterPanel,
-          ),
-          const SizedBox(width: 8),
-          _ActionIconButton(
-            icon: _isGridView ? Icons.view_agenda_rounded : Icons.grid_view_rounded,
-            onTap: () => setState(() => _isGridView = !_isGridView),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          _buildSearchAndActions(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: LibraryTheme.surface,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: LibraryTheme.border),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      hintText: 'ابحث باسم المادة أو الدكتور أو التخصص...',
+                      hintStyle: const TextStyle(color: LibraryTheme.muted),
+                      prefixIcon: const Icon(Icons.search_rounded, color: LibraryTheme.primary),
+                      suffixIcon: IconButton(
+                        onPressed: _showFilterPanel,
+                        icon: const Icon(Icons.tune_rounded),
+                        color: LibraryTheme.primary,
+                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: LibraryTheme.surface,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: LibraryTheme.border),
+                        ),
+                        child: Text(
+                          'الترتيب: $_sortOrder',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    InkWell(
+                      onTap: () => setState(() => _isGridView = !_isGridView),
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: LibraryTheme.surface,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: LibraryTheme.border),
+                        ),
+                        child: Icon(
+                          _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+                          color: LibraryTheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: LibraryFilesService.universityFiles(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator(color: LibraryTheme.primary));
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('حدث خطأ: ${snapshot.error}'));
                 }
 
                 final docs = snapshot.data?.docs ?? [];
-                final files = docs.map((doc) => FileModel.fromFirestore(doc)).toList();
-                final filteredFiles = _applyFilters(files);
+                final files = docs.map(FileModel.fromFirestore).toList();
+                final filtered = _applyFilters(files);
 
-                if (filteredFiles.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'لا توجد ملفات مطابقة حالياً',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  );
+                if (filtered.isEmpty) {
+                  return const _EmptyLibraryState();
                 }
 
                 if (_isGridView) {
                   return GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.72,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
+                      childAspectRatio: 0.77,
                     ),
-                    itemCount: filteredFiles.length,
+                    itemCount: filtered.length,
                     itemBuilder: (context, index) {
-                      final file = filteredFiles[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => FileDetailsScreen(file: file),
-                            ),
-                          );
-                        },
-                        child: FileCard(file: file),
+                      final file = filtered[index];
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(22),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => FileDetailsScreen(file: file)),
+                        ),
+                        child: GridFileCard(file: file),
                       );
                     },
                   );
                 }
 
                 return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                  itemCount: filteredFiles.length,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  itemCount: filtered.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
-                    final file = filteredFiles[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => FileDetailsScreen(file: file),
-                          ),
-                        );
-                      },
+                    final file = filtered[index];
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(22),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => FileDetailsScreen(file: file)),
+                      ),
                       child: FileCard(file: file),
                     );
                   },
@@ -303,31 +316,38 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
   }
 }
 
-class _ActionIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _ActionIconButton({
-    required this.icon,
-    required this.onTap,
-  });
+class _EmptyLibraryState extends StatelessWidget {
+  const _EmptyLibraryState();
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
-          ),
-          child: Icon(icon, color: Theme.of(context).iconTheme.color),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 84,
+              height: 84,
+              decoration: BoxDecoration(
+                color: LibraryTheme.primary.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(26),
+              ),
+              child: const Icon(Icons.library_books_rounded, size: 42, color: LibraryTheme.primary),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'لا توجد ملفات مطابقة',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'جرّب تغيير كلمات البحث أو تخفيف الفلاتر حتى تظهر لك نتائج أكثر.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: LibraryTheme.muted, height: 1.5),
+            ),
+          ],
         ),
       ),
     );
@@ -340,41 +360,24 @@ class _BottomSheetDropdown extends StatelessWidget {
   final List<String> items;
   final ValueChanged<String?> onChanged;
 
-  const _BottomSheetDropdown({
-    required this.value,
-    required this.label,
-    required this.items,
-    required this.onChanged,
-  });
+  const _BottomSheetDropdown({required this.value, required this.label, required this.items, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    final safeItems = items.toSet().toList();
-    final safeValue = safeItems.contains(value) ? value : null;
-
     return DropdownButtonFormField<String>(
-      value: safeValue,
+      value: value,
       isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12)),
-        ),
+        fillColor: LibraryTheme.bg,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: const BorderSide(color: LibraryTheme.border)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: const BorderSide(color: LibraryTheme.primary, width: 1.4)),
       ),
-      items: safeItems
-          .map((item) => DropdownMenuItem<String>(
-                value: item,
-                child: Text(item, overflow: TextOverflow.ellipsis),
-              ))
-          .toList(),
+      items: items.map((e) => DropdownMenuItem<String>(value: e, child: Text(e))).toList(),
       onChanged: onChanged,
     );
   }
 }
+

@@ -64,17 +64,35 @@ class LibraryLocalDownloadService {
         .map((e) => Map<String, dynamic>.from(e as Map))
         .toList()
       ..sort(
-        (a, b) => (b['downloadedAt'] ?? '')
+            (a, b) => (b['downloadedAt'] ?? '')
             .toString()
             .compareTo((a['downloadedAt'] ?? '').toString()),
       );
   }
 
   static Future<void> removeDownloadedFile(String fileId) async {
+    final item = _box.get(fileId);
+    if (item != null) {
+      final map = Map<String, dynamic>.from(item as Map);
+      final localPath = map['localPath']?.toString();
+      if (localPath != null && localPath.isNotEmpty) {
+        final file = File(localPath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      }
+    }
     await _box.delete(fileId);
   }
 
-  static Future<void> clearAllDownloads() async {
-    await _box.clear();
+  static bool isDownloaded(String fileId) {
+    return _box.containsKey(fileId);
+  }
+
+  static String? getLocalPath(String fileId) {
+    final item = _box.get(fileId);
+    if (item == null) return null;
+    final map = Map<String, dynamic>.from(item as Map);
+    return map['localPath']?.toString();
   }
 }

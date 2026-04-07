@@ -51,9 +51,7 @@ class FileModel {
     this.storagePath,
   });
 
-  bool get isPdf =>
-      fileType.toLowerCase() == 'pdf' ||
-      fileUrl.toLowerCase().contains('.pdf');
+  bool get isPdf => fileType.toLowerCase() == 'pdf' || fileUrl.toLowerCase().contains('.pdf');
 
   bool get isWord => fileType.toLowerCase() == 'word';
 
@@ -98,35 +96,40 @@ class FileModel {
     );
   }
 
-  factory FileModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory FileModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? <String, dynamic>{};
 
     int readInt(String key) {
       final value = data[key];
       if (value is int) return value;
       if (value is num) return value.toInt();
-      if (value is String) return int.tryParse(value) ?? 0;
-      return 0;
+      return int.tryParse('${data[key] ?? 0}') ?? 0;
     }
+
+    final Timestamp? createdAtTimestamp = data['createdAt'] as Timestamp?;
+    final subjectName = (data['subjectName'] ?? data['title'] ?? 'بدون عنوان').toString();
+    final doctorName = (data['doctorName'] ?? data['author'] ?? 'غير معروف').toString();
+    final college = (data['college'] ?? '').toString();
+    final specialization = (data['specialization'] ?? data['major'] ?? '').toString();
+    final level = (data['level'] ?? '').toString();
+    final term = (data['term'] ?? '').toString();
 
     return FileModel(
       id: doc.id,
-      title: (data['subjectName'] ?? '').toString(),
-      author: (data['doctorName'] ?? '').toString(),
-      course: (data['subjectName'] ?? '').toString(),
+      title: subjectName,
+      author: doctorName,
+      course: subjectName,
       university: (data['university'] ?? 'جامعة صنعاء').toString(),
-      college: (data['college'] ?? '').toString(),
-      major: (data['specialization'] ?? '').toString(),
-      semester:
-          '${data['level'] ?? ''}${data['term'] != null ? ' • ${data['term']}' : ''}',
-      fileType: (data['fileType'] ?? '').toString(),
+      college: college,
+      major: specialization,
+      semester: '$level${term.isNotEmpty ? ' • $term' : ''}',
+      fileType: (data['fileType'] ?? 'File').toString(),
       thumbnailUrl: (data['thumbnailUrl'] ?? '').toString(),
       fileUrl: (data['fileUrl'] ?? '').toString(),
       uploaderName: (data['uploaderName'] ?? '').toString(),
       uploaderUsername: (data['uploaderUsername'] ?? '').toString(),
       description: (data['description'] ?? '').toString(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      createdAt: createdAtTimestamp?.toDate(),
       likes: readInt('likesCount'),
       saves: readInt('savesCount'),
       downloads: readInt('downloadsCount'),

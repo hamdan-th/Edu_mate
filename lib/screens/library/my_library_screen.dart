@@ -21,7 +21,6 @@ class MyLibraryScreen extends StatelessWidget {
         .snapshots()
         .map((snapshot) => snapshot.docs.length);
   }
-
   Stream<int> _combinedReferencesCount() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return Stream.value(0);
@@ -134,29 +133,24 @@ class MyLibraryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: LibraryTheme.bg,
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-            sliver: SliverToBoxAdapter(
-              child: _HeroCard(
-                onUploadTap: () => _openUpload(context),
-              ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _HeroCard(
+              onUploadTap: () => _openUpload(context),
             ),
-          ),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 22, 16, 14),
-              child: _SectionHeader(
-                title: 'مؤشرات مكتبتي',
-                subtitle: 'إحصائيات سريعة لكل ما يتعلق بملفاتك وتفاعلاتك',
-              ),
+            const SizedBox(height: 22),
+            const _SectionHeader(
+              title: 'مؤشرات مكتبتي',
+              subtitle: 'إحصائيات سريعة لكل ما يتعلق بملفاتك وتفاعلاتك',
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
-            sliver: SliverGrid.count(
+            const SizedBox(height: 14),
+            GridView.count(
               crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 14,
               mainAxisSpacing: 14,
               childAspectRatio: 0.88,
@@ -231,8 +225,8 @@ class MyLibraryScreen extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -241,123 +235,322 @@ class MyLibraryScreen extends StatelessWidget {
 class _HeroCard extends StatelessWidget {
   final VoidCallback onUploadTap;
 
-  const _HeroCard({
-    required this.onUploadTap,
-  });
+  const _HeroCard({required this.onUploadTap});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [
-            Color(0xFF5B8CFF),
-            Color(0xFF7B61FF),
+            LibraryTheme.surface,
+            Colors.white,
+            LibraryTheme.primary.withOpacity(0.06),
           ],
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: LibraryTheme.border),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7B61FF).withOpacity(0.24),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final bool isNarrow = constraints.maxWidth < 340;
-          
-          final iconBlock = Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.16),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.18)),
-            ),
-            child: const Icon(
-              Icons.folder_special_rounded,
-              color: Colors.white,
-              size: 28,
-            ),
-          );
-          
-          final textBlock = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'مكتبتي الشخصية',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 21,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              SizedBox(height: 6),
-              Text(
-                'أدر ملفاتك المرفوعة والمحفوظة والتنزيلات من مكان واحد.',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13.2,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          );
-          
-          final buttonBlock = ElevatedButton.icon(
-            onPressed: onUploadTap,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: LibraryTheme.primary,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            icon: const Icon(Icons.add_rounded, size: 18),
-            label: const Text(
-              'رفع',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-          );
-
-          if (isNarrow) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    iconBlock,
-                    const SizedBox(width: 14),
-                    Expanded(child: textBlock),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF5B8CFF),
+                      Color(0xFF7B61FF),
+                    ],
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF7B61FF).withOpacity(0.22),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: buttonBlock,
+                child: const Icon(
+                  Icons.folder_copy_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'مكتبتي الشخصية',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: LibraryTheme.text,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'مساحة مرتبة لملفاتك، محفوظاتك، وتنزيلاتك داخل التطبيق.',
+                      style: TextStyle(
+                        fontSize: 13.2,
+                        color: LibraryTheme.muted,
+                        height: 1.45,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: LibraryTheme.bg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: LibraryTheme.border),
+            ),
+            child: Row(
+              children: const [
+                _MiniFeature(
+                  icon: Icons.upload_file_rounded,
+                  label: 'رفع',
+                ),
+                SizedBox(width: 10),
+                _MiniFeature(
+                  icon: Icons.bookmark_rounded,
+                  label: 'حفظ',
+                ),
+                SizedBox(width: 10),
+                _MiniFeature(
+                  icon: Icons.download_rounded,
+                  label: 'تنزيل',
                 ),
               ],
-            );
-          }
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onUploadTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: LibraryTheme.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              icon: const Icon(Icons.add_rounded, size: 20),
+              label: const Text(
+                'رفع ملف جديد',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-          return Row(
-            children: [
-              iconBlock,
-              const SizedBox(width: 14),
-              Expanded(child: textBlock),
-              const SizedBox(width: 10),
-              buttonBlock,
+class _MiniFeature extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _MiniFeature({
+    required this.icon,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: LibraryTheme.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: LibraryTheme.primary),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: LibraryTheme.text,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final int count;
+  final IconData icon;
+  final List<Color> colors;
+  final VoidCallback onTap;
+
+  const _StatCard({
+    Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.count,
+    required this.icon,
+    required this.colors,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  State<_StatCard> createState() => _StatCardState();
+}
+
+class _StatCardState extends State<_StatCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      child: AnimatedScale(
+        scale: _pressed ? 0.975 : 1,
+        duration: const Duration(milliseconds: 120),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: widget.colors,
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: widget.colors.last.withOpacity(0.22),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
+              ),
             ],
-          );
-        },
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.28),
+                        Colors.white.withOpacity(0.08),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.22),
+                    ),
+                  ),
+                  child: Icon(
+                    widget.icon,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                widget.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                widget.subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.86),
+                  fontSize: 12.2,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Text(
+                    '${widget.count}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      height: 1,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'عنصر',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.88),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -380,18 +573,18 @@ class _SectionHeader extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color: LibraryTheme.text,
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.w800,
+            color: LibraryTheme.text,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           subtitle,
           style: const TextStyle(
-            color: LibraryTheme.muted,
             fontSize: 13,
-            height: 1.4,
+            color: LibraryTheme.muted,
+            height: 1.45,
           ),
         ),
       ],
@@ -399,89 +592,101 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final int count;
-  final IconData icon;
-  final List<Color> colors;
-  final VoidCallback onTap;
+class _InfoCard extends StatelessWidget {
+  final List<_InfoItemData> items;
 
-  const _StatCard({
-    required this.title,
-    required this.subtitle,
-    required this.count,
-    required this.icon,
-    required this.colors,
-    required this.onTap,
-  });
+  const _InfoCard({required this.items});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: LibraryTheme.surface,
         borderRadius: BorderRadius.circular(24),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: LibraryTheme.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: LibraryTheme.border),
-            boxShadow: [
-              BoxShadow(
-                color: colors.first.withOpacity(0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
+        border: Border.all(color: LibraryTheme.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: colors),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Icon(icon, color: Colors.white, size: 24),
-                ),
-                const Spacer(),
-                Text(
-                  '$count',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: LibraryTheme.text,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w800,
-                    color: LibraryTheme.text,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    color: LibraryTheme.muted,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        ],
+      ),
+      child: Column(
+        children: List.generate(items.length, (index) {
+          final item = items[index];
+          return Padding(
+            padding: EdgeInsets.only(bottom: index == items.length - 1 ? 0 : 14),
+            child: _InfoTile(item: item),
+          );
+        }),
       ),
     );
   }
+}
+
+class _InfoTile extends StatelessWidget {
+  final _InfoItemData item;
+
+  const _InfoTile({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: LibraryTheme.primary.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(
+            item.icon,
+            color: LibraryTheme.primary,
+            size: 18,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.title,
+                style: const TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                  color: LibraryTheme.text,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                item.subtitle,
+                style: const TextStyle(
+                  color: LibraryTheme.muted,
+                  fontSize: 12.8,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoItemData {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _InfoItemData({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
 }

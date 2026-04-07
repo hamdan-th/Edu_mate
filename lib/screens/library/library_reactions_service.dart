@@ -46,7 +46,7 @@ class LibraryReactionsService {
     await _firestore.runTransaction((transaction) async {
       final fileSnap = await transaction.get(fileRef);
       final currentLikes =
-          ((fileSnap.data()?['likesCount'] ?? 0) as num).toInt();
+      ((fileSnap.data()?['likesCount'] ?? 0) as num).toInt();
 
       if (isCurrentlyLiked) {
         transaction.delete(likeRef);
@@ -78,7 +78,7 @@ class LibraryReactionsService {
     await _firestore.runTransaction((transaction) async {
       final fileSnap = await transaction.get(fileRef);
       final currentSaves =
-          ((fileSnap.data()?['savesCount'] ?? 0) as num).toInt();
+      ((fileSnap.data()?['savesCount'] ?? 0) as num).toInt();
 
       if (isCurrentlySaved) {
         transaction.delete(saveRef);
@@ -97,6 +97,31 @@ class LibraryReactionsService {
     });
   }
 
+  static Future<void> registerViewOnce(String fileId) async {
+    final uid = currentUserId;
+    if (uid == null) return;
+
+    final fileRef = _firestore.collection('library_files').doc(fileId);
+    final viewRef = fileRef.collection('views').doc(uid);
+
+    await _firestore.runTransaction((transaction) async {
+      final viewSnap = await transaction.get(viewRef);
+
+      if (viewSnap.exists) {
+        return;
+      }
+
+      transaction.set(viewRef, {
+        'userId': uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      transaction.update(fileRef, {
+        'viewsCount': FieldValue.increment(1),
+      });
+    });
+  }
+
   static Future<void> registerDownload(String fileId) async {
     final uid = currentUserId;
     if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
@@ -107,18 +132,19 @@ class LibraryReactionsService {
     await _firestore.runTransaction((transaction) async {
       final fileSnap = await transaction.get(fileRef);
       final currentDownloads =
-          ((fileSnap.data()?['downloadsCount'] ?? 0) as num).toInt();
-      final alreadyDownloaded = (await downloadRef.get()).exists;
+      ((fileSnap.data()?['downloadsCount'] ?? 0) as num).toInt();
+      final downloadSnap = await transaction.get(downloadRef);
 
-      if (!alreadyDownloaded) {
+      if (!downloadSnap.exists) {
         transaction.set(downloadRef, {
           'userId': uid,
           'createdAt': FieldValue.serverTimestamp(),
         });
-        transaction.update(fileRef, {
-          'downloadsCount': currentDownloads + 1,
-        });
       }
+
+      transaction.update(fileRef, {
+        'downloadsCount': currentDownloads + 1,
+      });
     });
   }
 
@@ -127,44 +153,23 @@ class LibraryReactionsService {
     if (uid == null) throw Exception('يجب تسجيل الدخول أولاً');
 
     final fileRef = _firestore.collection('library_files').doc(fileId);
-    final shareRef = fileRef.collection('shares').doc();
+    final shareRef = fileRef.collection('shares').doc(uid);
 
     await _firestore.runTransaction((transaction) async {
       final fileSnap = await transaction.get(fileRef);
       final currentShares =
-          ((fileSnap.data()?['sharesCount'] ?? 0) as num).toInt();
+      ((fileSnap.data()?['sharesCount'] ?? 0) as num).toInt();
+      final shareSnap = await transaction.get(shareRef);
 
-      transaction.set(shareRef, {
-        'userId': uid,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      if (!shareSnap.exists) {
+        transaction.set(shareRef, {
+          'userId': uid,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
       transaction.update(fileRef, {
         'sharesCount': currentShares + 1,
-      });
-    });
-  }
-
-  static Future<void> registerViewOnce(String fileId) async {
-    final uid = currentUserId;
-    if (uid == null) return;
-
-    final fileRef = _firestore.collection('library_files').doc(fileId);
-    final viewRef = fileRef.collection('views').doc(uid);
-
-    await _firestore.runTransaction((transaction) async {
-      final alreadyViewed = (await viewRef.get()).exists;
-      if (alreadyViewed) return;
-
-      final fileSnap = await transaction.get(fileRef);
-      final currentViews =
-          ((fileSnap.data()?['viewsCount'] ?? 0) as num).toInt();
-
-      transaction.set(viewRef, {
-        'userId': uid,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-      transaction.update(fileRef, {
-        'viewsCount': currentViews + 1,
       });
     });
   }

@@ -10,7 +10,6 @@ import 'file_model.dart';
 import 'library_files_service.dart';
 import 'library_theme.dart';
 import 'pdf_preview_screen.dart';
-import '../../core/theme/app_colors.dart';
 
 class MyFilesListScreen extends StatelessWidget {
   final String title;
@@ -74,9 +73,9 @@ class MyFilesListScreen extends StatelessWidget {
     final authorsList = authorsString.isEmpty
         ? <Map<String, dynamic>>[]
         : authorsString
-            .split(',')
-            .map((name) => {'name': name.trim()})
-            .toList();
+        .split(',')
+        .map((name) => {'name': name.trim()})
+        .toList();
 
     return {
       'id': data['articleId'],
@@ -86,7 +85,7 @@ class MyFilesListScreen extends StatelessWidget {
       'publisher': data['publisher'],
       'yearPublished': data['yearPublished'],
       'journals': data['journal'] == null ||
-              (data['journal'] ?? '').toString().isEmpty
+          (data['journal'] ?? '').toString().isEmpty
           ? <String>[]
           : [data['journal'].toString()],
       'downloadUrl': data['downloadUrl'],
@@ -133,9 +132,9 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   Widget _buildFileList(
-    BuildContext context,
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
-  ) {
+      BuildContext context,
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+      ) {
     String emptyMessage = 'لا توجد ملفات';
     if (title == 'المراجع') emptyMessage = 'لم تقم بحفظ أي ملفات بعد';
     if (title == 'ما رفعته') emptyMessage = 'لم تقم برفع أي ملفات بعد';
@@ -146,9 +145,9 @@ class MyFilesListScreen extends StatelessWidget {
       return Center(
         child: Text(
           emptyMessage,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
-            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
+            color: LibraryTheme.text,
           ),
         ),
       );
@@ -182,12 +181,12 @@ class MyFilesListScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
+              color: LibraryTheme.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
+              border: Border.all(color: LibraryTheme.border),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.04),
+                  color: LibraryTheme.primary.withOpacity(0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -199,7 +198,7 @@ class MyFilesListScreen extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: (isPdf ? AppColors.error : AppColors.primary)
+                  color: (isPdf ? LibraryTheme.danger : LibraryTheme.primary)
                       .withOpacity(0.10),
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -207,22 +206,22 @@ class MyFilesListScreen extends StatelessWidget {
                   isPdf
                       ? Icons.picture_as_pdf_rounded
                       : Icons.description_rounded,
-                  color: isPdf ? AppColors.error : AppColors.primary,
+                  color: isPdf ? LibraryTheme.danger : LibraryTheme.primary,
                 ),
               ),
               title: Text(
                 data['subjectName'] ?? 'بدون عنوان',
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
+                  color: LibraryTheme.text,
                 ),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   '${data['doctorName'] ?? ''} • ${data['college'] ?? ''}',
-                  style: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
+                  style: const TextStyle(
+                    color: LibraryTheme.muted,
                     height: 1.4,
                   ),
                 ),
@@ -232,17 +231,17 @@ class MyFilesListScreen extends StatelessWidget {
                 children: [
                   Text(
                     (data['fileType'] ?? '').toString(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+                      color: LibraryTheme.text,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    (data['status'] ?? '').toString(),
-                    style: TextStyle(
+                    (data['term'] ?? '').toString(),
+                    style: const TextStyle(
                       fontSize: 11,
-                      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
+                      color: LibraryTheme.muted,
                     ),
                   ),
                 ],
@@ -254,174 +253,511 @@ class MyFilesListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDigitalReferenceList(
-    BuildContext context,
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
-  ) {
-    if (docs.isEmpty) {
-      return Center(
+  Widget _buildMyUploads() {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: LibraryFilesService.myUploadedFiles(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'حدث خطأ: ${snapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        return _buildFileList(context, docs);
+      },
+    );
+  }
+
+  Widget _buildSavedReferences() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return const Center(
         child: Text(
-          'لا توجد مراجع رقمية محفوظة',
-          style: TextStyle(
-            fontSize: 18,
-            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
-          ),
+          'يجب تسجيل الدخول أولاً',
+          style: TextStyle(fontSize: 18, color: LibraryTheme.text),
         ),
       );
     }
 
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
-      itemCount: docs.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final data = docs[index].data();
-        final mapped = _mapDigitalDocToCoreResult(data);
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collectionGroup('saves')
+          .where('userId', isEqualTo: user.uid)
+          .snapshots(),
+      builder: (context, saveSnapshot) {
+        if (saveSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => CoreResultDetailsScreen(
-                  resultData: mapped,
-                  isSaved: true,
-                  onToggleSave: () {},
-                ),
-              ),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
+        if (saveSnapshot.hasError) {
+          return Center(
+            child: Text(
+              'حدث خطأ: ${saveSnapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text),
+              textAlign: TextAlign.center,
             ),
-            child: ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.menu_book_rounded,
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
-              ),
-              title: Text(
-                data['title'] ?? 'بدون عنوان',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
-                ),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 6),
+          );
+        }
+
+        final saveDocs = saveSnapshot.data?.docs ?? [];
+
+        return FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+          future: _loadParentFileDocs(saveDocs),
+          builder: (context, filesSnapshot) {
+            if (filesSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (filesSnapshot.hasError) {
+              return Center(
                 child: Text(
-                  '${data['authors'] ?? ''} • ${data['yearPublished'] ?? ''}',
-                  style: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
-                    height: 1.4,
-                  ),
+                  'حدث خطأ: ${filesSnapshot.error}',
+                  style: const TextStyle(color: LibraryTheme.text),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ),
-          ),
+              );
+            }
+
+            final fileDocs = filesSnapshot.data ?? [];
+            if (fileDocs.isEmpty) return const SizedBox.shrink();
+            return _buildFileList(context, fileDocs);
+          },
         );
       },
     );
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> _buildStream() {
+  Widget _buildDownloads() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Stream.empty();
+      return const Center(
+        child: Text(
+          'يجب تسجيل الدخول أولاً',
+          style: TextStyle(fontSize: 18, color: LibraryTheme.text),
+        ),
+      );
     }
 
-    switch (title) {
-      case 'ما رفعته':
-        return FirebaseFirestore.instance
-            .collection('library_files')
-            .where('userId', isEqualTo: user.uid)
-            .orderBy('createdAt', descending: true)
-            .snapshots();
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collectionGroup('downloads')
+          .where('userId', isEqualTo: user.uid)
+          .snapshots(),
+      builder: (context, downloadSnapshot) {
+        if (downloadSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      case 'ما شاركته':
-        return FirebaseFirestore.instance
-            .collectionGroup('shares')
-            .where('userId', isEqualTo: user.uid)
-            .snapshots();
+        if (downloadSnapshot.hasError) {
+          return Center(
+            child: Text(
+              'حدث خطأ: ${downloadSnapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
 
-      case 'تنزيلاتي':
-        return FirebaseFirestore.instance
-            .collectionGroup('downloads')
-            .where('userId', isEqualTo: user.uid)
-            .snapshots();
+        final downloadDocs = downloadSnapshot.data?.docs ?? [];
 
-      case 'المراجع':
-        return FirebaseFirestore.instance
-            .collectionGroup('saves')
-            .where('userId', isEqualTo: user.uid)
-            .snapshots();
+        return FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+          future: _loadParentFileDocs(downloadDocs),
+          builder: (context, filesSnapshot) {
+            if (filesSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-      default:
-        return const Stream.empty();
+            if (filesSnapshot.hasError) {
+              return Center(
+                child: Text(
+                  'حدث خطأ: ${filesSnapshot.error}',
+                  style: const TextStyle(color: LibraryTheme.text),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
+            final fileDocs = filesSnapshot.data ?? [];
+            if (fileDocs.isEmpty) return const SizedBox.shrink();
+            return _buildFileList(context, fileDocs);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildShares() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return const Center(
+        child: Text(
+          'يجب تسجيل الدخول أولاً',
+          style: TextStyle(fontSize: 18, color: LibraryTheme.text),
+        ),
+      );
     }
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collectionGroup('shares')
+          .where('userId', isEqualTo: user.uid)
+          .snapshots(),
+      builder: (context, shareSnapshot) {
+        if (shareSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (shareSnapshot.hasError) {
+          return Center(
+            child: Text(
+              'حدث خطأ: ${shareSnapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final shareDocs = shareSnapshot.data?.docs ?? [];
+
+        return FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+          future: _loadParentFileDocs(shareDocs),
+          builder: (context, filesSnapshot) {
+            if (filesSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (filesSnapshot.hasError) {
+              return Center(
+                child: Text(
+                  'حدث خطأ: ${filesSnapshot.error}',
+                  style: const TextStyle(color: LibraryTheme.text),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
+            final fileDocs = filesSnapshot.data ?? [];
+            return _buildFileList(context, fileDocs);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDigitalSavedReferences() {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: DigitalLibraryFirestoreService.savedReferences(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'حدث خطأ: ${snapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+
+        if (docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          itemCount: docs.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final data = docs[index].data();
+            final coreResult = _mapDigitalDocToCoreResult(data);
+
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CoreResultDetailsScreen(
+                      resultData: coreResult,
+                      isSaved: true,
+                      onToggleSave: () {},
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: LibraryTheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: LibraryTheme.border),
+                ),
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: LibraryTheme.primary.withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.menu_book_rounded,
+                      color: LibraryTheme.primary,
+                    ),
+                  ),
+                  title: Text(
+                    (data['title'] ?? 'بدون عنوان').toString(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: LibraryTheme.text,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      (data['authors'] ?? 'مؤلف غير معروف').toString(),
+                      style: const TextStyle(
+                        color: LibraryTheme.muted,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                  trailing: const Text(
+                    'CORE',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: LibraryTheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDigitalDownloads() {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: DigitalLibraryFirestoreService.downloadedReferences(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'حدث خطأ: ${snapshot.error}',
+              style: const TextStyle(color: LibraryTheme.text),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+
+        if (docs.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          itemCount: docs.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final data = docs[index].data();
+
+            return GestureDetector(
+              onTap: () async {
+                final downloadUrl = (data['downloadUrl'] ?? '').toString();
+                final sourceUrl = (data['sourceUrl'] ?? '').toString();
+                final targetUrl =
+                downloadUrl.isNotEmpty ? downloadUrl : sourceUrl;
+
+                if (targetUrl.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('لا يوجد رابط للفتح')),
+                  );
+                  return;
+                }
+
+                final uri = Uri.parse(targetUrl);
+                final launched = await launchUrl(
+                  uri,
+                  mode: LaunchMode.externalApplication,
+                );
+
+                if (!launched) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تعذر فتح الملف')),
+                  );
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: LibraryTheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: LibraryTheme.border),
+                ),
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: LibraryTheme.primary.withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.download_rounded,
+                      color: LibraryTheme.primary,
+                    ),
+                  ),
+                  title: Text(
+                    (data['title'] ?? 'بدون عنوان').toString(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: LibraryTheme.text,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      (data['authors'] ?? 'مؤلف غير معروف').toString(),
+                      style: const TextStyle(
+                        color: LibraryTheme.muted,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                  trailing: const Text(
+                    'فتح',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: LibraryTheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _loadParentFileDocs(
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> childDocs,
+      ) async {
+    final results = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+
+    for (final childDoc in childDocs) {
+      final fileRef = childDoc.reference.parent.parent;
+      if (fileRef == null) continue;
+
+      final fileSnap = await fileRef.get();
+      if (fileSnap.exists && fileSnap.data() != null) {
+        results.add(_WrappedQueryDocumentSnapshot(fileSnap));
+      }
+    }
+
+    return results;
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final bool isMyUploads = title == 'ما رفعته';
+    final bool isReferences = title == 'المراجع';
+    final bool isDownloads = title == 'تنزيلاتي';
+    final bool isShares = title == 'ما شاركته';
 
     return Scaffold(
-      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+      backgroundColor: LibraryTheme.bg,
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        foregroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
+        backgroundColor: LibraryTheme.surface,
+        foregroundColor: LibraryTheme.text,
         elevation: 0,
       ),
-      body: user == null
-          ? Center(
-              child: Text(
-                'يجب تسجيل الدخول أولاً',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
-                ),
-              ),
-            )
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  if (title == 'المراجع')
-                    StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                      stream: FirebaseFirestore.instance
-                          .collection('digital_saved_references')
-                          .where('userId', isEqualTo: user.uid)
-                          .snapshots(),
-                      builder: (context, digitalSnapshot) {
-                        final digitalDocs = digitalSnapshot.data?.docs ?? [];
-                        if (digitalDocs.isEmpty) return const SizedBox.shrink();
-                        return _buildDigitalReferenceList(context, digitalDocs);
-                      },
-                    ),
-                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    stream: _buildStream(),
-                    builder: (context, snapshot) {
-                      final docs = snapshot.data?.docs ?? [];
-                      return _buildFileList(context, docs);
-                    },
-                  ),
-                ],
-              ),
-            ),
+      body: isMyUploads
+          ? _buildMyUploads()
+          : isReferences
+          ? SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildSavedReferences(),
+            _buildDigitalSavedReferences(),
+          ],
+        ),
+      )
+          : isDownloads
+          ? SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildDownloads(),
+            _buildDigitalDownloads(),
+          ],
+        ),
+      )
+          : isShares
+          ? _buildShares()
+          : Center(
+        child: Text(
+          'سيتم عرض قائمة "$title" هنا لاحقًا',
+          style: const TextStyle(
+            fontSize: 18,
+            color: LibraryTheme.text,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
+}
+
+class _WrappedQueryDocumentSnapshot
+    implements QueryDocumentSnapshot<Map<String, dynamic>> {
+  final DocumentSnapshot<Map<String, dynamic>> _doc;
+
+  _WrappedQueryDocumentSnapshot(this._doc);
+
+  @override
+  Map<String, dynamic> data() => _doc.data()!;
+
+  @override
+  String get id => _doc.id;
+
+  @override
+  DocumentReference<Map<String, dynamic>> get reference => _doc.reference;
+
+  @override
+  SnapshotMetadata get metadata => _doc.metadata;
+
+  @override
+  bool get exists => _doc.exists;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      super.noSuchMethod(invocation);
 }

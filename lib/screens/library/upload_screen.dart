@@ -9,7 +9,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'library_theme.dart';
 import 'library_upload_service.dart';
 import 'university_academic_data.dart';
-import '../../core/theme/app_colors.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({Key? key}) : super(key: key);
@@ -154,17 +153,17 @@ class _UploadScreenState extends State<UploadScreen> {
   Widget build(BuildContext context) {
     final normalizedCollege = _normalizeCollege(_selectedCollege);
     final normalizedSpecialization =
-        _normalizeSpecialization(_selectedSpecialization);
+    _normalizeSpecialization(_selectedSpecialization);
 
     final specializations = normalizedCollege == null
         ? <String>[]
         : (UniversityAcademicData.majorsByCollege[normalizedCollege] ??
-                <String>[])
-            .toSet()
-            .toList();
+        <String>[])
+        .toSet()
+        .toList();
 
     return Scaffold(
-      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+      backgroundColor: const Color(0xFFF7F9FC),
       body: Stack(
         children: [
           Positioned(
@@ -175,7 +174,7 @@ class _UploadScreenState extends State<UploadScreen> {
               height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.07),
+                color: LibraryTheme.primary.withOpacity(0.07),
               ),
             ),
           ),
@@ -187,7 +186,7 @@ class _UploadScreenState extends State<UploadScreen> {
               height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.secondary.withOpacity(0.05),
+                color: LibraryTheme.secondary.withOpacity(0.05),
               ),
             ),
           ),
@@ -301,10 +300,10 @@ class _UploadScreenState extends State<UploadScreen> {
                       child: ElevatedButton(
                         onPressed: _isUploading ? null : _submitForm,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: LibraryTheme.primary,
                           foregroundColor: Colors.white,
                           disabledBackgroundColor:
-                              AppColors.primary.withOpacity(0.55),
+                          LibraryTheme.primary.withOpacity(0.55),
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 17),
                           shape: RoundedRectangleBorder(
@@ -313,36 +312,36 @@ class _UploadScreenState extends State<UploadScreen> {
                         ),
                         child: _isUploading
                             ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.4,
-                                  color: Colors.white,
-                                ),
-                              )
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            color: Colors.white,
+                          ),
+                        )
                             : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.cloud_upload_rounded, size: 20),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'رفع الملف الآن',
-                                    style: TextStyle(
-                                      fontSize: 15.5,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ],
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.cloud_upload_rounded, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'رفع الملف الآن',
+                              style: TextStyle(
+                                fontSize: 15.5,
+                                fontWeight: FontWeight.w800,
                               ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Center(
+                    const Center(
                       child: Text(
                         'سيتم رفع الملف ثم مراجعته قبل ظهوره داخل مكتبة الجامعة',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
+                          color: LibraryTheme.muted,
                           fontSize: 12.8,
                           height: 1.5,
                         ),
@@ -375,9 +374,9 @@ class _TopBar extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
+              border: Border.all(color: LibraryTheme.border),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.03),
@@ -390,12 +389,12 @@ class _TopBar extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        Text(
+        const Text(
           'رفع ملف جديد',
           style: TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.w800,
-            color: Theme.of(context).textTheme.titleLarge?.color,
+            color: LibraryTheme.text,
           ),
         ),
       ],
@@ -512,14 +511,14 @@ class _FilePickerCard extends StatelessWidget {
           radius: const Radius.circular(22),
           dashPattern: const [8, 5],
           color: hasFile
-              ? AppColors.primary.withOpacity(0.45)
-              : (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12),
+              ? LibraryTheme.primary.withOpacity(0.45)
+              : LibraryTheme.border,
           strokeWidth: 1.5,
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
+              color: LibraryTheme.bg,
               borderRadius: BorderRadius.circular(22),
             ),
             child: Column(
@@ -531,13 +530,13 @@ class _FilePickerCard extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: hasFile
                           ? [
-                              AppColors.primary.withOpacity(0.16),
-                              Theme.of(context).colorScheme.secondary.withOpacity(0.12),
-                            ]
+                        LibraryTheme.primary.withOpacity(0.16),
+                        LibraryTheme.secondary.withOpacity(0.12),
+                      ]
                           : [
-                              Colors.grey.withOpacity(0.08),
-                              Colors.grey.withOpacity(0.04),
-                            ],
+                        Colors.grey.withOpacity(0.08),
+                        Colors.grey.withOpacity(0.04),
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(18),
                   ),
@@ -545,7 +544,7 @@ class _FilePickerCard extends StatelessWidget {
                     hasFile
                         ? Icons.check_circle_rounded
                         : Icons.attach_file_rounded,
-                    color: hasFile ? AppColors.primary : (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
+                    color: hasFile ? LibraryTheme.primary : LibraryTheme.muted,
                     size: 24,
                   ),
                 ),
@@ -555,10 +554,10 @@ class _FilePickerCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14.6,
                     fontWeight: FontWeight.w700,
-                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
+                    color: LibraryTheme.text,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -567,9 +566,9 @@ class _FilePickerCard extends StatelessWidget {
                       ? 'تم اختيار الملف بنجاح، ويمكنك الآن إكمال بقية البيانات'
                       : 'الأنواع المدعومة: PDF / DOC / DOCX / JPG / PNG',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12.5,
-                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
+                    color: LibraryTheme.muted,
                     height: 1.5,
                   ),
                 ),
@@ -580,16 +579,16 @@ class _FilePickerCard extends StatelessWidget {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).canvasColor,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
+                    border: Border.all(color: LibraryTheme.border),
                   ),
                   child: Text(
                     hasFile ? 'تغيير الملف' : 'اختيار ملف',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+                      color: LibraryTheme.primary,
                     ),
                   ),
                 ),
@@ -618,9 +617,9 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
+        border: Border.all(color: LibraryTheme.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -634,18 +633,18 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 17.5,
               fontWeight: FontWeight.w800,
-              color: Theme.of(context).textTheme.titleLarge?.color,
+              color: LibraryTheme.text,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12.8,
-              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
+              color: LibraryTheme.muted,
               height: 1.45,
             ),
           ),
@@ -678,16 +677,16 @@ class _ModernTextField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 14.5,
-        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
+        color: LibraryTheme.text,
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+        fillColor: const Color(0xFFF8FAFD),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 16,
@@ -698,15 +697,15 @@ class _ModernTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12),
+          borderSide: const BorderSide(
+            color: LibraryTheme.border,
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: AppColors.primary,
+          borderSide: const BorderSide(
+            color: LibraryTheme.primary,
             width: 1.4,
           ),
         ),
@@ -748,22 +747,22 @@ class _ModernDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final uniqueItems = items.toSet().toList();
     final safeValue =
-        value != null && uniqueItems.contains(value) ? value : null;
+    value != null && uniqueItems.contains(value) ? value : null;
 
     return DropdownButtonFormField<String>(
       value: safeValue,
       isExpanded: true,
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 14.5,
-        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
+        color: LibraryTheme.text,
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+        fillColor: const Color(0xFFF8FAFD),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 16,
@@ -774,15 +773,15 @@ class _ModernDropdown extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.3) : Colors.black12),
+          borderSide: const BorderSide(
+            color: LibraryTheme.border,
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: AppColors.primary,
+          borderSide: const BorderSide(
+            color: LibraryTheme.primary,
             width: 1.4,
           ),
         ),
@@ -790,13 +789,13 @@ class _ModernDropdown extends StatelessWidget {
       items: uniqueItems
           .map(
             (item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          )
+          value: item,
+          child: Text(
+            item,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      )
           .toList(),
       onChanged: onChanged,
     );

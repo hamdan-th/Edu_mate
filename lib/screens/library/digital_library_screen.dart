@@ -4,7 +4,6 @@ import 'package:share_plus/share_plus.dart';
 import 'core_api_service.dart';
 import 'core_result_details_screen.dart';
 import 'library_theme.dart';
-import '../../core/theme/app_colors.dart';
 
 class DigitalLibraryScreen extends StatefulWidget {
   const DigitalLibraryScreen({Key? key}) : super(key: key);
@@ -100,7 +99,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+      backgroundColor: LibraryTheme.bg,
       body: Column(
         children: [
           Padding(
@@ -114,7 +113,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.send_rounded),
-                  color: AppColors.primary,
+                  color: LibraryTheme.primary,
                   onPressed: _performSearch,
                 ),
                 border: OutlineInputBorder(
@@ -122,111 +121,163 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+                fillColor: LibraryTheme.surface,
               ),
             ),
           ),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _searchResults.isEmpty
-                    ? Center(
-                        child: Text(
-                          _message,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
-                            fontSize: 16,
+                : _searchResults.isNotEmpty
+                ? ListView.builder(
+              padding: const EdgeInsets.only(top: 8),
+              itemCount: _searchResults.length,
+              itemBuilder: (context, index) {
+                final result = _searchResults[index];
+                final title = result['title'] ?? 'بدون عنوان';
+                final authors = (result['authors'] as List<dynamic>?)
+                    ?.map((author) => author['name'].toString())
+                    .join(', ') ??
+                    'مؤلف غير معروف';
+
+                final String articleId = result['id']?.toString() ?? '';
+                final bool isSaved = _savedItems.contains(articleId);
+
+                return Card(
+                  elevation: 0,
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CoreResultDetailsScreen(
+                            resultData: result,
+                            isSaved: isSaved,
+                            onToggleSave: () => _toggleSave(result),
                           ),
                         ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _searchResults.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final result = _searchResults[index];
-                          final title = result['title'] ?? 'بدون عنوان';
-                          final articleId = result['id']?.toString() ?? '';
-                          final isSaved = _savedItems.contains(articleId);
-
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(14),
-                              title: Text(
-                                title,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
-                                ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          if (authors.isNotEmpty)
+                            Text(
+                              authors,
+                              style: const TextStyle(
+                                color: LibraryTheme.muted,
+                                fontSize: 14,
                               ),
-                              subtitle: Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  result['yearPublished']?.toString() ?? 'غير معروف',
-                                  style: TextStyle(
-                                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
-                                  ),
-                                ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _ActionButton(
+                                icon: isSaved
+                                    ? Icons.bookmark_added
+                                    : Icons.bookmark_add_outlined,
+                                label: isSaved ? 'تم الحفظ' : 'حفظ',
+                                onPressed: () => _toggleSave(result),
                               ),
-                              trailing: PopupMenuButton<String>(
-                                onSelected: (value) async {
-                                  if (value == 'save') {
-                                    _toggleSave(result);
-                                  } else if (value == 'share') {
-                                    await _shareResult(result, title);
-                                  } else if (value == 'details') {
-                                    if (!mounted) return;
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => CoreResultDetailsScreen(
-                                          resultData: result,
-                                          isSaved: isSaved,
-                                          onToggleSave: () => _toggleSave(result),
-                                        ),
+                              _ActionButton(
+                                icon: Icons.share_outlined,
+                                label: 'مشاركة',
+                                onPressed: () => _shareResult(result, title),
+                              ),
+                              _ActionButton(
+                                icon: Icons.arrow_forward_ios_rounded,
+                                label: 'التفاصيل',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CoreResultDetailsScreen(
+                                        resultData: result,
+                                        isSaved: isSaved,
+                                        onToggleSave: () => _toggleSave(result),
                                       ),
-                                    );
-                                  }
-                                },
-                                itemBuilder: (context) => [
-                                  PopupMenuItem(
-                                    value: 'save',
-                                    child: Text(isSaved ? 'إزالة الحفظ' : 'حفظ'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'share',
-                                    child: Text('مشاركة'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'details',
-                                    child: Text('التفاصيل'),
-                                  ),
-                                ],
-                              ),
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => CoreResultDetailsScreen(
-                                      resultData: result,
-                                      isSaved: isSaved,
-                                      onToggleSave: () => _toggleSave(result),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
+                    ),
+                  ),
+                );
+              },
+            )
+                : Center(
+              child: Text(
+                _message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: LibraryTheme.muted,
+                ),
+              ),
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: LibraryTheme.primary),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: LibraryTheme.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
