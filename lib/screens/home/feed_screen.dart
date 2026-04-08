@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
-
+import '../notifications/notifications_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/feed_reactions_service.dart';
 import '../../services/feed_service.dart';
@@ -64,7 +64,7 @@ class _FeedScreenState extends State<FeedScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const PlaceholderNotificationsScreen(),
+        builder: (_) => NotificationsScreen(),
       ),
     );
   }
@@ -1293,29 +1293,6 @@ class PlaceholderNotificationsScreen extends StatelessWidget {
           l10n.notificationsBody,
           style: TextStyle(
             color: isDark ? AppColors.textPrimary : Colors.black87,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class PlaceholderBotScreen extends StatelessWidget {
-  const PlaceholderBotScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Edu Bot'),
-      ),
-      body: const Center(
-        child: Text(
-          'البوت سيُربط بالذكاء الاصطناعي لاحقًا',
-          style: TextStyle(
-            color: AppColors.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),

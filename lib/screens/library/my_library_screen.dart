@@ -134,31 +134,33 @@ class MyLibraryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: LibraryTheme.bg(context),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. DASHBOARD HERO CARD
             _MyLibraryHeroCard(
               onUploadTap: () => _openUpload(context),
             ),
-            
-            const SizedBox(height: 32),
-            
-            // 2. STATS SECTION HEADER
+            const SizedBox(height: 18),
             Text(
               'مؤشرات مكتبتي',
               style: TextStyle(
-                fontSize: 19,
+                fontSize: 18,
                 fontWeight: FontWeight.w900,
                 color: LibraryTheme.text(context),
-                letterSpacing: -0.5,
+                letterSpacing: -0.3,
               ),
             ),
-            
-            const SizedBox(height: 16),
-            
-            // 3. LARGE PRIMARY STAT CARD
+            const SizedBox(height: 6),
+            Text(
+              'نظرة سريعة على ملفاتك، محفوظاتك، وتنزيلاتك',
+              style: TextStyle(
+                fontSize: 12.8,
+                fontWeight: FontWeight.w600,
+                color: LibraryTheme.muted(context),
+              ),
+            ),
+            const SizedBox(height: 14),
             StreamBuilder<int>(
               stream: _combinedReferencesCount(),
               builder: (context, snapshot) {
@@ -171,10 +173,7 @@ class MyLibraryScreen extends StatelessWidget {
                 );
               },
             ),
-            
-            const SizedBox(height: 14),
-            
-            // 4. SECONDARY STAT CARDS (Grid Array)
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -190,7 +189,7 @@ class MyLibraryScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: LibraryFilesService.myUploadedFiles(),
@@ -206,10 +205,7 @@ class MyLibraryScreen extends StatelessWidget {
                 ),
               ],
             ),
-            
-            const SizedBox(height: 14),
-            
-            // 5. FULL WIDTH SECONDARY STAT CARD
+            const SizedBox(height: 12),
             StreamBuilder<int>(
               stream: _collectionGroupCount('shares'),
               builder: (context, snapshot) {
@@ -222,8 +218,7 @@ class MyLibraryScreen extends StatelessWidget {
                 );
               },
             ),
-            
-            const SizedBox(height: 32),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -238,31 +233,33 @@ class _MyLibraryHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gold = const Color(0xFFD4AF37);
+    final gold = const Color(0xFFC9A227);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: LibraryTheme.surface(context),
         gradient: LinearGradient(
           colors: [
             LibraryTheme.surface(context),
-            isDark ? LibraryTheme.surface(context) : gold.withOpacity(0.02),
+            isDark ? LibraryTheme.surface(context) : gold.withOpacity(0.015),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isDark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.8),
+          color: isDark
+              ? LibraryTheme.border(context)
+              : LibraryTheme.border(context).withOpacity(0.65),
           width: 0.8,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.25 : 0.06),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(isDark ? 0.22 : 0.05),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -270,25 +267,24 @@ class _MyLibraryHeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                height: 56,
-                width: 56,
+                height: 48,
+                width: 48,
                 decoration: BoxDecoration(
                   color: gold.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: gold.withOpacity(0.2),
+                    color: gold.withOpacity(0.18),
                   ),
                 ),
                 child: Icon(
-                  Icons.folder_special_rounded, 
-                  color: gold, 
-                  size: 28,
+                  Icons.folder_special_rounded,
+                  color: gold,
+                  size: 24,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,17 +292,17 @@ class _MyLibraryHeroCard extends StatelessWidget {
                     Text(
                       'مكتبتي الشخصية',
                       style: TextStyle(
-                        fontSize: 19,
+                        fontSize: 18,
                         fontWeight: FontWeight.w900,
                         color: LibraryTheme.text(context),
-                        letterSpacing: -0.3,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
                       'إدارة جميع ملفاتك ومصادرك',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                         color: LibraryTheme.muted(context),
                       ),
@@ -316,16 +312,14 @@ class _MyLibraryHeroCard extends StatelessWidget {
               ),
             ],
           ),
-          
-          const SizedBox(height: 24),
-          
+          const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: LibraryTheme.bg(context).withOpacity(isDark ? 0.5 : 0.8),
-              borderRadius: BorderRadius.circular(16),
+              color: LibraryTheme.bg(context).withOpacity(isDark ? 0.45 : 0.75),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: LibraryTheme.border(context).withOpacity(0.5),
+                color: LibraryTheme.border(context).withOpacity(0.45),
               ),
             ),
             child: Row(
@@ -337,18 +331,16 @@ class _MyLibraryHeroCard extends StatelessWidget {
               ],
             ),
           ),
-          
-          const SizedBox(height: 20),
-          
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: onUploadTap,
               style: ElevatedButton.styleFrom(
-                backgroundColor: LibraryTheme.primary(context),
+                backgroundColor: gold,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -356,7 +348,7 @@ class _MyLibraryHeroCard extends StatelessWidget {
               child: const Text(
                 'رفع ملف جديد',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14.5,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.2,
                 ),
@@ -373,24 +365,26 @@ class _FeatureChip extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _FeatureChip({required this.icon, required this.label});
+  const _FeatureChip({
+    required this.icon,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(
-          icon, 
-          size: 16, 
+          icon,
+          size: 15,
           color: LibraryTheme.muted(context),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12.5,
+            fontSize: 12.2,
             fontWeight: FontWeight.w800,
             color: LibraryTheme.text(context),
           ),
@@ -418,44 +412,45 @@ class _PrimaryStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final gold = const Color(0xFFD4AF37);
+    final gold = const Color(0xFFC9A227);
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         decoration: BoxDecoration(
           color: LibraryTheme.surface(context),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isDark ? gold.withOpacity(0.15) : gold.withOpacity(0.7),
-            width: 1.2,
+            color: gold.withOpacity(isDark ? 0.18 : 0.65),
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withOpacity(0.25) : gold.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              color: isDark
+                  ? Colors.black.withOpacity(0.20)
+                  : gold.withOpacity(0.07),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: gold.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
-                icon, 
-                color: gold, 
-                size: 30,
+                icon,
+                color: gold,
+                size: 26,
               ),
             ),
-            const SizedBox(width: 18),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,17 +458,16 @@ class _PrimaryStatCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 17,
+                      fontSize: 16,
                       fontWeight: FontWeight.w900,
                       color: LibraryTheme.text(context),
-                      letterSpacing: -0.2,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: LibraryTheme.muted(context),
                     ),
@@ -481,14 +475,14 @@ class _PrimaryStatCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Text(
               '$count',
               style: TextStyle(
-                fontSize: 38,
+                fontSize: 34,
                 fontWeight: FontWeight.w900,
                 color: LibraryTheme.text(context),
-                height: 1.0,
+                height: 1,
               ),
             ),
           ],
@@ -521,19 +515,21 @@ class _SecondaryStatCard extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: LibraryTheme.surface(context),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isDark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.6),
+            color: isDark
+                ? LibraryTheme.border(context)
+                : LibraryTheme.border(context).withOpacity(0.55),
             width: 0.8,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: Colors.black.withOpacity(isDark ? 0.18 : 0.035),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -547,8 +543,6 @@ class _SecondaryStatCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(8),
@@ -557,27 +551,28 @@ class _SecondaryStatCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
-                icon, 
-                color: LibraryTheme.muted(context), 
-                size: 20,
+                icon,
+                color: LibraryTheme.muted(context),
+                size: 18,
               ),
             ),
+            const Spacer(),
             Text(
               '$count',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 24,
                 fontWeight: FontWeight.w900,
                 color: LibraryTheme.text(context),
-                height: 1.0,
+                height: 1,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 14),
         Text(
           title,
           style: TextStyle(
-            fontSize: 14.5,
+            fontSize: 14,
             fontWeight: FontWeight.w800,
             color: LibraryTheme.text(context),
           ),
@@ -588,7 +583,6 @@ class _SecondaryStatCard extends StatelessWidget {
 
   Widget _buildFullWidth(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
@@ -597,16 +591,16 @@ class _SecondaryStatCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
-            icon, 
-            color: LibraryTheme.muted(context), 
-            size: 20,
+            icon,
+            color: LibraryTheme.muted(context),
+            size: 18,
           ),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: 12),
         Text(
           title,
           style: TextStyle(
-            fontSize: 15.5,
+            fontSize: 14.5,
             fontWeight: FontWeight.w800,
             color: LibraryTheme.text(context),
           ),
@@ -615,10 +609,10 @@ class _SecondaryStatCard extends StatelessWidget {
         Text(
           '$count',
           style: TextStyle(
-            fontSize: 26,
+            fontSize: 24,
             fontWeight: FontWeight.w900,
             color: LibraryTheme.text(context),
-            height: 1.0,
+            height: 1,
           ),
         ),
       ],
