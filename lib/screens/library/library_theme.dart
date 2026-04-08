@@ -5,20 +5,40 @@ class LibraryTheme {
   // SAFE THEME ACCESS
   // ========================
 
-  static Color bg(BuildContext context) =>
-      Theme.of(context).scaffoldBackgroundColor;
+  static Color bg(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      return const Color(0xFF0C0E12);
+    }
+    return Theme.of(context).scaffoldBackgroundColor;
+  }
 
-  static Color surface(BuildContext context) =>
-      Theme.of(context).cardColor;
+  static Color surface(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      return const Color(0xFF14171C);
+    }
+    return Theme.of(context).cardColor;
+  }
 
-  static Color text(BuildContext context) =>
-      Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+  static Color text(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      return Colors.white.withOpacity(0.92);
+    }
+    return Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+  }
 
-  static Color muted(BuildContext context) =>
-      Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
+  static Color muted(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      return Colors.white.withOpacity(0.55);
+    }
+    return Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
+  }
 
-  static Color border(BuildContext context) =>
-      Theme.of(context).dividerColor;
+  static Color border(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      return Colors.white.withOpacity(0.08);
+    }
+    return Theme.of(context).dividerColor;
+  }
 
   // ========================
   // BRAND COLORS (ثابتة)

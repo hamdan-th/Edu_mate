@@ -144,10 +144,12 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                 final bool isSaved = _savedItems.contains(articleId);
 
                 return Card(
+                  color: LibraryTheme.surface(context),
                   elevation: 0,
                   margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : Colors.transparent),
                   ),
                   child: InkWell(
                     onTap: () {

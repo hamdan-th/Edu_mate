@@ -45,13 +45,13 @@ class _FileCardState extends State<FileCard> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: Colors.grey.withOpacity(isDark ? 0.10 : 0.14),
+                    color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.14),
                     width: 1,
                   ),
                   gradient: LinearGradient(
                     colors: [
                       LibraryTheme.surface(context),
-                      gold.withOpacity(isDark ? 0.05 : 0.025),
+                      isDark ? LibraryTheme.surface(context) : gold.withOpacity(0.025),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -59,7 +59,7 @@ class _FileCardState extends State<FileCard> {
                   boxShadow: [
                     if (!_isPressed)
                       BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.05 : 0.045),
+                        color: Colors.black.withOpacity(isDark ? 0.25 : 0.045),
                         blurRadius: _isHovering ? 16 : 12,
                         offset: Offset(0, _isHovering ? 8 : 4),
                       ),
@@ -106,9 +106,7 @@ class _FileCardState extends State<FileCard> {
                                   style: TextStyle(
                                     fontSize: 12.8,
                                     fontWeight: FontWeight.w600,
-                                    color: isDark
-                                        ? Colors.grey[400]
-                                        : Colors.grey[600],
+                                    color: LibraryTheme.muted(context),
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -342,13 +340,13 @@ class _GridFileCardState extends State<GridFileCard> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: Colors.grey.withOpacity(isDark ? 0.10 : 0.14),
+                    color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.14),
                     width: 1,
                   ),
                   gradient: LinearGradient(
                     colors: [
                       LibraryTheme.surface(context),
-                      gold.withOpacity(isDark ? 0.05 : 0.025),
+                      isDark ? LibraryTheme.surface(context) : gold.withOpacity(0.025),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -356,7 +354,7 @@ class _GridFileCardState extends State<GridFileCard> {
                   boxShadow: [
                     if (!_isPressed)
                       BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.05 : 0.04),
+                        color: Colors.black.withOpacity(isDark ? 0.25 : 0.04),
                         blurRadius: _isHovering ? 16 : 12,
                         offset: Offset(0, _isHovering ? 8 : 4),
                       ),
@@ -403,9 +401,7 @@ class _GridFileCardState extends State<GridFileCard> {
                             style: TextStyle(
                               fontSize: 12.3,
                               fontWeight: FontWeight.w600,
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : Colors.grey[600],
+                              color: LibraryTheme.muted(context),
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -641,12 +637,10 @@ class _MetricChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
+        color: isDark ? const Color(0xFF1E222A) : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(0.05)
-              : Colors.grey.withOpacity(0.18),
+          color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.18),
           width: 0.5,
         ),
       ),
@@ -656,13 +650,13 @@ class _MetricChip extends StatelessWidget {
           Icon(
             icon,
             size: 14.5,
-            color: isDark ? Colors.grey[400] : Colors.grey[700],
+            color: LibraryTheme.muted(context),
           ),
           const SizedBox(width: 5),
           Text(
             '$value',
             style: TextStyle(
-              color: isDark ? Colors.grey[300] : Colors.grey[800],
+              color: LibraryTheme.text(context),
               fontSize: 12,
               fontWeight: FontWeight.w700,
               height: 1.1,

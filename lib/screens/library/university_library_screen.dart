@@ -189,7 +189,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                   decoration: BoxDecoration(
                     color: LibraryTheme.surface(context),
                     borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                    border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -217,7 +217,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                         decoration: BoxDecoration(
                           color: LibraryTheme.surface(context),
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                         ),
                         child: Text(
                           'الترتيب: $_sortOrder',
@@ -235,7 +235,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                         decoration: BoxDecoration(
                           color: LibraryTheme.surface(context),
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                         ),
                         child: Icon(
                           _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,

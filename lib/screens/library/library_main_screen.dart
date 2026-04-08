@@ -115,7 +115,7 @@ class _ModernHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: LibraryTheme.primary(context).withOpacity(0.25),
+            color: LibraryTheme.primary(context).withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.05 : 0.25),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),

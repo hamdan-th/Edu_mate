@@ -248,19 +248,19 @@ class _MyLibraryHeroCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             LibraryTheme.surface(context),
-            gold.withOpacity(isDark ? 0.05 : 0.02),
+            isDark ? LibraryTheme.surface(context) : gold.withOpacity(0.02),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: LibraryTheme.border(context).withOpacity(isDark ? 0.4 : 0.8),
+          color: isDark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.8),
           width: 0.8,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.02 : 0.06),
+            color: Colors.black.withOpacity(isDark ? 0.25 : 0.06),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -429,12 +429,12 @@ class _PrimaryStatCard extends StatelessWidget {
           color: LibraryTheme.surface(context),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: gold.withOpacity(isDark ? 0.3 : 0.7),
+            color: isDark ? gold.withOpacity(0.15) : gold.withOpacity(0.7),
             width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: gold.withOpacity(isDark ? 0.05 : 0.08),
+              color: isDark ? Colors.black.withOpacity(0.25) : gold.withOpacity(0.08),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -526,12 +526,12 @@ class _SecondaryStatCard extends StatelessWidget {
           color: LibraryTheme.surface(context),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: LibraryTheme.border(context).withOpacity(isDark ? 0.3 : 0.6),
+            color: isDark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.6),
             width: 0.8,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.02 : 0.04),
+              color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
