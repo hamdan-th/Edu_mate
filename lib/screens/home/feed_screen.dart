@@ -24,7 +24,7 @@ class _FeedScreenState extends State<FeedScreen> {
   String _selectedFilter = 'For You';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
-
+  int _unreadNotifications = 3;
   final List<String> _filters = const [
     'For You',
     'Recent',
@@ -60,13 +60,19 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  void _openNotifications() {
-    Navigator.push(
+  Future<void> _openNotifications() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => NotificationsScreen(),
+        builder: (_) => const NotificationsScreen(),
       ),
     );
+
+    if (result is int && mounted) {
+      setState(() {
+        _unreadNotifications = result;
+      });
+    }
   }
 
   void _openBot() {
@@ -156,7 +162,7 @@ class _FeedScreenState extends State<FeedScreen> {
                           const SizedBox(width: 8),
                           FeedTopActionButton(
                             icon: Icons.notifications_none_rounded,
-                            hasBadge: true,
+                            hasBadge: _unreadNotifications > 0,
                             onTap: _openNotifications,
                           ),
                           const SizedBox(width: 8),
@@ -1270,32 +1276,6 @@ class EmptyStateCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class PlaceholderNotificationsScreen extends StatelessWidget {
-  const PlaceholderNotificationsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(l10n.notificationsTitle),
-      ),
-      body: Center(
-        child: Text(
-          l10n.notificationsBody,
-          style: TextStyle(
-            color: isDark ? AppColors.textPrimary : Colors.black87,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
     );
   }

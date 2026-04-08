@@ -75,6 +75,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     });
   }
 
+  int _unreadCount() {
+    return _items.where((e) => !e.isRead).length;
+  }
+
+  void _popWithUnreadCount() {
+    Navigator.pop(context, _unreadCount());
+  }
+
   List<NotificationItemModel> get _todayItems {
     final now = DateTime.now();
     return _items.where((item) {
@@ -109,87 +117,97 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final unreadCount = _items.where((e) => !e.isRead).length;
+    final unreadCount = _unreadCount();
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        elevation: 0,
+    return WillPopScope(
+      onWillPop: () async {
+        _popWithUnreadCount();
+        return false;
+      },
+      child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        centerTitle: false,
-        titleSpacing: 20,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'الإشعارات',
-              style: TextStyle(
-                color: isDark ? AppColors.textPrimary : Colors.black87,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          centerTitle: false,
+          titleSpacing: 20,
+          leading: IconButton(
+            onPressed: _popWithUnreadCount,
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'الإشعارات',
+                style: TextStyle(
+                  color: isDark ? AppColors.textPrimary : Colors.black87,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              unreadCount > 0
-                  ? 'لديك $unreadCount إشعارات غير مقروءة'
-                  : 'كل الإشعارات مقروءة',
-              style: TextStyle(
-                color: isDark ? AppColors.textSecondary : Colors.black54,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 2),
+              Text(
+                unreadCount > 0
+                    ? 'لديك $unreadCount إشعارات غير مقروءة'
+                    : 'كل الإشعارات مقروءة',
+                style: TextStyle(
+                  color: isDark ? AppColors.textSecondary : Colors.black54,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          if (_items.any((e) => !e.isRead))
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 10),
-              child: TextButton(
-                onPressed: _markAllAsRead,
-                child: const Text(
-                  'تحديد الكل كمقروء',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12.5,
+            ],
+          ),
+          actions: [
+            if (_items.any((e) => !e.isRead))
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 10),
+                child: TextButton(
+                  onPressed: _markAllAsRead,
+                  child: const Text(
+                    'تحديد الكل كمقروء',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.5,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
-      ),
-      body: _items.isEmpty
-          ? const _NotificationsEmptyState()
-          : ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-        children: [
-          if (_todayItems.isNotEmpty) ...[
-            const _SectionTitle(title: 'اليوم'),
-            const SizedBox(height: 10),
-            ..._todayItems.map(
-                  (item) => _NotificationTile(
-                item: item,
-                timeLabel: _formatTime(item.timestamp),
-                onTap: () => _markOneAsRead(item.id),
-              ),
-            ),
-            const SizedBox(height: 18),
           ],
-          if (_earlierItems.isNotEmpty) ...[
-            const _SectionTitle(title: 'الأقدم'),
-            const SizedBox(height: 10),
-            ..._earlierItems.map(
-                  (item) => _NotificationTile(
-                item: item,
-                timeLabel: _formatTime(item.timestamp),
-                onTap: () => _markOneAsRead(item.id),
+        ),
+        body: _items.isEmpty
+            ? const _NotificationsEmptyState()
+            : ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+          children: [
+            if (_todayItems.isNotEmpty) ...[
+              const _SectionTitle(title: 'اليوم'),
+              const SizedBox(height: 10),
+              ..._todayItems.map(
+                    (item) => _NotificationTile(
+                  item: item,
+                  timeLabel: _formatTime(item.timestamp),
+                  onTap: () => _markOneAsRead(item.id),
+                ),
               ),
-            ),
+              const SizedBox(height: 18),
+            ],
+            if (_earlierItems.isNotEmpty) ...[
+              const _SectionTitle(title: 'الأقدم'),
+              const SizedBox(height: 10),
+              ..._earlierItems.map(
+                    (item) => _NotificationTile(
+                  item: item,
+                  timeLabel: _formatTime(item.timestamp),
+                  onTap: () => _markOneAsRead(item.id),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
