@@ -233,14 +233,20 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+      backgroundColor: isDark ? const Color(0xFF0C0E12) : const Color(0xFFF8F9FA),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
+        preferredSize: const Size.fromHeight(64),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).appBarTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-            boxShadow: [BoxShadow(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12), blurRadius: 4, offset: const Offset(0, 1))],
+            color: isDark ? const Color(0xFF14171C) : Colors.white,
+            border: Border(bottom: BorderSide(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05), width: 1)),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+            ],
           ),
           child: AppBar(
             titleSpacing: 0,
@@ -311,14 +317,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     children: [
                       Text(
                         widget.group.name.isEmpty ? 'الدردشة' : widget.group.name,
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: Theme.of(context).textTheme.titleLarge?.color, letterSpacing: -0.2),
+                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5, color: isDark ? Colors.white.withOpacity(0.95) : Colors.black87, letterSpacing: -0.2),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 1),
+                      const SizedBox(height: 2),
                       Text(
                         "${_membersCount > 0 ? '$_membersCount أعضاء • ' : ''}${widget.group.specializationName}".trim(),
-                        style: TextStyle(fontSize: 13, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7), height: 1.1),
+                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: isDark ? Colors.white.withOpacity(0.55) : Colors.black54),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -527,6 +533,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     if (senderName.contains('@')) senderName = senderName.split('@').first;
     
     final timestamp = data['createdAt'] as Timestamp?;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = const Color(0xFFD4AF37);
 
     final List<Color> nameColors = [
       const Color(0xFFE53935), const Color(0xFFD81B60), const Color(0xFF8E24AA), 
@@ -540,21 +548,29 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     final messageContent = Container(
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isMe ? AppColors.primary : (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
+        color: isMe 
+            ? (isDark ? primaryColor.withOpacity(0.08) : AppColors.primary) 
+            : (isDark ? const Color(0xFF14171C) : Colors.white),
+        border: Border.all(
+            color: isDark 
+                ? (isMe ? primaryColor.withOpacity(0.25) : Colors.white.withOpacity(0.08)) 
+                : Colors.transparent,
+            width: 1),
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(18),
-          topRight: const Radius.circular(18),
-          bottomLeft: Radius.circular(isMe ? 18 : 6),
-          bottomRight: Radius.circular(isMe ? 6 : 18),
+          topLeft: const Radius.circular(20),
+          topRight: const Radius.circular(20),
+          bottomLeft: Radius.circular(isMe ? 20 : 4),
+          bottomRight: Radius.circular(isMe ? 4 : 20),
         ),
         boxShadow: [
-          BoxShadow(
-            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.05) : Colors.black12),
-            blurRadius: 1.5,
-            offset: const Offset(0, 1),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
         ],
       ),
       child: Column(
@@ -613,11 +629,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.end,
               children: [
-                _buildMessageText(text),
+                _buildMessageText(text, isMe, isDark),
                 const SizedBox(width: 8),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 1, top: 4),
-                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 11, color: isMe ? Colors.white70 : Theme.of(context).textTheme.bodySmall?.color, letterSpacing: 0.1)),
+                  padding: const EdgeInsets.only(bottom: 0, top: 4),
+                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: isMe ? (isDark ? primaryColor.withOpacity(0.7) : Colors.white70) : (isDark ? Colors.white.withOpacity(0.4) : Colors.black45), letterSpacing: 0.2)),
                 ),
               ],
             ),
@@ -664,15 +680,18 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     );
   }
 
-  Widget _buildMessageText(String text) {
+  Widget _buildMessageText(String text, bool isMe, bool isDark) {
+    final textColor = isDark ? (isMe ? Colors.white.withOpacity(0.95) : Colors.white.withOpacity(0.95)) : (isMe ? Colors.white : Colors.black87);
+    final textStyle = TextStyle(fontSize: 15.5, color: textColor, height: 1.4, fontWeight: FontWeight.w500);
+
     if (!text.contains('edumate://invite')) {
-      return Text(text, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.4));
+      return Text(text, style: textStyle);
     }
     
     final RegExp linkRegExp = RegExp(r'(edumate:\/\/invite\?[^\s]+)', caseSensitive: false);
     final matches = linkRegExp.allMatches(text);
     if (matches.isEmpty) {
-      return Text(text, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.4));
+      return Text(text, style: textStyle);
     }
 
     List<TextSpan> spans = [];
@@ -686,7 +705,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       spans.add(
         TextSpan(
           text: url,
-          style: const TextStyle(color: Color(0xFF64B5F6), decoration: TextDecoration.underline),
+          style: const TextStyle(color: Color(0xFF64B5F6), decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               final uri = Uri.tryParse(url);
@@ -709,7 +728,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     
     return RichText(
       text: TextSpan(
-        style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.4),
+        style: textStyle,
         children: spans,
       ),
     );
@@ -726,14 +745,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
        return _buildDisabledState('المجموعة للقراءة فقط', Icons.info_outline_rounded, AppColors.textSecondary);
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.only(
         left: 8, right: 8, top: 8,
         bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).bottomSheetTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-        boxShadow: [BoxShadow(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12), blurRadius: 4, offset: const Offset(0, -1))],
+        color: isDark ? const Color(0xFF14171C) : Colors.white,
+        boxShadow: [BoxShadow(color: isDark ? Colors.black.withOpacity(0.2) : Colors.black12, blurRadius: 10, offset: const Offset(0, -2))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -791,25 +812,25 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   minLines: 1,
                   maxLines: 5,
                   textInputAction: TextInputAction.newline,
-                  cursorColor: Colors.white,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  cursorColor: AppColors.primary,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                   decoration: InputDecoration(
                     hintText: "اكتب رسالة...",
                     hintStyle: TextStyle(
-                      color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7),
+                      color: isDark ? Colors.white.withOpacity(0.4) : Colors.black45,
                       fontSize: 15,
                     ),
                     filled: true,
-                    fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+                    fillColor: isDark ? const Color(0xFF1A1D24) : const Color(0xFFF0F2F5),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(24),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   ),
                 ),
               ),
@@ -819,9 +840,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 child: Container(
                   height: 48,
                   width: 48,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.primary,
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      if (!_isSending && !isDark)
+                        BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 3)),
+                    ],
                   ),
                   child: _isSending
                       ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)))
@@ -869,6 +894,7 @@ class _EmptyChatState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -876,18 +902,29 @@ class _EmptyChatState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white).withOpacity(0.9),
+                color: isDark ? const Color(0xFF14171C) : Colors.white,
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: isDark ? Colors.white.withOpacity(0.08) : Colors.black12),
+                boxShadow: [
+                   BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.05), blurRadius: 16, offset: const Offset(0, 4)),
+                ]
               ),
-              child: Text(
-                'لا توجد رسائل بعد',
-                style: TextStyle(
-                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                   Icon(Icons.chat_bubble_outline_rounded, size: 20, color: isDark ? Colors.white54 : Colors.black54),
+                   const SizedBox(width: 10),
+                   Text(
+                    'لا توجد رسائل بعد',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
