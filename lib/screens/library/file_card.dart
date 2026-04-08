@@ -7,7 +7,11 @@ class FileCard extends StatefulWidget {
   final FileModel file;
   final VoidCallback? onTap;
 
-  const FileCard({super.key, required this.file, this.onTap});
+  const FileCard({
+    super.key,
+    required this.file,
+    this.onTap,
+  });
 
   @override
   State<FileCard> createState() => _FileCardState();
@@ -21,7 +25,7 @@ class _FileCardState extends State<FileCard> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final gold = const Color(0xFFD4AF37);
-    final double scale = _isPressed ? 0.97 : (_isHovering ? 1.01 : 1.0);
+    final scale = _isPressed ? 0.98 : (_isHovering ? 1.005 : 1.0);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -31,8 +35,8 @@ class _FileCardState extends State<FileCard> {
         onPointerUp: (_) => setState(() => _isPressed = false),
         onPointerCancel: (_) => setState(() => _isPressed = false),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCirc,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
           transform: Matrix4.identity()..scale(scale, scale),
           margin: const EdgeInsets.only(bottom: 14),
           child: Stack(
@@ -59,12 +63,6 @@ class _FileCardState extends State<FileCard> {
                         blurRadius: _isHovering ? 16 : 12,
                         offset: Offset(0, _isHovering ? 8 : 4),
                       ),
-                    if (_isPressed)
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
                   ],
                 ),
                 child: Material(
@@ -75,64 +73,67 @@ class _FileCardState extends State<FileCard> {
                     highlightColor: gold.withOpacity(0.05),
                     splashColor: gold.withOpacity(0.10),
                     child: Padding(
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const _ActionButton(),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 14),
                           Expanded(
                             child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   widget.file.title,
-                                  maxLines: 2,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 16.5,
+                                    fontSize: 15.8,
                                     fontWeight: FontWeight.w800,
                                     color: LibraryTheme.text(context),
-                                    height: 1.35,
-                                    letterSpacing: -0.15,
+                                    height: 1.2,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 6),
                                 Text(
                                   _buildSubtitle(),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 12.8,
                                     fontWeight: FontWeight.w600,
-                                    color:
-                                    isDark ? Colors.grey[400] : Colors.grey[600],
+                                    color: isDark
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
                                   ),
                                 ),
-                                const SizedBox(height: 14),
-                                Row(
+                                const SizedBox(height: 10),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 6,
                                   children: [
                                     _MetricChip(
-                                      icon: Icons.remove_red_eye_outlined,
-                                      value: widget.file.views,
+                                      icon: Icons.favorite_border_rounded,
+                                      value: widget.file.likes,
                                     ),
-                                    const SizedBox(width: 8),
                                     _MetricChip(
                                       icon: Icons.file_download_outlined,
                                       value: widget.file.downloads,
                                     ),
-                                    const SizedBox(width: 8),
                                     _MetricChip(
-                                      icon: Icons.favorite_border_rounded,
-                                      value: widget.file.likes,
+                                      icon: Icons.remove_red_eye_outlined,
+                                      value: widget.file.views,
                                     ),
                                   ],
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 14),
+                          const SizedBox(width: 12),
                           _buildBadge(context),
                         ],
                       ),
@@ -168,61 +169,64 @@ class _FileCardState extends State<FileCard> {
 
     if (author.isNotEmpty && college.isNotEmpty) {
       return '$author • $college';
-    } else if (author.isNotEmpty) {
+    }
+    if (author.isNotEmpty) {
       return author;
-    } else if (college.isNotEmpty) {
+    }
+    if (college.isNotEmpty) {
       return college;
     }
     return 'غير محدد';
   }
 
   Widget _buildBadge(BuildContext context) {
-    final String type = widget.file.fileType.toLowerCase();
-    final Color badgeColor = _getFileColor(type);
-    final IconData badgeIcon = _getFileIcon(type);
+    final type = widget.file.fileType.toLowerCase();
+    final color = _getFileColor(type);
+    final icon = _getFileIcon(type);
 
     if (widget.file.thumbnailUrl.trim().isNotEmpty) {
       return Container(
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.withOpacity(0.14)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
           ],
-          border: Border.all(color: Colors.grey.withOpacity(0.15)),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: Image.network(
             widget.file.thumbnailUrl,
-            width: 50,
-            height: 50,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
-                _fallbackBadge(badgeColor, badgeIcon, type),
+            errorBuilder: (_, __, ___) => _fallbackBadge(color, icon, type),
           ),
         ),
       );
     }
-    return _fallbackBadge(badgeColor, badgeIcon, type);
+
+    return _fallbackBadge(color, icon, type);
   }
 
   Widget _fallbackBadge(Color color, IconData icon, String type) {
-    final shortType =
-    type.toUpperCase().length > 4 ? type.substring(0, 3).toUpperCase() : type.toUpperCase();
+    final shortType = type.toUpperCase().length > 4
+        ? type.substring(0, 3).toUpperCase()
+        : type.toUpperCase();
 
     return Container(
-      width: 50,
-      height: 50,
+      width: 48,
+      height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.06),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: color.withOpacity(0.20),
           width: 1,
         ),
         boxShadow: [
@@ -236,15 +240,15 @@ class _FileCardState extends State<FileCard> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 2),
+          Icon(icon, color: color, size: 18),
+          const SizedBox(height: 1),
           Text(
             shortType.isEmpty ? 'FILE' : shortType,
             style: TextStyle(
-              fontSize: 9,
+              fontSize: 8.5,
               fontWeight: FontWeight.w800,
               color: color,
-              letterSpacing: 0.5,
+              letterSpacing: 0.3,
               height: 1,
             ),
           ),
@@ -300,7 +304,11 @@ class GridFileCard extends StatefulWidget {
   final FileModel file;
   final VoidCallback? onTap;
 
-  const GridFileCard({super.key, required this.file, this.onTap});
+  const GridFileCard({
+    super.key,
+    required this.file,
+    this.onTap,
+  });
 
   @override
   State<GridFileCard> createState() => _GridFileCardState();
@@ -314,7 +322,7 @@ class _GridFileCardState extends State<GridFileCard> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final gold = const Color(0xFFD4AF37);
-    final double scale = _isPressed ? 0.97 : (_isHovering ? 1.01 : 1.0);
+    final scale = _isPressed ? 0.98 : (_isHovering ? 1.005 : 1.0);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -324,8 +332,8 @@ class _GridFileCardState extends State<GridFileCard> {
         onPointerUp: (_) => setState(() => _isPressed = false),
         onPointerCancel: (_) => setState(() => _isPressed = false),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCirc,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
           transform: Matrix4.identity()..scale(scale, scale),
           margin: const EdgeInsets.only(bottom: 14),
           child: Stack(
@@ -352,12 +360,6 @@ class _GridFileCardState extends State<GridFileCard> {
                         blurRadius: _isHovering ? 16 : 12,
                         offset: Offset(0, _isHovering ? 8 : 4),
                       ),
-                    if (_isPressed)
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
                   ],
                 ),
                 child: Material(
@@ -368,15 +370,14 @@ class _GridFileCardState extends State<GridFileCard> {
                     highlightColor: gold.withOpacity(0.05),
                     splashColor: gold.withOpacity(0.10),
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _ActionButton(),
+                              const _ActionButton(compact: true),
+                              const Spacer(),
                               _buildBadge(context),
                             ],
                           ),
@@ -386,14 +387,13 @@ class _GridFileCardState extends State<GridFileCard> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 15.5,
+                              fontSize: 14.8,
                               fontWeight: FontWeight.w800,
                               color: LibraryTheme.text(context),
-                              height: 1.35,
-                              letterSpacing: -0.15,
+                              height: 1.25,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           Text(
                             widget.file.author.isNotEmpty
                                 ? widget.file.author
@@ -401,23 +401,25 @@ class _GridFileCardState extends State<GridFileCard> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: 12.3,
                               fontWeight: FontWeight.w600,
-                              color:
-                              isDark ? Colors.grey[400] : Colors.grey[600],
+                              color: isDark
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          Row(
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
                             children: [
-                              _MetricChip(
-                                icon: Icons.remove_red_eye_outlined,
-                                value: widget.file.views,
-                              ),
-                              const SizedBox(width: 8),
                               _MetricChip(
                                 icon: Icons.file_download_outlined,
                                 value: widget.file.downloads,
+                              ),
+                              _MetricChip(
+                                icon: Icons.remove_red_eye_outlined,
+                                value: widget.file.views,
                               ),
                             ],
                           ),
@@ -450,18 +452,20 @@ class _GridFileCardState extends State<GridFileCard> {
   }
 
   Widget _buildBadge(BuildContext context) {
-    final String type = widget.file.fileType.toLowerCase();
-    final Color badgeColor = _getFileColor(type);
-    final IconData badgeIcon = _getFileIcon(type);
+    final type = widget.file.fileType.toLowerCase();
+    final color = _getFileColor(type);
+    final icon = _getFileIcon(type);
 
     if (widget.file.thumbnailUrl.trim().isNotEmpty) {
       return Container(
+        width: 42,
+        height: 42,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey.withOpacity(0.15)),
+          border: Border.all(color: Colors.grey.withOpacity(0.14)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -471,40 +475,27 @@ class _GridFileCardState extends State<GridFileCard> {
           borderRadius: BorderRadius.circular(14),
           child: Image.network(
             widget.file.thumbnailUrl,
-            width: 44,
-            height: 44,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
-                _fallbackBadge(badgeColor, badgeIcon, type),
+            errorBuilder: (_, __, ___) => _fallbackBadge(color, icon),
           ),
         ),
       );
     }
-    return _fallbackBadge(badgeColor, badgeIcon, type);
+
+    return _fallbackBadge(color, icon);
   }
 
-  Widget _fallbackBadge(Color color, IconData icon, String type) {
+  Widget _fallbackBadge(Color color, IconData icon) {
     return Container(
-      width: 44,
-      height: 44,
-      padding: const EdgeInsets.all(4),
+      width: 42,
+      height: 42,
       decoration: BoxDecoration(
         color: color.withOpacity(0.06),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: color.withOpacity(0.20)),
       ),
       child: Center(
-        child: Icon(icon, color: color, size: 18),
+        child: Icon(icon, color: color, size: 17),
       ),
     );
   }
@@ -553,7 +544,9 @@ class _GridFileCardState extends State<GridFileCard> {
 }
 
 class _ActionButton extends StatefulWidget {
-  const _ActionButton();
+  final bool compact;
+
+  const _ActionButton({this.compact = false});
 
   @override
   State<_ActionButton> createState() => _ActionButtonState();
@@ -565,6 +558,11 @@ class _ActionButtonState extends State<_ActionButton> {
 
   @override
   Widget build(BuildContext context) {
+    final horizontal = widget.compact ? 12.0 : 14.0;
+    final vertical = widget.compact ? 8.0 : 10.0;
+    final fontSize = widget.compact ? 12.0 : 13.0;
+    final iconSize = widget.compact ? 15.0 : 16.0;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
@@ -573,11 +571,14 @@ class _ActionButtonState extends State<_ActionButton> {
         onPointerUp: (_) => setState(() => _isPressed = false),
         onPointerCancel: (_) => setState(() => _isPressed = false),
         child: AnimatedScale(
-          scale: _isPressed ? 0.94 : (_isHovering ? 1.03 : 1.0),
-          duration: const Duration(milliseconds: 150),
+          scale: _isPressed ? 0.96 : (_isHovering ? 1.02 : 1.0),
+          duration: const Duration(milliseconds: 140),
           curve: Curves.easeOutCubic,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontal,
+              vertical: vertical,
+            ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [
@@ -591,29 +592,29 @@ class _ActionButtonState extends State<_ActionButton> {
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFFD4AF37)
-                      .withOpacity(_isHovering ? 0.45 : 0.28),
+                      .withOpacity(_isHovering ? 0.40 : 0.24),
                   blurRadius: _isHovering ? 14 : 10,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'فتح',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
-                    letterSpacing: 0.3,
+                    letterSpacing: 0.2,
                   ),
                 ),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Icon(
                   Icons.arrow_back_rounded,
                   color: Colors.white,
-                  size: 16,
+                  size: iconSize,
                 ),
               ],
             ),
@@ -638,7 +639,7 @@ class _MetricChip extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
@@ -654,15 +655,15 @@ class _MetricChip extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 15,
+            size: 14.5,
             color: isDark ? Colors.grey[400] : Colors.grey[700],
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 5),
           Text(
             '$value',
             style: TextStyle(
               color: isDark ? Colors.grey[300] : Colors.grey[800],
-              fontSize: 12.5,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               height: 1.1,
             ),
