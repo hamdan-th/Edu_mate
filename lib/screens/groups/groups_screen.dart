@@ -239,7 +239,7 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
               )
             : Text(
                 "المجتمعات", 
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1.2)
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, fontSize: 22, letterSpacing: 0.5)
               ),
         actions: [
           IconButton(
@@ -476,9 +476,9 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.35),
-                blurRadius: 20,
-                offset: const Offset(0, 8), // Soft float effect
+                color: (Theme.of(context).brightness == Brightness.dark ? Colors.black.withOpacity(0.25) : AppColors.textPrimary.withOpacity(0.05)),
+                blurRadius: 24,
+                offset: const Offset(0, 8), 
               ),
             ],
           ),
@@ -498,8 +498,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.2), // gentle inner glow spread
-                            blurRadius: 10,
+                            color: AppColors.primary.withOpacity(0.3),
+                            blurRadius: 15,
                             offset: const Offset(0, 4),
                           ),
                         ],
@@ -545,10 +545,10 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                                 child: Text(
                                   widget.group.name,
                                   style: TextStyle(
-                                    fontSize: 17, 
-                                    fontWeight: FontWeight.w900, 
+                                    fontSize: 18, 
+                                    fontWeight: FontWeight.w800, 
                                     color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87), 
-                                    letterSpacing: 0.3
+                                    letterSpacing: 0.2
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -596,18 +596,18 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           
                           // Metadata sub-line
                           if (widget.isDiscover)
                             Row(
                               children: [
                                 Icon(Icons.school_rounded, size: 14, color: AppColors.primary.withOpacity(0.8)),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     "${widget.group.collegeName} • ${widget.group.specializationName}",
-                                    style: TextStyle(fontSize: 12, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7), fontWeight: FontWeight.w600),
+                                    style: TextStyle(fontSize: 12.5, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.8), fontWeight: FontWeight.w600),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -617,7 +617,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                           else
                             Text(
                               widget.group.description.isNotEmpty ? widget.group.description : widget.group.specializationName,
-                              style: TextStyle(fontSize: 13, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.6), fontWeight: FontWeight.w500, height: 1.4),
+                              style: TextStyle(fontSize: 13.5, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7), fontWeight: FontWeight.w500, height: 1.4),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -628,10 +628,10 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                 ),
                 
                 if (widget.isDiscover && widget.group.description.isNotEmpty) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   Text(
                     widget.group.description,
-                    style: TextStyle(fontSize: 13, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.6), height: 1.5, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 14, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7), height: 1.5, fontWeight: FontWeight.w500),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

@@ -50,9 +50,9 @@ class MessageBubble extends StatelessWidget {
           );
         },
         child: Align(
-          alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
+          alignment: isUser ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
           child: Column(
-            crossAxisAlignment: isUser ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+            crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -83,22 +83,25 @@ class MessageBubble extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
-                        color: isUser ? AppColors.primary : AppColors.surface,
+                        color: isUser ? null : AppColors.surface,
+                        gradient: isUser 
+                             ? const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFFFD700)], begin: Alignment.topLeft, end: Alignment.bottomRight) 
+                             : null,
                         borderRadius: BorderRadius.only(
                           topLeft: const Radius.circular(20),
                           topRight: const Radius.circular(20),
-                          bottomLeft: Radius.circular(isUser ? 4 : 20),
-                          bottomRight: Radius.circular(isUser ? 20 : 4),
+                          bottomLeft: Radius.circular(isUser ? 20 : 4),
+                          bottomRight: Radius.circular(isUser ? 4 : 20),
                         ),
                         border: isUser 
                            ? null 
-                           : Border.all(color: AppColors.border.withOpacity(0.4)),
+                           : Border.all(color: AppColors.border.withOpacity(0.3)),
                         boxShadow: [
                           if (isUser)
                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.2),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
+                                color: const Color(0xFFD4AF37).withOpacity(0.2),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
                              )
                           else
                              BoxShadow(

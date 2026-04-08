@@ -841,11 +841,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   height: 48,
                   width: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    gradient: const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFFFD700)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                     shape: BoxShape.circle,
                     boxShadow: [
-                      if (!_isSending && !isDark)
-                        BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 3)),
+                      if (!_isSending)
+                        BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
                     ],
                   ),
                   child: _isSending

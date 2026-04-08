@@ -56,12 +56,12 @@ class _MessageInputState extends State<MessageInput> {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: AppColors.border.withOpacity(0.5)),
+            border: Border.all(color: AppColors.border.withOpacity(0.3)),
             boxShadow: [
                BoxShadow(
-                 color: AppColors.textPrimary.withOpacity(0.03),
-                 blurRadius: 10,
-                 offset: const Offset(0, 2),
+                 color: AppColors.textPrimary.withOpacity(0.05),
+                 blurRadius: 15,
+                 offset: const Offset(0, 4),
                )
             ],
           ),
@@ -94,7 +94,7 @@ class _MessageInputState extends State<MessageInput> {
                   height: 44,
                   decoration: BoxDecoration(
                     gradient: (hasText && !widget.isSending)
-                      ? const LinearGradient(colors: [AppColors.primary, AppColors.blueGlow], begin: Alignment.topLeft, end: Alignment.bottomRight)
+                      ? const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFFFD700)], begin: Alignment.topLeft, end: Alignment.bottomRight)
                       : null,
                     color: (hasText && !widget.isSending) ? null : AppColors.surface,
                     shape: BoxShape.circle,

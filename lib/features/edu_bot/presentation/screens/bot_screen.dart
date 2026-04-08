@@ -65,18 +65,43 @@ class _BotScreenState extends State<BotScreen> {
         elevation: 0,
         centerTitle: true,
         leading: const BackButton(color: AppColors.textPrimary),
-        title: const Row(
+        title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.auto_awesome_rounded, color: AppColors.primary, size: 20),
-            SizedBox(width: 8),
-            Text(
-              'Edu Bot',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFFFD700)]),
+                boxShadow: [
+                  BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 2)),
+                ],
               ),
+              child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 16),
+            ),
+            const SizedBox(width: 12),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Edu Bot',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                Text(
+                  'مساعد الذكاء الاصطناعي',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

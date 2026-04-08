@@ -1,10 +1,32 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class EmptyState extends StatelessWidget {
+class EmptyState extends StatefulWidget {
   final Function(String) onSuggestionTap;
 
   const EmptyState({super.key, required this.onSuggestionTap});
+
+  @override
+  State<EmptyState> createState() => _EmptyStateState();
+}
+
+class _EmptyStateState extends State<EmptyState> with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+       vsync: this,
+       duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   Widget _buildCategoryBox(String title, IconData icon, List<String> suggestions) {
     return Container(
@@ -56,14 +78,17 @@ class EmptyState extends StatelessWidget {
 
   Widget _buildSuggestionChip(String label) {
     return GestureDetector(
-      onTap: () => onSuggestionTap(label),
+      onTap: () => widget.onSuggestionTap(label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.background,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border.withOpacity(0.7)),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.border.withOpacity(0.3)),
+          boxShadow: [
+             BoxShadow(color: AppColors.textPrimary.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+          ]
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -72,12 +97,12 @@ class EmptyState extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: AppColors.textPrimary,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w500,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.arrow_back_ios_rounded, size: 10, color: AppColors.textSecondary.withOpacity(0.5)),
+            Icon(Icons.arrow_upward_rounded, size: 14, color: AppColors.primary.withOpacity(0.8)),
           ],
         ),
       ),
@@ -107,47 +132,53 @@ class EmptyState extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.blueGlow],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(Icons.auto_awesome_rounded, size: 40, color: Colors.white),
+                AnimatedBuilder(
+                  animation: _pulseController,
+                  builder: (context, child) {
+                     return Container(
+                       padding: const EdgeInsets.all(28),
+                       decoration: BoxDecoration(
+                         gradient: const LinearGradient(
+                           colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
+                           begin: Alignment.topLeft,
+                           end: Alignment.bottomRight,
+                         ),
+                         shape: BoxShape.circle,
+                         boxShadow: [
+                           BoxShadow(
+                             color: const Color(0xFFD4AF37).withOpacity(0.3 + (_pulseController.value * 0.3)),
+                             blurRadius: 30 + (_pulseController.value * 20),
+                             spreadRadius: _pulseController.value * 8,
+                             offset: const Offset(0, 10),
+                           ),
+                         ],
+                       ),
+                       child: const Icon(Icons.auto_awesome_rounded, size: 50, color: Colors.white),
+                     );
+                  }
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 36),
                 const Text(
                   'مرحباً بك في Edu Bot',
                   style: TextStyle(
                     color: AppColors.textPrimary,
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 12),
-                const Text(
+                const SizedBox(height: 14),
+                Text(
                   'أنا مساعدك الذكي المعزز بالذكاء الاصطناعي.\nاطرح أي سؤال حول دراستك أو التطبيق وسأساعدك فوراً.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 15,
+                    color: AppColors.textSecondary.withOpacity(0.7),
+                    fontSize: 15.5,
                     height: 1.6,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 54),
                 _buildCategoryBox('شروحات سريعة', Icons.lightbulb_outline_rounded, [
                   'كيف أستفيد من مجموعات التطبيق؟',
                   'اشرح لي كيفية نشر ملف جديد',
