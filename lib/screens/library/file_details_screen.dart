@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/theme/app_colors.dart';
 import 'library_local_download_service.dart';
 import 'file_model.dart';
 import 'library_files_service.dart';
@@ -22,12 +23,27 @@ class FileDetailsScreen extends StatefulWidget {
 class _FileDetailsScreenState extends State<FileDetailsScreen> {
   bool _viewRegistered = false;
 
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
+  Color get _bg => _isDark ? const Color(0xFF0B0D12) : const Color(0xFFF7F9FC);
+  Color get _surface => _isDark ? const Color(0xFF171C25) : Colors.white;
+  Color get _surfaceSoft =>
+      _isDark ? const Color(0xFF10141C) : const Color(0xFFF8FAFD);
+  Color get _text => _isDark ? AppColors.textPrimary : Colors.black87;
+  Color get _muted => _isDark ? AppColors.textSecondary : Colors.black54;
+  Color get _border =>
+      _isDark ? Colors.white.withOpacity(0.07) : Colors.black12;
+  Color get _heroPink =>
+      _isDark ? const Color(0xFF2A1E24) : const Color(0xFFF8DDE1);
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_viewRegistered) {
       _viewRegistered = true;
-      LibraryReactionsService.registerViewOnce(widget.file.id);    }}
+      LibraryReactionsService.registerViewOnce(widget.file.id);
+    }
+  }
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'غير محدد';
@@ -77,9 +93,11 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
       builder: (context) {
         return Container(
           padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          decoration: BoxDecoration(
+            color: _surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(28),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -88,7 +106,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 width: 42,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: LibraryTheme.border(context),
+                  color: _border,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -112,7 +130,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: LibraryTheme.text(context),
+                  color: _text,
                 ),
               ),
               const SizedBox(height: 8),
@@ -121,7 +139,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.2,
-                  color: LibraryTheme.muted(context),
+                  color: _muted,
                   height: 1.5,
                 ),
               ),
@@ -271,7 +289,8 @@ $url
 
     final initialMajors = selectedCollege == null
         ? <String>[]
-        : (UniversityAcademicData.majorsByCollege[selectedCollege] ?? <String>[])
+        : (UniversityAcademicData.majorsByCollege[selectedCollege] ??
+        <String>[])
         .toSet()
         .toList();
 
@@ -314,9 +333,11 @@ $url
               ),
               child: Container(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 22),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFDFEFF),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                decoration: BoxDecoration(
+                  color: _surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(30),
+                  ),
                 ),
                 child: SingleChildScrollView(
                   child: Column(
@@ -326,18 +347,19 @@ $url
                         width: 42,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: LibraryTheme.border(context),
+                          color: _border,
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Row(
+                      Row(
                         children: [
                           Text(
                             'تعديل الملف',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
+                              color: _text,
                             ),
                           ),
                         ],
@@ -347,12 +369,20 @@ $url
                         controller: subjectController,
                         label: 'اسم المادة / العنوان',
                         icon: Icons.menu_book_rounded,
+                        isDark: _isDark,
+                        textColor: _text,
+                        borderColor: _border,
+                        fillColor: _surfaceSoft,
                       ),
                       const SizedBox(height: 12),
                       _ModernField(
                         controller: doctorController,
                         label: 'اسم الدكتور',
                         icon: Icons.person_rounded,
+                        isDark: _isDark,
+                        textColor: _text,
+                        borderColor: _border,
+                        fillColor: _surfaceSoft,
                       ),
                       const SizedBox(height: 12),
                       _ModernField(
@@ -360,6 +390,10 @@ $url
                         label: 'الوصف',
                         icon: Icons.notes_rounded,
                         maxLines: 4,
+                        isDark: _isDark,
+                        textColor: _text,
+                        borderColor: _border,
+                        fillColor: _surfaceSoft,
                       ),
                       const SizedBox(height: 12),
                       _DropdownField(
@@ -367,6 +401,9 @@ $url
                         hint: 'الكلية',
                         icon: Icons.account_balance_rounded,
                         items: UniversityAcademicData.colleges,
+                        textColor: _text,
+                        borderColor: _border,
+                        fillColor: _surfaceSoft,
                         onChanged: (value) => setModalState(() {
                           selectedCollege = value;
                           selectedSpecialization = null;
@@ -378,6 +415,9 @@ $url
                         hint: 'التخصص',
                         icon: Icons.auto_awesome_mosaic_rounded,
                         items: majors,
+                        textColor: _text,
+                        borderColor: _border,
+                        fillColor: _surfaceSoft,
                         onChanged: (value) => setModalState(() {
                           selectedSpecialization = value;
                         }),
@@ -388,6 +428,9 @@ $url
                         hint: 'المستوى',
                         icon: Icons.layers_rounded,
                         items: UniversityAcademicData.levels,
+                        textColor: _text,
+                        borderColor: _border,
+                        fillColor: _surfaceSoft,
                         onChanged: (value) => setModalState(() {
                           selectedLevel = value;
                         }),
@@ -398,6 +441,9 @@ $url
                         hint: 'الترم',
                         icon: Icons.calendar_month_rounded,
                         items: UniversityAcademicData.terms,
+                        textColor: _text,
+                        borderColor: _border,
+                        fillColor: _surfaceSoft,
                         onChanged: (value) => setModalState(() {
                           selectedTerm = value;
                         }),
@@ -489,12 +535,22 @@ $url
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('حذف الملف'),
-        content: const Text('هل أنت متأكد؟'),
+        backgroundColor: _surface,
+        title: Text(
+          'حذف الملف',
+          style: TextStyle(color: _text),
+        ),
+        content: Text(
+          'هل أنت متأكد؟',
+          style: TextStyle(color: _muted),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('إلغاء'),
+            child: Text(
+              'إلغاء',
+              style: TextStyle(color: _muted),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -528,7 +584,9 @@ $url
     if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        SnackBar(content: Text(message)),
+      );
   }
 
   Widget _buildInfoTile({
@@ -540,28 +598,35 @@ $url
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFD),
+        color: _surfaceSoft,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+        border: Border.all(
+          color: _border,
+          width: 0.6,
+        ),
       ),
       child: Row(
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: LibraryTheme.primary(context).withOpacity(0.08),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, size: 16, color: LibraryTheme.primary(context)),
+            child: Icon(
+              icon,
+              size: 16,
+              color: LibraryTheme.primary(context),
+            ),
           ),
           const SizedBox(width: 10),
           Text(
             label,
             style: TextStyle(
               fontSize: 13.2,
-              fontWeight: FontWeight.w700,
-              color: LibraryTheme.text(context),
+              fontWeight: FontWeight.w800,
+              color: _text,
             ),
           ),
           const Spacer(),
@@ -573,7 +638,7 @@ $url
               maxLines: 2,
               style: TextStyle(
                 fontSize: 13.2,
-                color: LibraryTheme.text(context).withOpacity(0.78),
+                color: _muted,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -583,31 +648,39 @@ $url
     );
   }
 
-  Widget _statItem(IconData icon, String label, int count, {Color? color}) {
+  Widget _statItem(
+      IconData icon,
+      String label,
+      int count, {
+        Color? color,
+      }) {
     final effectiveColor = color ?? LibraryTheme.primary(context);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: effectiveColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(14),
+        color: _surfaceSoft,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _border),
       ),
       child: Column(
         children: [
-          Icon(icon, color: effectiveColor, size: 16),
-          const SizedBox(height: 4),
+          Icon(icon, color: effectiveColor, size: 18),
+          const SizedBox(height: 6),
           Text(
             '$count',
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 14,
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 15,
+              color: _text,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
-              color: LibraryTheme.muted(context),
+              fontSize: 11.2,
+              color: _muted,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -615,12 +688,64 @@ $url
     );
   }
 
+  Widget _actionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required bool filled,
+  }) {
+    final primary = LibraryTheme.primary(context);
+
+    if (filled) {
+      return Expanded(
+        child: ElevatedButton.icon(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primary,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+          ),
+          icon: Icon(icon, size: 18),
+          label: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+      );
+    }
+
+    return Expanded(
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primary,
+          side: BorderSide(color: primary),
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+        icon: Icon(icon, size: 18),
+        label: Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    final isOwner = currentUserId != null && currentUserId == widget.file.userId;
-    final fileColor =
-    widget.file.isPdf ? LibraryTheme.danger(context) : LibraryTheme.primary(context);
+    final isOwner =
+        currentUserId != null && currentUserId == widget.file.userId;
+    final fileColor = widget.file.isPdf
+        ? LibraryTheme.danger(context)
+        : LibraryTheme.primary(context);
 
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
@@ -647,7 +772,7 @@ $url
         );
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF7F9FC),
+          backgroundColor: _bg,
           body: Stack(
             children: [
               Positioned(
@@ -658,7 +783,7 @@ $url
                   height: 220,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: fileColor.withOpacity(0.06),
+                    color: fileColor.withOpacity(_isDark ? 0.05 : 0.06),
                   ),
                 ),
               ),
@@ -673,18 +798,27 @@ $url
                           _CircleAction(
                             icon: Icons.arrow_back_rounded,
                             onTap: () => Navigator.pop(context),
+                            backgroundColor: _surface,
+                            borderColor: _border,
+                            iconColor: _text,
                           ),
                           const Spacer(),
                           if (isOwner) ...[
                             _CircleAction(
                               icon: Icons.edit_rounded,
                               onTap: _showEditSheet,
+                              backgroundColor: _surface,
+                              borderColor: _border,
+                              iconColor: _text,
                             ),
                             const SizedBox(width: 8),
                             _CircleAction(
                               icon: Icons.delete_outline_rounded,
                               color: LibraryTheme.danger(context),
                               onTap: _confirmDelete,
+                              backgroundColor: _surface,
+                              borderColor: _border,
+                              iconColor: LibraryTheme.danger(context),
                             ),
                           ],
                         ],
@@ -692,22 +826,19 @@ $url
                       const SizedBox(height: 16),
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white,
-                              fileColor.withOpacity(0.05),
-                            ],
-                            begin: AlignmentDirectional.topStart,
-                            end: AlignmentDirectional.bottomEnd,
+                          color: _heroPink,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: _border,
+                            width: 0.6,
                           ),
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
-                              blurRadius: 10,
+                              color: Colors.black
+                                  .withOpacity(_isDark ? 0.14 : 0.03),
+                              blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),
                           ],
@@ -716,10 +847,11 @@ $url
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  width: 44,
-                                  height: 44,
+                                  width: 52,
+                                  height: 52,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
@@ -727,14 +859,14 @@ $url
                                         fileColor.withOpacity(0.08),
                                       ],
                                     ),
-                                    borderRadius: BorderRadius.circular(14),
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Icon(
                                     updatedFile.isPdf
                                         ? Icons.picture_as_pdf_rounded
                                         : Icons.description_rounded,
                                     color: fileColor,
-                                    size: 22,
+                                    size: 26,
                                   ),
                                 ),
                                 const SizedBox(width: 14),
@@ -758,18 +890,18 @@ $url
                                           style: TextStyle(
                                             color: fileColor,
                                             fontSize: 11.5,
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w800,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 10),
                                       Text(
                                         updatedFile.title,
                                         style: TextStyle(
-                                          fontSize: 18,
-                                          height: 1.3,
-                                          fontWeight: FontWeight.w800,
-                                          color: LibraryTheme.text(context),
+                                          fontSize: 20,
+                                          height: 1.35,
+                                          fontWeight: FontWeight.w900,
+                                          color: _text,
                                         ),
                                       ),
                                     ],
@@ -782,8 +914,8 @@ $url
                               'د. ${updatedFile.author}',
                               style: TextStyle(
                                 fontSize: 14.5,
-                                color: LibraryTheme.muted(context),
-                                fontWeight: FontWeight.w600,
+                                color: _muted,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -791,7 +923,8 @@ $url
                               'رفعه: ${updatedFile.displayUploader}',
                               style: TextStyle(
                                 fontSize: 12.8,
-                                color: LibraryTheme.muted(context),
+                                color: _muted,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -855,6 +988,10 @@ $url
                                       _snack('تعذر تنفيذ الإعجاب: $e');
                                     }
                                   },
+                                  isDark: _isDark,
+                                  surfaceColor: _surface,
+                                  borderColor: _border,
+                                  mutedColor: _muted,
                                 ),
                               );
                             },
@@ -884,6 +1021,10 @@ $url
                                       _snack('تعذر تنفيذ الحفظ: $e');
                                     }
                                   },
+                                  isDark: _isDark,
+                                  surfaceColor: _surface,
+                                  borderColor: _border,
+                                  mutedColor: _muted,
                                 ),
                               );
                             },
@@ -896,6 +1037,10 @@ $url
                               count: updatedFile.shares,
                               active: false,
                               onTap: _shareFileExternally,
+                              isDark: _isDark,
+                              surfaceColor: _surface,
+                              borderColor: _border,
+                              mutedColor: _muted,
                             ),
                           ),
                         ],
@@ -903,37 +1048,18 @@ $url
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => _openFile(updatedFile.fileUrl),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: LibraryTheme.primary(context),
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                              ),
-                              icon: const Icon(Icons.visibility_rounded, size: 18),
-                              label: const Text('فتح الملف'),
-                            ),
+                          _actionButton(
+                            icon: Icons.visibility_rounded,
+                            label: 'فتح الملف',
+                            onTap: () => _openFile(updatedFile.fileUrl),
+                            filled: true,
                           ),
                           const SizedBox(width: 10),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () => _downloadFile(updatedFile.fileUrl),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: LibraryTheme.primary(context),
-                                side: BorderSide(color: LibraryTheme.primary(context)),
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                              ),
-                              icon: const Icon(Icons.download_rounded, size: 18),
-                              label: const Text('تنزيل'),
-                            ),
+                          _actionButton(
+                            icon: Icons.download_rounded,
+                            label: 'تنزيل',
+                            onTap: () => _downloadFile(updatedFile.fileUrl),
+                            filled: false,
                           ),
                         ],
                       ),
@@ -943,27 +1069,42 @@ $url
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                            color: _surface,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: _border,
+                              width: 0.6,
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'الوصف',
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
-                                ),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.notes_rounded,
+                                    color: LibraryTheme.primary(context),
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'الوصف',
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      color: _text,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 12),
                               Text(
                                 updatedFile.description,
                                 style: TextStyle(
                                   fontSize: 14.2,
-                                  color: LibraryTheme.text(context).withOpacity(0.82),
+                                  color: _muted,
                                   height: 1.7,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -974,19 +1115,33 @@ $url
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                          color: _surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _border,
+                            width: 0.6,
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'معلومات الملف',
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w800,
-                              ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 18,
+                                  color: _text,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'معلومات الملف',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    color: _text,
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 12),
                             _buildInfoTile(
@@ -1056,11 +1211,17 @@ class _CircleAction extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final Color? color;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color iconColor;
 
   const _CircleAction({
     required this.icon,
     required this.onTap,
     this.color,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.iconColor,
   });
 
   @override
@@ -1072,11 +1233,18 @@ class _CircleAction extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+          border: Border.all(
+            color: borderColor,
+            width: 0.6,
+          ),
         ),
-        child: Icon(icon, size: 20, color: color ?? LibraryTheme.text(context)),
+        child: Icon(
+          icon,
+          size: 20,
+          color: color ?? iconColor,
+        ),
       ),
     );
   }
@@ -1088,6 +1256,10 @@ class _ReactionButton extends StatelessWidget {
   final int count;
   final bool active;
   final VoidCallback onTap;
+  final bool isDark;
+  final Color surfaceColor;
+  final Color borderColor;
+  final Color mutedColor;
 
   const _ReactionButton({
     required this.icon,
@@ -1095,11 +1267,16 @@ class _ReactionButton extends StatelessWidget {
     required this.count,
     required this.active,
     required this.onTap,
+    required this.isDark,
+    required this.surfaceColor,
+    required this.borderColor,
+    required this.mutedColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? LibraryTheme.primary(context) : LibraryTheme.muted(context);
+    final color =
+    active ? LibraryTheme.primary(context) : mutedColor;
 
     return InkWell(
       onTap: onTap,
@@ -1108,13 +1285,14 @@ class _ReactionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: active
-              ? LibraryTheme.primary(context).withOpacity(0.08)
-              : Colors.white,
+              ? LibraryTheme.primary(context)
+              .withOpacity(isDark ? 0.16 : 0.08)
+              : surfaceColor,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: active
-                ? LibraryTheme.primary(context).withOpacity(0.18)
-                : LibraryTheme.border(context),
+                ? LibraryTheme.primary(context).withOpacity(0.25)
+                : borderColor,
           ),
         ),
         child: Column(
@@ -1133,7 +1311,7 @@ class _ReactionButton extends StatelessWidget {
             Text(
               '$count',
               style: TextStyle(
-                color: LibraryTheme.muted(context),
+                color: mutedColor,
                 fontSize: 11.5,
               ),
             ),
@@ -1149,12 +1327,20 @@ class _ModernField extends StatelessWidget {
   final String label;
   final IconData icon;
   final int maxLines;
+  final bool isDark;
+  final Color textColor;
+  final Color borderColor;
+  final Color fillColor;
 
   const _ModernField({
     required this.controller,
     required this.label,
     required this.icon,
     this.maxLines = 1,
+    required this.isDark,
+    required this.textColor,
+    required this.borderColor,
+    required this.fillColor,
   });
 
   @override
@@ -1162,18 +1348,22 @@ class _ModernField extends StatelessWidget {
     return TextField(
       controller: controller,
       maxLines: maxLines,
+      style: TextStyle(color: textColor),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(
+          color: isDark ? AppColors.textSecondary : Colors.black54,
+        ),
         prefixIcon: Icon(icon, size: 18),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: borderColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
@@ -1186,12 +1376,16 @@ class _ModernField extends StatelessWidget {
     );
   }
 }
+
 class _DropdownField extends StatelessWidget {
   final String? value;
   final String hint;
   final IconData icon;
   final List<String> items;
   final ValueChanged<String?> onChanged;
+  final Color textColor;
+  final Color borderColor;
+  final Color fillColor;
 
   const _DropdownField({
     required this.value,
@@ -1199,6 +1393,9 @@ class _DropdownField extends StatelessWidget {
     required this.icon,
     required this.items,
     required this.onChanged,
+    required this.textColor,
+    required this.borderColor,
+    required this.fillColor,
   });
 
   @override
@@ -1211,18 +1408,28 @@ class _DropdownField extends StatelessWidget {
       initialValue: safeValue,
       isExpanded: true,
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
+      style: TextStyle(color: textColor),
+      dropdownColor:
+      Theme.of(context).brightness == Brightness.dark
+          ? const Color(0xFF171C25)
+          : Colors.white,
       decoration: InputDecoration(
         labelText: hint,
+        labelStyle: TextStyle(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.textSecondary
+              : Colors.black54,
+        ),
         prefixIcon: Icon(icon, size: 18),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: LibraryTheme.border(context)),
+          borderSide: BorderSide(color: borderColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),

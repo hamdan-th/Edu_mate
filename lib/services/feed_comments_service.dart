@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/feed_comment_model.dart';
 import '../models/feed_comment_reply_model.dart';
-
+import 'notifications_service.dart';
 class FeedCommentsService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -28,7 +28,6 @@ class FeedCommentsService {
     final user = _auth.currentUser;
     if (user == null || postId.isEmpty || text.trim().isEmpty) return;
 
-    // Fetch user name as a fallback gracefully
     String authorName = 'مستخدم';
     try {
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
@@ -40,6 +39,11 @@ class FeedCommentsService {
 
     final postRef = _firestore.collection('posts').doc(postId);
     final commentRef = postRef.collection('comments').doc();
+
+    final postSnapshot = await postRef.get();
+    final postData = postSnapshot.data();
+
+    final postAuthorId = (postData?['authorId'] ?? '').toString();
 
     final batch = _firestore.batch();
 
@@ -54,6 +58,17 @@ class FeedCommentsService {
     batch.update(postRef, {'commentsCount': FieldValue.increment(1)});
 
     await batch.commit();
+
+    if (postAuthorId.isNotEmpty && postAuthorId != user.uid) {
+      await NotificationsService.createNotification(
+        userId: postAuthorId,
+        title: 'تعليق جديد على منشورك',
+        body: '$authorName علّق على منشورك',
+        type: 'general',
+        senderId: user.uid,
+        postId: postId,
+      );
+    }
   }
 
   static Stream<List<FeedCommentReplyModel>> streamReplies({
@@ -74,7 +89,6 @@ class FeedCommentsService {
           .toList();
     });
   }
-
   static Future<void> addReply({
     required String postId,
     required String commentId,
@@ -99,7 +113,7 @@ class FeedCommentsService {
         .doc(postId)
         .collection('comments')
         .doc(commentId);
-        
+
     final replyRef = commentRef.collection('replies').doc();
 
     final data = <String, dynamic>{
@@ -114,6 +128,19 @@ class FeedCommentsService {
     if (replyToUserName != null) data['replyToUserName'] = replyToUserName;
 
     await replyRef.set(data);
+
+    if (replyToUserId != null &&
+        replyToUserId.isNotEmpty &&
+        replyToUserId != user.uid) {
+      await NotificationsService.createNotification(
+        userId: replyToUserId,
+        title: 'رد جديد على تعليقك',
+        body: '$authorName رد على تعليقك',
+        type: 'general',
+        senderId: user.uid,
+        postId: postId,
+      );
+    }
   }
 
   static Future<void> editComment({

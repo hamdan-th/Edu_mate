@@ -1,12 +1,19 @@
 import 'dart:io';
-
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 class LibraryLocalDownloadService {
   static final Dio _dio = Dio();
-  static Box get _box => Hive.box('downloads_box');
+  static const String _boxName = 'downloads_box';
+
+  static Future<Box> _getBox() async {
+    if (!Hive.isBoxOpen(_boxName)) {
+      return await Hive.openBox(_boxName);
+    }
+    return Hive.box(_boxName);
+  }
 
   static Future<String> _downloadsFolderPath() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -29,6 +36,7 @@ class LibraryLocalDownloadService {
     required String course,
     required String author,
   }) async {
+    final box = await _getBox();
     final folderPath = await _downloadsFolderPath();
 
     String extension = fileType.toLowerCase().trim();
@@ -47,7 +55,7 @@ class LibraryLocalDownloadService {
 
     await _dio.download(fileUrl, savePath);
 
-    await _box.put(fileId, {
+    await box.put(fileId, {
       'fileId': fileId,
       'title': title,
       'fileUrl': fileUrl,
@@ -60,7 +68,9 @@ class LibraryLocalDownloadService {
   }
 
   static Future<List<Map<String, dynamic>>> getDownloadedFiles() async {
-    return _box.values
+    final box = await _getBox();
+
+    return box.values
         .map((e) => Map<String, dynamic>.from(e as Map))
         .toList()
       ..sort(
@@ -71,7 +81,9 @@ class LibraryLocalDownloadService {
   }
 
   static Future<void> removeDownloadedFile(String fileId) async {
-    final item = _box.get(fileId);
+    final box = await _getBox();
+
+    final item = box.get(fileId);
     if (item != null) {
       final map = Map<String, dynamic>.from(item as Map);
       final localPath = map['localPath']?.toString();
@@ -82,15 +94,18 @@ class LibraryLocalDownloadService {
         }
       }
     }
-    await _box.delete(fileId);
+    await box.delete(fileId);
   }
 
-  static bool isDownloaded(String fileId) {
-    return _box.containsKey(fileId);
+  static Future<bool> isDownloaded(String fileId) async {
+    final box = await _getBox();
+    return box.containsKey(fileId);
   }
 
-  static String? getLocalPath(String fileId) {
-    final item = _box.get(fileId);
+  static Future<String?> getLocalPath(String fileId) async {
+    final box = await _getBox();
+
+    final item = box.get(fileId);
     if (item == null) return null;
     final map = Map<String, dynamic>.from(item as Map);
     return map['localPath']?.toString();

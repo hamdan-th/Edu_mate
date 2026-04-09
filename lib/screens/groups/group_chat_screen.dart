@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/gestures.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
 import 'group_details_screen.dart';
 import 'invite_group_screen.dart';
-import 'package:flutter/gestures.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final GroupModel group;
@@ -47,17 +47,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   final Map<String, Map<String, dynamic>> _userCache = {};
   Map<String, dynamic>? _replyMessage;
 
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+  Color get _bg => _isDark ? const Color(0xFF0B0D12) : const Color(0xFFF4F5F7);
+  Color get _headerBg => _isDark ? const Color(0xFF121722) : Colors.white;
+  Color get _surface => _isDark ? const Color(0xFF171C25) : Colors.white;
+  Color get _soft => _isDark ? const Color(0xFF10141C) : const Color(0xFFF2F4F7);
+  Color get _text => _isDark ? AppColors.textPrimary : Colors.black87;
+  Color get _muted => _isDark ? AppColors.textSecondary : Colors.black54;
+  Color get _border => _isDark ? Colors.white.withOpacity(0.07) : Colors.black12;
+
   Future<void> _fetchUserIfNeeded(String userId) async {
     if (userId.isEmpty || _userCache.containsKey(userId)) return;
-    _userCache[userId] = {}; // Optimistic lock to prevent infinite re-fetches
+    _userCache[userId] = {};
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
-      if (doc.exists && doc.data() != null) {
-        if (mounted) {
-          setState(() {
-            _userCache[userId] = doc.data()!;
-          });
-        }
+      if (doc.exists && doc.data() != null && mounted) {
+        setState(() {
+          _userCache[userId] = doc.data()!;
+        });
       }
     } catch (_) {}
   }
@@ -78,7 +85,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   Future<void> _checkPermissions() async {
     final state = await GroupService.getUserGroupState(widget.group.id);
-    
+
     if (mounted) {
       setState(() {
         _isMember = state.isMember;
@@ -95,13 +102,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   Future<void> _pickImage() async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
       if (image != null) {
         setState(() {
           _selectedImage = File(image.path);
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('تعذر اختيار الصورة. تأكد من إعطاء الصلاحيات.')),
@@ -114,11 +124,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty && _selectedImage == null) return;
 
-    if (mounted) {
-      setState(() {
-        _isSending = true;
-      });
-    }
+    setState(() => _isSending = true);
 
     try {
       await GroupService.sendMessage(
@@ -151,11 +157,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isSending = false;
-        });
-      }
+      if (mounted) setState(() => _isSending = false);
     }
   }
 
@@ -163,7 +165,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     if (timestamp == null) return '';
     final date = timestamp.toDate();
     int hour = date.hour;
-    String minute = date.minute.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
     String period = 'ص';
 
     if (hour >= 12) {
@@ -189,20 +191,25 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     if (user == null) return;
 
     if (_isOwner) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('المالك لا يمكنه المغادرة قبل نقل الملكية')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('المالك لا يمكنه المغادرة قبل نقل الملكية')),
+      );
       return;
     }
 
     try {
       await GroupService.leaveGroup(widget.group.id);
-          
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لقد غادرت المجموعة')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('لقد غادرت المجموعة')),
+        );
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء مغادرة المجموعة')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('حدث خطأ أثناء مغادرة المجموعة')),
+        );
       }
     }
   }
@@ -210,17 +217,28 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   Future<void> _handleMenuAction(String action) async {
     switch (action) {
       case 'mute':
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم كتم الإشعارات')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم كتم الإشعارات')),
+        );
         break;
-
       case 'toggle_chat':
         try {
-          final doc = await _firestore.collection('groups').doc(widget.group.id).get();
+          final doc =
+          await _firestore.collection('groups').doc(widget.group.id).get();
           if (doc.exists) {
             final current = doc.data()?['membersCanChat'] ?? true;
             await doc.reference.update({'membersCanChat': !current});
-            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(!current ? 'تم تفعيل دردشة الأعضاء' : 'تم إيقاف دردشة الأعضاء')));
-            // Force re-check to update text box input area immediately without hot reloading
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    !current
+                        ? 'تم تفعيل دردشة الأعضاء'
+                        : 'تم إيقاف دردشة الأعضاء',
+                  ),
+                ),
+              );
+            }
             _checkPermissions();
           }
         } catch (_) {}
@@ -233,331 +251,506 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0C0E12) : const Color(0xFFF8F9FA),
+      backgroundColor: _bg,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
+        preferredSize: const Size.fromHeight(66),
         child: Container(
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF14171C) : Colors.white,
-            border: Border(bottom: BorderSide(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05), width: 1)),
+            color: _headerBg,
+            border: Border(
+              bottom: BorderSide(color: _border),
+            ),
             boxShadow: [
-              if (!isDark)
-                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+              BoxShadow(
+                color: Colors.black.withOpacity(_isDark ? 0.18 : 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
-          child: AppBar(
-            titleSpacing: 0,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: () {
-            if (_isSearching) {
-              setState(() {
-                _isSearching = false;
-                _searchQuery = '';
-                _searchController.clear();
-              });
-            } else {
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-        title: _isSearching
-            ? TextField(
+          child: SafeArea(
+            bottom: false,
+            child: AppBar(
+              titleSpacing: 0,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.arrow_back_rounded,
+                  color: _text,
+                ),
+                onPressed: () {
+                  if (_isSearching) {
+                    setState(() {
+                      _isSearching = false;
+                      _searchQuery = '';
+                      _searchController.clear();
+                    });
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+              title: _isSearching
+                  ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                cursorColor: Colors.white,
-                style: const TextStyle(
-                  color: Colors.white,
+                cursorColor: AppColors.primary,
+                style: TextStyle(
+                  color: _text,
                   fontSize: 16,
                 ),
                 decoration: InputDecoration(
                   hintText: "ابحث في المحادثة...",
                   hintStyle: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54).withOpacity(0.7),
+                    color: _muted.withOpacity(0.7),
                     fontSize: 15,
                   ),
                   filled: true,
-                  fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+                  fillColor: _soft,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(color: _border),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
-                onChanged: (val) => setState(() => _searchQuery = val.trim()),
+                onChanged: (val) =>
+                    setState(() => _searchQuery = val.trim()),
               )
-            : GestureDetector(
-          onTap: _openDetails,
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 4, right: 8),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.primary.withOpacity(0.15),
-                  backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                  child: widget.group.imageUrl.isEmpty
-                      ? Text(
-                          widget.group.name.isNotEmpty ? widget.group.name.substring(0, 1).toUpperCase() : 'M',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                  : GestureDetector(
+                onTap: _openDetails,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 4,
+                    bottom: 4,
+                    right: 8,
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        widget.group.name.isEmpty ? 'الدردشة' : widget.group.name,
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5, color: isDark ? Colors.white.withOpacity(0.95) : Colors.black87, letterSpacing: -0.2),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor:
+                        AppColors.primary.withOpacity(0.14),
+                        backgroundImage: widget.group.imageUrl.isNotEmpty
+                            ? NetworkImage(widget.group.imageUrl)
+                            : null,
+                        child: widget.group.imageUrl.isEmpty
+                            ? Text(
+                          widget.group.name.isNotEmpty
+                              ? widget.group.name.substring(0, 1).toUpperCase()
+                              : 'M',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        )
+                            : null,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "${_membersCount > 0 ? '$_membersCount أعضاء • ' : ''}${widget.group.specializationName}".trim(),
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: isDark ? Colors.white.withOpacity(0.55) : Colors.black54),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              widget.group.name.isEmpty
+                                  ? 'الدردشة'
+                                  : widget.group.name,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16.5,
+                                color: _text,
+                                letterSpacing: -0.2,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              "${_membersCount > 0 ? '$_membersCount أعضاء • ' : ''}${widget.group.specializationName}".trim(),
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: _muted.withOpacity(0.9),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
+              ),
+              actions: [
+                if (_isSearching)
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: _text),
+                    onPressed: () {
+                      setState(() {
+                        _searchController.clear();
+                        _searchQuery = '';
+                      });
+                    },
+                  )
+                else
+                  IconButton(
+                    icon: Icon(Icons.search_rounded, color: _muted),
+                    onPressed: () => setState(() => _isSearching = true),
+                  ),
               ],
             ),
           ),
         ),
-        actions: [
-          if (_isSearching)
-            IconButton(
-              icon: const Icon(Icons.close_rounded, color: Colors.white),
-              onPressed: () {
-                setState(() {
-                  _searchController.clear();
-                  _searchQuery = '';
-                });
-              },
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.search_rounded, color: Color(0xFF7F8B98)),
-              onPressed: () => setState(() => _isSearching = true),
-            )
-        ],
-      ),
-      ),
       ),
       body: _isLoadingRole
           ? const Center(child: CircularProgressIndicator())
           : !_isMember
-              ? _buildNonMemberState()
-              : Container(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: StreamBuilder<QuerySnapshot>(
-                          stream: _firestore
-                              .collection('groups')
-                              .doc(widget.group.id)
-                              .collection('messages')
-                              .orderBy('createdAt', descending: true)
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                               return const Center(child: CircularProgressIndicator(color: Color(0xFF3390EC)));
-                            }
-  
-                            if (snapshot.hasError) {
-                               return const Center(child: Text('تعذر تحميل الرسائل', style: TextStyle(color: Color(0xFF7F8B98))));
-                            }
-  
-                            // Apply Search Filter locally if active
-                            var docs = snapshot.data?.docs ?? [];
-                            
-                            if (_searchQuery.isNotEmpty) {
-                              final query = _searchQuery.toLowerCase();
-                              docs = docs.where((doc) {
-                                final data = doc.data() as Map<String, dynamic>;
-                                final text = (data['text'] ?? '').toString().toLowerCase();
-                                return text.contains(query);
-                              }).toList();
-                            }
-                            
-                            if (docs.isEmpty) {
-                               return _searchQuery.isNotEmpty
-                                   ? const Center(child: Text("لا توجد نتائج مطابقة", style: TextStyle(color: Color(0xFF7F8B98), fontSize: 16)))
-                                   : const _EmptyChatState();
-                            }
-  
-                            return ListView.builder(
-                              controller: _scrollController,
-                              reverse: true,
-                              padding: const EdgeInsets.only(top: 16, bottom: 12, left: 12, right: 12),
-                              itemCount: docs.length,
-                              itemBuilder: (context, index) {
-                                final doc = docs[index];
-                                final data = doc.data() as Map<String, dynamic>;
-                                final messageId = doc.id;
-                                final myId = _auth.currentUser?.uid;
-                                final senderId = data['senderId'] ?? '';
-                                final isMe = myId != null && myId == senderId;
-                                
-                                return _buildMessageBubble(data, messageId, isMe);
-                              },
-                            );
-                          },
-                        ),
+          ? _buildNonMemberState()
+          : Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('groups')
+                  .doc(widget.group.id)
+                  .collection('messages')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'تعذر تحميل الرسائل',
+                      style: TextStyle(color: _muted),
+                    ),
+                  );
+                }
+
+                var docs = snapshot.data?.docs ?? [];
+
+                if (_searchQuery.isNotEmpty) {
+                  final query = _searchQuery.toLowerCase();
+                  docs = docs.where((doc) {
+                    final data =
+                    doc.data() as Map<String, dynamic>;
+                    final text =
+                    (data['text'] ?? '').toString().toLowerCase();
+                    return text.contains(query);
+                  }).toList();
+                }
+
+                if (docs.isEmpty) {
+                  return _searchQuery.isNotEmpty
+                      ? Center(
+                    child: Text(
+                      "لا توجد نتائج مطابقة",
+                      style: TextStyle(
+                        color: _muted,
+                        fontSize: 16,
                       ),
-                      _buildInputArea(),
-                    ],
+                    ),
+                  )
+                      : const _EmptyChatState();
+                }
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: const EdgeInsets.only(
+                    top: 16,
+                    bottom: 12,
+                    left: 12,
+                    right: 12,
                   ),
-                ),
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final doc = docs[index];
+                    final data =
+                    doc.data() as Map<String, dynamic>;
+                    final messageId = doc.id;
+                    final myId = _auth.currentUser?.uid;
+                    final senderId = data['senderId'] ?? '';
+                    final isMe = myId != null && myId == senderId;
+
+                    return _buildMessageBubble(
+                      data,
+                      messageId,
+                      isMe,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          _buildInputArea(),
+        ],
+      ),
     );
   }
 
   Widget _buildNonMemberState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white), shape: BoxShape.circle, boxShadow: [BoxShadow(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.05) : Colors.black12), blurRadius: 16)]),
-            child: Icon(Icons.lock_rounded, size: 48, color: Theme.of(context).iconTheme.color?.withOpacity(0.8)),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'يجب الانضمام للمجموعة',
-            style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color, fontSize: 20, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 10),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: _surface,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(_isDark ? 0.16 : 0.05),
+                    blurRadius: 16,
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.lock_rounded,
+                size: 48,
+                color: _muted.withOpacity(0.9),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'يجب الانضمام للمجموعة',
+              style: TextStyle(
+                color: _text,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
               'هذا مجتمع خاص بأعضائه، يرجى عرض معلومات المجموعة وطلب الانضمام للمشاركة.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF7F8B98), fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: _muted.withOpacity(0.9),
+                fontSize: 14,
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
-              elevation: 0,
+            const SizedBox(height: 32),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 36,
+                  vertical: 14,
+                ),
+                elevation: 0,
+              ),
+              onPressed: _openDetails,
+              child: const Text(
+                'عرض معلومات المجموعة',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
             ),
-            onPressed: _openDetails,
-            child: const Text('عرض معلومات المجموعة', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  void _showMessageOptions(Map<String, dynamic> data, String messageId, String resolvedSenderName, bool isSaved) {
+  void _showMessageOptions(
+      Map<String, dynamic> data,
+      String messageId,
+      String resolvedSenderName,
+      bool isSaved,
+      ) {
     final parentContext = context;
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).bottomSheetTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      backgroundColor: _surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) => Padding(
         padding: const EdgeInsets.only(top: 8, bottom: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             const SizedBox(height: 12),
             ListTile(
-              leading: const Icon(Icons.reply_rounded, color: Colors.white),
-              title: const Text('رد', style: TextStyle(color: Colors.white, fontSize: 16)),
+              leading: Icon(Icons.reply_rounded, color: _text),
+              title: Text(
+                'رد',
+                style: TextStyle(color: _text, fontSize: 16),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 setState(() {
                   _replyMessage = {
                     'id': messageId,
-                    'text': (data['text'] != null && data['text'].toString().isNotEmpty) ? data['text'] : 'صورة مرفقة',
+                    'text': (data['text'] != null &&
+                        data['text'].toString().isNotEmpty)
+                        ? data['text']
+                        : 'صورة مرفقة',
                     'senderName': resolvedSenderName,
                   };
                 });
               },
             ),
             ListTile(
-              leading: Icon(isSaved ? Icons.star_border_rounded : Icons.star_rounded, color: Colors.amber),
-              title: Text(isSaved ? 'إزالة من المحفوظات' : 'حفظ بنجمة', style: const TextStyle(color: Colors.white, fontSize: 16)),
+              leading: Icon(
+                isSaved ? Icons.star_border_rounded : Icons.star_rounded,
+                color: Colors.amber,
+              ),
+              title: Text(
+                isSaved ? 'إزالة من المحفوظات' : 'حفظ بنجمة',
+                style: TextStyle(color: _text, fontSize: 16),
+              ),
               onTap: () async {
                 Navigator.pop(context);
                 try {
                   if (isSaved) {
-                    await GroupService.unsaveMessage(groupId: widget.group.id, messageId: messageId);
-                    if (mounted) ScaffoldMessenger.of(parentContext).showSnackBar(const SnackBar(content: Text('تمت إزالة الرسالة')));
+                    await GroupService.unsaveMessage(
+                      groupId: widget.group.id,
+                      messageId: messageId,
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(parentContext).showSnackBar(
+                        const SnackBar(content: Text('تمت إزالة الرسالة')),
+                      );
+                    }
                   } else {
-                    await GroupService.saveMessage(groupId: widget.group.id, messageId: messageId, data: data);
-                    if (mounted) ScaffoldMessenger.of(parentContext).showSnackBar(const SnackBar(content: Text('تم حفظ الرسالة')));
+                    await GroupService.saveMessage(
+                      groupId: widget.group.id,
+                      messageId: messageId,
+                      data: data,
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(parentContext).showSnackBar(
+                        const SnackBar(content: Text('تم حفظ الرسالة')),
+                      );
+                    }
                   }
-                } catch (e) {
-                  if (mounted) ScaffoldMessenger.of(parentContext).showSnackBar(const SnackBar(content: Text('فشلت العملية، يرجى المحاولة لاحقاً')));
+                } catch (_) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(parentContext).showSnackBar(
+                      const SnackBar(
+                        content: Text('فشلت العملية، يرجى المحاولة لاحقاً'),
+                      ),
+                    );
+                  }
                 }
               },
             ),
           ],
         ),
-      )
+      ),
     );
   }
 
-  Widget _buildMessageBubble(Map<String, dynamic> data, String messageId, bool isMe) {
+  Widget _buildMessageBubble(
+      Map<String, dynamic> data,
+      String messageId,
+      bool isMe,
+      ) {
     final text = data['text'] ?? '';
     final imageUrl = data['imageUrl'] as String?;
     final senderId = data['senderId'] ?? '';
-    
+
     _fetchUserIfNeeded(senderId);
     final cachedUser = _userCache[senderId];
-    
+
     String senderName = data['senderName']?.toString() ?? 'عضو';
-    String senderAvatarUrl = data['senderAvatar'] as String? ?? data['senderImageUrl'] as String? ?? data['photoUrl'] as String? ?? '';
+    String senderAvatarUrl = data['senderAvatar'] as String? ??
+        data['senderImageUrl'] as String? ??
+        data['photoUrl'] as String? ??
+        '';
 
     if (cachedUser != null && cachedUser.isNotEmpty) {
-      senderName = (cachedUser['username']?.toString() ?? cachedUser['fullName']?.toString() ?? cachedUser['displayName']?.toString() ?? cachedUser['name']?.toString() ?? senderName).trim();
-      senderAvatarUrl = (cachedUser['photoUrl']?.toString() ?? cachedUser['imageUrl']?.toString() ?? senderAvatarUrl).trim();
+      senderName = (cachedUser['username']?.toString() ??
+          cachedUser['fullName']?.toString() ??
+          cachedUser['displayName']?.toString() ??
+          cachedUser['name']?.toString() ??
+          senderName)
+          .trim();
+      senderAvatarUrl = (cachedUser['photoUrl']?.toString() ??
+          cachedUser['imageUrl']?.toString() ??
+          senderAvatarUrl)
+          .trim();
     }
-    
+
     if (senderName.contains('@')) senderName = senderName.split('@').first;
-    
+
     final timestamp = data['createdAt'] as Timestamp?;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = const Color(0xFFD4AF37);
+    const primaryColor = Color(0xFFD4AF37);
 
     final List<Color> nameColors = [
-      const Color(0xFFE53935), const Color(0xFFD81B60), const Color(0xFF8E24AA), 
-      const Color(0xFF3949AB), const Color(0xFF039BE5), const Color(0xFF00897B), 
-      const Color(0xFF7CB342), const Color(0xFFF4511E)
+      const Color(0xFFE53935),
+      const Color(0xFFD81B60),
+      const Color(0xFF8E24AA),
+      const Color(0xFF3949AB),
+      const Color(0xFF039BE5),
+      const Color(0xFF00897B),
+      const Color(0xFF7CB342),
+      const Color(0xFFF4511E),
     ];
     final senderColor = nameColors[senderName.length % nameColors.length];
-    
+
     final String? replyToText = data['replyToText'];
     final String? replyToSender = data['replyToSender'];
 
     final messageContent = Container(
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.82,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isMe 
-            ? (isDark ? primaryColor.withOpacity(0.08) : AppColors.primary) 
-            : (isDark ? const Color(0xFF14171C) : Colors.white),
+        color: isMe
+            ? (_isDark
+            ? primaryColor.withOpacity(0.10)
+            : AppColors.primary)
+            : _surface,
         border: Border.all(
-            color: isDark 
-                ? (isMe ? primaryColor.withOpacity(0.25) : Colors.white.withOpacity(0.08)) 
-                : Colors.transparent,
-            width: 1),
+          color: _isDark
+              ? (isMe
+              ? primaryColor.withOpacity(0.22)
+              : Colors.white.withOpacity(0.06))
+              : Colors.transparent,
+        ),
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(20),
           topRight: const Radius.circular(20),
@@ -565,12 +758,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           bottomRight: Radius.circular(isMe ? 4 : 20),
         ),
         boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
+          BoxShadow(
+            color: Colors.black.withOpacity(_isDark ? 0.10 : 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Column(
@@ -580,33 +772,64 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           if (!isMe)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
-              child: Text(senderName, style: TextStyle(fontSize: 14, color: senderColor, fontWeight: FontWeight.w800)),
+              child: Text(
+                senderName,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: senderColor,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
-          
           if (replyToText != null) ...[
             Container(
-               width: double.infinity,
-               margin: const EdgeInsets.only(bottom: 6),
-               padding: const EdgeInsets.only(right: 10, left: 10, top: 4, bottom: 6),
-               decoration: BoxDecoration(
-                 border: Border(right: BorderSide(color: senderColor, width: 3.5)),
-                 color: senderColor.withOpacity(0.12),
-                 borderRadius: BorderRadius.circular(6),
-               ),
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.start,
-                 children: [
-                   Text(replyToSender ?? "رد", style: TextStyle(color: senderColor, fontSize: 13, fontWeight: FontWeight.bold)),
-                   const SizedBox(height: 2),
-                   Text(replyToText, style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.2), maxLines: 1, overflow: TextOverflow.ellipsis),
-                 ],
-               ),
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.only(
+                right: 10,
+                left: 10,
+                top: 4,
+                bottom: 6,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  right: BorderSide(color: senderColor, width: 3.5),
+                ),
+                color: senderColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    replyToSender ?? "رد",
+                    style: TextStyle(
+                      color: senderColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    replyToText,
+                    style: TextStyle(
+                      color: _muted,
+                      fontSize: 13,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ],
-
           if (imageUrl != null && imageUrl.isNotEmpty)
             Padding(
-              padding: EdgeInsets.only(bottom: text.isNotEmpty ? 6.0 : 2.0, top: 2),
+              padding: EdgeInsets.only(
+                bottom: text.isNotEmpty ? 6.0 : 2.0,
+                top: 2,
+              ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
@@ -615,10 +838,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(
-                      height: 150, width: double.infinity,
-                      color: Colors.white.withOpacity(0.05),
+                      height: 150,
+                      width: double.infinity,
+                      color: _soft,
                       alignment: Alignment.center,
-                      child: const CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF64B5F6)),
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
                     );
                   },
                 ),
@@ -629,11 +856,22 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.end,
               children: [
-                _buildMessageText(text, isMe, isDark),
+                _buildMessageText(text, isMe),
                 const SizedBox(width: 8),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 0, top: 4),
-                  child: Text(_formatTimestamp(timestamp), style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: isMe ? (isDark ? primaryColor.withOpacity(0.7) : Colors.white70) : (isDark ? Colors.white.withOpacity(0.4) : Colors.black45), letterSpacing: 0.2)),
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    _formatTimestamp(timestamp),
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      color: isMe
+                          ? (_isDark
+                          ? primaryColor.withOpacity(0.72)
+                          : Colors.white70)
+                          : _muted.withOpacity(0.8),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -642,7 +880,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               alignment: Alignment.bottomRight,
               child: Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Text(_formatTimestamp(timestamp), style: const TextStyle(fontSize: 11, color: Color(0xFF7F8B98))),
+                child: Text(
+                  _formatTimestamp(timestamp),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: _muted.withOpacity(0.85),
+                  ),
+                ),
               ),
             ),
         ],
@@ -651,7 +895,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     return GestureDetector(
       onLongPress: () async {
-        final isSaved = await GroupService.isMessageSaved(groupId: widget.group.id, messageId: messageId);
+        final isSaved = await GroupService.isMessageSaved(
+          groupId: widget.group.id,
+          messageId: messageId,
+        );
         if (!mounted) return;
         _showMessageOptions(data, messageId, senderName, isSaved);
       },
@@ -659,16 +906,26 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       child: Padding(
         padding: const EdgeInsets.only(bottom: 6),
         child: Row(
-          mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisAlignment:
+          isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (!isMe) ...[
               CircleAvatar(
                 radius: 17,
                 backgroundColor: senderColor.withOpacity(0.15),
-                backgroundImage: senderAvatarUrl.isNotEmpty ? NetworkImage(senderAvatarUrl) : null,
+                backgroundImage: senderAvatarUrl.isNotEmpty
+                    ? NetworkImage(senderAvatarUrl)
+                    : null,
                 child: senderAvatarUrl.isEmpty
-                    ? Text(senderName.isNotEmpty ? senderName[0] : 'M', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: senderColor))
+                    ? Text(
+                  senderName.isNotEmpty ? senderName[0] : 'M',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: senderColor,
+                  ),
+                )
                     : null,
               ),
               const SizedBox(width: 8),
@@ -680,23 +937,33 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     );
   }
 
-  Widget _buildMessageText(String text, bool isMe, bool isDark) {
-    final textColor = isDark ? (isMe ? Colors.white.withOpacity(0.95) : Colors.white.withOpacity(0.95)) : (isMe ? Colors.white : Colors.black87);
-    final textStyle = TextStyle(fontSize: 15.5, color: textColor, height: 1.4, fontWeight: FontWeight.w500);
+  Widget _buildMessageText(String text, bool isMe) {
+    final textColor = isMe
+        ? (_isDark ? Colors.white.withOpacity(0.95) : Colors.white)
+        : _text;
+    final textStyle = TextStyle(
+      fontSize: 15.5,
+      color: textColor,
+      height: 1.4,
+      fontWeight: FontWeight.w500,
+    );
 
     if (!text.contains('edumate://invite')) {
       return Text(text, style: textStyle);
     }
-    
-    final RegExp linkRegExp = RegExp(r'(edumate:\/\/invite\?[^\s]+)', caseSensitive: false);
+
+    final linkRegExp = RegExp(
+      r'(edumate:\/\/invite\?[^\s]+)',
+      caseSensitive: false,
+    );
     final matches = linkRegExp.allMatches(text);
     if (matches.isEmpty) {
       return Text(text, style: textStyle);
     }
 
-    List<TextSpan> spans = [];
+    final List<TextSpan> spans = [];
     int currentPos = 0;
-    
+
     for (final match in matches) {
       if (match.start > currentPos) {
         spans.add(TextSpan(text: text.substring(currentPos, match.start)));
@@ -705,7 +972,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       spans.add(
         TextSpan(
           text: url,
-          style: const TextStyle(color: Color(0xFF64B5F6), decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Color(0xFF64B5F6),
+            decoration: TextDecoration.underline,
+            fontWeight: FontWeight.bold,
+          ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               final uri = Uri.tryParse(url);
@@ -713,7 +984,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 final groupId = uri.queryParameters['groupId'];
                 final code = uri.queryParameters['code'];
                 if (groupId != null && code != null) {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => InviteGroupScreen(groupId: groupId, code: code)));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => InviteGroupScreen(
+                        groupId: groupId,
+                        code: code,
+                      ),
+                    ),
+                  );
                 }
               }
             },
@@ -721,40 +1000,56 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       );
       currentPos = match.end;
     }
-    
+
     if (currentPos < text.length) {
       spans.add(TextSpan(text: text.substring(currentPos)));
     }
-    
+
     return RichText(
-      text: TextSpan(
-        style: textStyle,
-        children: spans,
-      ),
+      text: TextSpan(style: textStyle, children: spans),
     );
   }
 
   Widget _buildInputArea() {
     if (_isBanned) {
-      return _buildDisabledState('عذراً، لقد تم حظرك من المشاركة في هذه المجموعة.', Icons.block_rounded, AppColors.error);
+      return _buildDisabledState(
+        'عذراً، لقد تم حظرك من المشاركة في هذه المجموعة.',
+        Icons.block_rounded,
+        AppColors.error,
+      );
     }
     if (_isMuted) {
-       return _buildDisabledState('لقد تم كتمك. لا يمكنك الإرسال حالياً.', Icons.mic_off_rounded, AppColors.warning);
+      return _buildDisabledState(
+        'لقد تم كتمك. لا يمكنك الإرسال حالياً.',
+        Icons.mic_off_rounded,
+        AppColors.warning,
+      );
     }
     if (!_canSend) {
-       return _buildDisabledState('المجموعة للقراءة فقط', Icons.info_outline_rounded, AppColors.textSecondary);
+      return _buildDisabledState(
+        'المجموعة للقراءة فقط',
+        Icons.info_outline_rounded,
+        AppColors.textSecondary,
+      );
     }
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: EdgeInsets.only(
-        left: 8, right: 8, top: 8,
+        left: 8,
+        right: 8,
+        top: 8,
         bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF14171C) : Colors.white,
-        boxShadow: [BoxShadow(color: isDark ? Colors.black.withOpacity(0.2) : Colors.black12, blurRadius: 10, offset: const Offset(0, -2))],
+        color: _surface,
+        border: Border(top: BorderSide(color: _border)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(_isDark ? 0.18 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -762,23 +1057,55 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           if (_replyMessage != null)
             Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(color: const Color(0xFF242F3D), borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 4)]),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: _soft,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: _border),
+              ),
               child: Row(
                 children: [
-                  const Icon(Icons.reply_rounded, color: Color(0xFF64B5F6), size: 22),
+                  const Icon(
+                    Icons.reply_rounded,
+                    color: Color(0xFF64B5F6),
+                    size: 22,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_replyMessage!['senderName'], style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 13, fontWeight: FontWeight.w800)),
+                        Text(
+                          _replyMessage!['senderName'],
+                          style: const TextStyle(
+                            color: Color(0xFF64B5F6),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(_replyMessage!['text'], style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.2), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(
+                          _replyMessage!['text'],
+                          style: TextStyle(
+                            color: _muted,
+                            fontSize: 13,
+                            height: 1.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
-                  IconButton(icon: const Icon(Icons.close_rounded, color: Color(0xFF7F8B98)), onPressed: () => setState(() => _replyMessage = null), padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: _muted),
+                    onPressed: () => setState(() => _replyMessage = null),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
                 ],
               ),
             ),
@@ -786,13 +1113,40 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             Container(
               margin: const EdgeInsets.only(bottom: 8, left: 42),
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: const Color(0xFF242F3D), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)]),
+              decoration: BoxDecoration(
+                color: _soft,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _border),
+              ),
               child: Row(
                 children: [
-                  ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(_selectedImage!, height: 50, width: 50, fit: BoxFit.cover)),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      _selectedImage!,
+                      height: 50,
+                      width: 50,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  const Expanded(child: Text("صورة مرفقة", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Colors.white))),
-                  IconButton(icon: const Icon(Icons.close_rounded, color: Color(0xFFE53935)), onPressed: () => setState(() => _selectedImage = null)),
+                  Expanded(
+                    child: Text(
+                      "صورة مرفقة",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: _text,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFFE53935),
+                    ),
+                    onPressed: () => setState(() => _selectedImage = null),
+                  ),
                 ],
               ),
             ),
@@ -801,7 +1155,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             children: [
               IconButton(
                 onPressed: _pickImage,
-                icon: const Icon(Icons.image_outlined, color: Color(0xFF7F8B98), size: 28),
+                icon: Icon(
+                  Icons.image_outlined,
+                  color: _muted,
+                  size: 28,
+                ),
                 padding: const EdgeInsets.all(8),
                 constraints: const BoxConstraints(),
               ),
@@ -814,23 +1172,30 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   textInputAction: TextInputAction.newline,
                   cursorColor: AppColors.primary,
                   style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
+                    color: _text,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                   decoration: InputDecoration(
                     hintText: "اكتب رسالة...",
                     hintStyle: TextStyle(
-                      color: isDark ? Colors.white.withOpacity(0.4) : Colors.black45,
+                      color: _muted.withOpacity(0.75),
                       fontSize: 15,
                     ),
                     filled: true,
-                    fillColor: isDark ? const Color(0xFF1A1D24) : const Color(0xFFF0F2F5),
+                    fillColor: _soft,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide(color: _border),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
                   ),
                 ),
               ),
@@ -841,18 +1206,42 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   height: 48,
                   width: 48,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFFFD700)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFD4AF37),
+                        Color(0xFFFFD700),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     shape: BoxShape.circle,
                     boxShadow: [
-                      if (!_isSending)
-                        BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+                      BoxShadow(
+                        color: const Color(0xFFD4AF37)
+                            .withOpacity(_isDark ? 0.18 : 0.26),
+                        blurRadius: _isDark ? 10 : 14,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
                   child: _isSending
-                      ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)))
-                      : const Icon(Icons.send_rounded, color: Colors.white, size: 22),
+                      ? const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                      : const Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
-              )
+              ),
             ],
           ),
         ],
@@ -864,12 +1253,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
-        top: 16, bottom: MediaQuery.of(context).padding.bottom + 16,
-        left: 20, right: 20,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+        left: 20,
+        right: 20,
       ),
       decoration: BoxDecoration(
-        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-        border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
+        color: _surface,
+        border: Border(top: BorderSide(color: _border)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -879,7 +1270,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           Flexible(
             child: Text(
               msg,
-              style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 14),
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -895,39 +1290,47 @@ class _EmptyChatState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? const Color(0xFF171C25) : Colors.white;
+    final text = isDark ? AppColors.textPrimary : Colors.black87;
+    final muted = isDark ? AppColors.textSecondary : Colors.black54;
+    final border = isDark ? Colors.white.withOpacity(0.07) : Colors.black12;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF14171C) : Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: isDark ? Colors.white.withOpacity(0.08) : Colors.black12),
-                boxShadow: [
-                   BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.05), blurRadius: 16, offset: const Offset(0, 4)),
-                ]
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.16 : 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                   Icon(Icons.chat_bubble_outline_rounded, size: 20, color: isDark ? Colors.white54 : Colors.black54),
-                   const SizedBox(width: 10),
-                   Text(
-                    'لا توجد رسائل بعد',
-                    style: TextStyle(
-                      color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.chat_bubble_outline_rounded,
+                size: 20,
+                color: muted,
               ),
-            ),
-          ],
+              const SizedBox(width: 10),
+              Text(
+                'لا توجد رسائل بعد',
+                style: TextStyle(
+                  color: text,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

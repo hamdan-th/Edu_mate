@@ -1,106 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../../models/notification_item_model.dart';
+import '../../models/app_notification_model.dart';
+import '../../services/notifications_service.dart';
 
-class NotificationsScreen extends StatefulWidget {
+class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
-
-  @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
-}
-
-class _NotificationsScreenState extends State<NotificationsScreen> {
-  late List<NotificationItemModel> _items;
-
-  @override
-  void initState() {
-    super.initState();
-    final now = DateTime.now();
-
-    _items = [
-      NotificationItemModel(
-        id: '1',
-        title: 'تمت الموافقة على ملفك',
-        body: 'تم قبول ملف "شبكات الحاسوب" وإتاحته داخل المكتبة.',
-        timestamp: now.subtract(const Duration(minutes: 18)),
-        isRead: false,
-        type: NotificationType.library,
-      ),
-      NotificationItemModel(
-        id: '2',
-        title: 'رسالة جديدة في المجموعة',
-        body: 'هناك رسالة جديدة في مجموعة "مشروع التخرج".',
-        timestamp: now.subtract(const Duration(hours: 2)),
-        isRead: false,
-        type: NotificationType.group,
-      ),
-      NotificationItemModel(
-        id: '3',
-        title: 'إعجاب جديد بمنشورك',
-        body: 'أحد الأعضاء أعجب بمنشورك الأخير في الصفحة الرئيسية.',
-        timestamp: now.subtract(const Duration(hours: 5)),
-        isRead: true,
-        type: NotificationType.general,
-      ),
-      NotificationItemModel(
-        id: '4',
-        title: 'اقتراح من Edu Bot',
-        body: 'لديك توصية جديدة لمراجع مرتبطة بتخصصك.',
-        timestamp: now.subtract(const Duration(days: 1, hours: 3)),
-        isRead: true,
-        type: NotificationType.bot,
-      ),
-      NotificationItemModel(
-        id: '5',
-        title: 'تحديث في النظام',
-        body: 'تم تحسين تجربة المكتبة والوضع الداكن بنجاح.',
-        timestamp: now.subtract(const Duration(days: 2, hours: 4)),
-        isRead: true,
-        type: NotificationType.system,
-      ),
-    ];
-  }
-
-  void _markAllAsRead() {
-    setState(() {
-      _items = _items.map((e) => e.copyWith(isRead: true)).toList();
-    });
-  }
-
-  void _markOneAsRead(String id) {
-    setState(() {
-      _items = _items
-          .map((e) => e.id == id ? e.copyWith(isRead: true) : e)
-          .toList();
-    });
-  }
-
-  int _unreadCount() {
-    return _items.where((e) => !e.isRead).length;
-  }
-
-  void _popWithUnreadCount() {
-    Navigator.pop(context, _unreadCount());
-  }
-
-  List<NotificationItemModel> get _todayItems {
-    final now = DateTime.now();
-    return _items.where((item) {
-      return item.timestamp.year == now.year &&
-          item.timestamp.month == now.month &&
-          item.timestamp.day == now.day;
-    }).toList();
-  }
-
-  List<NotificationItemModel> get _earlierItems {
-    final now = DateTime.now();
-    return _items.where((item) {
-      final isToday = item.timestamp.year == now.year &&
-          item.timestamp.month == now.month &&
-          item.timestamp.day == now.day;
-      return !isToday;
-    }).toList();
-  }
 
   String _formatTime(DateTime date) {
     final now = DateTime.now();
@@ -116,98 +20,112 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final unreadCount = _unreadCount();
-
-    return WillPopScope(
-      onWillPop: () async {
-        _popWithUnreadCount();
-        return false;
-      },
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          centerTitle: false,
-          titleSpacing: 20,
-          leading: IconButton(
-            onPressed: _popWithUnreadCount,
-            icon: const Icon(Icons.arrow_back_rounded),
+        centerTitle: false,
+        titleSpacing: 20,
+        title: const Text(
+          'الإشعارات',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.4,
           ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await NotificationsService.markAllAsRead();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('تم تحديد جميع الإشعارات كمقروءة'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              }
+            },
+            child: const Text(
+              'تحديد الكل كمقروء',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+                fontSize: 12.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: StreamBuilder<List<AppNotificationModel>>(
+        stream: NotificationsService.streamMyNotifications(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            );
+          }
+
+          final items = snapshot.data ?? [];
+
+          if (items.isEmpty) {
+            return const _NotificationsEmptyState();
+          }
+
+          final now = DateTime.now();
+
+          final todayItems = items.where((item) {
+            return item.timestamp.year == now.year &&
+                item.timestamp.month == now.month &&
+                item.timestamp.day == now.day;
+          }).toList();
+
+          final earlierItems = items.where((item) {
+            final isToday = item.timestamp.year == now.year &&
+                item.timestamp.month == now.month &&
+                item.timestamp.day == now.day;
+            return !isToday;
+          }).toList();
+
+          return ListView(
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             children: [
-              Text(
-                'الإشعارات',
-                style: TextStyle(
-                  color: isDark ? AppColors.textPrimary : Colors.black87,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                unreadCount > 0
-                    ? 'لديك $unreadCount إشعارات غير مقروءة'
-                    : 'كل الإشعارات مقروءة',
-                style: TextStyle(
-                  color: isDark ? AppColors.textSecondary : Colors.black54,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            if (_items.any((e) => !e.isRead))
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 10),
-                child: TextButton(
-                  onPressed: _markAllAsRead,
-                  child: const Text(
-                    'تحديد الكل كمقروء',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
+              if (todayItems.isNotEmpty) ...[
+                const _SectionTitle(title: 'اليوم'),
+                const SizedBox(height: 10),
+                ...todayItems.map(
+                      (item) => SizedBox(
+                    width: double.infinity,
+                    child: _NotificationTile(
+                      item: item,
+                      timeLabel: _formatTime(item.timestamp),
+                      onTap: () => NotificationsService.markAsRead(item.id),
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
-        body: _items.isEmpty
-            ? const _NotificationsEmptyState()
-            : ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-          children: [
-            if (_todayItems.isNotEmpty) ...[
-              const _SectionTitle(title: 'اليوم'),
-              const SizedBox(height: 10),
-              ..._todayItems.map(
-                    (item) => _NotificationTile(
-                  item: item,
-                  timeLabel: _formatTime(item.timestamp),
-                  onTap: () => _markOneAsRead(item.id),
+                const SizedBox(height: 18),
+              ],
+              if (earlierItems.isNotEmpty) ...[
+                const _SectionTitle(title: 'الأقدم'),
+                const SizedBox(height: 10),
+                ...earlierItems.map(
+                      (item) => SizedBox(
+                    width: double.infinity,
+                    child: _NotificationTile(
+                      item: item,
+                      timeLabel: _formatTime(item.timestamp),
+                      onTap: () => NotificationsService.markAsRead(item.id),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 18),
+              ],
             ],
-            if (_earlierItems.isNotEmpty) ...[
-              const _SectionTitle(title: 'الأقدم'),
-              const SizedBox(height: 10),
-              ..._earlierItems.map(
-                    (item) => _NotificationTile(
-                  item: item,
-                  timeLabel: _formatTime(item.timestamp),
-                  onTap: () => _markOneAsRead(item.id),
-                ),
-              ),
-            ],
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -237,7 +155,7 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _NotificationTile extends StatelessWidget {
-  final NotificationItemModel item;
+  final AppNotificationModel item;
   final String timeLabel;
   final VoidCallback onTap;
 
@@ -258,17 +176,20 @@ class _NotificationTile extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            padding: EdgeInsets.zero,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surface : Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              color: item.isRead
+                  ? (isDark ? AppColors.surface : Colors.white)
+                  : accent.withOpacity(isDark ? 0.10 : 0.08),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: item.isRead
                     ? (isDark
-                    ? AppColors.border.withOpacity(0.55)
+                    ? AppColors.border.withOpacity(0.45)
                     : Colors.black12)
                     : accent.withOpacity(0.30),
                 width: item.isRead ? 1 : 1.2,
@@ -276,103 +197,130 @@ class _NotificationTile extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   color: isDark
-                      ? Colors.black.withOpacity(0.16)
-                      : Colors.black.withOpacity(0.035),
-                  blurRadius: 14,
+                      ? Colors.black.withOpacity(0.14)
+                      : Colors.black.withOpacity(0.04),
+                  blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
               ],
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: accent.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: accent.withOpacity(0.18),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 4,
+                    decoration: BoxDecoration(
+                      color: item.isRead ? Colors.transparent : accent,
+                      borderRadius: const BorderRadius.horizontal(
+                        left: Radius.circular(22),
+                      ),
                     ),
                   ),
-                  child: Icon(
-                    item.icon,
-                    color: accent,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              item.title,
-                              style: TextStyle(
-                                color: isDark
-                                    ? AppColors.textPrimary
-                                    : Colors.black87,
-                                fontSize: 15,
-                                fontWeight: item.isRead
-                                    ? FontWeight.w700
-                                    : FontWeight.w800,
-                                height: 1.3,
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: accent.withOpacity(0.12),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: accent.withOpacity(0.20),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            timeLabel,
-                            style: TextStyle(
-                              color: isDark
-                                  ? AppColors.textSecondary
-                                  : Colors.black45,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
+                            child: Icon(
+                              item.icon,
+                              color: accent,
+                              size: 22,
                             ),
                           ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.title,
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? AppColors.textPrimary
+                                              : Colors.black87,
+                                          fontSize: 15,
+                                          fontWeight: item.isRead
+                                              ? FontWeight.w700
+                                              : FontWeight.w800,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        timeLabel,
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? AppColors.textSecondary
+                                              : Colors.black45,
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  item.body,
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? AppColors.textSecondary
+                                        : Colors.black54,
+                                    fontSize: 13.2,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (!item.isRead) ...[
+                            const SizedBox(width: 10),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  color: accent,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: accent.withOpacity(0.35),
+                                      blurRadius: 10,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item.body,
-                        style: TextStyle(
-                          color: isDark
-                              ? AppColors.textSecondary
-                              : Colors.black54,
-                          fontSize: 13.2,
-                          fontWeight: FontWeight.w500,
-                          height: 1.45,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (!item.isRead) ...[
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 10,
-                    height: 10,
-                    margin: const EdgeInsets.only(top: 4),
-                    decoration: BoxDecoration(
-                      color: accent,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: accent.withOpacity(0.35),
-                          blurRadius: 8,
-                          spreadRadius: 1,
-                        ),
-                      ],
                     ),
                   ),
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -394,16 +342,16 @@ class _NotificationsEmptyState extends StatelessWidget {
         child: Container(
           width: double.infinity,
           constraints: const BoxConstraints(maxWidth: 420),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surface : Colors.white,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(26),
             border: Border.all(
               color: isDark ? AppColors.border : Colors.black12,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.15 : 0.04),
+                color: Colors.black.withOpacity(isDark ? 0.14 : 0.04),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
@@ -412,16 +360,20 @@ class _NotificationsEmptyState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(
-                radius: 34,
-                backgroundColor: AppColors.primary.withOpacity(0.10),
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.10),
+                  shape: BoxShape.circle,
+                ),
                 child: const Icon(
                   Icons.notifications_none_rounded,
                   color: AppColors.primary,
                   size: 34,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
               Text(
                 'لا توجد إشعارات الآن',
                 style: TextStyle(

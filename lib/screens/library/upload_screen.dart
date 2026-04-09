@@ -76,7 +76,7 @@ class _UploadScreenState extends State<UploadScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedFile == null) {
-      _showSnackBar('اختر ملفًا أولاً');
+      _showSnackBar('اختر ملفًا أولًا');
       return;
     }
 
@@ -89,7 +89,7 @@ class _UploadScreenState extends State<UploadScreen> {
     }
 
     if (FirebaseAuth.instance.currentUser == null) {
-      _showSnackBar('يجب تسجيل الدخول أولاً');
+      _showSnackBar('يجب تسجيل الدخول أولًا');
       return;
     }
 
@@ -120,7 +120,7 @@ class _UploadScreenState extends State<UploadScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           const SnackBar(
-            content: Text('تم رفع الملف بنجاح، وحالته الآن: قيد المراجعة'),
+            content: Text('تم رفع الملف بنجاح وأصبح ظاهرًا في المكتبة'),
           ),
         );
 
@@ -146,6 +146,32 @@ class _UploadScreenState extends State<UploadScreen> {
   String _fileName(File file) {
     final path = file.path.replaceAll('\\', '/');
     return path.split('/').last;
+  }
+
+  String _fileTypeLabel(File file) {
+    final name = _fileName(file).toLowerCase();
+    if (name.endsWith('.pdf')) return 'PDF';
+    if (name.endsWith('.doc') || name.endsWith('.docx')) return 'Word';
+    if (name.endsWith('.png') ||
+        name.endsWith('.jpg') ||
+        name.endsWith('.jpeg')) {
+      return 'Image';
+    }
+    return 'File';
+  }
+
+  IconData _fileTypeIcon(File file) {
+    final name = _fileName(file).toLowerCase();
+    if (name.endsWith('.pdf')) return Icons.picture_as_pdf_rounded;
+    if (name.endsWith('.doc') || name.endsWith('.docx')) {
+      return Icons.description_rounded;
+    }
+    if (name.endsWith('.png') ||
+        name.endsWith('.jpg') ||
+        name.endsWith('.jpeg')) {
+      return Icons.image_rounded;
+    }
+    return Icons.insert_drive_file_rounded;
   }
 
   @override
@@ -207,6 +233,8 @@ class _UploadScreenState extends State<UploadScreen> {
                       selectedFile: _selectedFile,
                       onTap: _pickFile,
                       fileNameBuilder: _fileName,
+                      fileTypeLabelBuilder: _fileTypeLabel,
+                      fileTypeIconBuilder: _fileTypeIcon,
                     ),
                     const SizedBox(height: 18),
                     _SectionCard(
@@ -337,7 +365,7 @@ class _UploadScreenState extends State<UploadScreen> {
                     const SizedBox(height: 12),
                     Center(
                       child: Text(
-                        'سيتم رفع الملف ثم مراجعته قبل ظهوره داخل مكتبة الجامعة',
+                        'سيتم رفع الملف مباشرة وإظهاره داخل مكتبة الجامعة.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: LibraryTheme.muted(context),
@@ -375,7 +403,10 @@ class _TopBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+              border: Border.all(
+                color: LibraryTheme.border(context).withOpacity(0.3),
+                width: 0.5,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.03),
@@ -488,11 +519,15 @@ class _FilePickerCard extends StatelessWidget {
   final File? selectedFile;
   final VoidCallback onTap;
   final String Function(File file) fileNameBuilder;
+  final String Function(File file) fileTypeLabelBuilder;
+  final IconData Function(File file) fileTypeIconBuilder;
 
   const _FilePickerCard({
     required this.selectedFile,
     required this.onTap,
     required this.fileNameBuilder,
+    required this.fileTypeLabelBuilder,
+    required this.fileTypeIconBuilder,
   });
 
   @override
@@ -520,50 +555,62 @@ class _FilePickerCard extends StatelessWidget {
               color: LibraryTheme.bg(context),
               borderRadius: BorderRadius.circular(22),
             ),
-            child: Column(
+            child: hasFile
+                ? Column(
               children: [
                 Container(
-                  width: 58,
-                  height: 58,
+                  width: 62,
+                  height: 62,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: hasFile
-                          ? [
+                      colors: [
                         LibraryTheme.primary(context).withOpacity(0.16),
                         LibraryTheme.secondary(context).withOpacity(0.12),
-                      ]
-                          : [
-                        Colors.grey.withOpacity(0.08),
-                        Colors.grey.withOpacity(0.04),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(
-                    hasFile
-                        ? Icons.check_circle_rounded
-                        : Icons.attach_file_rounded,
-                    color: hasFile ? LibraryTheme.primary(context) : LibraryTheme.muted(context),
-                    size: 24,
+                    fileTypeIconBuilder(selectedFile!),
+                    color: LibraryTheme.primary(context),
+                    size: 28,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                    LibraryTheme.primary(context).withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    fileTypeLabelBuilder(selectedFile!),
+                    style: TextStyle(
+                      color: LibraryTheme.primary(context),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 Text(
-                  hasFile ? fileNameBuilder(selectedFile!) : 'اضغط لاختيار ملف',
+                  fileNameBuilder(selectedFile!),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 14.6,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: LibraryTheme.text(context),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  hasFile
-                      ? 'تم اختيار الملف بنجاح، ويمكنك الآن إكمال بقية البيانات'
-                      : 'الأنواع المدعومة: PDF / DOC / DOCX / JPG / PNG',
+                  'تم اختيار الملف بنجاح، ويمكنك الآن إكمال بقية البيانات ثم رفعه.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12.5,
@@ -580,10 +627,80 @@ class _FilePickerCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                    border: Border.all(
+                      color:
+                      LibraryTheme.border(context).withOpacity(0.3),
+                      width: 0.5,
+                    ),
                   ),
                   child: Text(
-                    hasFile ? 'تغيير الملف' : 'اختيار ملف',
+                    'تغيير الملف',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: LibraryTheme.primary(context),
+                    ),
+                  ),
+                ),
+              ],
+            )
+                : Column(
+              children: [
+                Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.grey.withOpacity(0.08),
+                        Colors.grey.withOpacity(0.04),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(
+                    Icons.attach_file_rounded,
+                    color: LibraryTheme.muted(context),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'اضغط لاختيار ملف',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.6,
+                    fontWeight: FontWeight.w700,
+                    color: LibraryTheme.text(context),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'الأنواع المدعومة: PDF / DOC / DOCX / JPG / PNG',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: LibraryTheme.muted(context),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color:
+                      LibraryTheme.border(context).withOpacity(0.3),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Text(
+                    'اختيار ملف',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -618,7 +735,10 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+        border: Border.all(
+          color: LibraryTheme.border(context).withOpacity(0.3),
+          width: 0.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),

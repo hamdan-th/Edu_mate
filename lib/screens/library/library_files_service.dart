@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
-class LibraryFilesService {
+import '../../services/notifications_service.dart';class LibraryFilesService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseStorage _storage = FirebaseStorage.instanceFor(
@@ -100,11 +99,33 @@ class LibraryFilesService {
   }
 
   static Future<void> approveFile(String fileId) async {
-    await _firestore.collection('library_files').doc(fileId).update({
+    final docRef = _firestore.collection('library_files').doc(fileId);
+    final snapshot = await docRef.get();
+    final data = snapshot.data();
+
+    if (!snapshot.exists || data == null) {
+      throw Exception('الملف غير موجود');
+    }
+
+    final fileOwnerId = (data['userId'] ?? '').toString();
+    final fileTitle = (data['subjectName'] ?? data['title'] ?? 'ملف جديد').toString();
+
+    await docRef.update({
       'visibility': 'public',
       'status': 'approved',
       'updatedAt': FieldValue.serverTimestamp(),
     });
+
+    if (fileOwnerId.isNotEmpty) {
+      await NotificationsService.createNotification(
+        userId: fileOwnerId,
+        title: 'تمت الموافقة على ملفك',
+        body: 'تم قبول ملف $fileTitle وإتاحته داخل المكتبة.',
+        type: 'library',
+        senderId: currentUserId,
+        fileId: fileId,
+      );
+    }
   }
 
   static Future<void> rejectFile(String fileId) async {

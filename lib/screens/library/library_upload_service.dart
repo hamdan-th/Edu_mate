@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-
+import '../../services/notifications_service.dart';
 class LibraryUploadService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -90,6 +90,14 @@ class LibraryUploadService {
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      await NotificationsService.createNotification(
+        userId: user.uid,
+        title: 'تم رفع ملفك بنجاح',
+        body: 'أصبح ملف ${subjectName.trim()} متاحًا داخل المكتبة.',
+        type: 'library',
+        senderId: user.uid,
+        fileId: docRef.id,
+      );
     } on FirebaseException catch (e) {
       debugPrint('Firebase upload error => plugin: ${e.plugin}');
       debugPrint('Firebase upload error => code: ${e.code}');

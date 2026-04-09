@@ -77,12 +77,24 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final postId = widget.postCardData['postId']?.toString() ?? '';
 
     return Scaffold(
-      backgroundColor: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+      backgroundColor:
+      isDark ? AppColors.background : const Color(0xFFF7F9FC),
       appBar: AppBar(
-        title: const Text('التعليقات'),
+        elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        centerTitle: false,
+        title: const Text(
+          'التعليقات',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -94,7 +106,9 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
                     );
                   }
 
@@ -102,7 +116,11 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                     return Center(
                       child: Text(
                         'تعذر تحميل التعليقات',
-                        style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
+                        style: TextStyle(
+                          color: isDark
+                              ? AppColors.textSecondary
+                              : Colors.black54,
+                        ),
                       ),
                     );
                   }
@@ -110,79 +128,19 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
                   final comments = snapshot.data ?? [];
 
                   if (comments.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.chat_bubble_outline_rounded,
-                              size: 48, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
-                          const SizedBox(height: 16),
-                          Text(
-                            'لا توجد تعليقات بعد\nكُن أول من يعلق!',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
+                    return const _CommentsEmptyState();
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                    reverse: true, // Newest bottom logic natively via stream order
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                    reverse: true,
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
                       final comment = comments[index];
-                      // stream returns orderBy descending (newest first). 
-                      // if reverse=true, the index 0 (newest) is at the bottom.
-                      
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  comment.authorName,
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                Text(
-                                  _formatTime(comment.createdAt?.toDate()),
-                                  style: TextStyle(
-                                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              comment.text,
-                              style: TextStyle(
-                                color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
-                                fontSize: 13.5,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
+
+                      return _CommentCard(
+                        comment: comment,
+                        timeLabel: _formatTime(comment.createdAt?.toDate()),
                       );
                     },
                   );
@@ -197,46 +155,84 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
   }
 
   Widget _buildInputArea() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
       decoration: BoxDecoration(
-        color: (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
+        color: isDark ? AppColors.surface : Colors.white,
         border: Border(
-          top: BorderSide(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
+          top: BorderSide(
+            color: isDark
+                ? AppColors.border.withOpacity(0.55)
+                : Colors.black12,
+          ),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+            color: Colors.black.withOpacity(isDark ? 0.10 : 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
       child: SafeArea(
+        top: false,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            Container(
+              width: 42,
+              height: 42,
+              margin: const EdgeInsetsDirectional.only(end: 10),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.person_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+                  color: isDark
+                      ? AppColors.background
+                      : const Color(0xFFF8F9FB),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.border.withOpacity(0.1) : Colors.black12)),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.border.withOpacity(0.55)
+                        : Colors.black12,
+                  ),
                 ),
                 child: TextField(
                   controller: _commentController,
                   maxLines: 5,
                   minLines: 1,
                   style: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87),
+                    color: isDark
+                        ? AppColors.textPrimary
+                        : Colors.black87,
                     fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'إضافة تعليق...',
-                    hintStyle: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textSecondary : Colors.black54)),
+                    hintText: 'أضف تعليقًا مفيدًا...',
+                    hintStyle: TextStyle(
+                      color: isDark
+                          ? AppColors.textSecondary
+                          : Colors.black45,
+                    ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 12,
+                      vertical: 13,
                     ),
                     border: InputBorder.none,
                   ),
@@ -244,41 +240,280 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            GestureDetector(
-              onTap: _isSending ? null : _sendComment,
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _isSending ? null : _sendComment,
+                borderRadius: BorderRadius.circular(18),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.28),
+                        blurRadius: 12,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: _isSending
+                        ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 20,
                     ),
-                  ],
-                ),
-                child: Center(
-                  child: _isSending
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.send_rounded,
-                          color: Colors.white,
-                          size: 18,
-                        ),
+                  ),
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CommentCard extends StatelessWidget {
+  final FeedCommentModel comment;
+  final String timeLabel;
+
+  const _CommentCard({
+    required this.comment,
+    required this.timeLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surface : Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: isDark
+                      ? AppColors.border.withOpacity(0.50)
+                      : Colors.black12,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.10 : 0.03),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          comment.authorName,
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13.5,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        timeLabel,
+                        style: TextStyle(
+                          color: isDark
+                              ? AppColors.textSecondary
+                              : Colors.black45,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    comment.text,
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.textPrimary
+                          : Colors.black87,
+                      fontSize: 13.8,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _MiniActionChip(
+                        icon: Icons.reply_rounded,
+                        label: 'رد',
+                        isDark: isDark,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isDark;
+
+  const _MiniActionChip({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.background.withOpacity(0.7)
+            : const Color(0xFFF6F7FA),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: isDark
+              ? AppColors.border.withOpacity(0.5)
+              : Colors.black12,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: isDark ? AppColors.textSecondary : Colors.black54,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: isDark ? AppColors.textSecondary : Colors.black54,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommentsEmptyState extends StatelessWidget {
+  const _CommentsEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(maxWidth: 420),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surface : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isDark ? AppColors.border : Colors.black12,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.14 : 0.04),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 34,
+                backgroundColor: AppColors.primary.withOpacity(0.10),
+                child: const Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  color: AppColors.primary,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'لا توجد تعليقات بعد',
+                style: TextStyle(
+                  color: isDark ? AppColors.textPrimary : Colors.black87,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'ابدأ أول تعليق وشارك رأيك أو ملاحظتك بشكل مفيد وواضح.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isDark ? AppColors.textSecondary : Colors.black54,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

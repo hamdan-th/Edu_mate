@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'dart:async';
-
+import 'notifications_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -333,6 +333,14 @@ class GroupService {
     });
 
     await batch.commit();
+    await NotificationsService.createNotification(
+      userId: currentUid,
+      title: 'تم إنشاء المجموعة بنجاح',
+      body: 'تم إنشاء مجموعة $cleanName وأصبحت جاهزة الآن.',
+      type: 'group',
+      senderId: currentUid,
+      groupId: groupRef.id,
+    );
   }
 
   static Future<void> joinPublicGroup(String groupId) async {
@@ -351,7 +359,19 @@ class GroupService {
       if (!groupSnap.exists) {
         throw Exception('المجموعة غير موجودة');
       }
+      final joinedGroupSnap = await groupRef.get();
+      final joinedGroupData = joinedGroupSnap.data() ?? {};
+      final joinedGroupName =
+      (joinedGroupData['name'] ?? joinedGroupData['groupName'] ?? '').toString();
 
+      await NotificationsService.createNotification(
+        userId: currentUid,
+        title: 'تم الانضمام إلى المجموعة',
+        body: 'أصبحت الآن عضوًا في مجموعة $joinedGroupName',
+        type: 'group',
+        senderId: currentUid,
+        groupId: groupId,
+      );
       final data = groupSnap.data() ?? {};
       final status = (data['status'] ?? 'active').toString();
       final type = (data['type'] ?? 'public').toString();
@@ -385,6 +405,7 @@ class GroupService {
         'joinedAt': FieldValue.serverTimestamp(),
         'status': 'active',
       });
+
 
       tx.set(userRef.collection('joined_groups').doc(groupId), {
         'groupId': groupId,
@@ -461,7 +482,14 @@ class GroupService {
       if (!groupSnap.exists) {
         throw Exception('المجموعة غير موجودة');
       }
-
+      await NotificationsService.createNotification(
+        userId: currentUid,
+        title: 'تم الانضمام إلى المجموعة الخاصة',
+        body: 'أصبحت الآن عضوًا في مجموعة ${group.name}',
+        type: 'group',
+        senderId: currentUid,
+        groupId: group.id,
+      );
       final data = groupSnap.data() ?? {};
 
       final memberRef = groupRef.collection('members').doc(currentUid);
@@ -671,8 +699,23 @@ class GroupService {
 
     final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
+
     if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
       await memberRef.update({'role': 'admin'});
+
+      final promotedGroupSnap = await _groups.doc(groupId).get();
+      final promotedGroupData = promotedGroupSnap.data() ?? {};
+      final promotedGroupName =
+      (promotedGroupData['name'] ?? promotedGroupData['groupName'] ?? '').toString();
+
+      await NotificationsService.createNotification(
+        userId: memberId,
+        title: 'تمت ترقيتك إلى مشرف',
+        body: 'أصبحت الآن مشرفًا في مجموعة $promotedGroupName',
+        type: 'group',
+        senderId: currentUid,
+        groupId: groupId,
+      );
     }
   }
 
@@ -682,8 +725,23 @@ class GroupService {
 
     final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
+
     if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
       await memberRef.update({'role': 'member'});
+
+      final demotedGroupSnap = await _groups.doc(groupId).get();
+      final demotedGroupData = demotedGroupSnap.data() ?? {};
+      final demotedGroupName =
+      (demotedGroupData['name'] ?? demotedGroupData['groupName'] ?? '').toString();
+
+      await NotificationsService.createNotification(
+        userId: memberId,
+        title: 'تمت إزالة صلاحية الإشراف',
+        body: 'لم تعد مشرفًا في مجموعة $demotedGroupName',
+        type: 'group',
+        senderId: currentUid,
+        groupId: groupId,
+      );
     }
   }
 
@@ -693,8 +751,23 @@ class GroupService {
 
     final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
+
     if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
       await memberRef.update({'status': 'muted'});
+
+      final mutedGroupSnap = await _groups.doc(groupId).get();
+      final mutedGroupData = mutedGroupSnap.data() ?? {};
+      final mutedGroupName =
+      (mutedGroupData['name'] ?? mutedGroupData['groupName'] ?? '').toString();
+
+      await NotificationsService.createNotification(
+        userId: memberId,
+        title: 'تم كتمك داخل المجموعة',
+        body: 'لم يعد بإمكانك إرسال الرسائل في مجموعة $mutedGroupName',
+        type: 'group',
+        senderId: currentUid,
+        groupId: groupId,
+      );
     }
   }
 
@@ -704,8 +777,23 @@ class GroupService {
 
     final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
+
     if (memberDoc.exists) {
       await memberRef.update({'status': 'active'});
+
+      final unmutedGroupSnap = await _groups.doc(groupId).get();
+      final unmutedGroupData = unmutedGroupSnap.data() ?? {};
+      final unmutedGroupName =
+      (unmutedGroupData['name'] ?? unmutedGroupData['groupName'] ?? '').toString();
+
+      await NotificationsService.createNotification(
+        userId: memberId,
+        title: 'تم فك الكتم عنك',
+        body: 'يمكنك الآن إرسال الرسائل من جديد في مجموعة $unmutedGroupName',
+        type: 'group',
+        senderId: currentUid,
+        groupId: groupId,
+      );
     }
   }
 
@@ -716,15 +804,28 @@ class GroupService {
     final groupRef = _groups.doc(groupId);
     final memberRef = groupRef.collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
-    
+
     if (!memberDoc.exists) return;
     if (memberDoc.data()?['role'] == 'owner') throw Exception("لا يمكن طرد المالك");
+
+    final groupData = (await groupRef.get()).data() ?? {};
+    final kickedGroupName =
+    (groupData['name'] ?? groupData['groupName'] ?? '').toString();
 
     final batch = _db.batch();
     batch.delete(memberRef);
     batch.delete(_users.doc(memberId).collection('joined_groups').doc(groupId));
     batch.update(groupRef, {'membersCounts': FieldValue.increment(-1)});
     await batch.commit();
+
+    await NotificationsService.createNotification(
+      userId: memberId,
+      title: 'تمت إزالتك من المجموعة',
+      body: 'تمت إزالة عضويتك من مجموعة $kickedGroupName',
+      type: 'group',
+      senderId: currentUid,
+      groupId: groupId,
+    );
   }
 
   static Future<void> reportMember(String groupId, String reportedUserId) async {

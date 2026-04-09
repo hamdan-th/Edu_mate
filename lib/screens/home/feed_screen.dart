@@ -12,6 +12,7 @@ import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 import '../settings/settings_bottom_sheet.dart';
 import '../../features/edu_bot/presentation/screens/bot_screen.dart';
+import '../../services/notifications_service.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -24,7 +25,7 @@ class _FeedScreenState extends State<FeedScreen> {
   String _selectedFilter = 'For You';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
-  int _unreadNotifications = 3;
+
   final List<String> _filters = const [
     'For You',
     'Recent',
@@ -60,19 +61,13 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Future<void> _openNotifications() async {
-    final result = await Navigator.push(
+  void _openNotifications() {
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const NotificationsScreen(),
       ),
     );
-
-    if (result is int && mounted) {
-      setState(() {
-        _unreadNotifications = result;
-      });
-    }
   }
 
   void _openBot() {
@@ -132,23 +127,60 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
       body: Stack(
         children: [
+          Positioned(
+            top: -90,
+            right: -50,
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withOpacity(0.05),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 120,
+            left: -70,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primaryDark.withOpacity(0.04),
+              ),
+            ),
+          ),
           SafeArea(
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             l10n.app_name,
                             style: TextStyle(
-                              color: isDark ? AppColors.textPrimary : Colors.black87,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
+                              color:
+                              isDark ? AppColors.textPrimary : Colors.black87,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
                               letterSpacing: -0.8,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.filterForYou,
+                            style: TextStyle(
+                              color: isDark
+                                  ? AppColors.textSecondary
+                                  : Colors.black54,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -160,10 +192,17 @@ class _FeedScreenState extends State<FeedScreen> {
                             onTap: () => SettingsBottomSheet.show(context),
                           ),
                           const SizedBox(width: 8),
-                          FeedTopActionButton(
-                            icon: Icons.notifications_none_rounded,
-                            hasBadge: _unreadNotifications > 0,
-                            onTap: _openNotifications,
+                          StreamBuilder<int>(
+                            stream: NotificationsService.streamUnreadCount(),
+                            builder: (context, snapshot) {
+                              final unreadCount = snapshot.data ?? 0;
+
+                              return FeedTopActionButton(
+                                icon: Icons.notifications_none_rounded,
+                                hasBadge: unreadCount > 0,
+                                onTap: _openNotifications,
+                              );
+                            },
                           ),
                           const SizedBox(width: 8),
                           FeedTopActionButton(
@@ -176,23 +215,43 @@ class _FeedScreenState extends State<FeedScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                   child: Container(
-                    height: 44,
+                    height: 48,
                     decoration: BoxDecoration(
-                      color: AppColors.surface.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border.withOpacity(0.4)),
+                      color: isDark
+                          ? AppColors.surface.withOpacity(0.92)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.border.withOpacity(0.45)
+                            : Colors.black12,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? 0.10 : 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: TextField(
                       controller: _searchController,
-                      style: TextStyle(color: isDark ? AppColors.textPrimary : Colors.black87, fontSize: 14),
+                      style: TextStyle(
+                        color: isDark ? AppColors.textPrimary : Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: l10n.feedSearchHint,
                         hintStyle: TextStyle(
-                          color: isDark ? AppColors.textSecondary : Colors.black54,
-                          fontWeight: FontWeight.w400,
+                          color: isDark
+                              ? AppColors.textSecondary
+                              : Colors.black45,
+                          fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
                         prefixIcon: const Icon(
@@ -200,14 +259,15 @@ class _FeedScreenState extends State<FeedScreen> {
                           color: AppColors.textSecondary,
                           size: 20,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        contentPadding:
+                        const EdgeInsets.symmetric(vertical: 13),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 SizedBox(
-                  height: 38,
+                  height: 40,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -215,7 +275,7 @@ class _FeedScreenState extends State<FeedScreen> {
                     itemBuilder: (context, index) {
                       final label = _filters[index];
                       final active = _selectedFilter == label;
-                      
+
                       String displayLabel = label;
                       if (label == 'For You') {
                         displayLabel = l10n.filterForYou;
@@ -226,13 +286,18 @@ class _FeedScreenState extends State<FeedScreen> {
                       } else if (label == 'Academic') {
                         displayLabel = l10n.filterAcademic;
                       }
+
                       return GestureDetector(
                         onTap: () {
                           setState(() {
                             _selectedFilter = label;
                           });
                         },
-                        child: ModernChip(label: displayLabel, originalValue: label, active: active),
+                        child: ModernChip(
+                          label: displayLabel,
+                          originalValue: label,
+                          active: active,
+                        ),
                       );
                     },
                   ),
@@ -250,7 +315,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             ConnectionState.waiting) {
                           return ListView.builder(
                             padding:
-                            const EdgeInsets.fromLTRB(20, 0, 20, 110),
+                            const EdgeInsets.fromLTRB(16, 0, 16, 110),
                             itemCount: 3,
                             itemBuilder: (_, __) =>
                             const SkeletonPostCard(),
@@ -288,8 +353,7 @@ class _FeedScreenState extends State<FeedScreen> {
                         }
 
                         return ListView.builder(
-                          padding:
-                          const EdgeInsets.fromLTRB(8, 0, 8, 110),
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 110),
                           itemCount: docs.length,
                           itemBuilder: (context, index) {
                             final data = docs[index];
@@ -311,7 +375,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             };
 
                             return AnimatedPostWrapper(
-                              delay: Duration(milliseconds: 80 * index),
+                              delay: Duration(milliseconds: 70 * index),
                               child: PostCard(post: post),
                             );
                           },
@@ -341,21 +405,24 @@ class FloatingStudyBotButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surface.withOpacity(0.97) : Colors.white.withOpacity(0.97),
-            borderRadius: BorderRadius.circular(18),
+            color: isDark
+                ? AppColors.surface.withOpacity(0.97)
+                : Colors.white.withOpacity(0.98),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.10),
-                blurRadius: 16,
+                color: AppColors.primary.withOpacity(0.12),
+                blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
             ],
@@ -400,6 +467,7 @@ class FeedTopActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -412,7 +480,9 @@ class FeedTopActionButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark ? AppColors.surface.withOpacity(0.98) : Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: isDark ? AppColors.border : Colors.black12),
+              border: Border.all(
+                color: isDark ? AppColors.border : Colors.black12,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.primary.withOpacity(0.06),
@@ -463,7 +533,9 @@ class ModernChip extends StatelessWidget {
     final checkLabel = originalValue ?? label;
     if (checkLabel.contains('For You')) return Icons.auto_awesome_rounded;
     if (checkLabel.contains('Recent')) return Icons.access_time_rounded;
-    if (checkLabel.contains('Popular')) return Icons.local_fire_department_rounded;
+    if (checkLabel.contains('Popular')) {
+      return Icons.local_fire_department_rounded;
+    }
     if (checkLabel.contains('Academic')) return Icons.account_balance_rounded;
     return Icons.filter_list_rounded;
   }
@@ -471,17 +543,24 @@ class ModernChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: active 
-          ? AppColors.primary.withOpacity(0.12) 
-          : (isDark ? AppColors.surface.withOpacity(0.3) : Colors.white.withOpacity(0.6)),
-        borderRadius: BorderRadius.circular(20),
-        border: active 
-          ? Border.all(color: AppColors.primary.withOpacity(0.3)) 
-          : Border.all(color: isDark ? AppColors.border.withOpacity(0.3) : Colors.black12),
+        color: active
+            ? AppColors.primary.withOpacity(0.12)
+            : (isDark
+            ? AppColors.surface.withOpacity(0.4)
+            : Colors.white.withOpacity(0.75)),
+        borderRadius: BorderRadius.circular(22),
+        border: active
+            ? Border.all(color: AppColors.primary.withOpacity(0.30))
+            : Border.all(
+          color: isDark
+              ? AppColors.border.withOpacity(0.35)
+              : Colors.black12,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -489,15 +568,19 @@ class ModernChip extends StatelessWidget {
           Icon(
             _getIcon(),
             size: 14,
-            color: active ? AppColors.primary : AppColors.textSecondary.withOpacity(0.8),
+            color: active
+                ? AppColors.primary
+                : AppColors.textSecondary.withOpacity(0.85),
           ),
           const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
-              color: active ? AppColors.primary : (isDark ? AppColors.textSecondary : Colors.black54),
+              color: active
+                  ? AppColors.primary
+                  : (isDark ? AppColors.textSecondary : Colors.black54),
               fontSize: 13,
-              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              fontWeight: active ? FontWeight.w800 : FontWeight.w600,
             ),
           ),
         ],
@@ -634,14 +717,14 @@ class _PostCardState extends State<PostCard>
 
   Future<void> _joinGroup() async {
     if (_isLoadingJoined || _isJoined) return;
-    
+
     final groupId = widget.post['groupId']?.toString() ?? '';
     if (groupId.isEmpty) return;
-    
+
     setState(() {
       _isLoadingJoined = true;
     });
-    
+
     try {
       await GroupService.joinPublicGroup(groupId);
       if (mounted) {
@@ -649,11 +732,19 @@ class _PostCardState extends State<PostCard>
           _isJoined = true;
         });
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.feedJoinedGroup)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.feedJoinedGroup)),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString().replaceAll('Exception: ', ''),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -666,7 +757,7 @@ class _PostCardState extends State<PostCard>
 
   Future<void> _toggleLike() async {
     if (_isLoadingLike) return;
-    
+
     final postId = widget.post['postId']?.toString() ?? '';
     if (postId.isEmpty) return;
 
@@ -723,20 +814,28 @@ class _PostCardState extends State<PostCard>
       onTapCancel: () => setState(() => isPressed = false),
       child: AnimatedScale(
         duration: const Duration(milliseconds: 120),
-        scale: isPressed ? 0.985 : 1,
+        scale: isPressed ? 0.988 : 1,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(bottom: 14),
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           decoration: BoxDecoration(
             color: Theme.of(context).cardTheme.color ?? AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isDark ? AppColors.border.withOpacity(0.5) : Colors.black12),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.border.withOpacity(0.50)
+                  : Colors.black12,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(isPressed ? (isDark ? 0.2 : 0.05) : (isDark ? 0.1 : 0.02)),
-                blurRadius: isPressed ? 8 : 4,
-                offset: const Offset(0, 2),
+                color: Colors.black.withOpacity(
+                  isPressed
+                      ? (isDark ? 0.18 : 0.05)
+                      : (isDark ? 0.10 : 0.03),
+                ),
+                blurRadius: isPressed ? 10 : 6,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -744,11 +843,11 @@ class _PostCardState extends State<PostCard>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -771,32 +870,44 @@ class _PostCardState extends State<PostCard>
                         Text(
                           '${widget.post['authorName'] ?? ''}',
                           style: TextStyle(
-                            color: isDark ? AppColors.textPrimary : Colors.black87,
+                            color: isDark
+                                ? AppColors.textPrimary
+                                : Colors.black87,
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                             letterSpacing: -0.2,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 3),
                         Row(
                           children: [
+                            Flexible(
+                              child: Text(
+                                (widget.post['groupName'] ?? '').toString(),
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: AppColors.primary.withOpacity(0.95),
+                                  fontSize: 12.8,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.circle,
+                              size: 4,
+                              color:
+                              AppColors.textSecondary.withOpacity(0.65),
+                            ),
+                            const SizedBox(width: 8),
                             Text(
                               '${widget.post['time'] ?? ''}',
                               style: TextStyle(
-                                color: AppColors.textSecondary.withOpacity(0.8),
-                                fontSize: 13,
+                                color:
+                                AppColors.textSecondary.withOpacity(0.82),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(Icons.public, size: 12, color: AppColors.textSecondary.withOpacity(0.8)),
-                            const SizedBox(width: 6),
-                            Text(
-                              '· ${(widget.post['groupName'] ?? '').toString()}',
-                              style: TextStyle(
-                                color: AppColors.textSecondary.withOpacity(0.7),
-                                fontSize: 13,
-                              ),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
@@ -806,35 +917,56 @@ class _PostCardState extends State<PostCard>
                   if (!_isJoined)
                     InkWell(
                       onTap: _isLoadingJoined ? null : _joinGroup,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(18),
                       child: Container(
-                        height: 32,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        height: 34,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.22),
+                          ),
                         ),
                         child: Center(
                           child: _isLoadingJoined
                               ? const SizedBox(
-                                  width: 14, 
-                                  height: 14, 
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
-                                )
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
+                          )
                               : Text(
-                                  l10n.feedJoinAction,
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                            l10n.feedJoinAction,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12.8,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   const SizedBox(width: 8),
-                  Icon(Icons.more_horiz, color: isDark ? AppColors.textSecondary : Colors.black45, size: 24),
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.background.withOpacity(0.7)
+                          : const Color(0xFFF7F8FB),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.more_horiz,
+                      color: isDark
+                          ? AppColors.textSecondary
+                          : Colors.black45,
+                      size: 20,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -842,105 +974,88 @@ class _PostCardState extends State<PostCard>
                 widget.post['content'] ?? '',
                 style: TextStyle(
                   color: isDark ? AppColors.textPrimary : Colors.black87,
-                  fontSize: 15.5,
-                  height: 1.5,
-                  fontWeight: FontWeight.w400,
+                  fontSize: 15.3,
+                  height: 1.55,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               if ((widget.post['hasImage'] ?? false) == true) ...[
                 const SizedBox(height: 14),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(18),
                   child: Container(
                     width: double.infinity,
-                    height: 220,
+                    height: 230,
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.border.withOpacity(0.3)),
+                      border: Border.all(
+                        color: AppColors.border.withOpacity(0.25),
+                      ),
                       color: AppColors.surface,
                     ),
                     child: imageUrl.isNotEmpty
                         ? Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_not_supported_outlined, color: AppColors.textSecondary, size: 34)),
-                          )
-                        : const Center(child: Icon(Icons.image_outlined, color: AppColors.textSecondary, size: 34)),
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          color: AppColors.textSecondary,
+                          size: 34,
+                        ),
+                      ),
+                    )
+                        : const Center(
+                      child: Icon(
+                        Icons.image_outlined,
+                        color: AppColors.textSecondary,
+                        size: 34,
+                      ),
+                    ),
                   ),
                 ),
               ],
               const SizedBox(height: 14),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Row(
-                    children: [
-                      const Text('❤️', style: TextStyle(fontSize: 11)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$_likesCount',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
+                  _PostMetaItem(
+                    icon: Icons.favorite_rounded,
+                    value: '$_likesCount',
+                    color: Colors.red,
                   ),
                   const SizedBox(width: 14),
-                  Row(
-                    children: [
-                      const Text('💬', style: TextStyle(fontSize: 11)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${widget.post['comments'] ?? 0}',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
+                  _PostMetaItem(
+                    icon: Icons.chat_bubble_rounded,
+                    value: '${widget.post['comments'] ?? 0}',
+                    color: AppColors.primary,
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Divider(height: 1, thickness: 1, color: AppColors.border.withOpacity(0.3)),
-              const SizedBox(height: 2),
+              const SizedBox(height: 10),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: AppColors.border.withOpacity(0.28),
+              ),
+              const SizedBox(height: 4),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
+                    child: _ActionButton(
+                      icon: isLiked
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      label: l10n.likeAction,
+                      active: isLiked,
+                      activeColor: Colors.red,
                       onTap: _toggleLike,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: ScaleTransition(
-                          scale: _likeScale,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                size: 20,
-                                color: isLiked ? Colors.red : AppColors.textSecondary,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                l10n.likeAction,
-                                style: TextStyle(
-                                  color: isLiked ? Colors.red : (isDark ? AppColors.textSecondary : Colors.black54),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                   Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
+                    child: _ActionButton(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      label: l10n.commentAction,
+                      active: false,
+                      activeColor: AppColors.primary,
                       onTap: () {
                         showModalBottomSheet(
                           context: context,
@@ -950,37 +1065,19 @@ class _PostCardState extends State<PostCard>
                             padding: EdgeInsets.only(
                               bottom: MediaQuery.of(context).viewInsets.bottom,
                             ),
-                            child: PostCommentsSheet(postCardData: widget.post),
+                            child:
+                            PostCommentsSheet(postCardData: widget.post),
                           ),
                         );
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 20,
-                              color: isDark ? AppColors.textSecondary : Colors.black45,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              l10n.commentAction,
-                              style: TextStyle(
-                                color: isDark ? AppColors.textSecondary : Colors.black54,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ),
                   Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
+                    child: _ActionButton(
+                      icon: Icons.share_outlined,
+                      label: l10n.shareAction,
+                      active: false,
+                      activeColor: AppColors.primary,
                       onTap: () {
                         final feedPost = FeedPostModel.fromMap(
                           widget.post,
@@ -988,34 +1085,94 @@ class _PostCardState extends State<PostCard>
                         );
                         FeedShareService.sharePost(context, feedPost);
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.share_outlined,
-                              size: 20,
-                              color: isDark ? AppColors.textSecondary : Colors.black45,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              l10n.shareAction,
-                              style: TextStyle(
-                                color: isDark ? AppColors.textSecondary : Colors.black54,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ),
                 ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PostMetaItem extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final Color color;
+
+  const _PostMetaItem({
+    required this.icon,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 5),
+        Text(
+          value,
+          style: TextStyle(
+            color: AppColors.textSecondary.withOpacity(0.9),
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool active;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 9),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 19,
+              color: active
+                  ? activeColor
+                  : (isDark ? AppColors.textSecondary : Colors.black54),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: active
+                    ? activeColor
+                    : (isDark ? AppColors.textSecondary : Colors.black54),
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1112,7 +1269,9 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
           decoration: BoxDecoration(
             color: isDark ? AppColors.surface : Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: isDark ? AppColors.border : Colors.black12),
+            border: Border.all(
+              color: isDark ? AppColors.border : Colors.black12,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1182,7 +1341,7 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
                   const SizedBox(width: 20),
                   SkeletonBox(width: 54, height: 18, color: c, radius: 8),
                   const SizedBox(width: 20),
-                  SkeletonBox(width: 24, height: 18, color: c, radius: 8),
+                  SkeletonBox(width: 54, height: 18, color: c, radius: 8),
                 ],
               ),
             ],
@@ -1238,12 +1397,15 @@ class EmptyStateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDark ? AppColors.border : Colors.black12),
+        border: Border.all(
+          color: isDark ? AppColors.border : Colors.black12,
+        ),
       ),
       child: Column(
         children: [
