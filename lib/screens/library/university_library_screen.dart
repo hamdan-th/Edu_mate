@@ -232,6 +232,8 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                         ),
                         child: Text(
                           '${AppLocalizations.of(context)!.libSortPrefix} ${_getLocalizedSort(context, _sortOrder)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),

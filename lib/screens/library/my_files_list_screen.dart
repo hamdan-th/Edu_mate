@@ -10,14 +10,15 @@ import 'file_model.dart';
 import 'library_files_service.dart';
 import 'library_theme.dart';
 import 'pdf_preview_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class MyFilesListScreen extends StatelessWidget {
   final String title;
   const MyFilesListScreen({super.key, required this.title});
 
-  FileModel _mapDocToFileModel(Map<String, dynamic> data, String docId) {
-    final subjectName = (data['subjectName'] ?? 'بدون عنوان').toString();
-    final doctorName = (data['doctorName'] ?? 'غير معروف').toString();
+  FileModel _mapDocToFileModel(Map<String, dynamic> data, String docId, AppLocalizations l10n) {
+    final subjectName = (data['subjectName'] ?? l10n.myFilesNoTitle).toString();
+    final doctorName = (data['doctorName'] ?? l10n.myFilesUnknown).toString();
     final college = (data['college'] ?? '').toString();
     final specialization = (data['specialization'] ?? '').toString();
     final level = (data['level'] ?? '').toString();
@@ -45,7 +46,7 @@ class MyFilesListScreen extends StatelessWidget {
       title: subjectName,
       author: doctorName,
       course: subjectName,
-      university: 'جامعة صنعاء',
+      university: l10n.myFilesSanaUniversity,
       college: college,
       major: specialization,
       semester: '$level${term.isNotEmpty ? ' • $term' : ''}',
@@ -93,12 +94,15 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   Future<void> _openDownloadedFile(BuildContext context, FileModel file) async {
+    final l10n = AppLocalizations.of(context)!;
     final url = file.fileUrl.trim();
 
     if (url.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا يوجد رابط للملف')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.myFilesNoLink)),
+        );
+      }
       return;
     }
 
@@ -125,9 +129,11 @@ class MyFilesListScreen extends StatelessWidget {
     );
 
     if (!launched) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر فتح الملف')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.myFilesCannotOpen)),
+        );
+      }
     }
   }
 
@@ -135,11 +141,12 @@ class MyFilesListScreen extends StatelessWidget {
       BuildContext context,
       List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
       ) {
-    String emptyMessage = 'لا توجد ملفات';
-    if (title == 'المراجع') emptyMessage = 'لم تقم بحفظ أي ملفات بعد';
-    if (title == 'ما رفعته') emptyMessage = 'لم تقم برفع أي ملفات بعد';
-    if (title == 'تنزيلاتي') emptyMessage = 'لم تقم بتنزيل أي ملفات بعد';
-    if (title == 'ما شاركته') emptyMessage = 'لم تقم بمشاركة أي ملفات بعد';
+    final l10n = AppLocalizations.of(context)!;
+    String emptyMessage = l10n.myFilesEmptyDefault;
+    if (title == l10n.myLibNavReferences) emptyMessage = l10n.myFilesEmptySaved;
+    if (title == l10n.myLibUploadsTitle) emptyMessage = l10n.myFilesEmptyUploads;
+    if (title == l10n.myLibDownloadsTitle) emptyMessage = l10n.myFilesEmptyDownloads;
+    if (title == l10n.myLibSharesTitle) emptyMessage = l10n.myFilesEmptyShares;
 
     if (docs.isEmpty) {
       return Center(
@@ -163,11 +170,11 @@ class MyFilesListScreen extends StatelessWidget {
         final data = docs[index].data();
         final fileType = (data['fileType'] ?? '').toString().toLowerCase();
         final isPdf = fileType == 'pdf';
-        final file = _mapDocToFileModel(data, docs[index].id);
+        final file = _mapDocToFileModel(data, docs[index].id, l10n);
 
         return GestureDetector(
           onTap: () {
-            if (title == 'تنزيلاتي') {
+            if (title == l10n.myLibDownloadsTitle) {
               _openDownloadedFile(context, file);
             } else {
               Navigator.push(
@@ -210,7 +217,7 @@ class MyFilesListScreen extends StatelessWidget {
                 ),
               ),
               title: Text(
-                data['subjectName'] ?? 'بدون عنوان',
+                data['subjectName'] ?? l10n.myFilesNoTitle,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: LibraryTheme.text(context),
@@ -254,6 +261,7 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   Widget _buildMyUploads(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: LibraryFilesService.myUploadedFiles(),
       builder: (context, snapshot) {
@@ -264,7 +272,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${snapshot.error}',
+              l10n.myFilesError(snapshot.error.toString()),
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -278,11 +286,12 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   Widget _buildSavedReferences(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Center(
         child: Text(
-          'يجب تسجيل الدخول أولاً',
+          l10n.upErrorLoginRequired,
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
@@ -301,7 +310,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (saveSnapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${saveSnapshot.error}',
+              l10n.myFilesError(saveSnapshot.error.toString()),
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -320,7 +329,7 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'حدث خطأ: ${filesSnapshot.error}',
+                  l10n.myFilesError(filesSnapshot.error.toString()),
                   style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
@@ -337,11 +346,12 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   Widget _buildDownloads(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Center(
         child: Text(
-          'يجب تسجيل الدخول أولاً',
+          l10n.upErrorLoginRequired,
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
@@ -360,7 +370,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (downloadSnapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${downloadSnapshot.error}',
+              l10n.myFilesError(downloadSnapshot.error.toString()),
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -379,7 +389,7 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'حدث خطأ: ${filesSnapshot.error}',
+                  l10n.myFilesError(filesSnapshot.error.toString()),
                   style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
@@ -396,11 +406,12 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   Widget _buildShares(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Center(
         child: Text(
-          'يجب تسجيل الدخول أولاً',
+          l10n.upErrorLoginRequired,
           style: TextStyle(fontSize: 18, color: LibraryTheme.text(context)),
         ),
       );
@@ -419,7 +430,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (shareSnapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${shareSnapshot.error}',
+              l10n.myFilesError(shareSnapshot.error.toString()),
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -438,7 +449,7 @@ class MyFilesListScreen extends StatelessWidget {
             if (filesSnapshot.hasError) {
               return Center(
                 child: Text(
-                  'حدث خطأ: ${filesSnapshot.error}',
+                  l10n.myFilesError(filesSnapshot.error.toString()),
                   style: TextStyle(color: LibraryTheme.text(context)),
                   textAlign: TextAlign.center,
                 ),
@@ -454,6 +465,7 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   Widget _buildDigitalSavedReferences(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: DigitalLibraryFirestoreService.savedReferences(),
       builder: (context, snapshot) {
@@ -464,7 +476,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${snapshot.error}',
+              l10n.myFilesError(snapshot.error.toString()),
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -522,7 +534,7 @@ class MyFilesListScreen extends StatelessWidget {
                     ),
                   ),
                   title: Text(
-                    (data['title'] ?? 'بدون عنوان').toString(),
+                    (data['title'] ?? l10n.myFilesNoTitle).toString(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: LibraryTheme.text(context),
@@ -531,7 +543,7 @@ class MyFilesListScreen extends StatelessWidget {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      (data['authors'] ?? 'مؤلف غير معروف').toString(),
+                      (data['authors'] ?? l10n.myFilesUnknownAuthor).toString(),
                       style: TextStyle(
                         color: LibraryTheme.muted(context),
                         height: 1.4,
@@ -555,6 +567,7 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   Widget _buildDigitalDownloads(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: DigitalLibraryFirestoreService.downloadedReferences(),
       builder: (context, snapshot) {
@@ -565,7 +578,7 @@ class MyFilesListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'حدث خطأ: ${snapshot.error}',
+              l10n.myFilesError(snapshot.error.toString()),
               style: TextStyle(color: LibraryTheme.text(context)),
               textAlign: TextAlign.center,
             ),
@@ -596,7 +609,7 @@ class MyFilesListScreen extends StatelessWidget {
 
                 if (targetUrl.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('لا يوجد رابط للفتح')),
+                    SnackBar(content: Text(l10n.myFilesNoLinkToOpen)),
                   );
                   return;
                 }
@@ -609,7 +622,7 @@ class MyFilesListScreen extends StatelessWidget {
 
                 if (!launched) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تعذر فتح الملف')),
+                    SnackBar(content: Text(l10n.myFilesCannotOpen)),
                   );
                 }
               },
@@ -635,7 +648,7 @@ class MyFilesListScreen extends StatelessWidget {
                     ),
                   ),
                   title: Text(
-                    (data['title'] ?? 'بدون عنوان').toString(),
+                    (data['title'] ?? l10n.myFilesNoTitle).toString(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: LibraryTheme.text(context),
@@ -644,7 +657,7 @@ class MyFilesListScreen extends StatelessWidget {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      (data['authors'] ?? 'مؤلف غير معروف').toString(),
+                      (data['authors'] ?? l10n.myFilesUnknownAuthor).toString(),
                       style: TextStyle(
                         color: LibraryTheme.muted(context),
                         height: 1.4,
@@ -652,7 +665,7 @@ class MyFilesListScreen extends StatelessWidget {
                     ),
                   ),
                   trailing: Text(
-                    'فتح',
+                    l10n.myFilesTrailingOpen,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: LibraryTheme.primary(context),
@@ -686,11 +699,11 @@ class MyFilesListScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final bool isMyUploads = title == 'ما رفعته';
-    final bool isReferences = title == 'المراجع';
-    final bool isDownloads = title == 'تنزيلاتي';
-    final bool isShares = title == 'ما شاركته';
+  Widget build(BuildContext context) { final l10n = AppLocalizations.of(context)!;
+    final bool isMyUploads = title == l10n.myLibUploadsTitle;
+    final bool isReferences = title == l10n.myLibNavReferences;
+    final bool isDownloads = title == l10n.myLibDownloadsTitle;
+    final bool isShares = title == l10n.myLibSharesTitle;
 
     return Scaffold(
       backgroundColor: LibraryTheme.bg(context),
@@ -724,7 +737,7 @@ class MyFilesListScreen extends StatelessWidget {
           ? _buildShares(context)
           : Center(
         child: Text(
-          'سيتم عرض قائمة "$title" هنا لاحقًا',
+          l10n.myFilesFutureList(title),
           style: TextStyle(
             fontSize: 18,
             color: LibraryTheme.text(context),

@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'digital_library_firestore_service.dart';
 import 'library_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class CoreResultDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> resultData;
@@ -19,18 +20,19 @@ class CoreResultDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = resultData['title'] ?? 'بدون عنوان';
+    final l10n = AppLocalizations.of(context)!;
+    final title = resultData['title'] ?? l10n.digitalLibNoTitle;
     final authors = (resultData['authors'] as List<dynamic>?)
         ?.map((author) => author['name'].toString())
         .join(', ') ??
-        'مؤلف غير معروف';
-    final abstract = resultData['abstract'] ?? 'لا يوجد ملخص متاح.';
-    final year = resultData['yearPublished']?.toString() ?? 'غير معروف';
-    final publisher = resultData['publisher'] ?? 'غير معروف';
+        l10n.digitalLibUnknownAuthor;
+    final abstract = resultData['abstract'] ?? l10n.digitalLibNoAbstract;
+    final year = resultData['yearPublished']?.toString() ?? l10n.myFilesUnknown;
+    final publisher = resultData['publisher'] ?? l10n.myFilesUnknown;
     final journal = resultData['journals'] is List &&
         (resultData['journals'] as List).isNotEmpty
         ? (resultData['journals'] as List).first.toString()
-        : 'غير معروف';
+        : l10n.myFilesUnknown;
     final articleId = resultData['id']?.toString();
     final downloadableLink = resultData['downloadUrl']?.toString();
 
@@ -41,7 +43,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: LibraryTheme.bg(context),
       appBar: AppBar(
-        title: const Text('تفاصيل البحث'),
+        title: Text(l10n.digitalLibResultDetailsTitle),
         backgroundColor: LibraryTheme.surface(context),
         foregroundColor: LibraryTheme.text(context),
         elevation: 0,
@@ -60,13 +62,13 @@ class CoreResultDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(context, Icons.people_alt_outlined, 'المؤلفون:', authors),
+            _buildInfoRow(context, Icons.people_alt_outlined, l10n.digitalLibLabelAuthors, authors),
             const SizedBox(height: 8),
-            _buildInfoRow(context, Icons.business_rounded, 'الناشر:', publisher.toString()),
+            _buildInfoRow(context, Icons.business_rounded, l10n.digitalLibLabelPublisher, publisher.toString()),
             const SizedBox(height: 8),
-            _buildInfoRow(context, Icons.calendar_today_rounded, 'سنة النشر:', year),
+            _buildInfoRow(context, Icons.calendar_today_rounded, l10n.digitalLibLabelYear, year),
             const SizedBox(height: 8),
-            _buildInfoRow(context, Icons.menu_book_rounded, 'المجلة:', journal),
+            _buildInfoRow(context, Icons.menu_book_rounded, l10n.digitalLibLabelJournal, journal),
             const Divider(height: 30, thickness: 1),
 
             Row(
@@ -78,7 +80,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                           ? Icons.bookmark_rounded
                           : Icons.bookmark_border_rounded,
                     ),
-                    label: Text(isSaved ? 'محفوظ' : 'حفظ'),
+                    label: Text(isSaved ? l10n.digitalLibActionSaved : l10n.digitalLibActionSave),
                     onPressed: () async {
                       try {
                         if (!isSaved) {
@@ -92,8 +94,8 @@ class CoreResultDetailsScreen extends StatelessWidget {
                             SnackBar(
                               content: Text(
                                 isSaved
-                                    ? 'تمت الإزالة من الحفظ داخل الواجهة'
-                                    : 'تم حفظ المرجع في مكتبتي',
+                                    ? l10n.digitalLibRemovedFromSaved
+                                    : l10n.digitalLibSavedSuccessfully,
                               ),
                             ),
                           );
@@ -101,7 +103,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                       } catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('تعذر حفظ المرجع: $e')),
+                            SnackBar(content: Text(l10n.digitalLibSaveErrorParam(e.toString()))),
                           );
                         }
                       }
@@ -112,11 +114,11 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.share_outlined),
-                    label: const Text('مشاركة'),
+                    label: Text(l10n.digitalLibActionShare),
                     onPressed: () async {
                       if (articleUrl.isEmpty) return;
                       await Share.share(
-                        'اطلع على هذه الورقة البحثية:\n$title\n$articleUrl',
+                        l10n.digitalLibShareText(title, articleUrl),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -134,7 +136,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.download_rounded),
-                  label: const Text('تنزيل PDF'),
+                  label: Text(l10n.digitalLibActionDownloadPdf),
                   onPressed: () async {
                     try {
                       await DigitalLibraryFirestoreService.registerDownload(
@@ -143,7 +145,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('تعذر تسجيل التنزيل: $e')),
+                          SnackBar(content: Text(l10n.digitalLibDownloadError(e.toString()))),
                         );
                       }
                     }
@@ -173,7 +175,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.open_in_browser_rounded),
-                  label: const Text('فتح المصدر'),
+                  label: Text(l10n.digitalLibActionOpenSource),
                   onPressed: () async {
                     final Uri url = Uri.parse(articleUrl);
                     await launchUrl(
@@ -195,7 +197,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
 
             const Divider(height: 30, thickness: 1),
             Text(
-              'الملخص (Abstract)',
+              l10n.digitalLibLabelAbstract,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -205,7 +207,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               abstract.toString().trim().isEmpty
-                  ? 'لا يوجد ملخص متاح.'
+                  ? l10n.digitalLibNoAbstract
                   : abstract.toString(),
               style: TextStyle(
                 fontSize: 16,
@@ -220,6 +222,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -236,7 +239,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
         const SizedBox(width: 5),
         Expanded(
           child: Text(
-            value.isEmpty ? 'غير معروف' : value,
+            value.isEmpty ? l10n.myFilesUnknown : value,
             style: TextStyle(
               fontSize: 16,
               color: LibraryTheme.text(context),

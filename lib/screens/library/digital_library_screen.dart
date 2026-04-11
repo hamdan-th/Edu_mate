@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'core_api_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'core_result_details_screen.dart';
 import 'library_theme.dart';
 
@@ -16,7 +17,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _searchResults = [];
   bool _isLoading = false;
-  String _message = 'ابحث في ملايين الأوراق البحثية المفتوحة...';
+  String _message = '';
   final Set<String> _savedItems = {};
 
   @override
@@ -29,6 +30,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
     if (_searchController.text.trim().isEmpty) return;
 
     FocusScope.of(context).unfocus();
+    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isLoading = true;
@@ -38,20 +40,24 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
 
     try {
       final results = await CoreApiService.search(_searchController.text);
+      if (!mounted) return;
       setState(() {
         _searchResults = results;
         if (_searchResults.isEmpty) {
-          _message = 'لم يتم العثور على نتائج لـ "${_searchController.text}"';
+          _message = l10n.digitalLibNoResults(_searchController.text);
         }
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _message = 'حدث خطأ أثناء البحث. يرجى التحقق من اتصالك بالإنترنت.';
+        _message = l10n.digitalLibSearchError;
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -74,7 +80,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
       ..showSnackBar(
         SnackBar(
           content: Text(
-            isSaved ? 'تمت الإزالة من المحفوظات' : 'تم الحفظ كمرجع بنجاح',
+            isSaved ? AppLocalizations.of(context)!.digitalLibRemovedFromSaved : AppLocalizations.of(context)!.digitalLibSavedSuccessfully,
           ),
         ),
       );
@@ -82,17 +88,18 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
 
   Future<void> _shareResult(Map<String, dynamic> result, String title) async {
     final String? articleId = result['id']?.toString();
+    final l10n = AppLocalizations.of(context)!;
     if (articleId == null || articleId.isEmpty) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('لا يوجد رابط لمشاركة هذا العنصر')),
+          SnackBar(content: Text(l10n.digitalLibShareNoLink)),
         );
       return;
     }
 
     final String articleUrl = 'https://core.ac.uk/display/$articleId';
-    final String shareText = 'اطلع على هذه الورقة البحثية:\n$title\n$articleUrl';
+    final String shareText = l10n.digitalLibShareText(title, articleUrl);
     await Share.share(shareText);
   }
 
@@ -109,7 +116,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
               textInputAction: TextInputAction.search,
               onSubmitted: (value) => _performSearch(),
               decoration: InputDecoration(
-                hintText: 'ابحث في CORE (مثال: AI in Medicine)',
+                hintText: AppLocalizations.of(context)!.digitalLibSearchHint,
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.send_rounded),
@@ -134,11 +141,12 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 final result = _searchResults[index];
-                final title = result['title'] ?? 'بدون عنوان';
+                final l10n = AppLocalizations.of(context)!;
+                final title = result['title'] ?? l10n.digitalLibNoTitle;
                 final authors = (result['authors'] as List<dynamic>?)
                     ?.map((author) => author['name'].toString())
                     .join(', ') ??
-                    'مؤلف غير معروف';
+                    l10n.digitalLibUnknownAuthor;
 
                 final String articleId = result['id']?.toString() ?? '';
                 final bool isSaved = _savedItems.contains(articleId);
@@ -197,17 +205,17 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
                                 icon: isSaved
                                     ? Icons.bookmark_added
                                     : Icons.bookmark_add_outlined,
-                                label: isSaved ? 'تم الحفظ' : 'حفظ',
+                                label: isSaved ? l10n.digitalLibActionSaved : l10n.digitalLibActionSave,
                                 onPressed: () => _toggleSave(result),
                               ),
                               _ActionButton(
                                 icon: Icons.share_outlined,
-                                label: 'مشاركة',
+                                label: l10n.digitalLibActionShare,
                                 onPressed: () => _shareResult(result, title),
                               ),
                               _ActionButton(
                                 icon: Icons.arrow_forward_ios_rounded,
-                                label: 'التفاصيل',
+                                label: l10n.digitalLibActionDetails,
                                 onPressed: () {
                                   Navigator.push(
                                     context,
@@ -232,7 +240,7 @@ class _DigitalLibraryScreenState extends State<DigitalLibraryScreen> {
             )
                 : Center(
               child: Text(
-                _message,
+                _message.isEmpty ? AppLocalizations.of(context)!.digitalLibDefaultMessage : _message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,

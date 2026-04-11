@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import '../../l10n/app_localizations.dart';
 
 class PdfViewerScreen extends StatelessWidget {
   final String filePath;
@@ -10,7 +11,7 @@ class PdfViewerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تصفح الملف'),
+        title: Text(AppLocalizations.of(context)!.pdfBrowseFile),
         centerTitle: true,
       ),
       body: PDFView(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'digital_library_screen.dart';
 import 'library_theme.dart';
 import 'my_library_screen.dart';
@@ -21,24 +22,26 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
     const MyLibraryScreen(),
   ];
 
-  final List<_LibraryTabItem> _tabs = [
-    const _LibraryTabItem(
-      title: 'مكتبة الجامعة',
-      icon: Icons.school_rounded,
-    ),
-    const _LibraryTabItem(
-      title: 'المكتبة الرقمية',
-      icon: Icons.language_rounded,
-    ),
-    const _LibraryTabItem(
-      title: 'مكتبتي',
-      icon: Icons.folder_copy_rounded,
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final currentTab = _tabs[_selectedIndex];
+    final l10n = AppLocalizations.of(context)!;
+
+    final List<_LibraryTabItem> tabs = [
+      _LibraryTabItem(
+        title: l10n.libraryTabUniversity,
+        icon: Icons.school_rounded,
+      ),
+      _LibraryTabItem(
+        title: l10n.libraryTabDigital,
+        icon: Icons.language_rounded,
+      ),
+      _LibraryTabItem(
+        title: l10n.libraryTabMyLibrary,
+        icon: Icons.folder_copy_rounded,
+      ),
+    ];
+
+    final currentTab = tabs[_selectedIndex];
 
     return Scaffold(
       backgroundColor: LibraryTheme.bg(context),
@@ -50,7 +53,7 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
               child: _ModernHeader(
                 currentTab: currentTab,
                 selectedIndex: _selectedIndex,
-                tabs: _tabs,
+                tabs: tabs,
                 onTabChanged: (i) => setState(() => _selectedIndex = i),
               ),
             ),
@@ -178,7 +181,7 @@ class _ModernHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'استكشف وادِر مكتبتك الجامعية بسهولة',
+                      AppLocalizations.of(context)!.libraryHeaderSubtitle,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.85),
                         fontSize: 13,
@@ -243,16 +246,17 @@ class _ModernHeader extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 6),
-                            Text(
-                              tab.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w800,
-                                color: active
-                                    ? LibraryTheme.primary(context)
-                                    : Colors.white,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                tab.title,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: active
+                                      ? LibraryTheme.primary(context)
+                                      : Colors.white,
+                                ),
                               ),
                             ),
                           ],

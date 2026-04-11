@@ -1759,6 +1759,924 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transfer Ownership'**
   String get groupsActionTransferOwnership;
+
+  /// No description provided for @libraryTabUniversity.
+  ///
+  /// In en, this message translates to:
+  /// **'University Library'**
+  String get libraryTabUniversity;
+
+  /// No description provided for @libraryTabDigital.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Library'**
+  String get libraryTabDigital;
+
+  /// No description provided for @libraryTabMyLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'My Library'**
+  String get libraryTabMyLibrary;
+
+  /// No description provided for @libraryHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore and manage your university library easily'**
+  String get libraryHeaderSubtitle;
+
+  /// No description provided for @digitalLibDefaultMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Search millions of open research papers...'**
+  String get digitalLibDefaultMessage;
+
+  /// No description provided for @digitalLibNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found for \"{query}\"'**
+  String digitalLibNoResults(String query);
+
+  /// No description provided for @digitalLibSearchError.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred during the search. Please check your internet connection.'**
+  String get digitalLibSearchError;
+
+  /// No description provided for @digitalLibRemovedFromSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from saved'**
+  String get digitalLibRemovedFromSaved;
+
+  /// No description provided for @digitalLibSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as reference successfully'**
+  String get digitalLibSavedSuccessfully;
+
+  /// No description provided for @digitalLibShareNoLink.
+  ///
+  /// In en, this message translates to:
+  /// **'No link available to share this item'**
+  String get digitalLibShareNoLink;
+
+  /// No description provided for @digitalLibShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out this research paper:\n{title}\n{url}'**
+  String digitalLibShareText(String title, String url);
+
+  /// No description provided for @digitalLibSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search CORE (e.g., AI in Medicine)'**
+  String get digitalLibSearchHint;
+
+  /// No description provided for @digitalLibNoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get digitalLibNoTitle;
+
+  /// No description provided for @digitalLibUnknownAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown author'**
+  String get digitalLibUnknownAuthor;
+
+  /// No description provided for @digitalLibActionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get digitalLibActionSaved;
+
+  /// No description provided for @digitalLibActionSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get digitalLibActionSave;
+
+  /// No description provided for @digitalLibActionShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get digitalLibActionShare;
+
+  /// No description provided for @digitalLibActionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get digitalLibActionDetails;
+
+  /// No description provided for @myLibUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'File uploaded successfully, you can track it in My Library'**
+  String get myLibUploadSuccess;
+
+  /// No description provided for @myLibStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Library Stats'**
+  String get myLibStatsTitle;
+
+  /// No description provided for @myLibStatsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick look at your files, saves, and downloads'**
+  String get myLibStatsSubtitle;
+
+  /// No description provided for @myLibTotalSavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Saves'**
+  String get myLibTotalSavedTitle;
+
+  /// No description provided for @myLibTotalSavedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your references and sources'**
+  String get myLibTotalSavedSubtitle;
+
+  /// No description provided for @myLibNavReferences.
+  ///
+  /// In en, this message translates to:
+  /// **'References'**
+  String get myLibNavReferences;
+
+  /// No description provided for @myLibDownloadsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Downloads'**
+  String get myLibDownloadsTitle;
+
+  /// No description provided for @myLibUploadsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Uploads'**
+  String get myLibUploadsTitle;
+
+  /// No description provided for @myLibSharesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Shares'**
+  String get myLibSharesTitle;
+
+  /// No description provided for @myLibNavShares.
+  ///
+  /// In en, this message translates to:
+  /// **'What I Shared'**
+  String get myLibNavShares;
+
+  /// No description provided for @myLibHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Library'**
+  String get myLibHeroTitle;
+
+  /// No description provided for @myLibHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage all your files and resources'**
+  String get myLibHeroSubtitle;
+
+  /// No description provided for @myLibFeatureUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get myLibFeatureUpload;
+
+  /// No description provided for @myLibFeatureSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get myLibFeatureSave;
+
+  /// No description provided for @myLibFeatureDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get myLibFeatureDownload;
+
+  /// No description provided for @myLibBtnUploadNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload New File'**
+  String get myLibBtnUploadNew;
+
+  /// No description provided for @upErrorFilePick.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not pick file'**
+  String get upErrorFilePick;
+
+  /// No description provided for @upErrorSelectFileFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a file first'**
+  String get upErrorSelectFileFirst;
+
+  /// No description provided for @upErrorFillRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields'**
+  String get upErrorFillRequired;
+
+  /// No description provided for @upErrorLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be logged in'**
+  String get upErrorLoginRequired;
+
+  /// No description provided for @upErrorInvalidCollege.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a valid college'**
+  String get upErrorInvalidCollege;
+
+  /// No description provided for @upSuccessUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'File uploaded successfully and is now visible in the library'**
+  String get upSuccessUploaded;
+
+  /// No description provided for @upErrorUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while uploading. Please try again.'**
+  String get upErrorUploadFailed;
+
+  /// No description provided for @upSectionFileDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'File Details'**
+  String get upSectionFileDetailsTitle;
+
+  /// No description provided for @upSectionFileDetailsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the basic information clearly and organized'**
+  String get upSectionFileDetailsSubtitle;
+
+  /// No description provided for @upLabelSubjectName.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject Name / File Title'**
+  String get upLabelSubjectName;
+
+  /// No description provided for @upErrorFieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get upErrorFieldRequired;
+
+  /// No description provided for @upLabelDoctorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor Name'**
+  String get upLabelDoctorName;
+
+  /// No description provided for @upLabelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief Description'**
+  String get upLabelDescription;
+
+  /// No description provided for @upSectionAcademicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Classification'**
+  String get upSectionAcademicTitle;
+
+  /// No description provided for @upSectionAcademicSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where the file belongs in the university structure'**
+  String get upSectionAcademicSubtitle;
+
+  /// No description provided for @upLabelCollege.
+  ///
+  /// In en, this message translates to:
+  /// **'College'**
+  String get upLabelCollege;
+
+  /// No description provided for @upLabelMajor.
+  ///
+  /// In en, this message translates to:
+  /// **'Major'**
+  String get upLabelMajor;
+
+  /// No description provided for @upLabelLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get upLabelLevel;
+
+  /// No description provided for @upLabelTerm.
+  ///
+  /// In en, this message translates to:
+  /// **'Term'**
+  String get upLabelTerm;
+
+  /// No description provided for @upBtnUploadNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload File Now'**
+  String get upBtnUploadNow;
+
+  /// No description provided for @upHintDirectUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'The file will be uploaded directly and shown in the university library.'**
+  String get upHintDirectUpload;
+
+  /// No description provided for @upTitleNewUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload New File'**
+  String get upTitleNewUpload;
+
+  /// No description provided for @upHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your file to the library'**
+  String get upHeroTitle;
+
+  /// No description provided for @upHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload summaries, references, and study files in an organized and professional way.'**
+  String get upHeroSubtitle;
+
+  /// No description provided for @upSectionFileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded File'**
+  String get upSectionFileTitle;
+
+  /// No description provided for @upSectionFileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose PDF, Word, or image depending on content type'**
+  String get upSectionFileSubtitle;
+
+  /// No description provided for @upHintFileSelectedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'File selected successfully. You can now complete the rest of the data and upload it.'**
+  String get upHintFileSelectedSuccess;
+
+  /// No description provided for @upBtnChangeFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Change File'**
+  String get upBtnChangeFile;
+
+  /// No description provided for @upBtnSelectFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select a file'**
+  String get upBtnSelectFile;
+
+  /// No description provided for @upHintSupportedTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported Types: PDF / DOC / DOCX / JPG / PNG'**
+  String get upHintSupportedTypes;
+
+  /// No description provided for @upBtnChooseFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose File'**
+  String get upBtnChooseFile;
+
+  /// No description provided for @myFilesEmptyDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'No files found'**
+  String get myFilesEmptyDefault;
+
+  /// No description provided for @myFilesEmptySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t saved any files yet'**
+  String get myFilesEmptySaved;
+
+  /// No description provided for @myFilesEmptyUploads.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t uploaded any files yet'**
+  String get myFilesEmptyUploads;
+
+  /// No description provided for @myFilesEmptyDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t downloaded any files yet'**
+  String get myFilesEmptyDownloads;
+
+  /// No description provided for @myFilesEmptyShares.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t shared any files yet'**
+  String get myFilesEmptyShares;
+
+  /// No description provided for @myFilesNoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get myFilesNoTitle;
+
+  /// No description provided for @myFilesUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get myFilesUnknown;
+
+  /// No description provided for @myFilesUnknownAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Author'**
+  String get myFilesUnknownAuthor;
+
+  /// No description provided for @myFilesError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String myFilesError(String error);
+
+  /// No description provided for @myFilesNoLink.
+  ///
+  /// In en, this message translates to:
+  /// **'No link available for this file'**
+  String get myFilesNoLink;
+
+  /// No description provided for @myFilesNoLinkToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'No link available to open'**
+  String get myFilesNoLinkToOpen;
+
+  /// No description provided for @myFilesCannotOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open file'**
+  String get myFilesCannotOpen;
+
+  /// No description provided for @myFilesSanaUniversity.
+  ///
+  /// In en, this message translates to:
+  /// **'Sana\'a University'**
+  String get myFilesSanaUniversity;
+
+  /// No description provided for @myFilesTrailingOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get myFilesTrailingOpen;
+
+  /// No description provided for @myFilesFutureList.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"{title}\" list will be displayed here later'**
+  String myFilesFutureList(String title);
+
+  /// No description provided for @detailsUnspecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unspecified'**
+  String get detailsUnspecified;
+
+  /// No description provided for @detailsWordFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Word File'**
+  String get detailsWordFile;
+
+  /// No description provided for @detailsNoPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'This type is not currently displayed inside the app.\nChoose to open externally or download it.'**
+  String get detailsNoPreview;
+
+  /// No description provided for @detailsDownloadBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get detailsDownloadBtn;
+
+  /// No description provided for @detailsOpenExternalBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Externally'**
+  String get detailsOpenExternalBtn;
+
+  /// No description provided for @detailsNoGroupsJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t joined any groups yet'**
+  String get detailsNoGroupsJoined;
+
+  /// No description provided for @detailsShareToGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to Groups'**
+  String get detailsShareToGroups;
+
+  /// No description provided for @detailsSelectGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the group you want to share the file with'**
+  String get detailsSelectGroup;
+
+  /// No description provided for @detailsShareSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'File shared in {groupName} group'**
+  String detailsShareSuccess(String groupName);
+
+  /// No description provided for @detailsShareFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share file to group: {error}'**
+  String detailsShareFailure(String error);
+
+  /// No description provided for @detailsNoShareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'No link available to share the file'**
+  String get detailsNoShareLink;
+
+  /// No description provided for @detailsDownloadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'File downloaded and saved inside the app'**
+  String get detailsDownloadSuccess;
+
+  /// No description provided for @detailsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit File'**
+  String get detailsEditTitle;
+
+  /// No description provided for @detailsEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'File updated'**
+  String get detailsEditSuccess;
+
+  /// No description provided for @detailsEditFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to edit: {error}'**
+  String detailsEditFailure(String error);
+
+  /// No description provided for @detailsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete File'**
+  String get detailsDeleteTitle;
+
+  /// No description provided for @detailsDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get detailsDeleteConfirm;
+
+  /// No description provided for @detailsBtnCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get detailsBtnCancel;
+
+  /// No description provided for @detailsBtnDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get detailsBtnDelete;
+
+  /// No description provided for @detailsDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'File deleted'**
+  String get detailsDeleteSuccess;
+
+  /// No description provided for @detailsDeleteFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete file: {error}'**
+  String detailsDeleteFailure(String error);
+
+  /// No description provided for @detailsDownloadFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: {error}'**
+  String detailsDownloadFailure(String error);
+
+  /// No description provided for @detailsShareGeneralFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not register share: {error}'**
+  String detailsShareGeneralFailure(String error);
+
+  /// No description provided for @detailsFillRequiredFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete all required fields'**
+  String get detailsFillRequiredFields;
+
+  /// No description provided for @detailsBtnSaveEdits.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get detailsBtnSaveEdits;
+
+  /// No description provided for @detailsActionOpenFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Open File'**
+  String get detailsActionOpenFile;
+
+  /// No description provided for @detailsSectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get detailsSectionDescription;
+
+  /// No description provided for @detailsSectionFileInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'File Information'**
+  String get detailsSectionFileInfo;
+
+  /// No description provided for @detailsInfoCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Course'**
+  String get detailsInfoCourse;
+
+  /// No description provided for @detailsInfoCollege.
+  ///
+  /// In en, this message translates to:
+  /// **'College'**
+  String get detailsInfoCollege;
+
+  /// No description provided for @detailsInfoSpecialization.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialization'**
+  String get detailsInfoSpecialization;
+
+  /// No description provided for @detailsInfoLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get detailsInfoLevel;
+
+  /// No description provided for @detailsInfoType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get detailsInfoType;
+
+  /// No description provided for @detailsInfoStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get detailsInfoStatus;
+
+  /// No description provided for @detailsInfoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Date'**
+  String get detailsInfoDate;
+
+  /// No description provided for @detailsStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get detailsStatusApproved;
+
+  /// No description provided for @detailsStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Review'**
+  String get detailsStatusPending;
+
+  /// No description provided for @detailsStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get detailsStatusRejected;
+
+  /// No description provided for @detailsLikeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get detailsLikeAction;
+
+  /// No description provided for @detailsLikeFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not like: {error}'**
+  String detailsLikeFailure(String error);
+
+  /// No description provided for @detailsSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get detailsSaveAction;
+
+  /// No description provided for @detailsSaveFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save: {error}'**
+  String detailsSaveFailure(String error);
+
+  /// No description provided for @detailsUploaderPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded by: {uploader}'**
+  String detailsUploaderPrefix(String uploader);
+
+  /// No description provided for @detailsStatViews.
+  ///
+  /// In en, this message translates to:
+  /// **'Views'**
+  String get detailsStatViews;
+
+  /// No description provided for @detailsStatDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get detailsStatDownloads;
+
+  /// No description provided for @detailsStatShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares'**
+  String get detailsStatShares;
+
+  /// No description provided for @detailsPrefixDr.
+  ///
+  /// In en, this message translates to:
+  /// **'Dr. {author}'**
+  String detailsPrefixDr(String author);
+
+  /// No description provided for @pdfBrowseFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse File'**
+  String get pdfBrowseFile;
+
+  /// No description provided for @digitalLibNoAbstract.
+  ///
+  /// In en, this message translates to:
+  /// **'No abstract available.'**
+  String get digitalLibNoAbstract;
+
+  /// No description provided for @digitalLibResultDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Research Details'**
+  String get digitalLibResultDetailsTitle;
+
+  /// No description provided for @digitalLibLabelAuthors.
+  ///
+  /// In en, this message translates to:
+  /// **'Authors:'**
+  String get digitalLibLabelAuthors;
+
+  /// No description provided for @digitalLibLabelPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher:'**
+  String get digitalLibLabelPublisher;
+
+  /// No description provided for @digitalLibLabelYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication Year:'**
+  String get digitalLibLabelYear;
+
+  /// No description provided for @digitalLibLabelJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal:'**
+  String get digitalLibLabelJournal;
+
+  /// No description provided for @digitalLibSaveErrorParam.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save reference: {error}'**
+  String digitalLibSaveErrorParam(String error);
+
+  /// No description provided for @digitalLibActionDownloadPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF'**
+  String get digitalLibActionDownloadPdf;
+
+  /// No description provided for @digitalLibDownloadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not register download: {error}'**
+  String digitalLibDownloadError(String error);
+
+  /// No description provided for @digitalLibActionOpenSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Source'**
+  String get digitalLibActionOpenSource;
+
+  /// No description provided for @digitalLibLabelAbstract.
+  ///
+  /// In en, this message translates to:
+  /// **'Abstract'**
+  String get digitalLibLabelAbstract;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationsMarkAllReadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'All notifications marked as read'**
+  String get notificationsMarkAllReadSuccess;
+
+  /// No description provided for @notificationsSectionToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get notificationsSectionToday;
+
+  /// No description provided for @notificationsSectionEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get notificationsSectionEarlier;
+
+  /// No description provided for @notificationsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get notificationsEmptyTitle;
+
+  /// No description provided for @notificationsEmptyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When you have a new interaction or an important update, it will appear here clearly.'**
+  String get notificationsEmptyDesc;
+
+  /// No description provided for @timeYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get timeYesterday;
+
+  /// No description provided for @timeMinutesAgoParam.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String timeMinutesAgoParam(int count);
+
+  /// No description provided for @timeHoursAgoParam.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String timeHoursAgoParam(int count);
+
+  /// No description provided for @timeDaysAgoParam.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String timeDaysAgoParam(int count);
+
+  /// No description provided for @upFileTypePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get upFileTypePdf;
+
+  /// No description provided for @upFileTypeWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Word'**
+  String get upFileTypeWord;
+
+  /// No description provided for @upFileTypeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get upFileTypeImage;
+
+  /// No description provided for @upFileTypeGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get upFileTypeGeneric;
 }
 
 class _AppLocalizationsDelegate

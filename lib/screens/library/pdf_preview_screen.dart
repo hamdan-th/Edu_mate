@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'library_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class PdfPreviewScreen extends StatelessWidget {
   final String url;
@@ -25,7 +26,7 @@ class PdfPreviewScreen extends StatelessWidget {
       body: url.trim().isEmpty
           ? Center(
         child: Text(
-          'لا يوجد رابط للملف',
+          AppLocalizations.of(context)!.myFilesNoLink,
           style: TextStyle(color: LibraryTheme.text(context)),
         ),
       )

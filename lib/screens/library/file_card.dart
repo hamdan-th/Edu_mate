@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'file_model.dart';
 import 'library_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class FileCard extends StatefulWidget {
   final FileModel file;
@@ -110,23 +111,28 @@ class _FileCardState extends State<FileCard> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 6,
-                                  children: [
-                                    _MetricChip(
-                                      icon: Icons.favorite_border_rounded,
-                                      value: widget.file.likes,
-                                    ),
-                                    _MetricChip(
-                                      icon: Icons.file_download_outlined,
-                                      value: widget.file.downloads,
-                                    ),
-                                    _MetricChip(
-                                      icon: Icons.remove_red_eye_outlined,
-                                      value: widget.file.views,
-                                    ),
-                                  ],
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      _MetricChip(
+                                        icon: Icons.favorite_border_rounded,
+                                        value: widget.file.likes,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _MetricChip(
+                                        icon: Icons.file_download_outlined,
+                                        value: widget.file.downloads,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _MetricChip(
+                                        icon: Icons.remove_red_eye_outlined,
+                                        value: widget.file.views,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -405,19 +411,23 @@ class _GridFileCardState extends State<GridFileCard> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            children: [
-                              _MetricChip(
-                                icon: Icons.file_download_outlined,
-                                value: widget.file.downloads,
-                              ),
-                              _MetricChip(
-                                icon: Icons.remove_red_eye_outlined,
-                                value: widget.file.views,
-                              ),
-                            ],
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                _MetricChip(
+                                  icon: Icons.file_download_outlined,
+                                  value: widget.file.downloads,
+                                ),
+                                const SizedBox(width: 8),
+                                _MetricChip(
+                                  icon: Icons.remove_red_eye_outlined,
+                                  value: widget.file.views,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -554,6 +564,7 @@ class _ActionButtonState extends State<_ActionButton> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final horizontal = widget.compact ? 12.0 : 14.0;
     final vertical = widget.compact ? 8.0 : 10.0;
     final fontSize = widget.compact ? 12.0 : 13.0;
@@ -574,6 +585,10 @@ class _ActionButtonState extends State<_ActionButton> {
             padding: EdgeInsets.symmetric(
               horizontal: horizontal,
               vertical: vertical,
+            ),
+            constraints: BoxConstraints(
+              minWidth: widget.compact ? 70 : 82,
+              minHeight: widget.compact ? 34 : 40,
             ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -598,7 +613,7 @@ class _ActionButtonState extends State<_ActionButton> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'فتح',
+                  l10n.myFilesTrailingOpen,
                   style: TextStyle(
                     fontSize: fontSize,
                     fontWeight: FontWeight.w800,
@@ -635,7 +650,8 @@ class _MetricChip extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      height: 26,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E222A) : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),

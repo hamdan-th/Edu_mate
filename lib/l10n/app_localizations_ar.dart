@@ -855,4 +855,513 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get groupsActionTransferOwnership => 'نقل الملكية';
+
+  @override
+  String get libraryTabUniversity => 'مكتبة الجامعة';
+
+  @override
+  String get libraryTabDigital => 'المكتبة الرقمية';
+
+  @override
+  String get libraryTabMyLibrary => 'مكتبتي';
+
+  @override
+  String get libraryHeaderSubtitle => 'استكشف وادِر مكتبتك الجامعية بسهولة';
+
+  @override
+  String get digitalLibDefaultMessage =>
+      'ابحث في ملايين الأوراق البحثية المفتوحة...';
+
+  @override
+  String digitalLibNoResults(String query) {
+    return 'لم يتم العثور على نتائج لـ \"$query\"';
+  }
+
+  @override
+  String get digitalLibSearchError =>
+      'حدث خطأ أثناء البحث. يرجى التحقق من اتصالك بالإنترنت.';
+
+  @override
+  String get digitalLibRemovedFromSaved => 'تمت الإزالة من المحفوظات';
+
+  @override
+  String get digitalLibSavedSuccessfully => 'تم الحفظ كمرجع بنجاح';
+
+  @override
+  String get digitalLibShareNoLink => 'لا يوجد رابط لمشاركة هذا العنصر';
+
+  @override
+  String digitalLibShareText(String title, String url) {
+    return 'اطلع على هذه الورقة البحثية:\n$title\n$url';
+  }
+
+  @override
+  String get digitalLibSearchHint => 'ابحث في CORE (مثال: AI in Medicine)';
+
+  @override
+  String get digitalLibNoTitle => 'بدون عنوان';
+
+  @override
+  String get digitalLibUnknownAuthor => 'مؤلف غير معروف';
+
+  @override
+  String get digitalLibActionSaved => 'تم الحفظ';
+
+  @override
+  String get digitalLibActionSave => 'حفظ';
+
+  @override
+  String get digitalLibActionShare => 'مشاركة';
+
+  @override
+  String get digitalLibActionDetails => 'التفاصيل';
+
+  @override
+  String get myLibUploadSuccess =>
+      'تم رفع الملف بنجاح، ويمكنك متابعته من مكتبتي';
+
+  @override
+  String get myLibStatsTitle => 'مؤشرات مكتبتي';
+
+  @override
+  String get myLibStatsSubtitle => 'نظرة سريعة على ملفاتك، محفوظاتك، وتنزيلاتك';
+
+  @override
+  String get myLibTotalSavedTitle => 'إجمالي المحفوظات';
+
+  @override
+  String get myLibTotalSavedSubtitle => 'المراجع والمصادر الخاصة بك';
+
+  @override
+  String get myLibNavReferences => 'المراجع';
+
+  @override
+  String get myLibDownloadsTitle => 'تنزيلاتي';
+
+  @override
+  String get myLibUploadsTitle => 'ما رفعته';
+
+  @override
+  String get myLibSharesTitle => 'مشاركاتي';
+
+  @override
+  String get myLibNavShares => 'ما شاركته';
+
+  @override
+  String get myLibHeroTitle => 'مكتبتي الشخصية';
+
+  @override
+  String get myLibHeroSubtitle => 'إدارة جميع ملفاتك ومصادرك';
+
+  @override
+  String get myLibFeatureUpload => 'رفع';
+
+  @override
+  String get myLibFeatureSave => 'حفظ';
+
+  @override
+  String get myLibFeatureDownload => 'تنزيل';
+
+  @override
+  String get myLibBtnUploadNew => 'رفع ملف جديد';
+
+  @override
+  String get upErrorFilePick => 'تعذر اختيار الملف';
+
+  @override
+  String get upErrorSelectFileFirst => 'اختر ملفًا أولًا';
+
+  @override
+  String get upErrorFillRequired => 'أكمل جميع القوائم المطلوبة';
+
+  @override
+  String get upErrorLoginRequired => 'يجب تسجيل الدخول أولًا';
+
+  @override
+  String get upErrorInvalidCollege => 'اختر الكلية بشكل صحيح';
+
+  @override
+  String get upSuccessUploaded => 'تم رفع الملف بنجاح وأصبح ظاهرًا في المكتبة';
+
+  @override
+  String get upErrorUploadFailed => 'حدث خطأ أثناء رفع الملف';
+
+  @override
+  String get upSectionFileDetailsTitle => 'بيانات الملف';
+
+  @override
+  String get upSectionFileDetailsSubtitle =>
+      'أدخل المعلومات الأساسية بشكل واضح ومنظم';
+
+  @override
+  String get upLabelSubjectName => 'اسم المادة / عنوان الملف';
+
+  @override
+  String get upErrorFieldRequired => 'هذا الحقل مطلوب';
+
+  @override
+  String get upLabelDoctorName => 'اسم الدكتور';
+
+  @override
+  String get upLabelDescription => 'وصف مختصر';
+
+  @override
+  String get upSectionAcademicTitle => 'التصنيف الأكاديمي';
+
+  @override
+  String get upSectionAcademicSubtitle => 'اختر مكان الملف داخل هيكل الجامعة';
+
+  @override
+  String get upLabelCollege => 'الكلية';
+
+  @override
+  String get upLabelMajor => 'التخصص';
+
+  @override
+  String get upLabelLevel => 'المستوى';
+
+  @override
+  String get upLabelTerm => 'الترم';
+
+  @override
+  String get upBtnUploadNow => 'رفع الملف الآن';
+
+  @override
+  String get upHintDirectUpload =>
+      'سيتم رفع الملف مباشرة وإظهاره داخل مكتبة الجامعة.';
+
+  @override
+  String get upTitleNewUpload => 'رفع ملف جديد';
+
+  @override
+  String get upHeroTitle => 'أضف ملفك للمكتبة';
+
+  @override
+  String get upHeroSubtitle =>
+      'ارفع الملخصات والمراجع والملفات الدراسية بطريقة منظمة واحترافية.';
+
+  @override
+  String get upSectionFileTitle => 'الملف المرفوع';
+
+  @override
+  String get upSectionFileSubtitle =>
+      'اختر PDF أو Word أو صورة حسب نوع المحتوى';
+
+  @override
+  String get upHintFileSelectedSuccess =>
+      'تم اختيار الملف بنجاح، ويمكنك الآن إكمال بقية البيانات ثم رفعه.';
+
+  @override
+  String get upBtnChangeFile => 'تغيير الملف';
+
+  @override
+  String get upBtnSelectFile => 'اضغط لاختيار ملف';
+
+  @override
+  String get upHintSupportedTypes =>
+      'الأنواع المدعومة: PDF / DOC / DOCX / JPG / PNG';
+
+  @override
+  String get upBtnChooseFile => 'اختيار ملف';
+
+  @override
+  String get myFilesEmptyDefault => 'لا توجد ملفات';
+
+  @override
+  String get myFilesEmptySaved => 'لم تقم بحفظ أي ملفات بعد';
+
+  @override
+  String get myFilesEmptyUploads => 'لم تقم برفع أي ملفات بعد';
+
+  @override
+  String get myFilesEmptyDownloads => 'لم تقم بتنزيل أي ملفات بعد';
+
+  @override
+  String get myFilesEmptyShares => 'لم تقم بمشاركة أي ملفات بعد';
+
+  @override
+  String get myFilesNoTitle => 'بدون عنوان';
+
+  @override
+  String get myFilesUnknown => 'غير معروف';
+
+  @override
+  String get myFilesUnknownAuthor => 'مؤلف غير معروف';
+
+  @override
+  String myFilesError(String error) {
+    return 'حدث خطأ: $error';
+  }
+
+  @override
+  String get myFilesNoLink => 'لا يوجد رابط للملف';
+
+  @override
+  String get myFilesNoLinkToOpen => 'لا يوجد رابط للفتح';
+
+  @override
+  String get myFilesCannotOpen => 'تعذر فتح الملف';
+
+  @override
+  String get myFilesSanaUniversity => 'جامعة صنعاء';
+
+  @override
+  String get myFilesTrailingOpen => 'فتح';
+
+  @override
+  String myFilesFutureList(String title) {
+    return 'سيتم عرض قائمة \"$title\" هنا لاحقًا';
+  }
+
+  @override
+  String get detailsUnspecified => 'غير محدد';
+
+  @override
+  String get detailsWordFile => 'ملف Word';
+
+  @override
+  String get detailsNoPreview =>
+      'هذا النوع لا يُعرض داخل التطبيق حاليًا.\nاختر فتحه خارجيًا أو تنزيله.';
+
+  @override
+  String get detailsDownloadBtn => 'تنزيل';
+
+  @override
+  String get detailsOpenExternalBtn => 'فتح خارجي';
+
+  @override
+  String get detailsNoGroupsJoined => 'أنت غير منضم إلى أي مجموعة بعد';
+
+  @override
+  String get detailsShareToGroups => 'مشاركة إلى المجموعات';
+
+  @override
+  String get detailsSelectGroup => 'اختر المجموعة التي تريد مشاركة الملف فيها';
+
+  @override
+  String detailsShareSuccess(String groupName) {
+    return 'تمت مشاركة الملف في مجموعة $groupName';
+  }
+
+  @override
+  String detailsShareFailure(String error) {
+    return 'تعذر مشاركة الملف إلى المجموعة: $error';
+  }
+
+  @override
+  String get detailsNoShareLink => 'لا يوجد رابط لمشاركة الملف';
+
+  @override
+  String get detailsDownloadSuccess => 'تم تنزيل الملف وحفظه داخل التطبيق';
+
+  @override
+  String get detailsEditTitle => 'تعديل الملف';
+
+  @override
+  String get detailsEditSuccess => 'تم تحديث الملف';
+
+  @override
+  String detailsEditFailure(String error) {
+    return 'فشل التعديل: $error';
+  }
+
+  @override
+  String get detailsDeleteTitle => 'حذف الملف';
+
+  @override
+  String get detailsDeleteConfirm => 'هل أنت متأكد؟';
+
+  @override
+  String get detailsBtnCancel => 'إلغاء';
+
+  @override
+  String get detailsBtnDelete => 'حذف';
+
+  @override
+  String get detailsDeleteSuccess => 'تم حذف الملف';
+
+  @override
+  String detailsDeleteFailure(String error) {
+    return 'فشل حذف الملف: $error';
+  }
+
+  @override
+  String detailsDownloadFailure(String error) {
+    return 'فشل التنزيل: $error';
+  }
+
+  @override
+  String detailsShareGeneralFailure(String error) {
+    return 'تعذر تسجيل المشاركة: $error';
+  }
+
+  @override
+  String get detailsFillRequiredFields => 'أكمل جميع الحقول المطلوبة';
+
+  @override
+  String get detailsBtnSaveEdits => 'حفظ التعديلات';
+
+  @override
+  String get detailsActionOpenFile => 'فتح الملف';
+
+  @override
+  String get detailsSectionDescription => 'الوصف';
+
+  @override
+  String get detailsSectionFileInfo => 'معلومات الملف';
+
+  @override
+  String get detailsInfoCourse => 'المادة';
+
+  @override
+  String get detailsInfoCollege => 'الكلية';
+
+  @override
+  String get detailsInfoSpecialization => 'التخصص';
+
+  @override
+  String get detailsInfoLevel => 'المستوى';
+
+  @override
+  String get detailsInfoType => 'النوع';
+
+  @override
+  String get detailsInfoStatus => 'الحالة';
+
+  @override
+  String get detailsInfoDate => 'تاريخ الرفع';
+
+  @override
+  String get detailsStatusApproved => 'منشور';
+
+  @override
+  String get detailsStatusPending => 'قيد المراجعة';
+
+  @override
+  String get detailsStatusRejected => 'مرفوض';
+
+  @override
+  String get detailsLikeAction => 'إعجاب';
+
+  @override
+  String detailsLikeFailure(String error) {
+    return 'تعذر تنفيذ الإعجاب: $error';
+  }
+
+  @override
+  String get detailsSaveAction => 'حفظ';
+
+  @override
+  String detailsSaveFailure(String error) {
+    return 'تعذر تنفيذ الحفظ: $error';
+  }
+
+  @override
+  String detailsUploaderPrefix(String uploader) {
+    return 'رفعه: $uploader';
+  }
+
+  @override
+  String get detailsStatViews => 'مشاهدة';
+
+  @override
+  String get detailsStatDownloads => 'تنزيل';
+
+  @override
+  String get detailsStatShares => 'مشاركة';
+
+  @override
+  String detailsPrefixDr(String author) {
+    return 'د. $author';
+  }
+
+  @override
+  String get pdfBrowseFile => 'تصفح الملف';
+
+  @override
+  String get digitalLibNoAbstract => 'لا يوجد ملخص متاح.';
+
+  @override
+  String get digitalLibResultDetailsTitle => 'تفاصيل البحث';
+
+  @override
+  String get digitalLibLabelAuthors => 'المؤلفون:';
+
+  @override
+  String get digitalLibLabelPublisher => 'الناشر:';
+
+  @override
+  String get digitalLibLabelYear => 'سنة النشر:';
+
+  @override
+  String get digitalLibLabelJournal => 'المجلة:';
+
+  @override
+  String digitalLibSaveErrorParam(String error) {
+    return 'تعذر حفظ المرجع: $error';
+  }
+
+  @override
+  String get digitalLibActionDownloadPdf => 'تنزيل PDF';
+
+  @override
+  String digitalLibDownloadError(String error) {
+    return 'تعذر تسجيل التنزيل: $error';
+  }
+
+  @override
+  String get digitalLibActionOpenSource => 'فتح المصدر';
+
+  @override
+  String get digitalLibLabelAbstract => 'الملخص (Abstract)';
+
+  @override
+  String get notificationsMarkAllRead => 'تحديد الكل كمقروء';
+
+  @override
+  String get notificationsMarkAllReadSuccess =>
+      'تم تحديد جميع الإشعارات كمقروءة';
+
+  @override
+  String get notificationsSectionToday => 'اليوم';
+
+  @override
+  String get notificationsSectionEarlier => 'الأقدم';
+
+  @override
+  String get notificationsEmptyTitle => 'لا توجد إشعارات الآن';
+
+  @override
+  String get notificationsEmptyDesc =>
+      'عندما يصلك تفاعل جديد أو تحديث مهم سيظهر هنا بشكل مرتب وواضح.';
+
+  @override
+  String get timeYesterday => 'أمس';
+
+  @override
+  String timeMinutesAgoParam(int count) {
+    return 'منذ $count د';
+  }
+
+  @override
+  String timeHoursAgoParam(int count) {
+    return 'منذ $count س';
+  }
+
+  @override
+  String timeDaysAgoParam(int count) {
+    return 'منذ $count أيام';
+  }
+
+  @override
+  String get upFileTypePdf => 'بي دي اف';
+
+  @override
+  String get upFileTypeWord => 'وورد';
+
+  @override
+  String get upFileTypeImage => 'صورة';
+
+  @override
+  String get upFileTypeGeneric => 'ملف';
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'library_files_service.dart';
 import 'library_theme.dart';
+import '../../l10n/app_localizations.dart';
 import 'my_files_list_screen.dart';
 import 'upload_screen.dart';
 
@@ -110,11 +111,12 @@ class MyLibraryScreen extends StatelessWidget {
     );
 
     if (result == true && context.mounted) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(
-            content: Text('تم رفع الملف بنجاح، ويمكنك متابعته من مكتبتي'),
+          SnackBar(
+            content: Text(l10n.myLibUploadSuccess),
           ),
         );
     }
@@ -131,6 +133,7 @@ class MyLibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: LibraryTheme.bg(context),
       body: SingleChildScrollView(
@@ -143,7 +146,7 @@ class MyLibraryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             Text(
-              'مؤشرات مكتبتي',
+              l10n.myLibStatsTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
@@ -153,7 +156,7 @@ class MyLibraryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'نظرة سريعة على ملفاتك، محفوظاتك، وتنزيلاتك',
+              l10n.myLibStatsSubtitle,
               style: TextStyle(
                 fontSize: 12.8,
                 fontWeight: FontWeight.w600,
@@ -165,11 +168,11 @@ class MyLibraryScreen extends StatelessWidget {
               stream: _combinedReferencesCount(),
               builder: (context, snapshot) {
                 return _PrimaryStatCard(
-                  title: 'إجمالي المحفوظات',
-                  subtitle: 'المراجع والمصادر الخاصة بك',
+                  title: l10n.myLibTotalSavedTitle,
+                  subtitle: l10n.myLibTotalSavedSubtitle,
                   count: snapshot.data ?? 0,
                   icon: Icons.bookmark_rounded,
-                  onTap: () => _openList(context, 'المراجع'),
+                  onTap: () => _openList(context, l10n.myLibNavReferences),
                 );
               },
             ),
@@ -181,10 +184,10 @@ class MyLibraryScreen extends StatelessWidget {
                     stream: _combinedDownloadsCount(),
                     builder: (context, snapshot) {
                       return _SecondaryStatCard(
-                        title: 'تنزيلاتي',
+                        title: l10n.myLibDownloadsTitle,
                         count: snapshot.data ?? 0,
                         icon: Icons.download_rounded,
-                        onTap: () => _openList(context, 'تنزيلاتي'),
+                        onTap: () => _openList(context, l10n.myLibDownloadsTitle),
                       );
                     },
                   ),
@@ -195,10 +198,10 @@ class MyLibraryScreen extends StatelessWidget {
                     stream: LibraryFilesService.myUploadedFiles(),
                     builder: (context, snapshot) {
                       return _SecondaryStatCard(
-                        title: 'ما رفعته',
+                        title: l10n.myLibUploadsTitle,
                         count: snapshot.data?.docs.length ?? 0,
                         icon: Icons.cloud_upload_rounded,
-                        onTap: () => _openList(context, 'ما رفعته'),
+                        onTap: () => _openList(context, l10n.myLibUploadsTitle),
                       );
                     },
                   ),
@@ -210,11 +213,11 @@ class MyLibraryScreen extends StatelessWidget {
               stream: _collectionGroupCount('shares'),
               builder: (context, snapshot) {
                 return _SecondaryStatCard(
-                  title: 'مشاركاتي',
+                  title: l10n.myLibSharesTitle,
                   count: snapshot.data ?? 0,
                   icon: Icons.share_rounded,
                   isFullWidth: true,
-                  onTap: () => _openList(context, 'ما شاركته'),
+                  onTap: () => _openList(context, l10n.myLibNavShares),
                 );
               },
             ),
@@ -233,6 +236,7 @@ class _MyLibraryHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final gold = const Color(0xFFC9A227);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -290,7 +294,7 @@ class _MyLibraryHeroCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'مكتبتي الشخصية',
+                      l10n.myLibHeroTitle,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
@@ -300,7 +304,7 @@ class _MyLibraryHeroCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'إدارة جميع ملفاتك ومصادرك',
+                      l10n.myLibHeroSubtitle,
                       style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
@@ -324,10 +328,10 @@ class _MyLibraryHeroCard extends StatelessWidget {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                _FeatureChip(icon: Icons.cloud_upload_outlined, label: 'رفع'),
-                _FeatureChip(icon: Icons.bookmark_outline_rounded, label: 'حفظ'),
-                _FeatureChip(icon: Icons.download_outlined, label: 'تنزيل'),
+              children: [
+                _FeatureChip(icon: Icons.cloud_upload_outlined, label: l10n.myLibFeatureUpload),
+                _FeatureChip(icon: Icons.bookmark_outline_rounded, label: l10n.myLibFeatureSave),
+                _FeatureChip(icon: Icons.download_outlined, label: l10n.myLibFeatureDownload),
               ],
             ),
           ),
@@ -345,8 +349,8 @@ class _MyLibraryHeroCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text(
-                'رفع ملف جديد',
+              child: Text(
+                l10n.myLibBtnUploadNew,
                 style: TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w800,

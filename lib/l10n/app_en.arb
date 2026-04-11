@@ -9,7 +9,6 @@
   "themeDark": "Dark",
   "save": "Save",
   "close": "Close",
-
   "errEnterEmailPass": "Please enter your email and password",
   "errInvalidEmail": "Invalid email address",
   "errAccountNotFound": "Account not found",
@@ -28,7 +27,6 @@
   "errEmptyPassword": "Please enter a password",
   "errShortPassword": "Password must be at least 6 characters",
   "errUsernameTaken": "Username is already taken",
-  
   "loginWelcomeBack": "Welcome back",
   "loginTitle": "Log In",
   "loginSubtitle": "Sign in to access your platform",
@@ -41,7 +39,6 @@
   "resetLinkSent": "Password reset link sent to your email",
   "resetFailedSend": "Failed to send reset link",
   "resetEmailNotRegistered": "Email not registered",
-
   "signupTitle": "Create Account",
   "signupSubtitle": "Create your identity in Edu Mate and start your journey",
   "signupUsernameHint": "Username",
@@ -53,11 +50,9 @@
   "signupAlreadyHaveAccount": "Already have an account? Log in",
   "signupSuccess": "Account created successfully",
   "signupFailed": "Signup failed",
-
   "navHome": "Home",
   "navGroups": "Groups",
   "navLibrary": "Library",
-
   "feedSearchHint": "Search feed...",
   "filterForYou": "For You",
   "filterRecent": "Recent",
@@ -74,7 +69,6 @@
   "feedErrUpdateLike": "Failed to update like",
   "feedJoinAction": "Join",
   "feedBotName": "Edu Bot",
-  
   "likeAction": "Like",
   "commentAction": "Comment",
   "shareAction": "Share",
@@ -85,7 +79,6 @@
   "notificationsTitle": "Notifications",
   "notificationsBody": "Notifications will be connected later",
   "errLoginFailed": "Login failed",
-  
   "profileTitle": "Profile",
   "profileNoUser": "No user logged in",
   "profileNoData": "Profile data not found",
@@ -103,7 +96,6 @@
   "profileCancel": "Cancel",
   "profileDelete": "Delete",
   "profileDeleteConfirm": "Are you sure? Your account will be permanently deleted.",
-  
   "libFilterSortTitle": "Filter and Sort",
   "libFilterReset": "Reset",
   "libFilterApply": "Apply",
@@ -279,18 +271,299 @@
   "groupsInviteTitle": "Group Invite",
   "groupsInviteJoiningLoading": "Joining...",
   "groupsInviteNotSpecified": "Not specified",
-  "groupsTransferOwnershipSuccess": "Ownership transferred successfully",
-  "groupsTransferOwnershipError": "Error transferring ownership",
   "groupsMakeAdminSuccess": "Admin assigned",
-  "groupsRemoveAdminSuccess": "Admin removed",
-  "groupsMuteMemberSuccess": "Member muted",
-  "groupsUnmuteMemberSuccess": "Member unmuted",
   "groupsReportMemberSuccess": "Report sent to admin",
-  "groupsKickMemberSuccess": "Member kicked",
-  "groupsActionRemoveAdmin": "Remove Admin",
-  "groupsActionMakeAdmin": "Make Admin",
   "groupsActionUnmuteMember": "Unmute",
   "groupsActionMuteMember": "Mute",
   "groupsActionKickMember": "Kick Member",
-  "groupsActionTransferOwnership": "Transfer Ownership"
+  "groupsActionTransferOwnership": "Transfer Ownership",
+  "libraryTabUniversity": "University Library",
+  "libraryTabDigital": "Digital Library",
+  "libraryTabMyLibrary": "My Library",
+  "libraryHeaderSubtitle": "Explore and manage your university library easily",
+  "digitalLibDefaultMessage": "Search millions of open research papers...",
+  "digitalLibNoResults": "No results found for \"{query}\"",
+  "@digitalLibNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "digitalLibSearchError": "An error occurred during the search. Please check your internet connection.",
+  "digitalLibRemovedFromSaved": "Removed from saved",
+  "digitalLibSavedSuccessfully": "Saved as reference successfully",
+  "digitalLibShareNoLink": "No link available to share this item",
+  "digitalLibShareText": "Check out this research paper:\n{title}\n{url}",
+  "@digitalLibShareText": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "digitalLibSearchHint": "Search CORE (e.g., AI in Medicine)",
+  "digitalLibNoTitle": "Untitled",
+  "digitalLibUnknownAuthor": "Unknown author",
+  "digitalLibActionSaved": "Saved",
+  "digitalLibActionSave": "Save",
+  "digitalLibActionShare": "Share",
+  "digitalLibActionDetails": "Details",
+  "myLibUploadSuccess": "File uploaded successfully, you can track it in My Library",
+  "myLibStatsTitle": "My Library Stats",
+  "myLibStatsSubtitle": "A quick look at your files, saves, and downloads",
+  "myLibTotalSavedTitle": "Total Saves",
+  "myLibTotalSavedSubtitle": "Your references and sources",
+  "myLibNavReferences": "References",
+  "myLibDownloadsTitle": "My Downloads",
+  "myLibUploadsTitle": "My Uploads",
+  "myLibSharesTitle": "My Shares",
+  "myLibNavShares": "What I Shared",
+  "myLibHeroTitle": "Personal Library",
+  "myLibHeroSubtitle": "Manage all your files and resources",
+  "myLibFeatureUpload": "Upload",
+  "myLibFeatureSave": "Save",
+  "myLibFeatureDownload": "Download",
+  "myLibBtnUploadNew": "Upload New File",
+  "upErrorFilePick": "Could not pick file",
+  "upErrorSelectFileFirst": "Please select a file first",
+  "upErrorFillRequired": "Please fill all required fields",
+  "upErrorLoginRequired": "You must be logged in",
+  "upErrorInvalidCollege": "Please select a valid college",
+  "upSuccessUploaded": "File uploaded successfully and is now visible in the library",
+  "upErrorUploadFailed": "An error occurred while uploading. Please try again.",
+  "upSectionFileDetailsTitle": "File Details",
+  "upSectionFileDetailsSubtitle": "Enter the basic information clearly and organized",
+  "upLabelSubjectName": "Subject Name / File Title",
+  "upErrorFieldRequired": "This field is required",
+  "upLabelDoctorName": "Doctor Name",
+  "upLabelDescription": "Brief Description",
+  "upSectionAcademicTitle": "Academic Classification",
+  "upSectionAcademicSubtitle": "Choose where the file belongs in the university structure",
+  "upLabelCollege": "College",
+  "upLabelMajor": "Major",
+  "upLabelLevel": "Level",
+  "upLabelTerm": "Term",
+  "upBtnUploadNow": "Upload File Now",
+  "upHintDirectUpload": "The file will be uploaded directly and shown in the university library.",
+  "upTitleNewUpload": "Upload New File",
+  "upHeroTitle": "Add your file to the library",
+  "upHeroSubtitle": "Upload summaries, references, and study files in an organized and professional way.",
+  "upSectionFileTitle": "Uploaded File",
+  "upSectionFileSubtitle": "Choose PDF, Word, or image depending on content type",
+  "upHintFileSelectedSuccess": "File selected successfully. You can now complete the rest of the data and upload it.",
+  "upBtnChangeFile": "Change File",
+  "upBtnSelectFile": "Tap to select a file",
+  "upHintSupportedTypes": "Supported Types: PDF / DOC / DOCX / JPG / PNG",
+  "upBtnChooseFile": "Choose File",
+  "myFilesEmptyDefault": "No files found",
+  "myFilesEmptySaved": "You haven't saved any files yet",
+  "myFilesEmptyUploads": "You haven't uploaded any files yet",
+  "myFilesEmptyDownloads": "You haven't downloaded any files yet",
+  "myFilesEmptyShares": "You haven't shared any files yet",
+  "myFilesNoTitle": "Untitled",
+  "myFilesUnknown": "Unknown",
+  "myFilesUnknownAuthor": "Unknown Author",
+  "myFilesError": "Error: {error}",
+  "@myFilesError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "myFilesNoLink": "No link available for this file",
+  "myFilesNoLinkToOpen": "No link available to open",
+  "myFilesCannotOpen": "Could not open file",
+  "myFilesSanaUniversity": "Sana'a University",
+  "myFilesTrailingOpen": "Open",
+  "myFilesFutureList": "The \"{title}\" list will be displayed here later",
+  "@myFilesFutureList": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsUnspecified": "Unspecified",
+  "detailsWordFile": "Word File",
+  "detailsNoPreview": "This type is not currently displayed inside the app.\nChoose to open externally or download it.",
+  "detailsDownloadBtn": "Download",
+  "detailsOpenExternalBtn": "Open Externally",
+  "detailsNoGroupsJoined": "You haven't joined any groups yet",
+  "detailsShareToGroups": "Share to Groups",
+  "detailsSelectGroup": "Choose the group you want to share the file with",
+  "detailsShareSuccess": "File shared in {groupName} group",
+  "@detailsShareSuccess": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsShareFailure": "Could not share file to group: {error}",
+  "@detailsShareFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsNoShareLink": "No link available to share the file",
+  "detailsDownloadSuccess": "File downloaded and saved inside the app",
+  "detailsEditTitle": "Edit File",
+  "detailsEditSuccess": "File updated",
+  "detailsEditFailure": "Failed to edit: {error}",
+  "@detailsEditFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsDeleteTitle": "Delete File",
+  "detailsDeleteConfirm": "Are you sure?",
+  "detailsBtnCancel": "Cancel",
+  "detailsBtnDelete": "Delete",
+  "detailsDeleteSuccess": "File deleted",
+  "detailsDeleteFailure": "Failed to delete file: {error}",
+  "@detailsDeleteFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsDownloadFailure": "Download failed: {error}",
+  "@detailsDownloadFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsShareGeneralFailure": "Could not register share: {error}",
+  "@detailsShareGeneralFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsFillRequiredFields": "Complete all required fields",
+  "detailsBtnSaveEdits": "Save Changes",
+  "detailsActionOpenFile": "Open File",
+  "detailsSectionDescription": "Description",
+  "detailsSectionFileInfo": "File Information",
+  "detailsInfoCourse": "Course",
+  "detailsInfoCollege": "College",
+  "detailsInfoSpecialization": "Specialization",
+  "detailsInfoLevel": "Level",
+  "detailsInfoType": "Type",
+  "detailsInfoStatus": "Status",
+  "detailsInfoDate": "Upload Date",
+  "detailsStatusApproved": "Published",
+  "detailsStatusPending": "Under Review",
+  "detailsStatusRejected": "Rejected",
+  "detailsLikeAction": "Like",
+  "detailsLikeFailure": "Could not like: {error}",
+  "@detailsLikeFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsSaveAction": "Save",
+  "detailsSaveFailure": "Could not save: {error}",
+  "@detailsSaveFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsUploaderPrefix": "Uploaded by: {uploader}",
+  "@detailsUploaderPrefix": {
+    "placeholders": {
+      "uploader": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsStatViews": "Views",
+  "detailsStatDownloads": "Downloads",
+  "detailsStatShares": "Shares",
+  "detailsPrefixDr": "Dr. {author}",
+  "@detailsPrefixDr": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfBrowseFile": "Browse File",
+  "digitalLibNoAbstract": "No abstract available.",
+  "digitalLibResultDetailsTitle": "Research Details",
+  "digitalLibLabelAuthors": "Authors:",
+  "digitalLibLabelPublisher": "Publisher:",
+  "digitalLibLabelYear": "Publication Year:",
+  "digitalLibLabelJournal": "Journal:",
+  "digitalLibSaveErrorParam": "Could not save reference: {error}",
+  "digitalLibActionDownloadPdf": "Download PDF",
+  "digitalLibDownloadError": "Could not register download: {error}",
+  "digitalLibActionOpenSource": "Open Source",
+  "digitalLibLabelAbstract": "Abstract",
+  "@digitalLibSaveErrorParam": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@digitalLibDownloadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsMarkAllRead": "Mark all as read",
+  "notificationsMarkAllReadSuccess": "All notifications marked as read",
+  "notificationsSectionToday": "Today",
+  "notificationsSectionEarlier": "Earlier",
+  "notificationsEmptyTitle": "No notifications yet",
+  "notificationsEmptyDesc": "When you have a new interaction or an important update, it will appear here clearly.",
+  "timeYesterday": "Yesterday",
+  "timeMinutesAgoParam": "{count}m ago",
+  "@timeMinutesAgoParam": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgoParam": "{count}h ago",
+  "@timeHoursAgoParam": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgoParam": "{count}d ago",
+  "@timeDaysAgoParam": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "upFileTypePdf": "PDF",
+  "upFileTypeWord": "Word",
+  "upFileTypeImage": "Image",
+  "upFileTypeGeneric": "File"
 }

@@ -2,24 +2,26 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/app_notification_model.dart';
 import '../../services/notifications_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
-  String _formatTime(DateTime date) {
+  String _formatTime(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return 'الآن';
-    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} د';
-    if (diff.inHours < 24) return 'منذ ${diff.inHours} س';
-    if (diff.inDays == 1) return 'أمس';
-    if (diff.inDays < 7) return 'منذ ${diff.inDays} أيام';
+    if (diff.inMinutes < 1) return l10n.timeNow;
+    if (diff.inMinutes < 60) return l10n.timeMinutesAgoParam(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.timeHoursAgoParam(diff.inHours);
+    if (diff.inDays == 1) return l10n.timeYesterday;
+    if (diff.inDays < 7) return l10n.timeDaysAgoParam(diff.inDays);
     return '${date.day}/${date.month}/${date.year}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -27,9 +29,9 @@ class NotificationsScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         centerTitle: false,
         titleSpacing: 20,
-        title: const Text(
-          'الإشعارات',
-          style: TextStyle(
+        title: Text(
+          l10n.notificationsTitle,
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.4,
@@ -41,16 +43,16 @@ class NotificationsScreen extends StatelessWidget {
               await NotificationsService.markAllAsRead();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم تحديد جميع الإشعارات كمقروءة'),
-                    duration: Duration(seconds: 1),
+                  SnackBar(
+                    content: Text(l10n.notificationsMarkAllReadSuccess),
+                    duration: const Duration(seconds: 1),
                   ),
                 );
               }
             },
-            child: const Text(
-              'تحديد الكل كمقروء',
-              style: TextStyle(
+            child: Text(
+              l10n.notificationsMarkAllRead,
+              style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w700,
                 fontSize: 12.5,
@@ -95,14 +97,14 @@ class NotificationsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             children: [
               if (todayItems.isNotEmpty) ...[
-                const _SectionTitle(title: 'اليوم'),
+                _SectionTitle(title: l10n.notificationsSectionToday),
                 const SizedBox(height: 10),
                 ...todayItems.map(
                       (item) => SizedBox(
                     width: double.infinity,
                     child: _NotificationTile(
                       item: item,
-                      timeLabel: _formatTime(item.timestamp),
+                      timeLabel: _formatTime(item.timestamp, l10n),
                       onTap: () => NotificationsService.markAsRead(item.id),
                     ),
                   ),
@@ -110,14 +112,14 @@ class NotificationsScreen extends StatelessWidget {
                 const SizedBox(height: 18),
               ],
               if (earlierItems.isNotEmpty) ...[
-                const _SectionTitle(title: 'الأقدم'),
+                _SectionTitle(title: l10n.notificationsSectionEarlier),
                 const SizedBox(height: 10),
                 ...earlierItems.map(
                       (item) => SizedBox(
                     width: double.infinity,
                     child: _NotificationTile(
                       item: item,
-                      timeLabel: _formatTime(item.timestamp),
+                      timeLabel: _formatTime(item.timestamp, l10n),
                       onTap: () => NotificationsService.markAsRead(item.id),
                     ),
                   ),
@@ -334,6 +336,7 @@ class _NotificationsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
@@ -375,7 +378,7 @@ class _NotificationsEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               Text(
-                'لا توجد إشعارات الآن',
+                l10n.notificationsEmptyTitle,
                 style: TextStyle(
                   color: isDark ? AppColors.textPrimary : Colors.black87,
                   fontSize: 18,
@@ -384,7 +387,7 @@ class _NotificationsEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'عندما يصلك تفاعل جديد أو تحديث مهم سيظهر هنا بشكل مرتب وواضح.',
+                l10n.notificationsEmptyDesc,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isDark ? AppColors.textSecondary : Colors.black54,

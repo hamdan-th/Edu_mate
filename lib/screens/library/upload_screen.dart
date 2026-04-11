@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'library_theme.dart';
 import 'library_upload_service.dart';
 import 'university_academic_data.dart';
+import '../../l10n/app_localizations.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
@@ -66,17 +67,19 @@ class _UploadScreenState extends State<UploadScreen> {
         setState(() => _selectedFile = File(result.files.single.path!));
       }
     } catch (e) {
-      _showSnackBar('تعذر اختيار الملف');
+      if (mounted) _showSnackBar(AppLocalizations.of(context)!.upErrorFilePick);
     }
   }
 
   Future<void> _submitForm() async {
     if (_isUploading) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedFile == null) {
-      _showSnackBar('اختر ملفًا أولًا');
+      _showSnackBar(l10n.upErrorSelectFileFirst);
       return;
     }
 
@@ -84,19 +87,19 @@ class _UploadScreenState extends State<UploadScreen> {
         _selectedSpecialization == null ||
         _selectedLevel == null ||
         _selectedTerm == null) {
-      _showSnackBar('أكمل جميع القوائم المطلوبة');
+      _showSnackBar(l10n.upErrorFillRequired);
       return;
     }
 
     if (FirebaseAuth.instance.currentUser == null) {
-      _showSnackBar('يجب تسجيل الدخول أولًا');
+      _showSnackBar(l10n.upErrorLoginRequired);
       return;
     }
 
     final normalizedCollege = _normalizeCollege(_selectedCollege);
 
     if (normalizedCollege == null) {
-      _showSnackBar('اختر الكلية بشكل صحيح');
+      _showSnackBar(l10n.upErrorInvalidCollege);
       return;
     }
 
@@ -119,14 +122,14 @@ class _UploadScreenState extends State<UploadScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(
-            content: Text('تم رفع الملف بنجاح وأصبح ظاهرًا في المكتبة'),
+          SnackBar(
+            content: Text(l10n.upSuccessUploaded),
           ),
         );
 
       Navigator.pop(context, true);
     } catch (e) {
-      _showSnackBar('حدث خطأ أثناء رفع الملف');
+      if (mounted) _showSnackBar(l10n.upErrorUploadFailed);
     } finally {
       if (mounted) {
         setState(() => _isUploading = false);
@@ -148,16 +151,16 @@ class _UploadScreenState extends State<UploadScreen> {
     return path.split('/').last;
   }
 
-  String _fileTypeLabel(File file) {
+  String _fileTypeLabel(File file, AppLocalizations l10n) {
     final name = _fileName(file).toLowerCase();
-    if (name.endsWith('.pdf')) return 'PDF';
-    if (name.endsWith('.doc') || name.endsWith('.docx')) return 'Word';
+    if (name.endsWith('.pdf')) return l10n.upFileTypePdf;
+    if (name.endsWith('.doc') || name.endsWith('.docx')) return l10n.upFileTypeWord;
     if (name.endsWith('.png') ||
         name.endsWith('.jpg') ||
         name.endsWith('.jpeg')) {
-      return 'Image';
+      return l10n.upFileTypeImage;
     }
-    return 'File';
+    return l10n.upFileTypeGeneric;
   }
 
   IconData _fileTypeIcon(File file) {
@@ -176,6 +179,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final normalizedCollege = _normalizeCollege(_selectedCollege);
     final normalizedSpecialization =
     _normalizeSpecialization(_selectedSpecialization);
@@ -238,17 +242,17 @@ class _UploadScreenState extends State<UploadScreen> {
                     ),
                     const SizedBox(height: 18),
                     _SectionCard(
-                      title: 'بيانات الملف',
-                      subtitle: 'أدخل المعلومات الأساسية بشكل واضح ومنظم',
+                      title: l10n.upSectionFileDetailsTitle,
+                      subtitle: l10n.upSectionFileDetailsSubtitle,
                       child: Column(
                         children: [
                           _ModernTextField(
                             controller: _subjectNameController,
-                            label: 'اسم المادة / عنوان الملف',
+                            label: l10n.upLabelSubjectName,
                             icon: Icons.menu_book_rounded,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'هذا الحقل مطلوب';
+                                return l10n.upErrorFieldRequired;
                               }
                               return null;
                             },
@@ -256,11 +260,11 @@ class _UploadScreenState extends State<UploadScreen> {
                           const SizedBox(height: 12),
                           _ModernTextField(
                             controller: _doctorNameController,
-                            label: 'اسم الدكتور',
+                            label: l10n.upLabelDoctorName,
                             icon: Icons.person_rounded,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'هذا الحقل مطلوب';
+                                return l10n.upErrorFieldRequired;
                               }
                               return null;
                             },
@@ -268,7 +272,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           const SizedBox(height: 12),
                           _ModernTextField(
                             controller: _descriptionController,
-                            label: 'وصف مختصر',
+                            label: l10n.upLabelDescription,
                             icon: Icons.notes_rounded,
                             maxLines: 4,
                           ),
@@ -277,13 +281,13 @@ class _UploadScreenState extends State<UploadScreen> {
                     ),
                     const SizedBox(height: 18),
                     _SectionCard(
-                      title: 'التصنيف الأكاديمي',
-                      subtitle: 'اختر مكان الملف داخل هيكل الجامعة',
+                      title: l10n.upSectionAcademicTitle,
+                      subtitle: l10n.upSectionAcademicSubtitle,
                       child: Column(
                         children: [
                           _ModernDropdown(
                             value: normalizedCollege,
-                            label: 'الكلية',
+                            label: l10n.upLabelCollege,
                             icon: Icons.account_balance_rounded,
                             items: UniversityAcademicData.colleges,
                             onChanged: (value) => setState(() {
@@ -294,7 +298,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           const SizedBox(height: 12),
                           _ModernDropdown(
                             value: normalizedSpecialization,
-                            label: 'التخصص',
+                            label: l10n.upLabelMajor,
                             icon: Icons.auto_awesome_mosaic_rounded,
                             items: specializations,
                             onChanged: (value) =>
@@ -303,7 +307,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           const SizedBox(height: 12),
                           _ModernDropdown(
                             value: _selectedLevel,
-                            label: 'المستوى',
+                            label: l10n.upLabelLevel,
                             icon: Icons.layers_rounded,
                             items: UniversityAcademicData.levels,
                             onChanged: (value) =>
@@ -312,7 +316,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           const SizedBox(height: 12),
                           _ModernDropdown(
                             value: _selectedTerm,
-                            label: 'الترم',
+                            label: l10n.upLabelTerm,
                             icon: Icons.calendar_month_rounded,
                             items: UniversityAcademicData.terms,
                             onChanged: (value) =>
@@ -346,13 +350,13 @@ class _UploadScreenState extends State<UploadScreen> {
                             color: Colors.white,
                           ),
                         )
-                            : const Row(
+                            : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.cloud_upload_rounded, size: 20),
-                            SizedBox(width: 8),
+                            const Icon(Icons.cloud_upload_rounded, size: 20),
+                            const SizedBox(width: 8),
                             Text(
-                              'رفع الملف الآن',
+                              l10n.upBtnUploadNow,
                               style: TextStyle(
                                 fontSize: 15.5,
                                 fontWeight: FontWeight.w800,
@@ -365,7 +369,7 @@ class _UploadScreenState extends State<UploadScreen> {
                     const SizedBox(height: 12),
                     Center(
                       child: Text(
-                        'سيتم رفع الملف مباشرة وإظهاره داخل مكتبة الجامعة.',
+                        l10n.upHintDirectUpload,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: LibraryTheme.muted(context),
@@ -420,7 +424,7 @@ class _TopBar extends StatelessWidget {
         ),
         const Spacer(),
         Text(
-          'رفع ملف جديد',
+          AppLocalizations.of(context)!.upTitleNewUpload,
           style: TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.w800,
@@ -437,6 +441,7 @@ class _HeroUploadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -458,27 +463,27 @@ class _HeroUploadCard extends StatelessWidget {
           ),
         ],
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _HeroIconBox(),
-          SizedBox(width: 14),
+          const _HeroIconBox(),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'أضف ملفك للمكتبة',
-                  style: TextStyle(
+                  l10n.upHeroTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 21,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'ارفع الملخصات والمراجع والملفات الدراسية بطريقة منظمة واحترافية.',
-                  style: TextStyle(
+                  l10n.upHeroSubtitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13.4,
                     height: 1.5,
@@ -519,7 +524,7 @@ class _FilePickerCard extends StatelessWidget {
   final File? selectedFile;
   final VoidCallback onTap;
   final String Function(File file) fileNameBuilder;
-  final String Function(File file) fileTypeLabelBuilder;
+  final String Function(File file, AppLocalizations l10n) fileTypeLabelBuilder;
   final IconData Function(File file) fileTypeIconBuilder;
 
   const _FilePickerCard({
@@ -532,11 +537,12 @@ class _FilePickerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasFile = selectedFile != null;
 
     return _SectionCard(
-      title: 'الملف المرفوع',
-      subtitle: 'اختر PDF أو Word أو صورة حسب نوع المحتوى',
+      title: l10n.upSectionFileTitle,
+      subtitle: l10n.upSectionFileSubtitle,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(22),
@@ -588,7 +594,7 @@ class _FilePickerCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    fileTypeLabelBuilder(selectedFile!),
+                    fileTypeLabelBuilder(selectedFile!, l10n),
                     style: TextStyle(
                       color: LibraryTheme.primary(context),
                       fontSize: 12,
@@ -610,7 +616,7 @@ class _FilePickerCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'تم اختيار الملف بنجاح، ويمكنك الآن إكمال بقية البيانات ثم رفعه.',
+                  l10n.upHintFileSelectedSuccess,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12.5,
@@ -634,7 +640,7 @@ class _FilePickerCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'تغيير الملف',
+                    l10n.upBtnChangeFile,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -666,7 +672,7 @@ class _FilePickerCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'اضغط لاختيار ملف',
+                  l10n.upBtnSelectFile,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14.6,
@@ -676,7 +682,7 @@ class _FilePickerCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'الأنواع المدعومة: PDF / DOC / DOCX / JPG / PNG',
+                  l10n.upHintSupportedTypes,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12.5,
@@ -700,7 +706,7 @@ class _FilePickerCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'اختيار ملف',
+                    l10n.upBtnChooseFile,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,

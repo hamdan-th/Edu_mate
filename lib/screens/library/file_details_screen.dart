@@ -13,6 +13,7 @@ import 'pdf_preview_screen.dart';
 import 'university_academic_data.dart';
 import '../../services/group_service.dart';
 import '../../models/group_model.dart';
+import '../../l10n/app_localizations.dart';
 
 class FileDetailsScreen extends StatefulWidget {
   final FileModel file;
@@ -48,7 +49,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
   }
 
   String _formatDate(DateTime? date) {
-    if (date == null) return 'غير محدد';
+    if (date == null) return AppLocalizations.of(context)!.detailsUnspecified;
     return '${date.year}/${date.month}/${date.day}';
   }
 
@@ -70,7 +71,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
 
   Future<void> _openFile(String url) async {
     if (url.trim().isEmpty) {
-      _snack('لا يوجد رابط للملف');
+      _snack(AppLocalizations.of(context)!.myFilesNoLink);
       return;
     }
 
@@ -128,7 +129,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
               ),
               const SizedBox(height: 14),
               Text(
-                'ملف Word',
+                AppLocalizations.of(context)!.detailsWordFile,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -137,7 +138,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'هذا النوع لا يُعرض داخل التطبيق حاليًا.\nاختر فتحه خارجيًا أو تنزيله.',
+                AppLocalizations.of(context)!.detailsNoPreview,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.2,
@@ -163,7 +164,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                         ),
                       ),
                       icon: const Icon(Icons.download_rounded, size: 18),
-                      label: const Text('تنزيل'),
+                      label: Text(AppLocalizations.of(context)!.detailsDownloadBtn),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -177,7 +178,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                           mode: LaunchMode.externalApplication,
                         );
                         if (!launched && mounted) {
-                          _snack('تعذر فتح الملف');
+                          _snack(AppLocalizations.of(context)!.myFilesCannotOpen);
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -190,7 +191,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                         ),
                       ),
                       icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                      label: const Text('فتح خارجي'),
+                      label: Text(AppLocalizations.of(context)!.detailsOpenExternalBtn),
                     ),
                   ),
                 ],
@@ -205,7 +206,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
   Future<void> _shareFileToGroup() async {
     final url = widget.file.fileUrl.trim();
     if (url.isEmpty) {
-      _snack('لا يوجد رابط لمشاركة الملف');
+      _snack(AppLocalizations.of(context)!.detailsNoShareLink);
       return;
     }
 
@@ -215,7 +216,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
       if (!mounted) return;
 
       if (groups.isEmpty) {
-        _snack('أنت غير منضم إلى أي مجموعة بعد');
+        _snack(AppLocalizations.of(context)!.detailsNoGroupsJoined);
         return;
       }
 
@@ -256,7 +257,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'مشاركة إلى المجموعات',
+                      AppLocalizations.of(context)!.detailsShareToGroups,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -269,7 +270,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    'اختر المجموعة التي تريد مشاركة الملف فيها',
+                    AppLocalizations.of(context)!.detailsSelectGroup,
                     style: TextStyle(
                       fontSize: 13,
                       color: _muted,
@@ -378,41 +379,42 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
       await LibraryReactionsService.registerShare(widget.file.id);
 
       if (!mounted) return;
-      _snack('تمت مشاركة الملف في مجموعة ${selectedGroup.name}');
+      _snack(AppLocalizations.of(context)!.detailsShareSuccess(selectedGroup.name));
     } catch (e) {
-      _snack('تعذر مشاركة الملف إلى المجموعة: $e');
+      _snack(AppLocalizations.of(context)!.detailsShareFailure(e.toString()));
     }
   }
 
   Future<void> _shareFileExternally() async {
     final url = widget.file.fileUrl.trim();
     if (url.isEmpty) {
-      _snack('لا يوجد رابط لمشاركة الملف');
+      _snack(AppLocalizations.of(context)!.detailsNoShareLink);
       return;
     }
 
     try {
       await LibraryReactionsService.registerShare(widget.file.id);
+      final l10n = AppLocalizations.of(context)!;
       final text = '''
 📘 ${widget.file.title}
 
-الدكتور: ${widget.file.author}
-المادة: ${widget.file.course}
-الكلية: ${widget.file.college}
-التخصص: ${widget.file.major}
-المستوى: ${widget.file.semester}
+${l10n.upLabelDoctorName}: ${widget.file.author}
+${AppLocalizations.of(context)!.detailsInfoCourse}: ${widget.file.course}
+${AppLocalizations.of(context)!.detailsInfoCollege}: ${widget.file.college}
+${AppLocalizations.of(context)!.detailsInfoSpecialization}: ${widget.file.major}
+${AppLocalizations.of(context)!.detailsInfoLevel}: ${widget.file.semester}
 
 $url
 ''';
       await Share.share(text);
     } catch (e) {
-      _snack('تعذر تسجيل المشاركة: $e');
+      _snack(AppLocalizations.of(context)!.detailsShareGeneralFailure(e.toString()));
     }
   }
 
   Future<void> _downloadFile(String url) async {
     if (url.trim().isEmpty) {
-      _snack('لا يوجد رابط للتنزيل');
+      _snack(AppLocalizations.of(context)!.myFilesNoLink);
       return;
     }
 
@@ -429,10 +431,10 @@ $url
       await LibraryReactionsService.registerDownload(widget.file.id);
 
       if (mounted) {
-        _snack('تم تنزيل الملف وحفظه داخل التطبيق');
+        _snack(AppLocalizations.of(context)!.detailsDownloadSuccess);
       }
     } catch (e) {
-      _snack('فشل التنزيل: $e');
+      _snack(AppLocalizations.of(context)!.detailsDownloadFailure(e.toString()));
     }
   }
 
@@ -538,7 +540,7 @@ $url
                       Row(
                         children: [
                           Text(
-                            'تعديل الملف',
+                            AppLocalizations.of(context)!.detailsEditTitle,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
@@ -550,7 +552,7 @@ $url
                       const SizedBox(height: 16),
                       _ModernField(
                         controller: subjectController,
-                        label: 'اسم المادة / العنوان',
+                        label: AppLocalizations.of(context)!.upLabelSubjectName,
                         icon: Icons.menu_book_rounded,
                         isDark: _isDark,
                         textColor: _text,
@@ -560,7 +562,7 @@ $url
                       const SizedBox(height: 12),
                       _ModernField(
                         controller: doctorController,
-                        label: 'اسم الدكتور',
+                        label: AppLocalizations.of(context)!.upLabelDoctorName,
                         icon: Icons.person_rounded,
                         isDark: _isDark,
                         textColor: _text,
@@ -570,7 +572,7 @@ $url
                       const SizedBox(height: 12),
                       _ModernField(
                         controller: descriptionController,
-                        label: 'الوصف',
+                        label: AppLocalizations.of(context)!.detailsSectionDescription,
                         icon: Icons.notes_rounded,
                         maxLines: 4,
                         isDark: _isDark,
@@ -581,7 +583,7 @@ $url
                       const SizedBox(height: 12),
                       _DropdownField(
                         value: selectedCollege,
-                        hint: 'الكلية',
+                        hint: AppLocalizations.of(context)!.upLabelCollege,
                         icon: Icons.account_balance_rounded,
                         items: UniversityAcademicData.colleges,
                         textColor: _text,
@@ -595,7 +597,7 @@ $url
                       const SizedBox(height: 12),
                       _DropdownField(
                         value: selectedSpecialization,
-                        hint: 'التخصص',
+                        hint: AppLocalizations.of(context)!.upLabelMajor,
                         icon: Icons.auto_awesome_mosaic_rounded,
                         items: majors,
                         textColor: _text,
@@ -608,7 +610,7 @@ $url
                       const SizedBox(height: 12),
                       _DropdownField(
                         value: selectedLevel,
-                        hint: 'المستوى',
+                        hint: AppLocalizations.of(context)!.upLabelLevel,
                         icon: Icons.layers_rounded,
                         items: UniversityAcademicData.levels,
                         textColor: _text,
@@ -621,7 +623,7 @@ $url
                       const SizedBox(height: 12),
                       _DropdownField(
                         value: selectedTerm,
-                        hint: 'الترم',
+                        hint: AppLocalizations.of(context)!.upLabelTerm,
                         icon: Icons.calendar_month_rounded,
                         items: UniversityAcademicData.terms,
                         textColor: _text,
@@ -644,7 +646,7 @@ $url
                                 selectedSpecialization == null ||
                                 selectedLevel == null ||
                                 selectedTerm == null) {
-                              _snack('أكمل جميع الحقول المطلوبة');
+                              _snack(AppLocalizations.of(context)!.detailsFillRequiredFields);
                               return;
                             }
 
@@ -665,10 +667,10 @@ $url
 
                               if (mounted) {
                                 Navigator.pop(context);
-                                _snack('تم تحديث الملف');
+                                _snack(AppLocalizations.of(context)!.detailsEditSuccess);
                               }
                             } catch (e) {
-                              _snack('فشل التعديل: $e');
+                              _snack(AppLocalizations.of(context)!.detailsEditFailure(e.toString()));
                             } finally {
                               if (mounted) {
                                 setModalState(() => isSaving = false);
@@ -693,8 +695,8 @@ $url
                               color: Colors.white,
                             ),
                           )
-                              : const Text(
-                            'حفظ التعديلات',
+                              : Text(
+                            AppLocalizations.of(context)!.detailsBtnSaveEdits,
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
@@ -719,25 +721,25 @@ $url
       builder: (context) => AlertDialog(
         backgroundColor: _surface,
         title: Text(
-          'حذف الملف',
+          AppLocalizations.of(context)!.detailsDeleteTitle,
           style: TextStyle(color: _text),
         ),
         content: Text(
-          'هل أنت متأكد؟',
+          AppLocalizations.of(context)!.detailsDeleteConfirm,
           style: TextStyle(color: _muted),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'إلغاء',
+              AppLocalizations.of(context)!.detailsBtnCancel,
               style: TextStyle(color: _muted),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              'حذف',
+              AppLocalizations.of(context)!.detailsBtnDelete,
               style: TextStyle(color: LibraryTheme.danger(context)),
             ),
           ),
@@ -755,10 +757,10 @@ $url
       );
       if (mounted) {
         Navigator.pop(context);
-        _snack('تم حذف الملف');
+        _snack(AppLocalizations.of(context)!.detailsDeleteSuccess);
       }
     } catch (e) {
-      _snack('فشل حذف الملف: $e');
+      _snack(AppLocalizations.of(context)!.detailsDeleteFailure(e.toString()));
     }
   }
 
@@ -921,7 +923,7 @@ $url
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { final l10n = AppLocalizations.of(context)!;
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     final isOwner =
         currentUserId != null && currentUserId == widget.file.userId;
@@ -1093,7 +1095,7 @@ $url
                             ),
                             const SizedBox(height: 14),
                             Text(
-                              'د. ${updatedFile.author}',
+                              l10n.detailsPrefixDr(updatedFile.author),
                               style: TextStyle(
                                 fontSize: 14.5,
                                 color: _muted,
@@ -1102,7 +1104,7 @@ $url
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'رفعه: ${updatedFile.displayUploader}',
+                              l10n.detailsUploaderPrefix(updatedFile.displayUploader),
                               style: TextStyle(
                                 fontSize: 12.8,
                                 color: _muted,
@@ -1115,7 +1117,7 @@ $url
                                 Expanded(
                                   child: _statItem(
                                     Icons.visibility_outlined,
-                                    'مشاهدة',
+                                    l10n.detailsStatViews,
                                     updatedFile.views,
                                     color: LibraryTheme.primary(context),
                                   ),
@@ -1124,7 +1126,7 @@ $url
                                 Expanded(
                                   child: _statItem(
                                     Icons.download_rounded,
-                                    'تنزيل',
+                                    l10n.detailsStatDownloads,
                                     updatedFile.downloads,
                                     color: LibraryTheme.success(context),
                                   ),
@@ -1133,7 +1135,7 @@ $url
                                 Expanded(
                                   child: _statItem(
                                     Icons.share_outlined,
-                                    'مشاركة',
+                                    l10n.detailsStatShares,
                                     updatedFile.shares,
                                     color: LibraryTheme.accent(context),
                                   ),
@@ -1148,7 +1150,7 @@ $url
                         width: double.infinity,
                         child: _actionButton(
                           icon: Icons.groups_rounded,
-                          label: 'مشاركة إلى المجموعات',
+                          label: l10n.detailsShareToGroups,
                           onTap: _shareFileToGroup,
                           filled: false,
                         ),
@@ -1167,7 +1169,7 @@ $url
                                   icon: liked
                                       ? Icons.thumb_up_alt_rounded
                                       : Icons.thumb_up_alt_outlined,
-                                  label: 'إعجاب',
+                                  label: l10n.detailsLikeAction,
                                   count: updatedFile.likes,
                                   active: liked,
                                   onTap: () async {
@@ -1177,7 +1179,7 @@ $url
                                         isCurrentlyLiked: liked,
                                       );
                                     } catch (e) {
-                                      _snack('تعذر تنفيذ الإعجاب: $e');
+                                      _snack(l10n.detailsLikeFailure(e.toString()));
                                     }
                                   },
                                   isDark: _isDark,
@@ -1200,7 +1202,7 @@ $url
                                   icon: saved
                                       ? Icons.bookmark_rounded
                                       : Icons.bookmark_border_rounded,
-                                  label: 'حفظ',
+                                  label: l10n.detailsSaveAction,
                                   count: updatedFile.saves,
                                   active: saved,
                                   onTap: () async {
@@ -1210,7 +1212,7 @@ $url
                                         isCurrentlySaved: saved,
                                       );
                                     } catch (e) {
-                                      _snack('تعذر تنفيذ الحفظ: $e');
+                                      _snack(l10n.detailsSaveFailure(e.toString()));
                                     }
                                   },
                                   isDark: _isDark,
@@ -1225,7 +1227,7 @@ $url
                           Expanded(
                             child: _ReactionButton(
                               icon: Icons.share_outlined,
-                              label: 'مشاركة',
+                              label: l10n.detailsStatShares,
                               count: updatedFile.shares,
                               active: false,
                               onTap: _shareFileExternally,
@@ -1242,14 +1244,14 @@ $url
                         children: [
                           _actionButton(
                             icon: Icons.visibility_rounded,
-                            label: 'فتح الملف',
+                            label: l10n.detailsActionOpenFile,
                             onTap: () => _openFile(updatedFile.fileUrl),
                             filled: true,
                           ),
                           const SizedBox(width: 10),
                           _actionButton(
                             icon: Icons.download_rounded,
-                            label: 'تنزيل',
+                            label: l10n.detailsDownloadBtn,
                             onTap: () => _downloadFile(updatedFile.fileUrl),
                             filled: false,
                           ),
@@ -1280,7 +1282,7 @@ $url
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'الوصف',
+                                    l10n.detailsSectionDescription,
                                     style: TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w800,
@@ -1326,7 +1328,7 @@ $url
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'معلومات الملف',
+                                  l10n.detailsSectionFileInfo,
                                   style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w800,
@@ -1338,37 +1340,37 @@ $url
                             const SizedBox(height: 12),
                             _buildInfoTile(
                               icon: Icons.menu_book_rounded,
-                              label: 'المادة',
+                              label: l10n.detailsInfoCourse,
                               value: updatedFile.course,
                             ),
                             _buildInfoTile(
                               icon: Icons.account_balance_rounded,
-                              label: 'الكلية',
+                              label: l10n.detailsInfoCollege,
                               value: updatedFile.college,
                             ),
                             _buildInfoTile(
                               icon: Icons.auto_awesome_mosaic_rounded,
-                              label: 'التخصص',
+                              label: l10n.detailsInfoSpecialization,
                               value: updatedFile.major,
                             ),
                             _buildInfoTile(
                               icon: Icons.layers_rounded,
-                              label: 'المستوى',
+                              label: l10n.detailsInfoLevel,
                               value: updatedFile.semester,
                             ),
                             _buildInfoTile(
                               icon: Icons.description_rounded,
-                              label: 'النوع',
+                              label: l10n.detailsInfoType,
                               value: updatedFile.fileType,
                             ),
                             _buildInfoTile(
                               icon: Icons.verified_rounded,
-                              label: 'الحالة',
-                              value: _statusText(updatedFile.status),
+                              label: l10n.detailsInfoStatus,
+                              value: _statusText(updatedFile.status, l10n),
                             ),
                             _buildInfoTile(
                               icon: Icons.calendar_today_rounded,
-                              label: 'تاريخ الرفع',
+                              label: l10n.detailsInfoDate,
                               value: _formatDate(updatedFile.createdAt),
                             ),
                           ],
@@ -1385,14 +1387,14 @@ $url
     );
   }
 
-  static String _statusText(String status) {
+  static String _statusText(String status, AppLocalizations l10n) {
     switch (status) {
       case 'approved':
-        return 'منشور';
+        return l10n.detailsStatusApproved;
       case 'pending':
-        return 'قيد المراجعة';
+        return l10n.detailsStatusPending;
       case 'rejected':
-        return 'مرفوض';
+        return l10n.detailsStatusRejected;
       default:
         return status;
     }
@@ -1417,7 +1419,7 @@ class _CircleAction extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { final l10n = AppLocalizations.of(context)!;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -1466,7 +1468,7 @@ class _ReactionButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { final l10n = AppLocalizations.of(context)!;
     final color = active ? LibraryTheme.primary(context) : mutedColor;
 
     return InkWell(
@@ -1535,7 +1537,7 @@ class _ModernField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { final l10n = AppLocalizations.of(context)!;
     return TextField(
       controller: controller,
       maxLines: maxLines,
@@ -1590,7 +1592,7 @@ class _DropdownField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { final l10n = AppLocalizations.of(context)!;
     final uniqueItems = items.toSet().toList();
     final safeValue =
     (value != null && uniqueItems.contains(value)) ? value : null;

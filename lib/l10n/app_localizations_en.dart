@@ -863,4 +863,520 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupsActionTransferOwnership => 'Transfer Ownership';
+
+  @override
+  String get libraryTabUniversity => 'University Library';
+
+  @override
+  String get libraryTabDigital => 'Digital Library';
+
+  @override
+  String get libraryTabMyLibrary => 'My Library';
+
+  @override
+  String get libraryHeaderSubtitle =>
+      'Explore and manage your university library easily';
+
+  @override
+  String get digitalLibDefaultMessage =>
+      'Search millions of open research papers...';
+
+  @override
+  String digitalLibNoResults(String query) {
+    return 'No results found for \"$query\"';
+  }
+
+  @override
+  String get digitalLibSearchError =>
+      'An error occurred during the search. Please check your internet connection.';
+
+  @override
+  String get digitalLibRemovedFromSaved => 'Removed from saved';
+
+  @override
+  String get digitalLibSavedSuccessfully => 'Saved as reference successfully';
+
+  @override
+  String get digitalLibShareNoLink => 'No link available to share this item';
+
+  @override
+  String digitalLibShareText(String title, String url) {
+    return 'Check out this research paper:\n$title\n$url';
+  }
+
+  @override
+  String get digitalLibSearchHint => 'Search CORE (e.g., AI in Medicine)';
+
+  @override
+  String get digitalLibNoTitle => 'Untitled';
+
+  @override
+  String get digitalLibUnknownAuthor => 'Unknown author';
+
+  @override
+  String get digitalLibActionSaved => 'Saved';
+
+  @override
+  String get digitalLibActionSave => 'Save';
+
+  @override
+  String get digitalLibActionShare => 'Share';
+
+  @override
+  String get digitalLibActionDetails => 'Details';
+
+  @override
+  String get myLibUploadSuccess =>
+      'File uploaded successfully, you can track it in My Library';
+
+  @override
+  String get myLibStatsTitle => 'My Library Stats';
+
+  @override
+  String get myLibStatsSubtitle =>
+      'A quick look at your files, saves, and downloads';
+
+  @override
+  String get myLibTotalSavedTitle => 'Total Saves';
+
+  @override
+  String get myLibTotalSavedSubtitle => 'Your references and sources';
+
+  @override
+  String get myLibNavReferences => 'References';
+
+  @override
+  String get myLibDownloadsTitle => 'My Downloads';
+
+  @override
+  String get myLibUploadsTitle => 'My Uploads';
+
+  @override
+  String get myLibSharesTitle => 'My Shares';
+
+  @override
+  String get myLibNavShares => 'What I Shared';
+
+  @override
+  String get myLibHeroTitle => 'Personal Library';
+
+  @override
+  String get myLibHeroSubtitle => 'Manage all your files and resources';
+
+  @override
+  String get myLibFeatureUpload => 'Upload';
+
+  @override
+  String get myLibFeatureSave => 'Save';
+
+  @override
+  String get myLibFeatureDownload => 'Download';
+
+  @override
+  String get myLibBtnUploadNew => 'Upload New File';
+
+  @override
+  String get upErrorFilePick => 'Could not pick file';
+
+  @override
+  String get upErrorSelectFileFirst => 'Please select a file first';
+
+  @override
+  String get upErrorFillRequired => 'Please fill all required fields';
+
+  @override
+  String get upErrorLoginRequired => 'You must be logged in';
+
+  @override
+  String get upErrorInvalidCollege => 'Please select a valid college';
+
+  @override
+  String get upSuccessUploaded =>
+      'File uploaded successfully and is now visible in the library';
+
+  @override
+  String get upErrorUploadFailed =>
+      'An error occurred while uploading. Please try again.';
+
+  @override
+  String get upSectionFileDetailsTitle => 'File Details';
+
+  @override
+  String get upSectionFileDetailsSubtitle =>
+      'Enter the basic information clearly and organized';
+
+  @override
+  String get upLabelSubjectName => 'Subject Name / File Title';
+
+  @override
+  String get upErrorFieldRequired => 'This field is required';
+
+  @override
+  String get upLabelDoctorName => 'Doctor Name';
+
+  @override
+  String get upLabelDescription => 'Brief Description';
+
+  @override
+  String get upSectionAcademicTitle => 'Academic Classification';
+
+  @override
+  String get upSectionAcademicSubtitle =>
+      'Choose where the file belongs in the university structure';
+
+  @override
+  String get upLabelCollege => 'College';
+
+  @override
+  String get upLabelMajor => 'Major';
+
+  @override
+  String get upLabelLevel => 'Level';
+
+  @override
+  String get upLabelTerm => 'Term';
+
+  @override
+  String get upBtnUploadNow => 'Upload File Now';
+
+  @override
+  String get upHintDirectUpload =>
+      'The file will be uploaded directly and shown in the university library.';
+
+  @override
+  String get upTitleNewUpload => 'Upload New File';
+
+  @override
+  String get upHeroTitle => 'Add your file to the library';
+
+  @override
+  String get upHeroSubtitle =>
+      'Upload summaries, references, and study files in an organized and professional way.';
+
+  @override
+  String get upSectionFileTitle => 'Uploaded File';
+
+  @override
+  String get upSectionFileSubtitle =>
+      'Choose PDF, Word, or image depending on content type';
+
+  @override
+  String get upHintFileSelectedSuccess =>
+      'File selected successfully. You can now complete the rest of the data and upload it.';
+
+  @override
+  String get upBtnChangeFile => 'Change File';
+
+  @override
+  String get upBtnSelectFile => 'Tap to select a file';
+
+  @override
+  String get upHintSupportedTypes =>
+      'Supported Types: PDF / DOC / DOCX / JPG / PNG';
+
+  @override
+  String get upBtnChooseFile => 'Choose File';
+
+  @override
+  String get myFilesEmptyDefault => 'No files found';
+
+  @override
+  String get myFilesEmptySaved => 'You haven\'t saved any files yet';
+
+  @override
+  String get myFilesEmptyUploads => 'You haven\'t uploaded any files yet';
+
+  @override
+  String get myFilesEmptyDownloads => 'You haven\'t downloaded any files yet';
+
+  @override
+  String get myFilesEmptyShares => 'You haven\'t shared any files yet';
+
+  @override
+  String get myFilesNoTitle => 'Untitled';
+
+  @override
+  String get myFilesUnknown => 'Unknown';
+
+  @override
+  String get myFilesUnknownAuthor => 'Unknown Author';
+
+  @override
+  String myFilesError(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get myFilesNoLink => 'No link available for this file';
+
+  @override
+  String get myFilesNoLinkToOpen => 'No link available to open';
+
+  @override
+  String get myFilesCannotOpen => 'Could not open file';
+
+  @override
+  String get myFilesSanaUniversity => 'Sana\'a University';
+
+  @override
+  String get myFilesTrailingOpen => 'Open';
+
+  @override
+  String myFilesFutureList(String title) {
+    return 'The \"$title\" list will be displayed here later';
+  }
+
+  @override
+  String get detailsUnspecified => 'Unspecified';
+
+  @override
+  String get detailsWordFile => 'Word File';
+
+  @override
+  String get detailsNoPreview =>
+      'This type is not currently displayed inside the app.\nChoose to open externally or download it.';
+
+  @override
+  String get detailsDownloadBtn => 'Download';
+
+  @override
+  String get detailsOpenExternalBtn => 'Open Externally';
+
+  @override
+  String get detailsNoGroupsJoined => 'You haven\'t joined any groups yet';
+
+  @override
+  String get detailsShareToGroups => 'Share to Groups';
+
+  @override
+  String get detailsSelectGroup =>
+      'Choose the group you want to share the file with';
+
+  @override
+  String detailsShareSuccess(String groupName) {
+    return 'File shared in $groupName group';
+  }
+
+  @override
+  String detailsShareFailure(String error) {
+    return 'Could not share file to group: $error';
+  }
+
+  @override
+  String get detailsNoShareLink => 'No link available to share the file';
+
+  @override
+  String get detailsDownloadSuccess =>
+      'File downloaded and saved inside the app';
+
+  @override
+  String get detailsEditTitle => 'Edit File';
+
+  @override
+  String get detailsEditSuccess => 'File updated';
+
+  @override
+  String detailsEditFailure(String error) {
+    return 'Failed to edit: $error';
+  }
+
+  @override
+  String get detailsDeleteTitle => 'Delete File';
+
+  @override
+  String get detailsDeleteConfirm => 'Are you sure?';
+
+  @override
+  String get detailsBtnCancel => 'Cancel';
+
+  @override
+  String get detailsBtnDelete => 'Delete';
+
+  @override
+  String get detailsDeleteSuccess => 'File deleted';
+
+  @override
+  String detailsDeleteFailure(String error) {
+    return 'Failed to delete file: $error';
+  }
+
+  @override
+  String detailsDownloadFailure(String error) {
+    return 'Download failed: $error';
+  }
+
+  @override
+  String detailsShareGeneralFailure(String error) {
+    return 'Could not register share: $error';
+  }
+
+  @override
+  String get detailsFillRequiredFields => 'Complete all required fields';
+
+  @override
+  String get detailsBtnSaveEdits => 'Save Changes';
+
+  @override
+  String get detailsActionOpenFile => 'Open File';
+
+  @override
+  String get detailsSectionDescription => 'Description';
+
+  @override
+  String get detailsSectionFileInfo => 'File Information';
+
+  @override
+  String get detailsInfoCourse => 'Course';
+
+  @override
+  String get detailsInfoCollege => 'College';
+
+  @override
+  String get detailsInfoSpecialization => 'Specialization';
+
+  @override
+  String get detailsInfoLevel => 'Level';
+
+  @override
+  String get detailsInfoType => 'Type';
+
+  @override
+  String get detailsInfoStatus => 'Status';
+
+  @override
+  String get detailsInfoDate => 'Upload Date';
+
+  @override
+  String get detailsStatusApproved => 'Published';
+
+  @override
+  String get detailsStatusPending => 'Under Review';
+
+  @override
+  String get detailsStatusRejected => 'Rejected';
+
+  @override
+  String get detailsLikeAction => 'Like';
+
+  @override
+  String detailsLikeFailure(String error) {
+    return 'Could not like: $error';
+  }
+
+  @override
+  String get detailsSaveAction => 'Save';
+
+  @override
+  String detailsSaveFailure(String error) {
+    return 'Could not save: $error';
+  }
+
+  @override
+  String detailsUploaderPrefix(String uploader) {
+    return 'Uploaded by: $uploader';
+  }
+
+  @override
+  String get detailsStatViews => 'Views';
+
+  @override
+  String get detailsStatDownloads => 'Downloads';
+
+  @override
+  String get detailsStatShares => 'Shares';
+
+  @override
+  String detailsPrefixDr(String author) {
+    return 'Dr. $author';
+  }
+
+  @override
+  String get pdfBrowseFile => 'Browse File';
+
+  @override
+  String get digitalLibNoAbstract => 'No abstract available.';
+
+  @override
+  String get digitalLibResultDetailsTitle => 'Research Details';
+
+  @override
+  String get digitalLibLabelAuthors => 'Authors:';
+
+  @override
+  String get digitalLibLabelPublisher => 'Publisher:';
+
+  @override
+  String get digitalLibLabelYear => 'Publication Year:';
+
+  @override
+  String get digitalLibLabelJournal => 'Journal:';
+
+  @override
+  String digitalLibSaveErrorParam(String error) {
+    return 'Could not save reference: $error';
+  }
+
+  @override
+  String get digitalLibActionDownloadPdf => 'Download PDF';
+
+  @override
+  String digitalLibDownloadError(String error) {
+    return 'Could not register download: $error';
+  }
+
+  @override
+  String get digitalLibActionOpenSource => 'Open Source';
+
+  @override
+  String get digitalLibLabelAbstract => 'Abstract';
+
+  @override
+  String get notificationsMarkAllRead => 'Mark all as read';
+
+  @override
+  String get notificationsMarkAllReadSuccess =>
+      'All notifications marked as read';
+
+  @override
+  String get notificationsSectionToday => 'Today';
+
+  @override
+  String get notificationsSectionEarlier => 'Earlier';
+
+  @override
+  String get notificationsEmptyTitle => 'No notifications yet';
+
+  @override
+  String get notificationsEmptyDesc =>
+      'When you have a new interaction or an important update, it will appear here clearly.';
+
+  @override
+  String get timeYesterday => 'Yesterday';
+
+  @override
+  String timeMinutesAgoParam(int count) {
+    return '${count}m ago';
+  }
+
+  @override
+  String timeHoursAgoParam(int count) {
+    return '${count}h ago';
+  }
+
+  @override
+  String timeDaysAgoParam(int count) {
+    return '${count}d ago';
+  }
+
+  @override
+  String get upFileTypePdf => 'PDF';
+
+  @override
+  String get upFileTypeWord => 'Word';
+
+  @override
+  String get upFileTypeImage => 'Image';
+
+  @override
+  String get upFileTypeGeneric => 'File';
 }
