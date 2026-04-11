@@ -654,22 +654,54 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               SliverToBoxAdapter(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: _isDark ? AppColors.background : const Color(0xFFF9FAFC),
-                    border: _isDark ? null : Border(bottom: BorderSide(color: Colors.black.withOpacity(0.04))),
+                    color: _isDark ? AppColors.background : const Color(0xFFF4F5F8),
+                    border: _isDark
+                        ? null
+                        : Border(bottom: BorderSide(color: Colors.black.withOpacity(0.08), width: 1)),
+                    boxShadow: _isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
                   ),
                   padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48, bottom: 20),
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 56,
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
-                        backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                        child: widget.group.imageUrl.isEmpty
-                            ? Text(
-                                _groupName.isNotEmpty ? _groupName[0].toUpperCase() : 'M',
-                                style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
-                              )
-                            : null,
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: _isDark
+                              ? null
+                              : Border.all(color: Colors.black.withOpacity(0.10), width: 2),
+                          boxShadow: _isDark
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: AppColors.primary.withOpacity(0.12),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 56,
+                          backgroundColor: AppColors.primary.withOpacity(_isDark ? 0.10 : 0.15),
+                          backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
+                          child: widget.group.imageUrl.isEmpty
+                              ? Text(
+                                  _groupName.isNotEmpty ? _groupName[0].toUpperCase() : 'M',
+                                  style: TextStyle(
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isDark ? AppColors.primary : const Color(0xFF5B21B6),
+                                  ),
+                                )
+                              : null,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Padding(
@@ -677,13 +709,22 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                         child: Text(
                           _groupName,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: _isDark ? AppColors.textPrimary : const Color(0xFF111827),
+                            letterSpacing: -0.3,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         "$_membersCount ${AppLocalizations.of(context)!.groupsMemberCountSuffix}",
-                        style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: _isDark ? AppColors.textSecondary : const Color(0xFF374151),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       if (_groupDescription.isNotEmpty) ...[
                         const SizedBox(height: 12),
@@ -692,7 +733,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                           child: Text(
                             _groupDescription,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: _isDark ? AppColors.textPrimary : const Color(0xFF374151),
+                              height: 1.4,
+                            ),
                           ),
                         ),
                       ],
@@ -836,16 +881,34 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(13),
             decoration: BoxDecoration(
-              color: color.withOpacity(_isDark ? 0.1 : 0.18),
+              color: _isDark ? color.withOpacity(0.12) : color.withOpacity(0.10),
               borderRadius: BorderRadius.circular(16),
-              border: _isDark ? null : Border.all(color: color.withOpacity(0.08)),
+              border: _isDark
+                  ? Border.all(color: color.withOpacity(0.15))
+                  : Border.all(color: color.withOpacity(0.22), width: 1.5),
+              boxShadow: _isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: color.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      )
+                    ],
             ),
             child: Icon(icon, color: color, size: 26),
           ),
           const SizedBox(height: 8),
-          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13)),
+          Text(
+            label,
+            style: TextStyle(
+              color: _isDark ? color : color.withOpacity(0.9),
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
         ],
       ),
     );
@@ -913,28 +976,75 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-              leading: CircleAvatar(
-                radius: 24,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
-                backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-                child: imageUrl == null || imageUrl.isEmpty
-                    ? Text(name.isNotEmpty ? name[0] : 'M', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))
-                    : null,
+              leading: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: _isDark
+                      ? null
+                      : Border.all(color: Colors.black.withOpacity(0.07), width: 1.5),
+                ),
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundColor: AppColors.primary.withOpacity(_isDark ? 0.10 : 0.13),
+                  backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                  child: imageUrl == null || imageUrl.isEmpty
+                      ? Text(
+                          name.isNotEmpty ? name[0] : 'M',
+                          style: TextStyle(
+                            color: _isDark ? AppColors.primary : const Color(0xFF5B21B6),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
               ),
               title: Row(
                 children: [
-                  Flexible(child: Text(name + statusStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                  Flexible(
+                    child: Text(
+                      name + statusStr,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: _isDark ? AppColors.textPrimary : const Color(0xFF111827),
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 6),
                   roleIcon,
                 ],
               ),
-              subtitle: Text(roleStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              subtitle: Text(
+                roleStr,
+                style: TextStyle(
+                  color: _isDark ? AppColors.textSecondary : const Color(0xFF6B7280),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (role != 'member') Text(roleStr, style: TextStyle(color: roleCol, fontWeight: FontWeight.w900, fontSize: 12)),
+                  if (role != 'member')
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: roleCol.withOpacity(_isDark ? 0.12 : 0.10),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: roleCol.withOpacity(_isDark ? 0.20 : 0.30), width: 1),
+                      ),
+                      child: Text(
+                        roleStr,
+                        style: TextStyle(
+                          color: roleCol,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 11,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
                   if (memberId != _auth.currentUser?.uid) ...[
-                    if (role != 'member') const SizedBox(width: 8),
+                    if (role != 'member') const SizedBox(width: 6),
                     _buildPopupMenu(memberId, data, role == 'owner', role == 'admin'),
                   ],
                 ],
