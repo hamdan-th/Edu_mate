@@ -304,14 +304,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   Future<void> _clearChatHistory() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("مسح سجل الدردشة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
-        content: const Text("هل أنت متأكد من مسح جميع رسائل الدردشة؟ هذا الإجراء لا يمكن التراجع عنه."),
+        title: Text(l10n.groupsActionClearChat, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+        content: Text(l10n.groupsClearChatConfirmMsg),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("إلغاء")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("مسح", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.profileCancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.groupsClearChatSubmit, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
         ],
       )
     ) ?? false;
@@ -321,13 +322,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     try {
       await GroupService.clearGroupChat(widget.group.id);
 
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم مسح سجل الدردشة بنجاح')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsClearChatSuccess)));
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء مسح السجل')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsClearChatError)));
     }
   }
-
   void _openMoreMenu() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -346,7 +347,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               
               ListTile(
                 leading: const Icon(Icons.report_problem_rounded, color: AppColors.textPrimary),
-                title: const Text("إبلاغ", style: TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(l10n.groupsActionReport, style: const TextStyle(fontWeight: FontWeight.bold)),
                 onTap: () {
                   Navigator.pop(context);
                   _reportGroup();
@@ -355,7 +356,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               if (_isOwner)
                 ListTile(
                   leading: const Icon(Icons.cleaning_services_rounded, color: AppColors.error),
-                  title: const Text("مسح سجل الدردشة", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+                  title: Text(l10n.groupsActionClearChat, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
                   onTap: () {
                     Navigator.pop(context);
                     _clearChatHistory();
@@ -363,14 +364,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 ),
               ListTile(
                 leading: const Icon(Icons.link_rounded, color: AppColors.textPrimary),
-                title: const Text("نسخ الرابط", style: TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(l10n.groupsActionCopyLink, style: const TextStyle(fontWeight: FontWeight.bold)),
                 onTap: () {
                   Navigator.pop(context);
                   String link = widget.group.inviteLink.isEmpty 
                       ? GroupService.buildInviteLink(groupId: widget.group.id, inviteCode: widget.group.inviteCode) 
                       : widget.group.inviteLink;
                   Clipboard.setData(ClipboardData(text: link));
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ الرابط')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsCopyLinkSuccess)));
                 },
               ),
               
@@ -378,7 +379,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 const Divider(color: AppColors.background, thickness: 8),
                 ListTile(
                   leading: const Icon(Icons.edit_rounded, color: AppColors.textPrimary),
-                  title: const Text("تعديل المجموعة", style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(l10n.groupsActionEditGroup, style: const TextStyle(fontWeight: FontWeight.bold)),
                   onTap: () {
                     Navigator.pop(context);
                     setState(() => _isEditing = true);
@@ -395,6 +396,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isEditing) {
       return Scaffold(
         appBar: AppBar(
@@ -403,11 +405,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
             onPressed: () => setState(() => _isEditing = false),
           ),
-          title: const Text("تعديل", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+          title: Text(l10n.groupsEditTitle, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
           actions: [
             TextButton(
               onPressed: _saveEdits,
-              child: const Text("حفظ", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+              child: Text(l10n.groupsSaveAction, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ],
         ),
@@ -432,7 +434,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: "اسم المجموعة",
+                  labelText: l10n.groupsNameLabel,
                   filled: true,
                   fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -444,7 +446,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 controller: _descController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  labelText: "الوصف",
+                  labelText: l10n.groupsDescLabel,
                   filled: true,
                   fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -515,7 +517,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                "$_membersCount عضو",
+                "$_membersCount ${AppLocalizations.of(context)!.groupsMemberCountSuffix}",
                 style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
@@ -543,7 +545,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     Icon(widget.group.isPublic ? Icons.public_rounded : Icons.lock_rounded, size: 14, color: widget.group.isPublic ? AppColors.success : AppColors.warning),
                     const SizedBox(width: 6),
                     Text(
-                      widget.group.isPublic ? "مجموعة عامة" : "مجموعة خاصة",
+                      widget.group.isPublic ? AppLocalizations.of(context)!.groupsPublicBadge : AppLocalizations.of(context)!.groupsPrivateBadge,
                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.group.isPublic ? AppColors.success : AppColors.warning),
                     ),
                   ],
@@ -575,7 +577,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     onPressed: _isJoining ? null : _joinPublicGroup,
                     child: _isJoining
                         ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text("انضمام للمجموعة", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                        : Text(AppLocalizations.of(context)!.groupsJoinAction, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                   ),
                 ),
               ),
@@ -636,7 +638,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        "$_membersCount عضو",
+                        "$_membersCount ${AppLocalizations.of(context)!.groupsMemberCountSuffix}",
                         style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
                       ),
                       if (_groupDescription.isNotEmpty) ...[
@@ -654,9 +656,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildActionItem(_isNotificationMuted ? Icons.notifications_off_rounded : Icons.notifications_rounded, _isNotificationMuted ? "تفعيل" : "كتم", _toggleMute),
-                          _buildActionItem(Icons.exit_to_app_rounded, "مغادرة", _leaveGroup, color: AppColors.error),
-                          _buildActionItem(Icons.more_horiz_rounded, "المزيد", _openMoreMenu),
+                          _buildActionItem(_isNotificationMuted ? Icons.notifications_off_rounded : Icons.notifications_rounded, _isNotificationMuted ? AppLocalizations.of(context)!.groupsEnableAction : AppLocalizations.of(context)!.groupsMuteAction, _toggleMute),
+                          _buildActionItem(Icons.exit_to_app_rounded, AppLocalizations.of(context)!.groupsLeaveAction, _leaveGroup, color: AppColors.error),
+                          _buildActionItem(Icons.more_horiz_rounded, AppLocalizations.of(context)!.groupsMoreAction, _openMoreMenu),
                         ],
                       ),
                       if (widget.group.isPublic && (_isOwner || _isAdmin)) ...[
@@ -706,13 +708,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                                                 child: const Icon(Icons.campaign_rounded, color: Colors.white, size: 24),
                                               ),
                                               const SizedBox(width: 16),
-                                              const Expanded(
+                                              Expanded(
                                                 child: Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Text("نشر في الفيد العام", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 16)),
-                                                    SizedBox(height: 2),
-                                                    Text("مشاركة إعلان أو تحديث لجميع الطلاب", style: TextStyle(fontSize: 12, color: Colors.white70)),
+                                                    Text(AppLocalizations.of(context)!.groupsPublishFeedAction, style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 16)),
+                                                    const SizedBox(height: 2),
+                                                    Text(AppLocalizations.of(context)!.groupsPublishFeedSub, style: const TextStyle(fontSize: 12, color: Colors.white70)),
                                                   ],
                                                 ),
                                               ),
@@ -726,7 +728,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                                   const SizedBox(height: 8),
                                 ],
                                 SwitchListTile(
-                                  title: const Text("السماح للأعضاء بالمشاركة في الدردشة", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
+                                  title: Text(AppLocalizations.of(context)!.groupsAllowMembersChat, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
                                   activeThumbColor: AppColors.primary,
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 24),
                                   value: canChat,
@@ -755,10 +757,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       labelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                       unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       tabs: [
-                        Tab(text: "الأعضاء"),
-                        Tab(text: "الوسائط"),
-                        Tab(text: "الروابط"),
-                        Tab(text: "المحفوظات"),
+                        Tab(text: AppLocalizations.of(context)!.groupsTabMembers),
+                        Tab(text: AppLocalizations.of(context)!.groupsTabMedia),
+                        Tab(text: AppLocalizations.of(context)!.groupsTabLinks),
+                        Tab(text: AppLocalizations.of(context)!.groupsTabSaved),
                       ],
                     ),
                   ),
@@ -804,7 +806,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   Widget _buildMembersTab() {
     if (!_isMember) {
-      return _buildEmptyState(Icons.lock_rounded, "يجب الانضمام للمجموعة لرؤية الأعضاء");
+      return _buildEmptyState(Icons.lock_rounded, AppLocalizations.of(context)!.groupsRequiresJoinToView);
     }
 
     return StreamBuilder<QuerySnapshot>(
@@ -814,12 +816,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return _buildEmptyState(Icons.error_outline_rounded, "حدث خطأ أثناء تحميل الأعضاء");
+          return _buildEmptyState(Icons.error_outline_rounded, AppLocalizations.of(context)!.groupsErrorLoadingMembers);
         }
 
         final List<DocumentSnapshot> docs = List.from(snapshot.data?.docs ?? []);
         if (docs.isEmpty) {
-          return _buildEmptyState(Icons.group_rounded, "لا يوجد أعضاء في هذه المجموعة");
+          return _buildEmptyState(Icons.group_rounded, AppLocalizations.of(context)!.groupsEmptyMembersTitle);
         }
 
         docs.sort((a, b) {
@@ -838,27 +840,27 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final data = docs[index].data() as Map<String, dynamic>;
-            String name = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? 'عضو').trim();
+            String name = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? AppLocalizations.of(context)!.groupsRoleMember).trim();
             if (name.contains('@')) name = name.split('@').first;
             final imageUrl = data['imageUrl'] ?? data['photoUrl'];
             final role = data['role'] ?? 'member';
             final status = data['status'] ?? 'active';
 
-            String roleStr = "عضو";
+            String roleStr = AppLocalizations.of(context)!.groupsRoleMember;
             Color roleCol = AppColors.primary;
             Widget roleIcon = const SizedBox.shrink();
 
             if (role == 'owner') {
-              roleStr = "مالك";
+              roleStr = AppLocalizations.of(context)!.groupsRoleOwner;
               roleCol = AppColors.error;
               roleIcon = const Icon(Icons.workspace_premium, color: Colors.purple, size: 18);
             } else if (role == 'admin') {
-              roleStr = "مشرف";
+              roleStr = AppLocalizations.of(context)!.groupsRoleAdmin;
               roleCol = AppColors.warning;
               roleIcon = const Icon(Icons.headset_mic, color: Colors.orange, size: 18);
             }
 
-            String statusStr = status == 'muted' ? " (مكتوم)" : (status == 'banned' ? " (محظور)" : "");
+            String statusStr = status == 'muted' ? AppLocalizations.of(context)!.groupsStatusMuted : (status == 'banned' ? AppLocalizations.of(context)!.groupsStatusBanned : "");
 
             final memberId = docs[index].id;
 
@@ -905,12 +907,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           return const Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
         if (snapshot.hasError) {
-          return const Center(child: Text("حدث خطأ في تحميل المحفوظات", style: TextStyle(color: AppColors.textSecondary)));
+          return Center(child: Text(AppLocalizations.of(context)!.groupsErrorLoadingSaved, style: const TextStyle(color: AppColors.textSecondary)));
         }
         
         final msgs = snapshot.data ?? [];
         if (msgs.isEmpty) {
-          return _buildEmptyState(Icons.bookmark_rounded, "لا توجد رسائل محفوظة");
+          return _buildEmptyState(Icons.bookmark_rounded, AppLocalizations.of(context)!.groupsEmptySavedTitle);
         }
 
         return ListView.separated(
@@ -932,14 +934,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(child: Text(msg['senderName'] ?? 'عضو', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15))),
+                  Expanded(child: Text(msg['senderName'] ?? AppLocalizations.of(context)!.groupsRoleMember, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15))),
                   if (dateStr.isNotEmpty)
                     Text(dateStr, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
                 ],
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text(msg['text'] ?? 'رسالة', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87), fontSize: 14, height: 1.4)),
+                child: Text(msg['text'] ?? AppLocalizations.of(context)!.groupsDefaultMessageLabel, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87), fontSize: 14, height: 1.4)),
               ),
             );
           },
@@ -966,12 +968,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       stream: GroupService.streamMessages(widget.group.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-        if (snapshot.hasError) return const Center(child: Text("خطأ في تحميل الوسائط", style: TextStyle(color: AppColors.textSecondary)));
+        if (snapshot.hasError) return Center(child: Text(AppLocalizations.of(context)!.groupsErrorLoadingMedia, style: const TextStyle(color: AppColors.textSecondary)));
 
         final msgs = snapshot.data ?? [];
         final mediaMsgs = msgs.where((m) => m.imageUrl != null && m.imageUrl!.isNotEmpty).toList();
 
-        if (mediaMsgs.isEmpty) return _buildEmptyState(Icons.photo_library_rounded, "لا توجد وسائط");
+        if (mediaMsgs.isEmpty) return _buildEmptyState(Icons.photo_library_rounded, AppLocalizations.of(context)!.groupsEmptyMediaTitle);
 
         return GridView.builder(
           padding: const EdgeInsets.all(8),
@@ -1003,7 +1005,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       stream: GroupService.streamMessages(widget.group.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-        if (snapshot.hasError) return const Center(child: Text("خطأ في تحميل الروابط", style: TextStyle(color: AppColors.textSecondary)));
+        if (snapshot.hasError) return Center(child: Text(AppLocalizations.of(context)!.groupsErrorLoadingLinks, style: const TextStyle(color: AppColors.textSecondary)));
 
         final RegExp urlRegExp = RegExp(r'(https?:\/\/[^\s]+|edumate:\/\/[^\s]+)', caseSensitive: false);
         final msgs = snapshot.data ?? [];
@@ -1011,7 +1013,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         // Filter messages that contain a link
         final linkMsgs = msgs.where((m) => urlRegExp.hasMatch(m.text)).toList();
 
-        if (linkMsgs.isEmpty) return _buildEmptyState(Icons.link_rounded, "لا توجد روابط");
+        if (linkMsgs.isEmpty) return _buildEmptyState(Icons.link_rounded, AppLocalizations.of(context)!.groupsEmptyLinksTitle);
 
         return ListView.separated(
           padding: const EdgeInsets.only(top: 8, bottom: 24),

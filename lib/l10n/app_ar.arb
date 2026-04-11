@@ -194,5 +194,15 @@
   "groupsTabMedia": "الوسائط",
   "groupsTabLinks": "الروابط",
   "groupsTabSaved": "المحفوظات",
-  "groupsReportError": "حدث خطأ أثناء إرسال البلاغ"
+  "groupsReportError": "حدث خطأ أثناء إرسال البلاغ",
+  "groupsRequiresJoinToView": "يجب الانضمام للمجموعة لرؤية الأعضاء",
+  "groupsErrorLoadingMembers": "حدث خطأ أثناء تحميل الأعضاء",
+  "groupsEmptyMembersTitle": "لا يوجد أعضاء في هذه المجموعة",
+  "groupsErrorLoadingSaved": "حدث خطأ في تحميل المحفوظات",
+  "groupsEmptySavedTitle": "لا توجد رسائل محفوظة",
+  "groupsDefaultMessageLabel": "رسالة",
+  "groupsErrorLoadingMedia": "خطأ في تحميل الوسائط",
+  "groupsEmptyMediaTitle": "لا توجد وسائط",
+  "groupsErrorLoadingLinks": "خطأ في تحميل الروابط",
+  "groupsEmptyLinksTitle": "لا توجد روابط"
 }

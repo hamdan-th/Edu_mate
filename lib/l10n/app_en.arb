@@ -194,5 +194,15 @@
   "groupsTabMedia": "Media",
   "groupsTabLinks": "Links",
   "groupsTabSaved": "Saved",
-  "groupsReportError": "Error sending report"
+  "groupsReportError": "Error sending report",
+  "groupsRequiresJoinToView": "You must join the group to view members",
+  "groupsErrorLoadingMembers": "Error loading members",
+  "groupsEmptyMembersTitle": "No members in this group",
+  "groupsErrorLoadingSaved": "Error loading saved messages",
+  "groupsEmptySavedTitle": "No saved messages",
+  "groupsDefaultMessageLabel": "Message",
+  "groupsErrorLoadingMedia": "Error loading media",
+  "groupsEmptyMediaTitle": "No media found",
+  "groupsErrorLoadingLinks": "Error loading links",
+  "groupsEmptyLinksTitle": "No links found"
 }

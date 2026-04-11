@@ -574,4 +574,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get groupsTabSaved => 'المحفوظات';
+
+  @override
+  String get groupsReportError => 'حدث خطأ أثناء إرسال البلاغ';
 }

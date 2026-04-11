@@ -1213,6 +1213,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved'**
   String get groupsTabSaved;
+
+  /// No description provided for @groupsReportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error sending report'**
+  String get groupsReportError;
 }
 
 class _AppLocalizationsDelegate

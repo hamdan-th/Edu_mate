@@ -579,4 +579,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupsTabSaved => 'Saved';
+
+  @override
+  String get groupsReportError => 'Error sending report';
 }
