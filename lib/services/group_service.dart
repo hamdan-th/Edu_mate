@@ -24,66 +24,6 @@ class GroupService {
     return user.uid;
   }
 
-  static Future<GroupMembershipState> getUserGroupState(String groupId) async {
-    final user = _auth.currentUser;
-    if (user == null) return GroupMembershipState.none();
-
-    final groupDoc = await _groups.doc(groupId).get();
-    if (!groupDoc.exists) return GroupMembershipState.none();
-
-    final groupData = groupDoc.data() ?? {};
-    final membersCanChat = (groupData['membersCanChat'] ?? true) == true;
-    final banned = (groupData['bannedUserIds'] as List?)
-        ?.map((e) => e.toString())
-        .toList() ??
-        <String>[];
-
-    final isBanned = banned.contains(user.uid);
-
-    final memberSnap = await _groups.doc(groupId).collection('members').doc(user.uid).get();
-
-    if (!memberSnap.exists) {
-      return GroupMembershipState(
-        isMember: false,
-        isOwner: false,
-        isAdmin: false,
-        isBanned: isBanned,
-        isMuted: false,
-        canSend: false,
-        notificationsMuted: false,
-        role: 'none',
-      );
-    }
-
-    final data = memberSnap.data() ?? {};
-    final role = data['role']?.toString() ?? 'member';
-    final status = data['status']?.toString() ?? 'active';
-
-    final isOwner = role == 'owner';
-    final isAdmin = role == 'admin';
-    final isMuted = status == 'muted';
-
-    bool canSend = false;
-    if (!isBanned && !isMuted) {
-      if (isOwner || isAdmin) {
-        canSend = true;
-      } else if (membersCanChat) {
-        canSend = true;
-      }
-    }
-
-    return GroupMembershipState(
-      isMember: true,
-      isOwner: isOwner,
-      isAdmin: isAdmin,
-      isBanned: isBanned || status == 'banned',
-      isMuted: isMuted,
-      canSend: canSend,
-      notificationsMuted: false,
-      role: role,
-    );
-  }
-
   static CollectionReference<Map<String, dynamic>> get _groups =>
       _db.collection('groups');
 
@@ -133,6 +73,68 @@ class GroupService {
     return 'edumate://invite?groupId=$groupId&code=$inviteCode';
   }
 
+  static Future<GroupMembershipState> getUserGroupState(String groupId) async {
+    final user = _auth.currentUser;
+    if (user == null) return GroupMembershipState.none();
+
+    final groupDoc = await _groups.doc(groupId).get();
+    if (!groupDoc.exists) return GroupMembershipState.none();
+
+    final groupData = groupDoc.data() ?? {};
+    final membersCanChat = (groupData['membersCanChat'] ?? true) == true;
+    final banned = (groupData['bannedUserIds'] as List?)
+        ?.map((e) => e.toString())
+        .toList() ??
+        <String>[];
+
+    final isBanned = banned.contains(user.uid);
+
+    final memberSnap =
+    await _groups.doc(groupId).collection('members').doc(user.uid).get();
+
+    if (!memberSnap.exists) {
+      return GroupMembershipState(
+        isMember: false,
+        isOwner: false,
+        isAdmin: false,
+        isBanned: isBanned,
+        isMuted: false,
+        canSend: false,
+        notificationsMuted: false,
+        role: 'none',
+      );
+    }
+
+    final data = memberSnap.data() ?? {};
+    final role = data['role']?.toString() ?? 'member';
+    final status = data['status']?.toString() ?? 'active';
+    final groupOwnerId = (groupData['ownerId'] ?? '').toString();
+
+    final isOwner = groupOwnerId == user.uid || role == 'owner';
+    final isAdmin = role == 'admin';
+    final isMuted = status == 'muted';
+
+    bool canSend = false;
+    if (!isBanned && !isMuted) {
+      if (isOwner || isAdmin) {
+        canSend = true;
+      } else if (membersCanChat) {
+        canSend = true;
+      }
+    }
+
+    return GroupMembershipState(
+      isMember: true,
+      isOwner: isOwner,
+      isAdmin: isAdmin,
+      isBanned: isBanned || status == 'banned',
+      isMuted: isMuted,
+      canSend: canSend,
+      notificationsMuted: false,
+      role: role,
+    );
+  }
+
   static Stream<List<GroupModel>> streamMyGroups() {
     final stream = Stream.fromFuture(_userRefByUid(currentUid)).asyncExpand(
           (userRef) {
@@ -142,7 +144,8 @@ class GroupService {
 
             if (ids.isEmpty) return <GroupModel>[];
 
-            final docs = await Future.wait(ids.map((id) => _groups.doc(id).get()));
+            final docs =
+            await Future.wait(ids.map((id) => _groups.doc(id).get()));
 
             final result = <GroupModel>[];
             for (final doc in docs) {
@@ -172,9 +175,7 @@ class GroupService {
 
   static Stream<List<GroupModel>> streamDiscoverGroups({String search = ''}) {
     final queryText = search.trim().toLowerCase();
-    
-    // We use a StreamController to properly combine the endless user and groups streams
-    // instead of asyncExpand, which permanently blocks on the first broadcast snapshot map.
+
     StreamController<List<GroupModel>>? controller;
     StreamSubscription? joinedSub;
     StreamSubscription? groupsSub;
@@ -184,7 +185,7 @@ class GroupService {
 
     void emitResults() {
       if (controller == null || controller.isClosed) return;
-      
+
       final result = <GroupModel>[];
       for (final doc in groupDocs) {
         try {
@@ -221,11 +222,12 @@ class GroupService {
       onListen: () async {
         try {
           final userRef = await _userRefByUid(currentUid);
-          
-          joinedSub = userRef.collection('joined_groups').snapshots().listen((snap) {
-            joinedIds = snap.docs.map((e) => e.id).toSet();
-            emitResults();
-          });
+
+          joinedSub =
+              userRef.collection('joined_groups').snapshots().listen((snap) {
+                joinedIds = snap.docs.map((e) => e.id).toSet();
+                emitResults();
+              });
 
           groupsSub = _groups.snapshots().listen((snap) {
             groupDocs = snap.docs;
@@ -308,7 +310,7 @@ class GroupService {
       'inviteCode': inviteCode,
       'inviteLink': inviteLink,
       'membersCounts': 1,
-      'adminsCount': 1,
+      'adminsCount': 0,
       'messagesCount': 0,
       'lastMessageText': '',
       'status': 'active',
@@ -362,7 +364,8 @@ class GroupService {
       final joinedGroupSnap = await groupRef.get();
       final joinedGroupData = joinedGroupSnap.data() ?? {};
       final joinedGroupName =
-      (joinedGroupData['name'] ?? joinedGroupData['groupName'] ?? '').toString();
+      (joinedGroupData['name'] ?? joinedGroupData['groupName'] ?? '')
+          .toString();
 
       await NotificationsService.createNotification(
         userId: currentUid,
@@ -376,8 +379,8 @@ class GroupService {
       final status = (data['status'] ?? 'active').toString();
       final type = (data['type'] ?? 'public').toString();
       final banned = (data['bannedUserIds'] as List?)
-              ?.map((e) => e.toString())
-              .toList() ??
+          ?.map((e) => e.toString())
+          .toList() ??
           <String>[];
 
       if (status != 'active') {
@@ -405,7 +408,6 @@ class GroupService {
         'joinedAt': FieldValue.serverTimestamp(),
         'status': 'active',
       });
-
 
       tx.set(userRef.collection('joined_groups').doc(groupId), {
         'groupId': groupId,
@@ -472,7 +474,7 @@ class GroupService {
       throw Exception('أنت محظور من هذه المجموعة');
     }
     if (state.isMember) return;
-    
+
     final groupRef = _groups.doc(group.id);
     final userRef = await _userRefByUid(currentUid);
     final displayName = await _userDisplayName(currentUid);
@@ -562,14 +564,16 @@ class GroupService {
     }
 
     final state = await getUserGroupState(groupId);
-    if (!state.isMember) throw Exception('يجب أن تكون عضوًا في المجموعة لإرسال رسالة');
+    if (!state.isMember) {
+      throw Exception('يجب أن تكون عضوًا في المجموعة لإرسال رسالة');
+    }
     if (state.isBanned) throw Exception('أنت محظور من هذه المجموعة');
     if (state.isMuted) throw Exception('تم كتمك داخل هذه المجموعة');
     if (!state.canSend) throw Exception('المجموعة للقراءة فقط حاليًا');
 
     final groupRef = _groups.doc(groupId);
     final displayName = await _userDisplayName(currentUid);
-    
+
     String? imageUrl;
     if (imageFile != null) {
       final ref = FirebaseStorage.instance
@@ -590,6 +594,7 @@ class GroupService {
       'senderId': currentUid,
       'senderName': displayName,
       'text': cleanText,
+      'type': imageUrl != null ? 'image' : 'text',
       if (imageUrl != null) 'imageUrl': imageUrl,
       'createdAt': FieldValue.serverTimestamp(),
       if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
@@ -599,7 +604,76 @@ class GroupService {
 
     batch.update(groupRef, {
       'messagesCount': FieldValue.increment(1),
-      'lastMessageText': cleanText,
+      'lastMessageText': cleanText.isNotEmpty
+          ? cleanText
+          : (imageUrl != null ? 'صورة' : ''),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await batch.commit();
+  }
+
+  static Future<void> shareLibraryFileToGroup({
+    required String groupId,
+    required String fileId,
+    required String fileTitle,
+    required String fileUrl,
+    String? fileType,
+    String? note,
+    String? ownerId,
+    String? thumbnailUrl,
+  }) async {
+    final cleanNote = note?.trim() ?? '';
+    final cleanTitle = fileTitle.trim();
+    final cleanUrl = fileUrl.trim();
+    final cleanType = fileType?.trim() ?? '';
+
+    if (fileId.trim().isEmpty) {
+      throw Exception('معرف الملف غير صالح');
+    }
+
+    if (cleanTitle.isEmpty) {
+      throw Exception('عنوان الملف غير صالح');
+    }
+
+    if (cleanUrl.isEmpty) {
+      throw Exception('رابط الملف غير صالح');
+    }
+
+    final state = await getUserGroupState(groupId);
+    if (!state.isMember) {
+      throw Exception('يجب أن تكون عضوًا في المجموعة للمشاركة');
+    }
+    if (state.isBanned) throw Exception('أنت محظور من هذه المجموعة');
+    if (state.isMuted) throw Exception('تم كتمك داخل هذه المجموعة');
+    if (!state.canSend) throw Exception('المجموعة للقراءة فقط حاليًا');
+
+    final groupRef = _groups.doc(groupId);
+    final displayName = await _userDisplayName(currentUid);
+    final messageRef = groupRef.collection('messages').doc();
+
+    final batch = _db.batch();
+
+    batch.set(messageRef, {
+      'messageId': messageRef.id,
+      'senderId': currentUid,
+      'senderName': displayName,
+      'text': cleanNote,
+      'type': 'library_file_link',
+      'sharedFromLibrary': true,
+      'sharedFileId': fileId.trim(),
+      'sharedFileTitle': cleanTitle,
+      'sharedFileUrl': cleanUrl,
+      if (cleanType.isNotEmpty) 'sharedFileType': cleanType,
+      if ((ownerId ?? '').trim().isNotEmpty) 'sharedFileOwnerId': ownerId!.trim(),
+      if ((thumbnailUrl ?? '').trim().isNotEmpty)
+        'sharedFileThumbnailUrl': thumbnailUrl!.trim(),
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    batch.update(groupRef, {
+      'messagesCount': FieldValue.increment(1),
+      'lastMessageText': cleanTitle,
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
@@ -639,10 +713,6 @@ class GroupService {
         throw Exception("User not logged in");
       }
 
-      print('SAVE DEBUG: groupId=$groupId');
-      print('SAVE DEBUG: messageId=$messageId');
-      print('SAVE DEBUG: userId=${user.uid}');
-
       final ref = _groups
           .doc(groupId)
           .collection('savedMessages')
@@ -655,18 +725,35 @@ class GroupService {
         'savedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('SAVE ERROR: $e');
       rethrow;
     }
   }
 
-  static Future<void> unsaveMessage({required String groupId, required String messageId}) async {
-    await _groups.doc(groupId).collection('savedMessages').doc(currentUid).collection('items').doc(messageId).delete();
+  static Future<void> unsaveMessage({
+    required String groupId,
+    required String messageId,
+  }) async {
+    await _groups
+        .doc(groupId)
+        .collection('savedMessages')
+        .doc(currentUid)
+        .collection('items')
+        .doc(messageId)
+        .delete();
   }
 
-  static Future<bool> isMessageSaved({required String groupId, required String messageId}) async {
+  static Future<bool> isMessageSaved({
+    required String groupId,
+    required String messageId,
+  }) async {
     try {
-      final doc = await _groups.doc(groupId).collection('savedMessages').doc(currentUid).collection('items').doc(messageId).get();
+      final doc = await _groups
+          .doc(groupId)
+          .collection('savedMessages')
+          .doc(currentUid)
+          .collection('items')
+          .doc(messageId)
+          .get();
       return doc.exists;
     } catch (_) {
       return false;
@@ -677,14 +764,20 @@ class GroupService {
     try {
       final uid = _auth.currentUser?.uid;
       if (uid == null) return Stream.value([]);
-      
-      return _groups.doc(groupId).collection('savedMessages').doc(uid).collection('items').snapshots().map((snap) {
+
+      return _groups
+          .doc(groupId)
+          .collection('savedMessages')
+          .doc(uid)
+          .collection('items')
+          .snapshots()
+          .map((snap) {
         final list = snap.docs.map((e) => e.data()).toList();
         list.sort((a, b) {
-           final aTime = a['savedAt'] as Timestamp?;
-           final bTime = b['savedAt'] as Timestamp?;
-           if (aTime == null || bTime == null) return 0;
-           return bTime.compareTo(aTime);
+          final aTime = a['savedAt'] as Timestamp?;
+          final bTime = b['savedAt'] as Timestamp?;
+          if (aTime == null || bTime == null) return 0;
+          return bTime.compareTo(aTime);
         });
         return list;
       });
@@ -693,20 +786,136 @@ class GroupService {
     }
   }
 
+  static Future<void> transferOwnership(String groupId, String newOwnerId) async {
+    if (newOwnerId.trim().isEmpty) {
+      throw Exception('المالك الجديد غير صالح');
+    }
+
+    final groupRef = _groups.doc(groupId);
+    final newOwnerUserRef = await _userRefByUid(newOwnerId);
+
+    await _db.runTransaction((tx) async {
+      final groupSnap = await tx.get(groupRef);
+      if (!groupSnap.exists) {
+        throw Exception('المجموعة غير موجودة');
+      }
+
+      final groupData = groupSnap.data() ?? {};
+      final currentOwnerId = (groupData['ownerId'] ?? '').toString();
+      final groupName = (groupData['name'] ?? groupData['groupName'] ?? '').toString();
+
+      if (currentOwnerId != currentUid) {
+        throw Exception('المالك الحالي فقط يمكنه نقل الملكية');
+      }
+
+      if (newOwnerId == currentOwnerId) {
+        throw Exception('هذا العضو هو المالك بالفعل');
+      }
+
+      final newOwnerMemberRef = groupRef.collection('members').doc(newOwnerId);
+      final newOwnerMemberSnap = await tx.get(newOwnerMemberRef);
+
+      if (!newOwnerMemberSnap.exists) {
+        throw Exception('العضو المحدد ليس عضوًا في المجموعة');
+      }
+
+      final membersSnap = await groupRef.collection('members').get();
+
+      for (final memberDoc in membersSnap.docs) {
+        final role = (memberDoc.data()['role'] ?? 'member').toString();
+        if (role == 'owner') {
+          tx.update(memberDoc.reference, {'role': 'admin'});
+        }
+      }
+
+      final oldOwnerMemberRef = groupRef.collection('members').doc(currentOwnerId);
+      final oldOwnerMemberSnap = await tx.get(oldOwnerMemberRef);
+      if (oldOwnerMemberSnap.exists) {
+        tx.update(oldOwnerMemberRef, {'role': 'admin'});
+      }
+
+      tx.update(newOwnerMemberRef, {'role': 'owner'});
+
+      tx.update(groupRef, {
+        'ownerId': newOwnerId,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      final oldOwnerUserRef = await _userRefByUid(currentOwnerId);
+      tx.set(
+        oldOwnerUserRef.collection('joined_groups').doc(groupId),
+        {
+          'groupId': groupId,
+          'groupName': groupName,
+          'roleInGroup': 'admin',
+          'joinedAt': FieldValue.serverTimestamp(),
+          'type': (groupData['type'] ?? 'public').toString(),
+        },
+        SetOptions(merge: true),
+      );
+
+      tx.set(
+        newOwnerUserRef.collection('joined_groups').doc(groupId),
+        {
+          'groupId': groupId,
+          'groupName': groupName,
+          'roleInGroup': 'owner',
+          'joinedAt': FieldValue.serverTimestamp(),
+          'type': (groupData['type'] ?? 'public').toString(),
+        },
+        SetOptions(merge: true),
+      );
+    });
+
+    await NotificationsService.createNotification(
+      userId: newOwnerId,
+      title: 'تم نقل ملكية المجموعة إليك',
+      body: 'أصبحت الآن مالكًا لمجموعة جديدة',
+      type: 'group',
+      senderId: currentUid,
+      groupId: groupId,
+    );
+  }
+
   static Future<void> promoteToAdmin(String groupId, String memberId) async {
     final state = await getUserGroupState(groupId);
-    if (!state.isOwner && !state.isAdmin) throw Exception('غير مصرح لك بهذا الإجراء');
+    if (!state.isOwner && !state.isAdmin) {
+      throw Exception('غير مصرح لك بهذا الإجراء');
+    }
 
-    final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
+    final groupRef = _groups.doc(groupId);
+    final groupDoc = await groupRef.get();
+    final groupOwnerId = (groupDoc.data()?['ownerId'] ?? '').toString();
+
+    if (memberId == groupOwnerId) {
+      throw Exception('مالك المجموعة لا يمكن تغييره إلى مشرف');
+    }
+
+    final memberRef = groupRef.collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
 
-    if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
+    if (memberDoc.exists) {
+      final memberRole = (memberDoc.data()?['role'] ?? 'member').toString();
+      if (memberRole == 'owner') {
+        throw Exception('لا يمكن ترقية مالك المجموعة كمشرف');
+      }
+
       await memberRef.update({'role': 'admin'});
 
-      final promotedGroupSnap = await _groups.doc(groupId).get();
+      final promotedGroupSnap = await groupRef.get();
       final promotedGroupData = promotedGroupSnap.data() ?? {};
       final promotedGroupName =
-      (promotedGroupData['name'] ?? promotedGroupData['groupName'] ?? '').toString();
+      (promotedGroupData['name'] ?? promotedGroupData['groupName'] ?? '')
+          .toString();
+
+      final memberUserRef = await _userRefByUid(memberId);
+      await memberUserRef.collection('joined_groups').doc(groupId).set({
+        'roleInGroup': 'admin',
+        'groupId': groupId,
+        'groupName': promotedGroupName,
+        'joinedAt': FieldValue.serverTimestamp(),
+        'type': (promotedGroupData['type'] ?? 'public').toString(),
+      }, SetOptions(merge: true));
 
       await NotificationsService.createNotification(
         userId: memberId,
@@ -723,16 +932,39 @@ class GroupService {
     final state = await getUserGroupState(groupId);
     if (!state.isOwner) throw Exception('المالك فقط يمكنه إزالة المشرفين');
 
-    final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
+    final groupRef = _groups.doc(groupId);
+    final groupDoc = await groupRef.get();
+    final groupOwnerId = (groupDoc.data()?['ownerId'] ?? '').toString();
+
+    if (memberId == groupOwnerId) {
+      throw Exception('لا يمكن إزالة صلاحيات مالك المجموعة');
+    }
+
+    final memberRef = groupRef.collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
 
-    if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
+    if (memberDoc.exists) {
+      final role = (memberDoc.data()?['role'] ?? 'member').toString();
+      if (role == 'owner') {
+        throw Exception('لا يمكن إزالة المالك من هنا، استخدم نقل الملكية');
+      }
+
       await memberRef.update({'role': 'member'});
 
-      final demotedGroupSnap = await _groups.doc(groupId).get();
+      final demotedGroupSnap = await groupRef.get();
       final demotedGroupData = demotedGroupSnap.data() ?? {};
       final demotedGroupName =
-      (demotedGroupData['name'] ?? demotedGroupData['groupName'] ?? '').toString();
+      (demotedGroupData['name'] ?? demotedGroupData['groupName'] ?? '')
+          .toString();
+
+      final memberUserRef = await _userRefByUid(memberId);
+      await memberUserRef.collection('joined_groups').doc(groupId).set({
+        'roleInGroup': 'member',
+        'groupId': groupId,
+        'groupName': demotedGroupName,
+        'joinedAt': FieldValue.serverTimestamp(),
+        'type': (demotedGroupData['type'] ?? 'public').toString(),
+      }, SetOptions(merge: true));
 
       await NotificationsService.createNotification(
         userId: memberId,
@@ -749,13 +981,21 @@ class GroupService {
     final state = await getUserGroupState(groupId);
     if (!state.isOwner && !state.isAdmin) throw Exception('غير مصرح لك بهذا الإجراء');
 
-    final memberRef = _groups.doc(groupId).collection('members').doc(memberId);
+    final groupRef = _groups.doc(groupId);
+    final groupDoc = await groupRef.get();
+    final groupOwnerId = (groupDoc.data()?['ownerId'] ?? '').toString();
+
+    if (memberId == groupOwnerId) {
+      throw Exception('لا يمكن كتم مالك المجموعة');
+    }
+
+    final memberRef = groupRef.collection('members').doc(memberId);
     final memberDoc = await memberRef.get();
 
     if (memberDoc.exists && memberDoc.data()?['role'] != 'owner') {
       await memberRef.update({'status': 'muted'});
 
-      final mutedGroupSnap = await _groups.doc(groupId).get();
+      final mutedGroupSnap = await groupRef.get();
       final mutedGroupData = mutedGroupSnap.data() ?? {};
       final mutedGroupName =
       (mutedGroupData['name'] ?? mutedGroupData['groupName'] ?? '').toString();
@@ -806,16 +1046,26 @@ class GroupService {
     final memberDoc = await memberRef.get();
 
     if (!memberDoc.exists) return;
-    if (memberDoc.data()?['role'] == 'owner') throw Exception("لا يمكن طرد المالك");
 
     final groupData = (await groupRef.get()).data() ?? {};
+    final groupOwnerId = (groupData['ownerId'] ?? '').toString();
+
+    if (memberId == groupOwnerId || memberDoc.data()?['role'] == 'owner') {
+      throw Exception("لا يمكن طرد مالك المجموعة");
+    }
+
     final kickedGroupName =
     (groupData['name'] ?? groupData['groupName'] ?? '').toString();
 
+    final memberUserRef = await _userRefByUid(memberId);
+
     final batch = _db.batch();
     batch.delete(memberRef);
-    batch.delete(_users.doc(memberId).collection('joined_groups').doc(groupId));
-    batch.update(groupRef, {'membersCounts': FieldValue.increment(-1)});
+    batch.delete(memberUserRef.collection('joined_groups').doc(groupId));
+    batch.update(groupRef, {
+      'membersCounts': FieldValue.increment(-1),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
     await batch.commit();
 
     await NotificationsService.createNotification(

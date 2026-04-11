@@ -11,6 +11,8 @@ import 'library_reactions_service.dart';
 import 'library_theme.dart';
 import 'pdf_preview_screen.dart';
 import 'university_academic_data.dart';
+import '../../services/group_service.dart';
+import '../../models/group_model.dart';
 
 class FileDetailsScreen extends StatefulWidget {
   final FileModel file;
@@ -200,6 +202,188 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
     );
   }
 
+  Future<void> _shareFileToGroup() async {
+    final url = widget.file.fileUrl.trim();
+    if (url.isEmpty) {
+      _snack('لا يوجد رابط لمشاركة الملف');
+      return;
+    }
+
+    try {
+      final groups = await GroupService.streamMyGroups().first;
+
+      if (!mounted) return;
+
+      if (groups.isEmpty) {
+        _snack('أنت غير منضم إلى أي مجموعة بعد');
+        return;
+      }
+
+      final GroupModel? selectedGroup = await showModalBottomSheet<GroupModel>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (context) {
+          return Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.72,
+            ),
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+            decoration: BoxDecoration(
+              color: _surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 42,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: _border,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.groups_rounded,
+                      color: LibraryTheme.primary(context),
+                      size: 22,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'مشاركة إلى المجموعات',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: _text,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'اختر المجموعة التي تريد مشاركة الملف فيها',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: _muted,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: groups.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final group = groups[index];
+                      return InkWell(
+                        onTap: () => Navigator.pop(context, group),
+                        borderRadius: BorderRadius.circular(18),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _surfaceSoft,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: _border),
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundColor:
+                                LibraryTheme.primary(context).withOpacity(0.1),
+                                backgroundImage: group.imageUrl.isNotEmpty
+                                    ? NetworkImage(group.imageUrl)
+                                    : null,
+                                child: group.imageUrl.isEmpty
+                                    ? Text(
+                                  group.name.isNotEmpty
+                                      ? group.name.substring(0, 1).toUpperCase()
+                                      : 'G',
+                                  style: TextStyle(
+                                    color: LibraryTheme.primary(context),
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                )
+                                    : null,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      group.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                        color: _text,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      group.specializationName.isNotEmpty
+                                          ? group.specializationName
+                                          : group.collegeName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        color: _muted,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                color: _muted,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (selectedGroup == null) return;
+
+      await GroupService.shareLibraryFileToGroup(
+        groupId: selectedGroup.id,
+        fileId: widget.file.id,
+        fileTitle: widget.file.title,
+        fileUrl: widget.file.fileUrl,
+        fileType: widget.file.fileType,
+        ownerId: widget.file.userId,
+      );
+
+      await LibraryReactionsService.registerShare(widget.file.id);
+
+      if (!mounted) return;
+      _snack('تمت مشاركة الملف في مجموعة ${selectedGroup.name}');
+    } catch (e) {
+      _snack('تعذر مشاركة الملف إلى المجموعة: $e');
+    }
+  }
+
   Future<void> _shareFileExternally() async {
     final url = widget.file.fileUrl.trim();
     if (url.isEmpty) {
@@ -289,8 +473,7 @@ $url
 
     final initialMajors = selectedCollege == null
         ? <String>[]
-        : (UniversityAcademicData.majorsByCollege[selectedCollege] ??
-        <String>[])
+        : (UniversityAcademicData.majorsByCollege[selectedCollege] ?? <String>[])
         .toSet()
         .toList();
 
@@ -475,8 +658,7 @@ $url
                                 description:
                                 descriptionController.text.trim(),
                                 college: selectedCollege!,
-                                specialization:
-                                selectedSpecialization!,
+                                specialization: selectedSpecialization!,
                                 level: selectedLevel!,
                                 term: selectedTerm!,
                               );
@@ -962,6 +1144,16 @@ $url
                         ),
                       ),
                       const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: _actionButton(
+                          icon: Icons.groups_rounded,
+                          label: 'مشاركة إلى المجموعات',
+                          onTap: _shareFileToGroup,
+                          filled: false,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           StreamBuilder<bool>(
@@ -1275,8 +1467,7 @@ class _ReactionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-    active ? LibraryTheme.primary(context) : mutedColor;
+    final color = active ? LibraryTheme.primary(context) : mutedColor;
 
     return InkWell(
       onTap: onTap,
@@ -1409,8 +1600,7 @@ class _DropdownField extends StatelessWidget {
       isExpanded: true,
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
       style: TextStyle(color: textColor),
-      dropdownColor:
-      Theme.of(context).brightness == Brightness.dark
+      dropdownColor: Theme.of(context).brightness == Brightness.dark
           ? const Color(0xFF171C25)
           : Colors.white,
       decoration: InputDecoration(
