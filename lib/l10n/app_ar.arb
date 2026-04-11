@@ -193,5 +193,6 @@
   "groupsTabMembers": "الأعضاء",
   "groupsTabMedia": "الوسائط",
   "groupsTabLinks": "الروابط",
-  "groupsTabSaved": "المحفوظات"
+  "groupsTabSaved": "المحفوظات",
+  "groupsReportError": "حدث خطأ أثناء إرسال البلاغ"
 }

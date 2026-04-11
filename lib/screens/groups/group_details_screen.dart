@@ -299,7 +299,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsReportReceived)));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsReportError ?? 'حدث خطأ أثناء إرسال البلاغ')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsReportError)));
     }
   }
 
