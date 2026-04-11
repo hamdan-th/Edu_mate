@@ -80,91 +80,11 @@ class _SignupScreenState extends State<SignupScreen>
       builder: (context, _) {
         return Transform.translate(
           offset: Offset(0, _floatAnimation.value),
-          child: Container(
+          child: Image.asset(
+            'assets/images/university_logo.png',
             width: 112,
             height: 112,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primary,
-                  AppColors.primaryDark,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.blueGlow.withOpacity(0.20),
-                  blurRadius: 24,
-                  spreadRadius: 1.5,
-                ),
-                BoxShadow(
-                  color: AppColors.secondary.withOpacity(0.10),
-                  blurRadius: 16,
-                  spreadRadius: 0.5,
-                ),
-              ],
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                const Positioned(
-                  top: 22,
-                  child: Icon(
-                    Icons.school_rounded,
-                    size: 30,
-                    color: AppColors.secondary,
-                  ),
-                ),
-                Positioned(
-                  bottom: 18,
-                  child: Container(
-                    width: 56,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE2E8F0),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 1.5,
-                          color: const Color(0xFFCBD5E1),
-                        ),
-                        Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE2E8F0),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 20,
-                  top: 24,
-                  child: Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 16,
-                    color: AppColors.textOnDark.withOpacity(0.95),
-                  ),
-                ),
-              ],
-            ),
+            fit: BoxFit.contain,
           ),
         );
       },
