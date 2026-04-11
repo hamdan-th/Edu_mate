@@ -41,6 +41,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
   @override
   void initState() {
     super.initState();
@@ -492,20 +494,33 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+          color: Theme.of(context).scaffoldBackgroundColor,
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 56, bottom: 40),
           child: Column(
             children: [
-              CircleAvatar(
-                radius: 64,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
-                backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                child: widget.group.imageUrl.isEmpty
-                    ? Text(
-                        _groupName.isNotEmpty ? _groupName[0].toUpperCase() : 'M',
-                        style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primary),
-                      )
-                    : null,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: _isDark ? null : Border.all(color: Colors.black.withOpacity(0.08), width: 1.5),
+                  boxShadow: _isDark ? null : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 64,
+                  backgroundColor: AppColors.primary.withOpacity(_isDark ? 0.1 : 0.18),
+                  backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
+                  child: widget.group.imageUrl.isEmpty
+                      ? Text(
+                          _groupName.isNotEmpty ? _groupName[0].toUpperCase() : 'M',
+                          style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        )
+                      : null,
+                ),
               ),
               const SizedBox(height: 16),
               Padding(
@@ -513,13 +528,21 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 child: Text(
                   _groupName,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 24, 
+                    fontWeight: FontWeight.w900, 
+                    color: _isDark ? AppColors.textPrimary : AppColors.textOnLight
+                  ),
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 "$_membersCount ${AppLocalizations.of(context)!.groupsMemberCountSuffix}",
-                style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16, 
+                  color: _isDark ? AppColors.textSecondary : const Color(0xFF4B5563), 
+                  fontWeight: FontWeight.w600
+                ),
               ),
               const SizedBox(height: 12),
               Row(
@@ -529,7 +552,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   const SizedBox(width: 6),
                   Text(
                     "${widget.group.collegeName} • ${widget.group.specializationName}",
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 14, 
+                      color: _isDark ? AppColors.textSecondary : const Color(0xFF6B7280), 
+                      fontWeight: FontWeight.bold
+                    ),
                   ),
                 ],
               ),
@@ -537,7 +564,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: widget.group.isPublic ? AppColors.success.withOpacity(0.12) : AppColors.warning.withOpacity(0.12),
+                  color: widget.group.isPublic 
+                      ? AppColors.success.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.12 : 0.18) 
+                      : AppColors.warning.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.12 : 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -547,7 +576,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     const SizedBox(width: 6),
                     Text(
                       widget.group.isPublic ? AppLocalizations.of(context)!.groupsPublicBadge : AppLocalizations.of(context)!.groupsPrivateBadge,
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.group.isPublic ? AppColors.success : AppColors.warning),
+                      style: TextStyle(
+                        fontSize: 13, 
+                        fontWeight: FontWeight.bold, 
+                        color: widget.group.isPublic 
+                            ? (Theme.of(context).brightness == Brightness.dark ? AppColors.success : const Color(0xFF059669)) 
+                            : (Theme.of(context).brightness == Brightness.dark ? AppColors.warning : const Color(0xFFD97706))
+                      ),
                     ),
                   ],
                 ),
@@ -559,7 +594,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   child: Text(
                     _groupDescription,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 15, color: AppColors.textPrimary, height: 1.5, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 15, 
+                      color: _isDark ? AppColors.textPrimary : AppColors.textOnLight, 
+                      height: 1.5, 
+                      fontWeight: FontWeight.w500
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -613,7 +653,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             return [
               SliverToBoxAdapter(
                 child: Container(
-                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+                  decoration: BoxDecoration(
+                    color: _isDark ? AppColors.background : const Color(0xFFF9FAFC),
+                    border: _isDark ? null : Border(bottom: BorderSide(color: Colors.black.withOpacity(0.04))),
+                  ),
                   padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48, bottom: 20),
                   child: Column(
                     children: [
@@ -749,12 +792,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 pinned: true,
                 delegate: _StickyTabBarDelegate(
                   Container(
-                    color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     child: TabBar(
                       indicatorColor: AppColors.primary,
                       indicatorWeight: 3,
                       labelColor: AppColors.primary,
-                      unselectedLabelColor: AppColors.textSecondary,
+                      unselectedLabelColor: Theme.of(context).brightness == Brightness.dark 
+                          ? AppColors.textSecondary 
+                          : const Color(0xFF6B7280),
                       labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                       unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       tabs: [
@@ -770,7 +815,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             ];
           },
           body: Container(
-            color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
+            color: Theme.of(context).scaffoldBackgroundColor,
             child: TabBarView(
               children: [
                 _KeepAlivePage(child: _buildMembersTab()),
@@ -793,8 +838,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withOpacity(_isDark ? 0.1 : 0.18),
               borderRadius: BorderRadius.circular(16),
+              border: _isDark ? null : Border.all(color: color.withOpacity(0.08)),
             ),
             child: Icon(icon, color: color, size: 26),
           ),

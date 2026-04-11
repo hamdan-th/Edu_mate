@@ -34,16 +34,16 @@ class _GroupsScreenState extends State<GroupsScreen>
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
   Color get _pageBg =>
-      _isDark ? const Color(0xFF0B0D12) : const Color(0xFFF5F6F8);
+      _isDark ? const Color(0xFF0B0D12) : const Color(0xFFF0F2F5);
   Color get _cardBg => _isDark ? const Color(0xFF171C25) : Colors.white;
   Color get _softBg =>
-      _isDark ? const Color(0xFF10141C) : const Color(0xFFF8FAFD);
+      _isDark ? const Color(0xFF10141C) : const Color(0xFFF1F3F7);
   Color get _text =>
-      _isDark ? AppColors.textPrimary : const Color(0xFF181A20);
+      _isDark ? AppColors.textPrimary : const Color(0xFF111827);
   Color get _muted =>
-      _isDark ? AppColors.textSecondary : const Color(0xFF7B808A);
+      _isDark ? AppColors.textSecondary : const Color(0xFF6B7280);
   Color get _border =>
-      _isDark ? Colors.white.withOpacity(0.07) : Colors.black.withOpacity(0.07);
+      _isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.12);
 
   @override
   void initState() {
@@ -381,7 +381,7 @@ class _GroupsScreenState extends State<GroupsScreen>
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context)!.groupsSearchFieldHint,
               hintStyle: TextStyle(
-                color: _muted.withOpacity(0.7),
+                color: _isDark ? _muted.withOpacity(0.7) : const Color(0xFF9CA3AF),
                 fontWeight: FontWeight.w500,
               ),
               border: InputBorder.none,
@@ -447,14 +447,14 @@ class _GroupsScreenState extends State<GroupsScreen>
                 controller: _tabController,
                 indicator: BoxDecoration(
                   color: _isDark
-                      ? AppColors.primary.withOpacity(0.14)
-                      : AppColors.primary.withOpacity(0.12),
+                      ? AppColors.primary.withOpacity(0.16)
+                      : AppColors.primary.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: AppColors.primary,
-                unselectedLabelColor: _muted,
+                unselectedLabelColor: _isDark ? _muted : const Color(0xFF4B5563),
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 labelStyle: const TextStyle(
@@ -599,7 +599,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                 width: 82,
                 height: 82,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.10),
+                  color: AppColors.primary.withOpacity(_isDark ? 0.10 : 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -656,17 +656,18 @@ class _TopActionButton extends StatelessWidget {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF10141C) : const Color(0xFFF8FAFD),
+          color: isDark ? const Color(0xFF1C222D) : const Color(0xFFF3F4F6),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isDark
-                ? Colors.white.withOpacity(0.07)
-                : Colors.black.withOpacity(0.06),
+                ? Colors.white.withOpacity(0.1)
+                : Colors.black.withOpacity(0.1),
           ),
         ),
-        child: const Icon(
-          Icons.circle,
-          color: Colors.transparent,
+        child: Icon(
+          icon,
+          color: isDark ? Colors.white : const Color(0xFF374151),
+          size: 20,
         ),
       ),
     );
@@ -696,9 +697,9 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
   Color get _text =>
       _isDark ? AppColors.textPrimary : const Color(0xFF181A20);
   Color get _muted =>
-      _isDark ? AppColors.textSecondary : const Color(0xFF7B808A);
+      _isDark ? AppColors.textSecondary : const Color(0xFF6B7280);
   Color get _border =>
-      _isDark ? Colors.white.withOpacity(0.07) : Colors.black.withOpacity(0.07);
+      _isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.12);
 
   void _openGroupDetails() {
     Navigator.push(
@@ -793,8 +794,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
             boxShadow: [
               BoxShadow(
                 color: _isDark
-                    ? Colors.black.withOpacity(0.22)
-                    : Colors.black.withOpacity(0.045),
+                    ? Colors.black.withOpacity(0.24)
+                    : Colors.black.withOpacity(0.06),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
@@ -835,11 +836,11 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                                   : Icons.lock_rounded,
                               text: group.isPublic ? AppLocalizations.of(context)!.groupsPillPublic : AppLocalizations.of(context)!.groupsPillPrivate,
                               bg: group.isPublic
-                                  ? AppColors.success.withOpacity(0.10)
-                                  : AppColors.warning.withOpacity(0.10),
+                                  ? AppColors.success.withOpacity(_isDark ? 0.10 : 0.18)
+                                  : AppColors.warning.withOpacity(_isDark ? 0.10 : 0.18),
                               fg: group.isPublic
-                                  ? AppColors.success
-                                  : AppColors.warning,
+                                  ? (_isDark ? AppColors.success : const Color(0xFF059669))
+                                  : (_isDark ? AppColors.warning : const Color(0xFFD97706)),
                             )
                           else if (group.messagesCount > 0)
                             _TinyPill(

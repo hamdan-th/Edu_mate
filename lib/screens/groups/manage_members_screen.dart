@@ -239,6 +239,11 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
         decoration: BoxDecoration(
           color: Theme.of(context).inputDecorationTheme.fillColor,
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.08)
+                : Colors.black.withOpacity(0.12),
+          ),
         ),
         child: TextField(
           controller: _searchController,
@@ -267,10 +272,12 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: AppColors.primary,
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? AppColors.primary 
+              : const Color(0xFFC79A22), // Deepened gold for better contrast on light surfaces
         ),
       ),
     );
@@ -303,7 +310,9 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       roleIcon = const Icon(Icons.headset_mic, color: Colors.orange, size: 18);
     } else {
       roleLabel = l10n.groupsRoleMember;
-      roleColor = AppColors.primary;
+      roleColor = Theme.of(context).brightness == Brightness.dark 
+          ? AppColors.primary 
+          : const Color(0xFFC79A22);
     }
 
     // Small badge for muted/banned
@@ -338,7 +347,13 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                       Flexible(
                         child: Text(
                           name + statusNote,
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87)),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.textPrimary
+                                : const Color(0xFF111827),
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -437,7 +452,13 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
             const SizedBox(height: 20),
             Text(
               l10n.groupsEmptySearchTitle,
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87)),
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.textPrimary
+                    : const Color(0xFF111827),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
