@@ -1052,7 +1052,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     required Map<String, dynamic> data,
     required bool isMe,
   }) {
-    final title = (data['sharedFileTitle'] ?? 'ملف من المكتبة').toString();
+    final title = (data['sharedFileTitle'] ?? AppLocalizations.of(context)!.groupsChatLibraryFile).toString();
     final fileType = (data['sharedFileType'] ?? 'FILE').toString();
     final thumbnailUrl = (data['sharedFileThumbnailUrl'] ?? '').toString();
     final sharedFileUrl = (data['sharedFileUrl'] ?? '').toString();

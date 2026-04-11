@@ -1381,6 +1381,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter and interact with group members'**
   String get groupsCardMyGroupsSub;
+
+  /// No description provided for @groupsChatImageError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not select image. Make sure permissions are granted.'**
+  String get groupsChatImageError;
+
+  /// No description provided for @groupsChatFileP1Unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is no longer available'**
+  String get groupsChatFileP1Unavailable;
+
+  /// No description provided for @groupsChatFileP1Error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open file now'**
+  String get groupsChatFileP1Error;
+
+  /// No description provided for @groupsChatLeaveOwnerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner cannot leave before transferring ownership'**
+  String get groupsChatLeaveOwnerError;
+
+  /// No description provided for @groupsChatLeaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You have left the group'**
+  String get groupsChatLeaveSuccess;
+
+  /// No description provided for @groupsChatLeaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error leaving group'**
+  String get groupsChatLeaveError;
+
+  /// No description provided for @groupsChatMuteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications muted'**
+  String get groupsChatMuteSuccess;
+
+  /// No description provided for @groupsChatEnableMembersMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Members chat enabled'**
+  String get groupsChatEnableMembersMsg;
+
+  /// No description provided for @groupsChatDisableMembersMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Members chat disabled'**
+  String get groupsChatDisableMembersMsg;
+
+  /// No description provided for @groupsChatSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in chat...'**
+  String get groupsChatSearchHint;
+
+  /// No description provided for @groupsChatFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get groupsChatFallbackName;
+
+  /// No description provided for @groupsChatMembersPluralSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'members'**
+  String get groupsChatMembersPluralSuffix;
+
+  /// No description provided for @groupsChatDefaultCountName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get groupsChatDefaultCountName;
+
+  /// No description provided for @groupsChatErrorLoadingMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load messages'**
+  String get groupsChatErrorLoadingMessages;
+
+  /// No description provided for @groupsChatNoSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching results found'**
+  String get groupsChatNoSearchResults;
+
+  /// No description provided for @groupsChatRequiresJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Must join group'**
+  String get groupsChatRequiresJoinTitle;
+
+  /// No description provided for @groupsChatRequiresJoinBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This community is private. Open group info first, then request to join to participate in chat.'**
+  String get groupsChatRequiresJoinBody;
+
+  /// No description provided for @groupsChatDetailsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'View group info'**
+  String get groupsChatDetailsButton;
+
+  /// No description provided for @groupsChatReplyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get groupsChatReplyAction;
+
+  /// No description provided for @groupsChatLibraryFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Library file'**
+  String get groupsChatLibraryFile;
+
+  /// No description provided for @groupsChatImageAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached image'**
+  String get groupsChatImageAttached;
+
+  /// No description provided for @groupsChatSavedRemoveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from saved'**
+  String get groupsChatSavedRemoveAction;
+
+  /// No description provided for @groupsChatSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save with star'**
+  String get groupsChatSaveAction;
+
+  /// No description provided for @groupsChatSavedRemoveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Message removed'**
+  String get groupsChatSavedRemoveSuccess;
+
+  /// No description provided for @groupsChatSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Message saved'**
+  String get groupsChatSaveSuccess;
+
+  /// No description provided for @groupsChatSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed, try again later'**
+  String get groupsChatSaveError;
+
+  /// No description provided for @groupsChatMemberFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get groupsChatMemberFallback;
+
+  /// No description provided for @groupsChatImageDisplayError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not display image'**
+  String get groupsChatImageDisplayError;
+
+  /// No description provided for @groupsChatOpenFileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to open file'**
+  String get groupsChatOpenFileAction;
+
+  /// No description provided for @groupsChatBannedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, you have been banned from participating in this group.'**
+  String get groupsChatBannedMsg;
+
+  /// No description provided for @groupsChatMutedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'You are muted. Cannot send currently.'**
+  String get groupsChatMutedMsg;
+
+  /// No description provided for @groupsChatReadOnlyMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Group is read-only'**
+  String get groupsChatReadOnlyMsg;
+
+  /// No description provided for @groupsChatInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get groupsChatInputHint;
+
+  /// No description provided for @groupsChatEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get groupsChatEmptyTitle;
+
+  /// No description provided for @groupsChatEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the first conversation in this community and share ideas and files.'**
+  String get groupsChatEmptySub;
+
+  /// No description provided for @groupsChatTimeAm.
+  ///
+  /// In en, this message translates to:
+  /// **'AM'**
+  String get groupsChatTimeAm;
+
+  /// No description provided for @groupsChatTimePm.
+  ///
+  /// In en, this message translates to:
+  /// **'PM'**
+  String get groupsChatTimePm;
+
+  /// No description provided for @groupsCreateEmptyNameMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter group name'**
+  String get groupsCreateEmptyNameMsg;
+
+  /// No description provided for @groupsCreateEmptyCollegeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Select college'**
+  String get groupsCreateEmptyCollegeMsg;
+
+  /// No description provided for @groupsCreateEmptyMajorMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Select major'**
+  String get groupsCreateEmptyMajorMsg;
+
+  /// No description provided for @groupsCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get groupsCreateTitle;
+
+  /// No description provided for @groupsCreateHeaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Group'**
+  String get groupsCreateHeaderTitle;
+
+  /// No description provided for @groupsCreateHeaderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new study space for discussion and collaboration'**
+  String get groupsCreateHeaderSub;
+
+  /// No description provided for @groupsCreateInfoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Information'**
+  String get groupsCreateInfoLabel;
+
+  /// No description provided for @groupsCreateDescLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Description'**
+  String get groupsCreateDescLabel;
+
+  /// No description provided for @groupsCreateCollegeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'College'**
+  String get groupsCreateCollegeLabel;
+
+  /// No description provided for @groupsCreateMajorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Major'**
+  String get groupsCreateMajorLabel;
+
+  /// No description provided for @groupsCreateTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Type'**
+  String get groupsCreateTypeLabel;
+
+  /// No description provided for @groupsCreateTypePublicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get groupsCreateTypePublicTitle;
+
+  /// No description provided for @groupsCreateTypePublicSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone can join'**
+  String get groupsCreateTypePublicSub;
+
+  /// No description provided for @groupsCreateTypePrivateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get groupsCreateTypePrivateTitle;
+
+  /// No description provided for @groupsCreateTypePrivateSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Join via invite link'**
+  String get groupsCreateTypePrivateSub;
+
+  /// No description provided for @groupsCreateBtnLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get groupsCreateBtnLoading;
+
+  /// No description provided for @groupsCreateBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get groupsCreateBtn;
+
+  /// No description provided for @groupsInviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Invite'**
+  String get groupsInviteTitle;
+
+  /// No description provided for @groupsInviteJoiningLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining...'**
+  String get groupsInviteJoiningLoading;
+
+  /// No description provided for @groupsInviteNotSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get groupsInviteNotSpecified;
+
+  /// No description provided for @groupsMakeAdminSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin assigned'**
+  String get groupsMakeAdminSuccess;
+
+  /// No description provided for @groupsReportMemberSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent to admin'**
+  String get groupsReportMemberSuccess;
+
+  /// No description provided for @groupsActionUnmuteMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get groupsActionUnmuteMember;
+
+  /// No description provided for @groupsActionMuteMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get groupsActionMuteMember;
+
+  /// No description provided for @groupsActionKickMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Kick Member'**
+  String get groupsActionKickMember;
+
+  /// No description provided for @groupsActionTransferOwnership.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Ownership'**
+  String get groupsActionTransferOwnership;
 }
 
 class _AppLocalizationsDelegate

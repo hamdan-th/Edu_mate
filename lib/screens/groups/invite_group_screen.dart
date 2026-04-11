@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
 
@@ -54,6 +55,7 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
   Future<void> _join() async {
     final group = _group;
     if (group == null) return;
+    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isJoining = true;
@@ -63,7 +65,7 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
       await GroupService.joinPrivateGroupByLink(group.inviteLink);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الانضمام للمجموعة بنجاح')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsJoinSuccess)));
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
@@ -83,6 +85,8 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -91,7 +95,7 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
 
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('دعوة مجموعة')),
+        appBar: AppBar(title: Text(l10n.groupsInviteTitle)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -111,7 +115,7 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
     final group = _group!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('دعوة مجموعة')),
+      appBar: AppBar(title: Text(l10n.groupsInviteTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Container(
@@ -142,7 +146,7 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
               const SizedBox(height: 8),
               Text(
                 group.description.isEmpty
-                    ? 'مجموعة خاصة'
+                    ? l10n.groupsPrivateBadge
                     : group.description,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
@@ -158,7 +162,7 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
                 children: [
                   _InfoPill(text: group.collegeName),
                   _InfoPill(text: group.specializationName),
-                  const _InfoPill(text: 'مجموعة خاصة'),
+                  _InfoPill(text: l10n.groupsPrivateBadge),
                 ],
               ),
               const SizedBox(height: 18),
@@ -174,7 +178,7 @@ class _InviteGroupScreenState extends State<InviteGroupScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                       : const Icon(Icons.login_rounded),
-                  label: Text(_isJoining ? 'جاري الانضمام...' : 'انضمام للمجموعة'),
+                  label: Text(_isJoining ? l10n.groupsInviteJoiningLoading : l10n.groupsJoinAction),
                 ),
               ),
             ],
@@ -192,6 +196,7 @@ class _InfoPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
@@ -199,7 +204,7 @@ class _InfoPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        text.isEmpty ? 'غير محدد' : text,
+        text.isEmpty ? l10n.groupsInviteNotSpecified : text,
         style: const TextStyle(
           color: AppColors.primary,
           fontSize: 11.5,

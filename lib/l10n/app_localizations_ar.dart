@@ -661,4 +661,198 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get groupsCardMyGroupsSub => 'ادخل وابدأ التفاعل مع أعضاء المجموعة';
+
+  @override
+  String get groupsChatImageError =>
+      'تعذر اختيار الصورة. تأكد من إعطاء الصلاحيات.';
+
+  @override
+  String get groupsChatFileP1Unavailable => 'هذا الملف لم يعد متاحًا';
+
+  @override
+  String get groupsChatFileP1Error => 'تعذر فتح الملف الآن';
+
+  @override
+  String get groupsChatLeaveOwnerError =>
+      'المالك لا يمكنه المغادرة قبل نقل الملكية';
+
+  @override
+  String get groupsChatLeaveSuccess => 'لقد غادرت المجموعة';
+
+  @override
+  String get groupsChatLeaveError => 'حدث خطأ أثناء مغادرة المجموعة';
+
+  @override
+  String get groupsChatMuteSuccess => 'تم كتم الإشعارات';
+
+  @override
+  String get groupsChatEnableMembersMsg => 'تم تفعيل دردشة الأعضاء';
+
+  @override
+  String get groupsChatDisableMembersMsg => 'تم إيقاف دردشة الأعضاء';
+
+  @override
+  String get groupsChatSearchHint => 'ابحث في المحادثة...';
+
+  @override
+  String get groupsChatFallbackName => 'الدردشة';
+
+  @override
+  String get groupsChatMembersPluralSuffix => 'أعضاء';
+
+  @override
+  String get groupsChatDefaultCountName => 'مجموعة';
+
+  @override
+  String get groupsChatErrorLoadingMessages => 'تعذر تحميل الرسائل';
+
+  @override
+  String get groupsChatNoSearchResults => 'لا توجد نتائج مطابقة';
+
+  @override
+  String get groupsChatRequiresJoinTitle => 'يجب الانضمام للمجموعة';
+
+  @override
+  String get groupsChatRequiresJoinBody =>
+      'هذا المجتمع خاص بأعضائه. افتح معلومات المجموعة أولًا ثم اطلب الانضمام للمشاركة داخل الدردشة.';
+
+  @override
+  String get groupsChatDetailsButton => 'عرض معلومات المجموعة';
+
+  @override
+  String get groupsChatReplyAction => 'رد';
+
+  @override
+  String get groupsChatLibraryFile => 'ملف من المكتبة';
+
+  @override
+  String get groupsChatImageAttached => 'صورة مرفقة';
+
+  @override
+  String get groupsChatSavedRemoveAction => 'إزالة من المحفوظات';
+
+  @override
+  String get groupsChatSaveAction => 'حفظ بنجمة';
+
+  @override
+  String get groupsChatSavedRemoveSuccess => 'تمت إزالة الرسالة';
+
+  @override
+  String get groupsChatSaveSuccess => 'تم حفظ الرسالة';
+
+  @override
+  String get groupsChatSaveError => 'فشلت العملية، يرجى المحاولة لاحقاً';
+
+  @override
+  String get groupsChatMemberFallback => 'عضو';
+
+  @override
+  String get groupsChatImageDisplayError => 'تعذر عرض الصورة';
+
+  @override
+  String get groupsChatOpenFileAction => 'اضغط لفتح الملف';
+
+  @override
+  String get groupsChatBannedMsg =>
+      'عذرًا، لقد تم حظرك من المشاركة في هذه المجموعة.';
+
+  @override
+  String get groupsChatMutedMsg => 'لقد تم كتمك. لا يمكنك الإرسال حاليًا.';
+
+  @override
+  String get groupsChatReadOnlyMsg => 'المجموعة للقراءة فقط';
+
+  @override
+  String get groupsChatInputHint => 'اكتب رسالة...';
+
+  @override
+  String get groupsChatEmptyTitle => 'لا توجد رسائل بعد';
+
+  @override
+  String get groupsChatEmptySub =>
+      'ابدأ أول محادثة داخل هذا المجتمع وشارك الأفكار والملفات مع الأعضاء.';
+
+  @override
+  String get groupsChatTimeAm => 'ص';
+
+  @override
+  String get groupsChatTimePm => 'م';
+
+  @override
+  String get groupsCreateEmptyNameMsg => 'اكتب اسم المجموعة';
+
+  @override
+  String get groupsCreateEmptyCollegeMsg => 'اختر الكلية';
+
+  @override
+  String get groupsCreateEmptyMajorMsg => 'اختر التخصص';
+
+  @override
+  String get groupsCreateTitle => 'إنشاء مجموعة';
+
+  @override
+  String get groupsCreateHeaderTitle => 'مجموعة جديدة';
+
+  @override
+  String get groupsCreateHeaderSub => 'أنشئ مساحة دراسية جديدة للنقاش والتعاون';
+
+  @override
+  String get groupsCreateInfoLabel => 'معلومات المجموعة';
+
+  @override
+  String get groupsCreateDescLabel => 'نبذة عن المجموعة';
+
+  @override
+  String get groupsCreateCollegeLabel => 'الكلية';
+
+  @override
+  String get groupsCreateMajorLabel => 'التخصص';
+
+  @override
+  String get groupsCreateTypeLabel => 'نوع المجموعة';
+
+  @override
+  String get groupsCreateTypePublicTitle => 'عامة';
+
+  @override
+  String get groupsCreateTypePublicSub => 'يمكن لأي مستخدم الانضمام';
+
+  @override
+  String get groupsCreateTypePrivateTitle => 'خاصة';
+
+  @override
+  String get groupsCreateTypePrivateSub => 'الانضمام عبر رابط الدعوة';
+
+  @override
+  String get groupsCreateBtnLoading => 'جاري الإنشاء...';
+
+  @override
+  String get groupsCreateBtn => 'إنشاء المجموعة';
+
+  @override
+  String get groupsInviteTitle => 'دعوة مجموعة';
+
+  @override
+  String get groupsInviteJoiningLoading => 'جاري الانضمام...';
+
+  @override
+  String get groupsInviteNotSpecified => 'غير محدد';
+
+  @override
+  String get groupsMakeAdminSuccess => 'تم تعيين المشرف';
+
+  @override
+  String get groupsReportMemberSuccess => 'تم إرسال البلاغ لمدير التطبيق';
+
+  @override
+  String get groupsActionUnmuteMember => 'إلغاء الكتم';
+
+  @override
+  String get groupsActionMuteMember => 'كتم العضو';
+
+  @override
+  String get groupsActionKickMember => 'طرد العضو';
+
+  @override
+  String get groupsActionTransferOwnership => 'نقل الملكية';
 }

@@ -668,4 +668,199 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupsCardMyGroupsSub => 'Enter and interact with group members';
+
+  @override
+  String get groupsChatImageError =>
+      'Could not select image. Make sure permissions are granted.';
+
+  @override
+  String get groupsChatFileP1Unavailable => 'This file is no longer available';
+
+  @override
+  String get groupsChatFileP1Error => 'Could not open file now';
+
+  @override
+  String get groupsChatLeaveOwnerError =>
+      'Owner cannot leave before transferring ownership';
+
+  @override
+  String get groupsChatLeaveSuccess => 'You have left the group';
+
+  @override
+  String get groupsChatLeaveError => 'Error leaving group';
+
+  @override
+  String get groupsChatMuteSuccess => 'Notifications muted';
+
+  @override
+  String get groupsChatEnableMembersMsg => 'Members chat enabled';
+
+  @override
+  String get groupsChatDisableMembersMsg => 'Members chat disabled';
+
+  @override
+  String get groupsChatSearchHint => 'Search in chat...';
+
+  @override
+  String get groupsChatFallbackName => 'Chat';
+
+  @override
+  String get groupsChatMembersPluralSuffix => 'members';
+
+  @override
+  String get groupsChatDefaultCountName => 'Group';
+
+  @override
+  String get groupsChatErrorLoadingMessages => 'Could not load messages';
+
+  @override
+  String get groupsChatNoSearchResults => 'No matching results found';
+
+  @override
+  String get groupsChatRequiresJoinTitle => 'Must join group';
+
+  @override
+  String get groupsChatRequiresJoinBody =>
+      'This community is private. Open group info first, then request to join to participate in chat.';
+
+  @override
+  String get groupsChatDetailsButton => 'View group info';
+
+  @override
+  String get groupsChatReplyAction => 'Reply';
+
+  @override
+  String get groupsChatLibraryFile => 'Library file';
+
+  @override
+  String get groupsChatImageAttached => 'Attached image';
+
+  @override
+  String get groupsChatSavedRemoveAction => 'Remove from saved';
+
+  @override
+  String get groupsChatSaveAction => 'Save with star';
+
+  @override
+  String get groupsChatSavedRemoveSuccess => 'Message removed';
+
+  @override
+  String get groupsChatSaveSuccess => 'Message saved';
+
+  @override
+  String get groupsChatSaveError => 'Operation failed, try again later';
+
+  @override
+  String get groupsChatMemberFallback => 'Member';
+
+  @override
+  String get groupsChatImageDisplayError => 'Could not display image';
+
+  @override
+  String get groupsChatOpenFileAction => 'Tap to open file';
+
+  @override
+  String get groupsChatBannedMsg =>
+      'Sorry, you have been banned from participating in this group.';
+
+  @override
+  String get groupsChatMutedMsg => 'You are muted. Cannot send currently.';
+
+  @override
+  String get groupsChatReadOnlyMsg => 'Group is read-only';
+
+  @override
+  String get groupsChatInputHint => 'Type a message...';
+
+  @override
+  String get groupsChatEmptyTitle => 'No messages yet';
+
+  @override
+  String get groupsChatEmptySub =>
+      'Start the first conversation in this community and share ideas and files.';
+
+  @override
+  String get groupsChatTimeAm => 'AM';
+
+  @override
+  String get groupsChatTimePm => 'PM';
+
+  @override
+  String get groupsCreateEmptyNameMsg => 'Enter group name';
+
+  @override
+  String get groupsCreateEmptyCollegeMsg => 'Select college';
+
+  @override
+  String get groupsCreateEmptyMajorMsg => 'Select major';
+
+  @override
+  String get groupsCreateTitle => 'Create Group';
+
+  @override
+  String get groupsCreateHeaderTitle => 'New Group';
+
+  @override
+  String get groupsCreateHeaderSub =>
+      'Create a new study space for discussion and collaboration';
+
+  @override
+  String get groupsCreateInfoLabel => 'Group Information';
+
+  @override
+  String get groupsCreateDescLabel => 'Group Description';
+
+  @override
+  String get groupsCreateCollegeLabel => 'College';
+
+  @override
+  String get groupsCreateMajorLabel => 'Major';
+
+  @override
+  String get groupsCreateTypeLabel => 'Group Type';
+
+  @override
+  String get groupsCreateTypePublicTitle => 'Public';
+
+  @override
+  String get groupsCreateTypePublicSub => 'Anyone can join';
+
+  @override
+  String get groupsCreateTypePrivateTitle => 'Private';
+
+  @override
+  String get groupsCreateTypePrivateSub => 'Join via invite link';
+
+  @override
+  String get groupsCreateBtnLoading => 'Creating...';
+
+  @override
+  String get groupsCreateBtn => 'Create Group';
+
+  @override
+  String get groupsInviteTitle => 'Group Invite';
+
+  @override
+  String get groupsInviteJoiningLoading => 'Joining...';
+
+  @override
+  String get groupsInviteNotSpecified => 'Not specified';
+
+  @override
+  String get groupsMakeAdminSuccess => 'Admin assigned';
+
+  @override
+  String get groupsReportMemberSuccess => 'Report sent to admin';
+
+  @override
+  String get groupsActionUnmuteMember => 'Unmute';
+
+  @override
+  String get groupsActionMuteMember => 'Mute';
+
+  @override
+  String get groupsActionKickMember => 'Kick Member';
+
+  @override
+  String get groupsActionTransferOwnership => 'Transfer Ownership';
 }

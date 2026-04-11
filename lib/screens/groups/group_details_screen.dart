@@ -179,11 +179,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       await batch.commit();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نقل الملكية بنجاح')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsTransferOwnershipSuccess)));
         _loadMembershipState(); // reload local flags
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء نقل الملكية')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsTransferOwnershipError)));
     }
   }
 
@@ -194,27 +194,27 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       switch (action) {
         case 'make_admin':
           await GroupService.promoteToAdmin(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تعيين المشرف')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsMakeAdminSuccess)));
           break;
         case 'remove_admin':
           await GroupService.removeAdmin(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إزالة المشرف')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsRemoveAdminSuccess)));
           break;
         case 'mute':
           await GroupService.muteMember(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم كتم العضو')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsMuteMemberSuccess)));
           break;
         case 'unmute':
           await GroupService.unmuteMember(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إلغاء كتم العضو')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsUnmuteMemberSuccess)));
           break;
         case 'report':
           await GroupService.reportMember(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال البلاغ لمدير التطبيق')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsReportMemberSuccess)));
           break;
         case 'kick':
           await GroupService.kickMember(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم طرد العضو')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsKickMemberSuccess)));
           break;
         case 'transfer_owner':
           await _transferOwnership(memberId);
@@ -233,6 +233,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: (action) => _handleMemberAction(action, data, memberId),
       itemBuilder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         List<PopupMenuEntry<String>> items = [];
 
         bool canManage = false;
@@ -242,28 +243,28 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         if (canManage) {
           if (_isOwner && !isTargetOwner) {
             if (isTargetAdmin) {
-              items.add(const PopupMenuItem(value: 'remove_admin', child: Text("إزالة من الإشراف", style: TextStyle(fontWeight: FontWeight.bold))));
+              items.add(PopupMenuItem(value: 'remove_admin', child: Text(l10n.groupsActionRemoveAdmin, style: const TextStyle(fontWeight: FontWeight.bold))));
             } else {
-              items.add(const PopupMenuItem(value: 'make_admin', child: Text("تعيين كمشرف", style: TextStyle(fontWeight: FontWeight.bold))));
+              items.add(PopupMenuItem(value: 'make_admin', child: Text(l10n.groupsActionMakeAdmin, style: const TextStyle(fontWeight: FontWeight.bold))));
             }
           }
 
           if (status == 'muted') {
-            items.add(const PopupMenuItem(value: 'unmute', child: Text("إلغاء الكتم", style: TextStyle(fontWeight: FontWeight.bold))));
+            items.add(PopupMenuItem(value: 'unmute', child: Text(l10n.groupsActionUnmuteMember, style: const TextStyle(fontWeight: FontWeight.bold))));
           } else {
-            items.add(const PopupMenuItem(value: 'mute', child: Text("كتم العضو", style: TextStyle(fontWeight: FontWeight.bold))));
+            items.add(PopupMenuItem(value: 'mute', child: Text(l10n.groupsActionMuteMember, style: const TextStyle(fontWeight: FontWeight.bold))));
           }
 
           items.add(const PopupMenuDivider());
-          items.add(const PopupMenuItem(value: 'kick', child: Text("طرد العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+          items.add(PopupMenuItem(value: 'kick', child: Text(l10n.groupsActionKickMember, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
         }
 
         if (items.isNotEmpty) items.add(const PopupMenuDivider());
-        items.add(const PopupMenuItem(value: 'report', child: Text("إبلاغ", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+        items.add(PopupMenuItem(value: 'report', child: Text(l10n.groupsActionReport, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
 
         if (_isOwner && !isTargetOwner) {
           items.add(const PopupMenuDivider());
-          items.add(const PopupMenuItem(value: 'transfer_owner', child: Text("نقل الملكية", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w900))));
+          items.add(PopupMenuItem(value: 'transfer_owner', child: Text(l10n.groupsActionTransferOwnership, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w900))));
         }
 
         return items;

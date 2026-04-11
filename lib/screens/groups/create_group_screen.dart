@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../data/academic_structure.dart';
@@ -82,22 +83,23 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   Future<void> _createGroup() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
 
     if (name.isEmpty) {
-      _showMessage('اكتب اسم المجموعة');
+      _showMessage(l10n.groupsCreateEmptyNameMsg);
       return;
     }
 
     if ((_selectedCollegeId ?? '').isEmpty || (_selectedCollegeName ?? '').isEmpty) {
-      _showMessage('اختر الكلية');
+      _showMessage(l10n.groupsCreateEmptyCollegeMsg);
       return;
     }
 
     if ((_selectedSpecializationId ?? '').isEmpty ||
         (_selectedSpecializationName ?? '').isEmpty) {
-      _showMessage('اختر التخصص');
+      _showMessage(l10n.groupsCreateEmptyMajorMsg);
       return;
     }
 
@@ -140,14 +142,15 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final previewName = _nameController.text.trim().isEmpty
-        ? 'اسم المجموعة'
+        ? l10n.groupsNameLabel
         : _nameController.text.trim();
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('إنشاء مجموعة'),
+        title: Text(l10n.groupsCreateTitle),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -160,21 +163,21 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 colors: [AppColors.primary, AppColors.primaryDark],
               ),
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'New Group',
-                  style: TextStyle(
+                  l10n.groupsCreateHeaderTitle,
+                  style: const TextStyle(
                     color: AppColors.textOnDark,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'أنشئ مساحة دراسية جديدة للنقاش والتعاون',
-                  style: TextStyle(
+                  l10n.groupsCreateHeaderSub,
+                  style: const TextStyle(
                     color: Color(0xFFD7E6FF),
                     fontSize: 12.5,
                     fontWeight: FontWeight.w500,
@@ -239,7 +242,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        _groupType == 'private' ? 'مجموعة خاصة' : 'مجموعة عامة',
+                        _groupType == 'private' ? l10n.groupsPrivateBadge : l10n.groupsPublicBadge,
                         style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
@@ -307,32 +310,32 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _FormLabel('معلومات المجموعة'),
+                _FormLabel(l10n.groupsCreateInfoLabel),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _nameController,
                   onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(
-                    labelText: 'اسم المجموعة',
-                    prefixIcon: Icon(Icons.groups_rounded),
+                  decoration: InputDecoration(
+                    labelText: l10n.groupsNameLabel,
+                    prefixIcon: const Icon(Icons.groups_rounded),
                   ),
                 ),
                 const SizedBox(height: 14),
                 TextField(
                   controller: _descriptionController,
                   maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'نبذة عن المجموعة',
+                  decoration: InputDecoration(
+                    labelText: l10n.groupsCreateDescLabel,
                     alignLabelWithHint: true,
-                    prefixIcon: Icon(Icons.description_outlined),
+                    prefixIcon: const Icon(Icons.description_outlined),
                   ),
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
                   initialValue: _selectedCollegeId,
-                  decoration: const InputDecoration(
-                    labelText: 'الكلية',
-                    prefixIcon: Icon(Icons.account_balance_rounded),
+                  decoration: InputDecoration(
+                    labelText: l10n.groupsCreateCollegeLabel,
+                    prefixIcon: const Icon(Icons.account_balance_rounded),
                   ),
                   items: AcademicStructure.colleges.map((college) {
                     return DropdownMenuItem<String>(
@@ -361,9 +364,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
                   initialValue: _selectedSpecializationId,
-                  decoration: const InputDecoration(
-                    labelText: 'التخصص',
-                    prefixIcon: Icon(Icons.school_rounded),
+                  decoration: InputDecoration(
+                    labelText: l10n.groupsCreateMajorLabel,
+                    prefixIcon: const Icon(Icons.school_rounded),
                   ),
                   items: _availableSpecializations.map((spec) {
                     return DropdownMenuItem<String>(
@@ -388,14 +391,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   },
                 ),
                 const SizedBox(height: 18),
-                const _FormLabel('نوع المجموعة'),
+                _FormLabel(l10n.groupsCreateTypeLabel),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
                       child: _TypeSelectorCard(
-                        title: 'عامة',
-                        subtitle: 'يمكن لأي مستخدم الانضمام',
+                        title: l10n.groupsCreateTypePublicTitle,
+                        subtitle: l10n.groupsCreateTypePublicSub,
                         icon: Icons.public_rounded,
                         selected: _groupType == 'public',
                         onTap: () {
@@ -408,8 +411,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _TypeSelectorCard(
-                        title: 'خاصة',
-                        subtitle: 'الانضمام عبر رابط الدعوة',
+                        title: l10n.groupsCreateTypePrivateTitle,
+                        subtitle: l10n.groupsCreateTypePrivateSub,
                         icon: Icons.lock_rounded,
                         selected: _groupType == 'private',
                         onTap: () {
@@ -434,7 +437,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     )
                         : const Icon(Icons.check_rounded),
                     label: Text(
-                      _isLoading ? 'جاري الإنشاء...' : 'إنشاء المجموعة',
+                      _isLoading ? l10n.groupsCreateBtnLoading : l10n.groupsCreateBtn,
                     ),
                   ),
                 ),
