@@ -68,6 +68,9 @@ class NotificationsService {
     String? groupId,
     String? postId,
     String? fileId,
+    String? subType,
+    String? senderName,
+    String? targetName,
   }) async {
     await _firestore.collection('notifications').add({
       'userId': userId,
@@ -79,6 +82,9 @@ class NotificationsService {
       'groupId': groupId,
       'postId': postId,
       'fileId': fileId,
+      'subType': subType,
+      'senderName': senderName,
+      'targetName': targetName,
       'createdAt': FieldValue.serverTimestamp(),
     });
   }

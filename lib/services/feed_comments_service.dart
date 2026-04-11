@@ -65,6 +65,8 @@ class FeedCommentsService {
         title: 'تعليق جديد على منشورك',
         body: '$authorName علّق على منشورك',
         type: 'general',
+        subType: 'feed_comment_new',
+        senderName: authorName,
         senderId: user.uid,
         postId: postId,
       );
@@ -137,6 +139,8 @@ class FeedCommentsService {
         title: 'رد جديد على تعليقك',
         body: '$authorName رد على تعليقك',
         type: 'general',
+        subType: 'feed_reply_new',
+        senderName: authorName,
         senderId: user.uid,
         postId: postId,
       );

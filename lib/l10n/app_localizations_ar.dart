@@ -1333,7 +1333,111 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notificationsEmptyDesc =>
-      'عندما يصلك تفاعل جديد أو تحديث مهم سيظهر هنا بشكل مرتب وواضح.';
+      'عندما يكون لديك تفاعل جديد أو تحديث مهم، سيظهر هنا بشكل واضح.';
+
+  @override
+  String get notifGroupCreatedTitle => 'تم إنشاء المجموعة';
+
+  @override
+  String notifGroupCreatedBody(String name) {
+    return 'تم إنشاء مجموعتك $name وأصبحت جاهزة الآن.';
+  }
+
+  @override
+  String get notifGroupJoinedTitle => 'تم الانضمام للمجموعة';
+
+  @override
+  String notifGroupJoinedBody(String name) {
+    return 'أصبحت الآن عضواً في $name';
+  }
+
+  @override
+  String get notifGroupJoinedPrivateTitle => 'تم الانضمام لمجموعة خاصة';
+
+  @override
+  String notifGroupJoinedPrivateBody(String name) {
+    return 'أصبحت الآن عضواً في $name';
+  }
+
+  @override
+  String get notifGroupOwnershipTransferredTitle => 'نقل ملكية المجموعة';
+
+  @override
+  String notifGroupOwnershipTransferredBody(String name) {
+    return 'أصبحت الآن مالكاً لمجموعة $name';
+  }
+
+  @override
+  String get notifGroupPromotedAdminTitle => 'تمت ترقيتك لمشرف';
+
+  @override
+  String notifGroupPromotedAdminBody(String name) {
+    return 'أصبحت الآن مشرفاً في مجموعة $name';
+  }
+
+  @override
+  String get notifGroupDemotedAdminTitle => 'إزالة صلاحيات الإشراف';
+
+  @override
+  String notifGroupDemotedAdminBody(String name) {
+    return 'لم تعد مشرفاً في مجموعة $name';
+  }
+
+  @override
+  String get notifGroupMutedTitle => 'تم كتمك في المجموعة';
+
+  @override
+  String notifGroupMutedBody(String name) {
+    return 'لم يعد بإمكانك إرسال رسائل في $name';
+  }
+
+  @override
+  String get notifGroupUnmutedTitle => 'تم فك الكتم';
+
+  @override
+  String notifGroupUnmutedBody(String name) {
+    return 'يمكنك الآن إرسال الرسائل مجدداً في $name';
+  }
+
+  @override
+  String get notifGroupKickedTitle => 'تمت إزالتك من المجموعة';
+
+  @override
+  String notifGroupKickedBody(String name) {
+    return 'تمت إزالة عضويتك من مجموعة $name';
+  }
+
+  @override
+  String get notifNewCommentTitle => 'تعليق جديد';
+
+  @override
+  String notifNewCommentBody(String sender) {
+    return '$sender علّق على منشورك';
+  }
+
+  @override
+  String get notifNewReplyTitle => 'رد جديد';
+
+  @override
+  String notifNewReplyBody(String sender) {
+    return '$sender رد على تعليقك';
+  }
+
+  @override
+  String get notifLibraryFileApprovedTitle => 'تمت الموافقة على الملف';
+
+  @override
+  String notifLibraryFileApprovedBody(String name) {
+    return 'تم قبول ملف $name وإتاحته في المكتبة';
+  }
+
+  @override
+  String get notifLibraryFileUploadedTitle => 'تم الرفع بنجاح';
+
+  @override
+  String notifLibraryFileUploadedBody(String name) {
+    return 'ملف $name متاح الآن في المكتبة';
+  }
 
   @override
   String get timeYesterday => 'أمس';

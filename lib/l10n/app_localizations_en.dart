@@ -1351,6 +1351,110 @@ class AppLocalizationsEn extends AppLocalizations {
       'When you have a new interaction or an important update, it will appear here clearly.';
 
   @override
+  String get notifGroupCreatedTitle => 'Group Created';
+
+  @override
+  String notifGroupCreatedBody(String name) {
+    return 'Your group $name was created and is now ready.';
+  }
+
+  @override
+  String get notifGroupJoinedTitle => 'Joined Group';
+
+  @override
+  String notifGroupJoinedBody(String name) {
+    return 'You are now a member of $name';
+  }
+
+  @override
+  String get notifGroupJoinedPrivateTitle => 'Joined Private Group';
+
+  @override
+  String notifGroupJoinedPrivateBody(String name) {
+    return 'You are now a member of $name';
+  }
+
+  @override
+  String get notifGroupOwnershipTransferredTitle => 'Ownership Transferred';
+
+  @override
+  String notifGroupOwnershipTransferredBody(String name) {
+    return 'You are now the owner of $name';
+  }
+
+  @override
+  String get notifGroupPromotedAdminTitle => 'Promoted to Admin';
+
+  @override
+  String notifGroupPromotedAdminBody(String name) {
+    return 'You are now an admin in $name';
+  }
+
+  @override
+  String get notifGroupDemotedAdminTitle => 'Admin Privileges Removed';
+
+  @override
+  String notifGroupDemotedAdminBody(String name) {
+    return 'You are no longer an admin in $name';
+  }
+
+  @override
+  String get notifGroupMutedTitle => 'Muted in Group';
+
+  @override
+  String notifGroupMutedBody(String name) {
+    return 'You can no longer send messages in $name';
+  }
+
+  @override
+  String get notifGroupUnmutedTitle => 'Unmuted in Group';
+
+  @override
+  String notifGroupUnmutedBody(String name) {
+    return 'You can now send messages again in $name';
+  }
+
+  @override
+  String get notifGroupKickedTitle => 'Removed from Group';
+
+  @override
+  String notifGroupKickedBody(String name) {
+    return 'Your membership in $name has been removed';
+  }
+
+  @override
+  String get notifNewCommentTitle => 'New Comment';
+
+  @override
+  String notifNewCommentBody(String sender) {
+    return '$sender commented on your post';
+  }
+
+  @override
+  String get notifNewReplyTitle => 'New Reply';
+
+  @override
+  String notifNewReplyBody(String sender) {
+    return '$sender replied to your comment';
+  }
+
+  @override
+  String get notifLibraryFileApprovedTitle => 'File Approved';
+
+  @override
+  String notifLibraryFileApprovedBody(String name) {
+    return 'File $name was accepted and is available in the library';
+  }
+
+  @override
+  String get notifLibraryFileUploadedTitle => 'Upload Successful';
+
+  @override
+  String notifLibraryFileUploadedBody(String name) {
+    return 'File $name is now available in the library';
+  }
+
+  @override
   String get timeYesterday => 'Yesterday';
 
   @override

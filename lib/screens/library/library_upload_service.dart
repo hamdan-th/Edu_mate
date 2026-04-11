@@ -95,6 +95,8 @@ class LibraryUploadService {
         title: 'تم رفع ملفك بنجاح',
         body: 'أصبح ملف ${subjectName.trim()} متاحًا داخل المكتبة.',
         type: 'library',
+        subType: 'library_file_uploaded',
+        targetName: subjectName.trim(),
         senderId: user.uid,
         fileId: docRef.id,
       );

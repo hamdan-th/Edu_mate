@@ -49,12 +49,6 @@ class EduApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: appSettings.themeMode,
       locale: appSettings.locale ?? const Locale('ar'),
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        );
-      },
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

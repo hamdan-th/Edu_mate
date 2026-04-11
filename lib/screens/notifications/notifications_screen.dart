@@ -7,7 +7,7 @@ import '../../l10n/app_localizations.dart';
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
-  String _formatTime(DateTime date, AppLocalizations l10n) {
+  String _formatTime(DateTime date, AppLocalizations l10n, BuildContext context) {
     final now = DateTime.now();
     final diff = now.difference(date);
 
@@ -16,7 +16,11 @@ class NotificationsScreen extends StatelessWidget {
     if (diff.inHours < 24) return l10n.timeHoursAgoParam(diff.inHours);
     if (diff.inDays == 1) return l10n.timeYesterday;
     if (diff.inDays < 7) return l10n.timeDaysAgoParam(diff.inDays);
-    return '${date.day}/${date.month}/${date.year}';
+    
+    final locale = Localizations.localeOf(context).languageCode;
+    return (locale == 'ar')
+        ? '${date.year}/${date.month}/${date.day}'
+        : '${date.day}/${date.month}/${date.year}';
   }
 
   @override
@@ -104,7 +108,7 @@ class NotificationsScreen extends StatelessWidget {
                     width: double.infinity,
                     child: _NotificationTile(
                       item: item,
-                      timeLabel: _formatTime(item.timestamp, l10n),
+                      timeLabel: _formatTime(item.timestamp, l10n, context),
                       onTap: () => NotificationsService.markAsRead(item.id),
                     ),
                   ),
@@ -119,7 +123,7 @@ class NotificationsScreen extends StatelessWidget {
                     width: double.infinity,
                     child: _NotificationTile(
                       item: item,
-                      timeLabel: _formatTime(item.timestamp, l10n),
+                      timeLabel: _formatTime(item.timestamp, l10n, context),
                       onTap: () => NotificationsService.markAsRead(item.id),
                     ),
                   ),
@@ -169,6 +173,7 @@ class _NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent = item.badgeColor(context);
 
@@ -252,7 +257,7 @@ class _NotificationTile extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        item.title,
+                                        item.localizedTitle(l10n),
                                         style: TextStyle(
                                           color: isDark
                                               ? AppColors.textPrimary
@@ -283,7 +288,7 @@ class _NotificationTile extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  item.body,
+                                  item.localizedBody(l10n),
                                   style: TextStyle(
                                     color: isDark
                                         ? AppColors.textSecondary

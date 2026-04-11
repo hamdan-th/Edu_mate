@@ -340,6 +340,8 @@ class GroupService {
       title: 'تم إنشاء المجموعة بنجاح',
       body: 'تم إنشاء مجموعة $cleanName وأصبحت جاهزة الآن.',
       type: 'group',
+      subType: 'group_created',
+      targetName: cleanName,
       senderId: currentUid,
       groupId: groupRef.id,
     );
@@ -372,6 +374,8 @@ class GroupService {
         title: 'تم الانضمام إلى المجموعة',
         body: 'أصبحت الآن عضوًا في مجموعة $joinedGroupName',
         type: 'group',
+        subType: 'group_joined',
+        targetName: joinedGroupName,
         senderId: currentUid,
         groupId: groupId,
       );
@@ -489,6 +493,8 @@ class GroupService {
         title: 'تم الانضمام إلى المجموعة الخاصة',
         body: 'أصبحت الآن عضوًا في مجموعة ${group.name}',
         type: 'group',
+        subType: 'group_joined_private',
+        targetName: group.name,
         senderId: currentUid,
         groupId: group.id,
       );
@@ -794,7 +800,7 @@ class GroupService {
     final groupRef = _groups.doc(groupId);
     final newOwnerUserRef = await _userRefByUid(newOwnerId);
 
-    await _db.runTransaction((tx) async {
+    final String groupName = await _db.runTransaction((tx) async {
       final groupSnap = await tx.get(groupRef);
       if (!groupSnap.exists) {
         throw Exception('المجموعة غير موجودة');
@@ -802,7 +808,7 @@ class GroupService {
 
       final groupData = groupSnap.data() ?? {};
       final currentOwnerId = (groupData['ownerId'] ?? '').toString();
-      final groupName = (groupData['name'] ?? groupData['groupName'] ?? '').toString();
+      final gName = (groupData['name'] ?? groupData['groupName'] ?? '').toString();
 
       if (currentOwnerId != currentUid) {
         throw Exception('المالك الحالي فقط يمكنه نقل الملكية');
@@ -846,7 +852,7 @@ class GroupService {
         oldOwnerUserRef.collection('joined_groups').doc(groupId),
         {
           'groupId': groupId,
-          'groupName': groupName,
+          'groupName': gName,
           'roleInGroup': 'admin',
           'joinedAt': FieldValue.serverTimestamp(),
           'type': (groupData['type'] ?? 'public').toString(),
@@ -858,13 +864,15 @@ class GroupService {
         newOwnerUserRef.collection('joined_groups').doc(groupId),
         {
           'groupId': groupId,
-          'groupName': groupName,
+          'groupName': gName,
           'roleInGroup': 'owner',
           'joinedAt': FieldValue.serverTimestamp(),
           'type': (groupData['type'] ?? 'public').toString(),
         },
         SetOptions(merge: true),
       );
+
+      return gName;
     });
 
     await NotificationsService.createNotification(
@@ -872,6 +880,8 @@ class GroupService {
       title: 'تم نقل ملكية المجموعة إليك',
       body: 'أصبحت الآن مالكًا لمجموعة جديدة',
       type: 'group',
+      subType: 'group_ownership_transferred',
+      targetName: groupName,
       senderId: currentUid,
       groupId: groupId,
     );
@@ -922,6 +932,8 @@ class GroupService {
         title: 'تمت ترقيتك إلى مشرف',
         body: 'أصبحت الآن مشرفًا في مجموعة $promotedGroupName',
         type: 'group',
+        subType: 'group_promoted_admin',
+        targetName: promotedGroupName,
         senderId: currentUid,
         groupId: groupId,
       );
@@ -971,6 +983,8 @@ class GroupService {
         title: 'تمت إزالة صلاحية الإشراف',
         body: 'لم تعد مشرفًا في مجموعة $demotedGroupName',
         type: 'group',
+        subType: 'group_demoted_admin',
+        targetName: demotedGroupName,
         senderId: currentUid,
         groupId: groupId,
       );
@@ -1005,6 +1019,8 @@ class GroupService {
         title: 'تم كتمك داخل المجموعة',
         body: 'لم يعد بإمكانك إرسال الرسائل في مجموعة $mutedGroupName',
         type: 'group',
+        subType: 'group_muted',
+        targetName: mutedGroupName,
         senderId: currentUid,
         groupId: groupId,
       );
@@ -1031,6 +1047,8 @@ class GroupService {
         title: 'تم فك الكتم عنك',
         body: 'يمكنك الآن إرسال الرسائل من جديد في مجموعة $unmutedGroupName',
         type: 'group',
+        subType: 'group_unmuted',
+        targetName: unmutedGroupName,
         senderId: currentUid,
         groupId: groupId,
       );
@@ -1073,6 +1091,8 @@ class GroupService {
       title: 'تمت إزالتك من المجموعة',
       body: 'تمت إزالة عضويتك من مجموعة $kickedGroupName',
       type: 'group',
+      subType: 'group_kicked',
+      targetName: kickedGroupName,
       senderId: currentUid,
       groupId: groupId,
     );

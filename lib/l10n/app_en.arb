@@ -537,6 +537,123 @@
   "notificationsSectionEarlier": "Earlier",
   "notificationsEmptyTitle": "No notifications yet",
   "notificationsEmptyDesc": "When you have a new interaction or an important update, it will appear here clearly.",
+  "notifGroupCreatedTitle": "Group Created",
+  "notifGroupCreatedBody": "Your group {name} was created and is now ready.",
+  "notifGroupJoinedTitle": "Joined Group",
+  "notifGroupJoinedBody": "You are now a member of {name}",
+  "notifGroupJoinedPrivateTitle": "Joined Private Group",
+  "notifGroupJoinedPrivateBody": "You are now a member of {name}",
+  "notifGroupOwnershipTransferredTitle": "Ownership Transferred",
+  "notifGroupOwnershipTransferredBody": "You are now the owner of {name}",
+  "notifGroupPromotedAdminTitle": "Promoted to Admin",
+  "notifGroupPromotedAdminBody": "You are now an admin in {name}",
+  "notifGroupDemotedAdminTitle": "Admin Privileges Removed",
+  "notifGroupDemotedAdminBody": "You are no longer an admin in {name}",
+  "notifGroupMutedTitle": "Muted in Group",
+  "notifGroupMutedBody": "You can no longer send messages in {name}",
+  "notifGroupUnmutedTitle": "Unmuted in Group",
+  "notifGroupUnmutedBody": "You can now send messages again in {name}",
+  "notifGroupKickedTitle": "Removed from Group",
+  "notifGroupKickedBody": "Your membership in {name} has been removed",
+  "notifNewCommentTitle": "New Comment",
+  "notifNewCommentBody": "{sender} commented on your post",
+  "notifNewReplyTitle": "New Reply",
+  "notifNewReplyBody": "{sender} replied to your comment",
+  "notifLibraryFileApprovedTitle": "File Approved",
+  "notifLibraryFileApprovedBody": "File {name} was accepted and is available in the library",
+  "notifLibraryFileUploadedTitle": "Upload Successful",
+  "notifLibraryFileUploadedBody": "File {name} is now available in the library",
+  "@notifGroupCreatedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupJoinedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupJoinedPrivateBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupOwnershipTransferredBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupPromotedAdminBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupDemotedAdminBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupMutedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupUnmutedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupKickedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifNewCommentBody": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifNewReplyBody": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifLibraryFileApprovedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifLibraryFileUploadedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "timeYesterday": "Yesterday",
   "timeMinutesAgoParam": "{count}m ago",
   "@timeMinutesAgoParam": {

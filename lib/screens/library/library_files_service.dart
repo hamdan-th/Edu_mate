@@ -122,6 +122,8 @@ import '../../services/notifications_service.dart';class LibraryFilesService {
         title: 'تمت الموافقة على ملفك',
         body: 'تم قبول ملف $fileTitle وإتاحته داخل المكتبة.',
         type: 'library',
+        subType: 'library_file_approved',
+        targetName: fileTitle,
         senderId: currentUserId,
         fileId: fileId,
       );

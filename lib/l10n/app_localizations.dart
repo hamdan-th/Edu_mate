@@ -2630,6 +2630,162 @@ abstract class AppLocalizations {
   /// **'When you have a new interaction or an important update, it will appear here clearly.'**
   String get notificationsEmptyDesc;
 
+  /// No description provided for @notifGroupCreatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Created'**
+  String get notifGroupCreatedTitle;
+
+  /// No description provided for @notifGroupCreatedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your group {name} was created and is now ready.'**
+  String notifGroupCreatedBody(String name);
+
+  /// No description provided for @notifGroupJoinedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined Group'**
+  String get notifGroupJoinedTitle;
+
+  /// No description provided for @notifGroupJoinedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now a member of {name}'**
+  String notifGroupJoinedBody(String name);
+
+  /// No description provided for @notifGroupJoinedPrivateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined Private Group'**
+  String get notifGroupJoinedPrivateTitle;
+
+  /// No description provided for @notifGroupJoinedPrivateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now a member of {name}'**
+  String notifGroupJoinedPrivateBody(String name);
+
+  /// No description provided for @notifGroupOwnershipTransferredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ownership Transferred'**
+  String get notifGroupOwnershipTransferredTitle;
+
+  /// No description provided for @notifGroupOwnershipTransferredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now the owner of {name}'**
+  String notifGroupOwnershipTransferredBody(String name);
+
+  /// No description provided for @notifGroupPromotedAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promoted to Admin'**
+  String get notifGroupPromotedAdminTitle;
+
+  /// No description provided for @notifGroupPromotedAdminBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now an admin in {name}'**
+  String notifGroupPromotedAdminBody(String name);
+
+  /// No description provided for @notifGroupDemotedAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Privileges Removed'**
+  String get notifGroupDemotedAdminTitle;
+
+  /// No description provided for @notifGroupDemotedAdminBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are no longer an admin in {name}'**
+  String notifGroupDemotedAdminBody(String name);
+
+  /// No description provided for @notifGroupMutedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted in Group'**
+  String get notifGroupMutedTitle;
+
+  /// No description provided for @notifGroupMutedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can no longer send messages in {name}'**
+  String notifGroupMutedBody(String name);
+
+  /// No description provided for @notifGroupUnmutedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmuted in Group'**
+  String get notifGroupUnmutedTitle;
+
+  /// No description provided for @notifGroupUnmutedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now send messages again in {name}'**
+  String notifGroupUnmutedBody(String name);
+
+  /// No description provided for @notifGroupKickedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from Group'**
+  String get notifGroupKickedTitle;
+
+  /// No description provided for @notifGroupKickedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership in {name} has been removed'**
+  String notifGroupKickedBody(String name);
+
+  /// No description provided for @notifNewCommentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Comment'**
+  String get notifNewCommentTitle;
+
+  /// No description provided for @notifNewCommentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} commented on your post'**
+  String notifNewCommentBody(String sender);
+
+  /// No description provided for @notifNewReplyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Reply'**
+  String get notifNewReplyTitle;
+
+  /// No description provided for @notifNewReplyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} replied to your comment'**
+  String notifNewReplyBody(String sender);
+
+  /// No description provided for @notifLibraryFileApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'File Approved'**
+  String get notifLibraryFileApprovedTitle;
+
+  /// No description provided for @notifLibraryFileApprovedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'File {name} was accepted and is available in the library'**
+  String notifLibraryFileApprovedBody(String name);
+
+  /// No description provided for @notifLibraryFileUploadedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Successful'**
+  String get notifLibraryFileUploadedTitle;
+
+  /// No description provided for @notifLibraryFileUploadedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'File {name} is now available in the library'**
+  String notifLibraryFileUploadedBody(String name);
+
   /// No description provided for @timeYesterday.
   ///
   /// In en, this message translates to:

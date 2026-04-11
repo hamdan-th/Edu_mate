@@ -421,7 +421,124 @@
   "notificationsSectionToday": "اليوم",
   "notificationsSectionEarlier": "الأقدم",
   "notificationsEmptyTitle": "لا توجد إشعارات الآن",
-  "notificationsEmptyDesc": "عندما يصلك تفاعل جديد أو تحديث مهم سيظهر هنا بشكل مرتب وواضح.",
+  "notificationsEmptyDesc": "عندما يكون لديك تفاعل جديد أو تحديث مهم، سيظهر هنا بشكل واضح.",
+  "notifGroupCreatedTitle": "تم إنشاء المجموعة",
+  "notifGroupCreatedBody": "تم إنشاء مجموعتك {name} وأصبحت جاهزة الآن.",
+  "notifGroupJoinedTitle": "تم الانضمام للمجموعة",
+  "notifGroupJoinedBody": "أصبحت الآن عضواً في {name}",
+  "notifGroupJoinedPrivateTitle": "تم الانضمام لمجموعة خاصة",
+  "notifGroupJoinedPrivateBody": "أصبحت الآن عضواً في {name}",
+  "notifGroupOwnershipTransferredTitle": "نقل ملكية المجموعة",
+  "notifGroupOwnershipTransferredBody": "أصبحت الآن مالكاً لمجموعة {name}",
+  "notifGroupPromotedAdminTitle": "تمت ترقيتك لمشرف",
+  "notifGroupPromotedAdminBody": "أصبحت الآن مشرفاً في مجموعة {name}",
+  "notifGroupDemotedAdminTitle": "إزالة صلاحيات الإشراف",
+  "notifGroupDemotedAdminBody": "لم تعد مشرفاً في مجموعة {name}",
+  "notifGroupMutedTitle": "تم كتمك في المجموعة",
+  "notifGroupMutedBody": "لم يعد بإمكانك إرسال رسائل في {name}",
+  "notifGroupUnmutedTitle": "تم فك الكتم",
+  "notifGroupUnmutedBody": "يمكنك الآن إرسال الرسائل مجدداً في {name}",
+  "notifGroupKickedTitle": "تمت إزالتك من المجموعة",
+  "notifGroupKickedBody": "تمت إزالة عضويتك من مجموعة {name}",
+  "notifNewCommentTitle": "تعليق جديد",
+  "notifNewCommentBody": "{sender} علّق على منشورك",
+  "notifNewReplyTitle": "رد جديد",
+  "notifNewReplyBody": "{sender} رد على تعليقك",
+  "notifLibraryFileApprovedTitle": "تمت الموافقة على الملف",
+  "notifLibraryFileApprovedBody": "تم قبول ملف {name} وإتاحته في المكتبة",
+  "notifLibraryFileUploadedTitle": "تم الرفع بنجاح",
+  "notifLibraryFileUploadedBody": "ملف {name} متاح الآن في المكتبة",
+  "@notifGroupCreatedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupJoinedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupJoinedPrivateBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupOwnershipTransferredBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupPromotedAdminBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupDemotedAdminBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupMutedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupUnmutedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifGroupKickedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifNewCommentBody": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifNewReplyBody": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifLibraryFileApprovedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notifLibraryFileUploadedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "timeYesterday": "أمس",
   "timeMinutesAgoParam": "منذ {count} د",
   "timeHoursAgoParam": "منذ {count} س",
