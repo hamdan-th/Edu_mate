@@ -749,13 +749,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 delegate: _StickyTabBarDelegate(
                   Container(
                     color: (Theme.of(context).brightness == Brightness.dark ? AppColors.background : const Color(0xFFF8F9FA)),
-                    child: const TabBar(
+                    child: TabBar(
                       indicatorColor: AppColors.primary,
                       indicatorWeight: 3,
                       labelColor: AppColors.primary,
                       unselectedLabelColor: AppColors.textSecondary,
-                      labelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-                      unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       tabs: [
                         Tab(text: AppLocalizations.of(context)!.groupsTabMembers),
                         Tab(text: AppLocalizations.of(context)!.groupsTabMedia),

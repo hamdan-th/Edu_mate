@@ -1219,6 +1219,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error sending report'**
   String get groupsReportError;
+
+  /// No description provided for @groupsRequiresJoinToView.
+  ///
+  /// In en, this message translates to:
+  /// **'You must join the group to view members'**
+  String get groupsRequiresJoinToView;
+
+  /// No description provided for @groupsErrorLoadingMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading members'**
+  String get groupsErrorLoadingMembers;
+
+  /// No description provided for @groupsEmptyMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No members in this group'**
+  String get groupsEmptyMembersTitle;
+
+  /// No description provided for @groupsErrorLoadingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading saved messages'**
+  String get groupsErrorLoadingSaved;
+
+  /// No description provided for @groupsEmptySavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved messages'**
+  String get groupsEmptySavedTitle;
+
+  /// No description provided for @groupsDefaultMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get groupsDefaultMessageLabel;
+
+  /// No description provided for @groupsErrorLoadingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading media'**
+  String get groupsErrorLoadingMedia;
+
+  /// No description provided for @groupsEmptyMediaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No media found'**
+  String get groupsEmptyMediaTitle;
+
+  /// No description provided for @groupsErrorLoadingLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading links'**
+  String get groupsErrorLoadingLinks;
+
+  /// No description provided for @groupsEmptyLinksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No links found'**
+  String get groupsEmptyLinksTitle;
+
+  /// No description provided for @groupsFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Results'**
+  String get groupsFilterTitle;
+
+  /// No description provided for @groupsFilterPublicOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Groups Only'**
+  String get groupsFilterPublicOnly;
+
+  /// No description provided for @groupsFilterPublicOnlySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Show only public communities in results'**
+  String get groupsFilterPublicOnlySub;
+
+  /// No description provided for @groupsFilterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Filter'**
+  String get groupsFilterReset;
+
+  /// No description provided for @groupsFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get groupsFilterApply;
+
+  /// No description provided for @groupsSearchFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a community...'**
+  String get groupsSearchFieldHint;
+
+  /// No description provided for @groupsAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Communities'**
+  String get groupsAppBarTitle;
+
+  /// No description provided for @groupsTabDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get groupsTabDiscover;
+
+  /// No description provided for @groupsTabMyGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'My Groups'**
+  String get groupsTabMyGroups;
+
+  /// No description provided for @groupsEmptyDiscoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No communities available to discover'**
+  String get groupsEmptyDiscoverTitle;
+
+  /// No description provided for @groupsEmptyDiscoverSub.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find any communities matching your criteria. Try adjusting the search or create a new community.'**
+  String get groupsEmptyDiscoverSub;
+
+  /// No description provided for @groupsEmptyMyGroupsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not a member of any community'**
+  String get groupsEmptyMyGroupsTitle;
+
+  /// No description provided for @groupsEmptyMyGroupsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Join academic groups to connect with peers or create your own.'**
+  String get groupsEmptyMyGroupsSub;
+
+  /// No description provided for @groupsPillPublic.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get groupsPillPublic;
+
+  /// No description provided for @groupsPillPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get groupsPillPrivate;
+
+  /// No description provided for @groupsCardDiscoverSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic community ready to join'**
+  String get groupsCardDiscoverSub;
+
+  /// No description provided for @groupsCardMyGroupsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter and interact with group members'**
+  String get groupsCardMyGroupsSub;
 }
 
 class _AppLocalizationsDelegate

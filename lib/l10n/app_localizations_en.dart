@@ -582,4 +582,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupsReportError => 'Error sending report';
+
+  @override
+  String get groupsRequiresJoinToView =>
+      'You must join the group to view members';
+
+  @override
+  String get groupsErrorLoadingMembers => 'Error loading members';
+
+  @override
+  String get groupsEmptyMembersTitle => 'No members in this group';
+
+  @override
+  String get groupsErrorLoadingSaved => 'Error loading saved messages';
+
+  @override
+  String get groupsEmptySavedTitle => 'No saved messages';
+
+  @override
+  String get groupsDefaultMessageLabel => 'Message';
+
+  @override
+  String get groupsErrorLoadingMedia => 'Error loading media';
+
+  @override
+  String get groupsEmptyMediaTitle => 'No media found';
+
+  @override
+  String get groupsErrorLoadingLinks => 'Error loading links';
+
+  @override
+  String get groupsEmptyLinksTitle => 'No links found';
+
+  @override
+  String get groupsFilterTitle => 'Filter Results';
+
+  @override
+  String get groupsFilterPublicOnly => 'Public Groups Only';
+
+  @override
+  String get groupsFilterPublicOnlySub =>
+      'Show only public communities in results';
+
+  @override
+  String get groupsFilterReset => 'Reset Filter';
+
+  @override
+  String get groupsFilterApply => 'Apply';
+
+  @override
+  String get groupsSearchFieldHint => 'Search for a community...';
+
+  @override
+  String get groupsAppBarTitle => 'Communities';
+
+  @override
+  String get groupsTabDiscover => 'Discover';
+
+  @override
+  String get groupsTabMyGroups => 'My Groups';
+
+  @override
+  String get groupsEmptyDiscoverTitle => 'No communities available to discover';
+
+  @override
+  String get groupsEmptyDiscoverSub =>
+      'We couldn\'t find any communities matching your criteria. Try adjusting the search or create a new community.';
+
+  @override
+  String get groupsEmptyMyGroupsTitle =>
+      'You are not a member of any community';
+
+  @override
+  String get groupsEmptyMyGroupsSub =>
+      'Join academic groups to connect with peers or create your own.';
+
+  @override
+  String get groupsPillPublic => 'Public';
+
+  @override
+  String get groupsPillPrivate => 'Private';
+
+  @override
+  String get groupsCardDiscoverSub => 'Academic community ready to join';
+
+  @override
+  String get groupsCardMyGroupsSub => 'Enter and interact with group members';
 }

@@ -577,4 +577,88 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get groupsReportError => 'حدث خطأ أثناء إرسال البلاغ';
+
+  @override
+  String get groupsRequiresJoinToView => 'يجب الانضمام للمجموعة لرؤية الأعضاء';
+
+  @override
+  String get groupsErrorLoadingMembers => 'حدث خطأ أثناء تحميل الأعضاء';
+
+  @override
+  String get groupsEmptyMembersTitle => 'لا يوجد أعضاء في هذه المجموعة';
+
+  @override
+  String get groupsErrorLoadingSaved => 'حدث خطأ في تحميل المحفوظات';
+
+  @override
+  String get groupsEmptySavedTitle => 'لا توجد رسائل محفوظة';
+
+  @override
+  String get groupsDefaultMessageLabel => 'رسالة';
+
+  @override
+  String get groupsErrorLoadingMedia => 'خطأ في تحميل الوسائط';
+
+  @override
+  String get groupsEmptyMediaTitle => 'لا توجد وسائط';
+
+  @override
+  String get groupsErrorLoadingLinks => 'خطأ في تحميل الروابط';
+
+  @override
+  String get groupsEmptyLinksTitle => 'لا توجد روابط';
+
+  @override
+  String get groupsFilterTitle => 'تصفية النتائج';
+
+  @override
+  String get groupsFilterPublicOnly => 'المجموعات العامة فقط';
+
+  @override
+  String get groupsFilterPublicOnlySub =>
+      'إظهار المجتمعات العامة فقط في النتائج';
+
+  @override
+  String get groupsFilterReset => 'إلغاء التصفية';
+
+  @override
+  String get groupsFilterApply => 'تطبيق';
+
+  @override
+  String get groupsSearchFieldHint => 'ابحث عن مجتمع...';
+
+  @override
+  String get groupsAppBarTitle => 'المجتمعات';
+
+  @override
+  String get groupsTabDiscover => 'اكتشف';
+
+  @override
+  String get groupsTabMyGroups => 'مجموعاتي';
+
+  @override
+  String get groupsEmptyDiscoverTitle => 'لا توجد مجتمعات متاحة للاكتشاف';
+
+  @override
+  String get groupsEmptyDiscoverSub =>
+      'لم نعثر على مجتمعات تطابق معاييرك حاليًا. يمكنك تعديل البحث أو إنشاء مجتمع جديد.';
+
+  @override
+  String get groupsEmptyMyGroupsTitle => 'لست عضوًا في أي مجتمع';
+
+  @override
+  String get groupsEmptyMyGroupsSub =>
+      'انضم إلى المجموعات الأكاديمية للتواصل مع زملائك أو أنشئ مجتمعك الخاص.';
+
+  @override
+  String get groupsPillPublic => 'عامة';
+
+  @override
+  String get groupsPillPrivate => 'خاصة';
+
+  @override
+  String get groupsCardDiscoverSub => 'مجتمع أكاديمي جاهز للانضمام';
+
+  @override
+  String get groupsCardMyGroupsSub => 'ادخل وابدأ التفاعل مع أعضاء المجموعة';
 }

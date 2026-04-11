@@ -9,6 +9,7 @@ import '../../services/group_service.dart';
 import 'create_group_screen.dart';
 import 'group_details_screen.dart';
 import 'group_chat_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
@@ -128,7 +129,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                           color: AppColors.primary.withOpacity(0.95), size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'تصفية النتائج',
+                        AppLocalizations.of(context)!.groupsFilterTitle,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
@@ -141,7 +142,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                   DropdownButtonFormField<String>(
                     initialValue: tempCollegeId,
                     decoration: InputDecoration(
-                      labelText: 'الكلية',
+                      labelText: AppLocalizations.of(context)!.filterCollege,
                       labelStyle: TextStyle(
                         color: _muted,
                         fontWeight: FontWeight.w700,
@@ -190,7 +191,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                     DropdownButtonFormField<String>(
                       initialValue: tempSpecId,
                       decoration: InputDecoration(
-                        labelText: 'التخصص',
+                        labelText: AppLocalizations.of(context)!.filterMajor,
                         labelStyle: TextStyle(
                           color: _muted,
                           fontWeight: FontWeight.w700,
@@ -240,7 +241,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                     ),
                     child: SwitchListTile(
                       title: Text(
-                        'المجموعات العامة فقط',
+                        AppLocalizations.of(context)!.groupsFilterPublicOnly,
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 14.5,
@@ -248,7 +249,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                         ),
                       ),
                       subtitle: Text(
-                        'إظهار المجتمعات العامة فقط في النتائج',
+                        AppLocalizations.of(context)!.groupsFilterPublicOnlySub,
                         style: TextStyle(
                           color: _muted,
                           fontSize: 12,
@@ -281,7 +282,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                             Navigator.pop(context);
                           },
                           child: Text(
-                            'إلغاء التصفية',
+                            AppLocalizations.of(context)!.groupsFilterReset,
                             style: TextStyle(
                               color: _muted,
                               fontWeight: FontWeight.w800,
@@ -311,9 +312,9 @@ class _GroupsScreenState extends State<GroupsScreen>
                             });
                             Navigator.pop(context);
                           },
-                          child: const Text(
-                            'تطبيق',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)!.groupsFilterApply,
+                            style: const TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 15,
                             ),
@@ -378,7 +379,7 @@ class _GroupsScreenState extends State<GroupsScreen>
               color: _text,
             ),
             decoration: InputDecoration(
-              hintText: 'ابحث عن مجتمع...',
+              hintText: AppLocalizations.of(context)!.groupsSearchFieldHint,
               hintStyle: TextStyle(
                 color: _muted.withOpacity(0.7),
                 fontWeight: FontWeight.w500,
@@ -396,7 +397,7 @@ class _GroupsScreenState extends State<GroupsScreen>
           ),
         )
             : Text(
-          'المجتمعات',
+          AppLocalizations.of(context)!.groupsAppBarTitle,
           style: TextStyle(
             color: _text,
             fontWeight: FontWeight.w900,
@@ -464,9 +465,9 @@ class _GroupsScreenState extends State<GroupsScreen>
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                 ),
-                tabs: const [
-                  Tab(text: 'اكتشف'),
-                  Tab(text: 'مجموعاتي'),
+                tabs: [
+                  Tab(text: AppLocalizations.of(context)!.groupsTabDiscover),
+                  Tab(text: AppLocalizations.of(context)!.groupsTabMyGroups),
                 ],
               ),
             ),
@@ -512,9 +513,8 @@ class _GroupsScreenState extends State<GroupsScreen>
         if (items.isEmpty) {
           return _buildEmptyState(
             icon: Icons.travel_explore_rounded,
-            title: 'لا توجد مجتمعات متاحة للاكتشاف',
-            subtitle:
-            'لم نعثر على مجتمعات تطابق معاييرك حاليًا. يمكنك تعديل البحث أو إنشاء مجتمع جديد.',
+            title: AppLocalizations.of(context)!.groupsEmptyDiscoverTitle,
+            subtitle: AppLocalizations.of(context)!.groupsEmptyDiscoverSub,
           );
         }
 
@@ -548,9 +548,8 @@ class _GroupsScreenState extends State<GroupsScreen>
         if (items.isEmpty) {
           return _buildEmptyState(
             icon: Icons.groups_rounded,
-            title: 'لست عضوًا في أي مجتمع',
-            subtitle:
-            'انضم إلى المجموعات الأكاديمية للتواصل مع زملائك أو أنشئ مجتمعك الخاص.',
+            title: AppLocalizations.of(context)!.groupsEmptyMyGroupsTitle,
+            subtitle: AppLocalizations.of(context)!.groupsEmptyMyGroupsSub,
           );
         }
 
@@ -834,7 +833,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                               icon: group.isPublic
                                   ? Icons.public_rounded
                                   : Icons.lock_rounded,
-                              text: group.isPublic ? 'عامة' : 'خاصة',
+                              text: group.isPublic ? AppLocalizations.of(context)!.groupsPillPublic : AppLocalizations.of(context)!.groupsPillPrivate,
                               bg: group.isPublic
                                   ? AppColors.success.withOpacity(0.10)
                                   : AppColors.warning.withOpacity(0.10),
@@ -901,8 +900,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                           ),
                           child: Text(
                             widget.isDiscover
-                                ? 'مجتمع أكاديمي جاهز للانضمام'
-                                : 'ادخل وابدأ التفاعل مع أعضاء المجموعة',
+                                ? AppLocalizations.of(context)!.groupsCardDiscoverSub
+                                : AppLocalizations.of(context)!.groupsCardMyGroupsSub,
                             style: TextStyle(
                               fontSize: 12.5,
                               color: _muted,

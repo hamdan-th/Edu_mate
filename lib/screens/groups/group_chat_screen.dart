@@ -13,6 +13,7 @@ import '../library/file_model.dart';
 import 'group_details_screen.dart';
 import 'invite_group_screen.dart';
 import 'package:flutter/gestures.dart';
+import '../../l10n/app_localizations.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final GroupModel group;
@@ -123,8 +124,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تعذر اختيار الصورة. تأكد من إعطاء الصلاحيات.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.groupsChatImageError),
           ),
         );
       }
@@ -215,25 +216,25 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('هذا الملف لم يعد متاحًا')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.groupsChatFileP1Unavailable)),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر فتح الملف الآن')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.groupsChatFileP1Error)),
       );
     }
   }
 
-  String _formatTimestamp(Timestamp? timestamp) {
+  String _formatTimestamp(Timestamp? timestamp, AppLocalizations l10n) {
     if (timestamp == null) return '';
     final date = timestamp.toDate();
     int hour = date.hour;
     String minute = date.minute.toString().padLeft(2, '0');
-    String period = 'ص';
+    String period = l10n.groupsChatTimeAm;
 
     if (hour >= 12) {
-      period = 'م';
+      period = l10n.groupsChatTimePm;
       if (hour > 12) hour -= 12;
     }
     if (hour == 0) hour = 12;
@@ -256,8 +257,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     if (_isOwner) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('المالك لا يمكنه المغادرة قبل نقل الملكية'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.groupsChatLeaveOwnerError),
         ),
       );
       return;
@@ -269,13 +270,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('لقد غادرت المجموعة')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.groupsChatLeaveSuccess)),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('حدث خطأ أثناء مغادرة المجموعة')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.groupsChatLeaveError)),
         );
       }
     }
@@ -285,7 +286,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     switch (action) {
       case 'mute':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم كتم الإشعارات')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.groupsChatMuteSuccess)),
         );
         break;
 
@@ -301,8 +302,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 SnackBar(
                   content: Text(
                     !current
-                        ? 'تم تفعيل دردشة الأعضاء'
-                        : 'تم إيقاف دردشة الأعضاء',
+                        ? AppLocalizations.of(context)!.groupsChatEnableMembersMsg
+                        : AppLocalizations.of(context)!.groupsChatDisableMembersMsg,
                   ),
                 ),
               );
@@ -381,7 +382,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                           fontWeight: FontWeight.w700,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'ابحث في المحادثة...',
+                          hintText: AppLocalizations.of(context)!.groupsChatSearchHint,
                           hintStyle: TextStyle(
                             color: _muted.withOpacity(0.75),
                           ),
@@ -420,7 +421,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                 children: [
                                   Text(
                                     widget.group.name.isEmpty
-                                        ? 'الدردشة'
+                                        ? AppLocalizations.of(context)!.groupsChatFallbackName
                                         : widget.group.name,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -433,7 +434,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${_membersCount > 0 ? '$_membersCount أعضاء' : 'مجموعة'} • ${widget.group.specializationName}',
+                                    '${_membersCount > 0 ? '$_membersCount ${AppLocalizations.of(context)!.groupsChatMembersPluralSuffix}' : AppLocalizations.of(context)!.groupsChatDefaultCountName} • ${widget.group.specializationName}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -491,7 +492,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 if (snapshot.hasError) {
                   return Center(
                     child: Text(
-                      'تعذر تحميل الرسائل',
+                      AppLocalizations.of(context)!.groupsChatErrorLoadingMessages,
                       style: TextStyle(color: _muted),
                     ),
                   );
@@ -517,7 +518,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   return _searchQuery.isNotEmpty
                       ? Center(
                     child: Text(
-                      "لا توجد نتائج مطابقة",
+                      AppLocalizations.of(context)!.groupsChatNoSearchResults,
                       style: TextStyle(
                         color: _muted,
                         fontSize: 15.5,
@@ -592,7 +593,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               ),
               const SizedBox(height: 18),
               Text(
-                'يجب الانضمام للمجموعة',
+                AppLocalizations.of(context)!.groupsChatRequiresJoinTitle,
                 style: TextStyle(
                   color: _text,
                   fontSize: 20,
@@ -601,7 +602,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                'هذا المجتمع خاص بأعضائه. افتح معلومات المجموعة أولًا ثم اطلب الانضمام للمشاركة داخل الدردشة.',
+                AppLocalizations.of(context)!.groupsChatRequiresJoinBody,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: _muted,
@@ -625,8 +626,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   elevation: 0,
                 ),
                 onPressed: _openDetails,
-                child: const Text(
-                  'عرض معلومات المجموعة',
+                child: Text(
+                  AppLocalizations.of(context)!.groupsChatDetailsButton,
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 14.5,
@@ -673,7 +674,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             ListTile(
               leading: const Icon(Icons.reply_rounded, color: AppColors.primary),
               title: Text(
-                'رد',
+                AppLocalizations.of(context)!.groupsChatReplyAction,
                 style: TextStyle(
                   color: _text,
                   fontSize: 16,
@@ -689,8 +690,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         data['text'].toString().isNotEmpty)
                         ? data['text']
                         : (data['type'] == 'library_file_link'
-                        ? (data['sharedFileTitle'] ?? 'ملف من المكتبة')
-                        : 'صورة مرفقة'),
+                        ? (data['sharedFileTitle'] ?? AppLocalizations.of(context)!.groupsChatLibraryFile)
+                        : AppLocalizations.of(context)!.groupsChatImageAttached),
                     'senderName': resolvedSenderName,
                   };
                 });
@@ -702,7 +703,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 color: Colors.amber,
               ),
               title: Text(
-                isSaved ? 'إزالة من المحفوظات' : 'حفظ بنجمة',
+                isSaved ? AppLocalizations.of(context)!.groupsChatSavedRemoveAction : AppLocalizations.of(context)!.groupsChatSaveAction,
                 style: TextStyle(
                   color: _text,
                   fontSize: 16,
@@ -719,7 +720,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     );
                     if (mounted) {
                       ScaffoldMessenger.of(parentContext).showSnackBar(
-                        const SnackBar(content: Text('تمت إزالة الرسالة')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.groupsChatSavedRemoveSuccess)),
                       );
                     }
                   } else {
@@ -730,15 +731,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     );
                     if (mounted) {
                       ScaffoldMessenger.of(parentContext).showSnackBar(
-                        const SnackBar(content: Text('تم حفظ الرسالة')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.groupsChatSaveSuccess)),
                       );
                     }
                   }
                 } catch (_) {
                   if (mounted) {
                     ScaffoldMessenger.of(parentContext).showSnackBar(
-                      const SnackBar(
-                        content: Text('فشلت العملية، يرجى المحاولة لاحقاً'),
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context)!.groupsChatSaveError),
                       ),
                     );
                   }
@@ -765,7 +766,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     _fetchUserIfNeeded(senderId);
     final cachedUser = _userCache[senderId];
 
-    String senderName = data['senderName']?.toString() ?? 'عضو';
+    String senderName = data['senderName']?.toString() ?? AppLocalizations.of(context)!.groupsChatMemberFallback;
     String senderAvatarUrl = data['senderAvatar'] as String? ??
         data['senderImageUrl'] as String? ??
         data['photoUrl'] as String? ??
@@ -912,7 +913,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              replyToSender ?? 'رد',
+                              replyToSender ?? AppLocalizations.of(context)!.groupsChatReplyAction,
                               style: TextStyle(
                                 color: senderColor,
                                 fontSize: 12.5,
@@ -974,7 +975,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                               color: _surfaceSoft,
                               alignment: Alignment.center,
                               child: Text(
-                                'تعذر عرض الصورة',
+                                AppLocalizations.of(context)!.groupsChatImageDisplayError,
                                 style: TextStyle(
                                   color: _muted,
                                   fontWeight: FontWeight.w600,
@@ -1006,7 +1007,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              _formatTimestamp(timestamp),
+                              _formatTimestamp(timestamp, AppLocalizations.of(context)!),
                               style: TextStyle(
                                 fontSize: 10.6,
                                 fontWeight: FontWeight.w700,
@@ -1028,7 +1029,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         child: Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            _formatTimestamp(timestamp),
+                            _formatTimestamp(timestamp, AppLocalizations.of(context)!),
                             style: TextStyle(
                               fontSize: 10.8,
                               fontWeight: FontWeight.w700,
@@ -1117,7 +1118,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    fileType.isNotEmpty ? fileType.toUpperCase() : 'ملف من المكتبة',
+                    fileType.isNotEmpty ? fileType.toUpperCase() : AppLocalizations.of(context)!.groupsChatLibraryFile,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -1138,7 +1139,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            'اضغط لفتح الملف',
+                            AppLocalizations.of(context)!.groupsChatOpenFileAction,
                             style: TextStyle(
                               color: subtitleColor,
                               fontSize: 11.8,
@@ -1267,21 +1268,21 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   Widget _buildInputArea() {
     if (_isBanned) {
       return _buildDisabledState(
-        'عذرًا، لقد تم حظرك من المشاركة في هذه المجموعة.',
+        AppLocalizations.of(context)!.groupsChatBannedMsg,
         Icons.block_rounded,
         AppColors.error,
       );
     }
     if (_isMuted) {
       return _buildDisabledState(
-        'لقد تم كتمك. لا يمكنك الإرسال حاليًا.',
+        AppLocalizations.of(context)!.groupsChatMutedMsg,
         Icons.mic_off_rounded,
         AppColors.warning,
       );
     }
     if (!_canSend) {
       return _buildDisabledState(
-        'المجموعة للقراءة فقط',
+        AppLocalizations.of(context)!.groupsChatReadOnlyMsg,
         Icons.info_outline_rounded,
         _muted,
       );
@@ -1389,7 +1390,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'صورة مرفقة',
+                      AppLocalizations.of(context)!.groupsChatImageAttached,
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
@@ -1434,7 +1435,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                     decoration: InputDecoration(
-                      hintText: "اكتب رسالة...",
+                      hintText: AppLocalizations.of(context)!.groupsChatInputHint,
                       hintStyle: TextStyle(
                         color: _muted.withOpacity(0.75),
                         fontSize: 15,
@@ -1710,7 +1711,7 @@ class _EmptyChatState extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               Text(
-                'لا توجد رسائل بعد',
+                AppLocalizations.of(context)!.groupsChatEmptyTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: text,
@@ -1720,7 +1721,7 @@ class _EmptyChatState extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'ابدأ أول محادثة داخل هذا المجتمع وشارك الأفكار والملفات مع الأعضاء.',
+                AppLocalizations.of(context)!.groupsChatEmptySub,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: muted,
