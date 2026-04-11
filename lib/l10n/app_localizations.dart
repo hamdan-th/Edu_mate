@@ -571,6 +571,414 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Login failed'**
   String get errLoginFailed;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileNoUser.
+  ///
+  /// In en, this message translates to:
+  /// **'No user logged in'**
+  String get profileNoUser;
+
+  /// No description provided for @profileNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile data not found'**
+  String get profileNoData;
+
+  /// No description provided for @profileVerifiedDoc.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Doctor'**
+  String get profileVerifiedDoc;
+
+  /// No description provided for @profileUserRole.
+  ///
+  /// In en, this message translates to:
+  /// **'User '**
+  String get profileUserRole;
+
+  /// No description provided for @profileUsernameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get profileUsernameLabel;
+
+  /// No description provided for @profileFullNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get profileFullNameLabel;
+
+  /// No description provided for @profileEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get profileEmailLabel;
+
+  /// No description provided for @profileBioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get profileBioLabel;
+
+  /// No description provided for @profileCollegeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'College'**
+  String get profileCollegeLabel;
+
+  /// No description provided for @profileSpecialtyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Major'**
+  String get profileSpecialtyLabel;
+
+  /// No description provided for @profileReqDocVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Doctor Verification'**
+  String get profileReqDocVerification;
+
+  /// No description provided for @profileLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Out'**
+  String get profileLogout;
+
+  /// No description provided for @profileDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get profileDeleteAccount;
+
+  /// No description provided for @profileCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileCancel;
+
+  /// No description provided for @profileDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get profileDelete;
+
+  /// No description provided for @profileDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure? Your account will be permanently deleted.'**
+  String get profileDeleteConfirm;
+
+  /// No description provided for @libFilterSortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter and Sort'**
+  String get libFilterSortTitle;
+
+  /// No description provided for @libFilterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get libFilterReset;
+
+  /// No description provided for @libFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get libFilterApply;
+
+  /// No description provided for @libFilterLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get libFilterLevel;
+
+  /// No description provided for @libSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by subject, doctor, or major...'**
+  String get libSearchHint;
+
+  /// No description provided for @libSortPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: '**
+  String get libSortPrefix;
+
+  /// No description provided for @libEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching files'**
+  String get libEmptyTitle;
+
+  /// No description provided for @libEmptyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing search keywords or lightening filters to see more results.'**
+  String get libEmptyDesc;
+
+  /// No description provided for @libSortLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest'**
+  String get libSortLatest;
+
+  /// No description provided for @libSortMostLiked.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Liked'**
+  String get libSortMostLiked;
+
+  /// No description provided for @libSortMostViewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Viewed'**
+  String get libSortMostViewed;
+
+  /// No description provided for @profileUpdatePhotoSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo updated'**
+  String get profileUpdatePhotoSuccess;
+
+  /// No description provided for @profileUpdatePhotoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload photo'**
+  String get profileUpdatePhotoFailed;
+
+  /// No description provided for @profileVerificationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a pending verification request'**
+  String get profileVerificationPending;
+
+  /// No description provided for @profileVerificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification request sent to dashboard'**
+  String get profileVerificationSent;
+
+  /// No description provided for @profileVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send request'**
+  String get profileVerificationFailed;
+
+  /// No description provided for @profileLogoutFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout failed'**
+  String get profileLogoutFailed;
+
+  /// No description provided for @profileDeleteRequiresLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'To delete account, please login again and retry'**
+  String get profileDeleteRequiresLogin;
+
+  /// No description provided for @profileDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete account'**
+  String get profileDeleteFailed;
+
+  /// No description provided for @profileDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error occurred while deleting account'**
+  String get profileDeleteError;
+
+  /// No description provided for @libErrorPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred: '**
+  String get libErrorPrefix;
+
+  /// No description provided for @groupsManageMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Members'**
+  String get groupsManageMembersTitle;
+
+  /// No description provided for @groupsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get groupsSearchHint;
+
+  /// No description provided for @groupsRoleOwnerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get groupsRoleOwnerTitle;
+
+  /// No description provided for @groupsRoleAdminsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins'**
+  String get groupsRoleAdminsTitle;
+
+  /// No description provided for @groupsRoleMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get groupsRoleMembersTitle;
+
+  /// No description provided for @groupsDefaultMemberName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group member'**
+  String get groupsDefaultMemberName;
+
+  /// No description provided for @groupsRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get groupsRoleOwner;
+
+  /// No description provided for @groupsRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get groupsRoleAdmin;
+
+  /// No description provided for @groupsRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get groupsRoleMember;
+
+  /// No description provided for @groupsStatusMuted.
+  ///
+  /// In en, this message translates to:
+  /// **' (Muted)'**
+  String get groupsStatusMuted;
+
+  /// No description provided for @groupsStatusBanned.
+  ///
+  /// In en, this message translates to:
+  /// **' (Banned)'**
+  String get groupsStatusBanned;
+
+  /// No description provided for @groupsYouMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'(You)'**
+  String get groupsYouMarker;
+
+  /// No description provided for @groupsActionRemoveAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Admin'**
+  String get groupsActionRemoveAdmin;
+
+  /// No description provided for @groupsActionMakeAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Admin'**
+  String get groupsActionMakeAdmin;
+
+  /// No description provided for @groupsActionUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get groupsActionUnmute;
+
+  /// No description provided for @groupsActionMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute Member'**
+  String get groupsActionMute;
+
+  /// No description provided for @groupsActionKick.
+  ///
+  /// In en, this message translates to:
+  /// **'Kick Member'**
+  String get groupsActionKick;
+
+  /// No description provided for @groupsActionReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get groupsActionReport;
+
+  /// No description provided for @groupsActionTransferOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Ownership'**
+  String get groupsActionTransferOwner;
+
+  /// No description provided for @groupsEmptySearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get groupsEmptySearchTitle;
+
+  /// No description provided for @groupsEmptySearchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find any members matching your search.'**
+  String get groupsEmptySearchDesc;
+
+  /// No description provided for @groupsTransferOwnershipSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Ownership transferred successfully'**
+  String get groupsTransferOwnershipSuccess;
+
+  /// No description provided for @groupsTransferOwnershipError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error transferring ownership'**
+  String get groupsTransferOwnershipError;
+
+  /// No description provided for @groupsSetAdminSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin appointed'**
+  String get groupsSetAdminSuccess;
+
+  /// No description provided for @groupsRemoveAdminSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin removed'**
+  String get groupsRemoveAdminSuccess;
+
+  /// No description provided for @groupsMuteMemberSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member muted'**
+  String get groupsMuteMemberSuccess;
+
+  /// No description provided for @groupsUnmuteMemberSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member unmuted'**
+  String get groupsUnmuteMemberSuccess;
+
+  /// No description provided for @groupsReportSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent to app manager'**
+  String get groupsReportSent;
+
+  /// No description provided for @groupsKickMemberSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member kicked'**
+  String get groupsKickMemberSuccess;
+
+  /// No description provided for @groupsLoadMembersError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load members'**
+  String get groupsLoadMembersError;
 }
 
 class _AppLocalizationsDelegate

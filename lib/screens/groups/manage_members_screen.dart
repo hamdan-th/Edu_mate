@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class ManageMembersScreen extends StatefulWidget {
   final GroupModel group;
@@ -73,14 +74,16 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       await batch.commit();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نقل الملكية بنجاح')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsTransferOwnershipSuccess)));
         setState(() {
           _currentUserRole = 'admin'; // update local role to reflect loss of ownership
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء نقل الملكية')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsTransferOwnershipError)));
       }
     }
   }
@@ -89,30 +92,31 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     if (memberId == _auth.currentUser?.uid) return;
 
     try {
+      final l10n = AppLocalizations.of(context)!;
       switch (action) {
         case 'make_admin':
           await GroupService.promoteToAdmin(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تعيين المشرف')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsSetAdminSuccess)));
           break;
         case 'remove_admin':
           await GroupService.removeAdmin(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إزالة المشرف')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsRemoveAdminSuccess)));
           break;
         case 'mute':
           await GroupService.muteMember(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم كتم العضو')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsMuteMemberSuccess)));
           break;
         case 'unmute':
           await GroupService.unmuteMember(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إلغاء كتم العضو')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsUnmuteMemberSuccess)));
           break;
         case 'report':
           await GroupService.reportMember(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال البلاغ لمدير التطبيق')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsReportSent)));
           break;
         case 'kick':
           await GroupService.kickMember(widget.group.id, memberId);
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم طرد العضو')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsKickMemberSuccess)));
           break;
         case 'transfer_owner':
           await _transferOwnership(memberId);
@@ -125,13 +129,12 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "إدارة الأعضاء",
-          style: TextStyle(fontWeight: FontWeight.w900),
+        title: Text(
+          l10n.groupsManageMembersTitle,
+          style: const TextStyle(fontWeight: FontWeight.w900),
         ),
         centerTitle: true,
         elevation: 0,
@@ -158,7 +161,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                       }
 
                       if (snapshot.hasError) {
-                        return const Center(child: Text('تعذر تحميل الأعضاء'));
+                        return Center(child: Text(l10n.groupsLoadMembersError));
                       }
 
                       final docs = snapshot.data?.docs ?? [];
@@ -173,7 +176,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                         
                         // Local search filter
                         if (_searchQuery.isNotEmpty) {
-                          String searchableName = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? 'عضو بالمجموعة').trim();
+                          String searchableName = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? l10n.groupsDefaultMemberName).trim();
                           if (searchableName.contains('@')) searchableName = searchableName.split('@').first;
                           if (!searchableName.toLowerCase().contains(_searchQuery)) continue;
                         }
@@ -191,15 +194,15 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                       final itemsList = <Widget>[];
 
                       if (owners.isNotEmpty) {
-                        itemsList.add(_buildSectionTitle("المالك"));
+                        itemsList.add(_buildSectionTitle(l10n.groupsRoleOwnerTitle));
                         itemsList.addAll(owners.map((doc) => _buildMemberItem(doc)));
                       }
                       if (admins.isNotEmpty) {
-                        itemsList.add(_buildSectionTitle("المشرفون"));
+                        itemsList.add(_buildSectionTitle(l10n.groupsRoleAdminsTitle));
                         itemsList.addAll(admins.map((doc) => _buildMemberItem(doc)));
                       }
                       if (members.isNotEmpty) {
-                        itemsList.add(_buildSectionTitle("الأعضاء"));
+                        itemsList.add(_buildSectionTitle(l10n.groupsRoleMembersTitle));
                         itemsList.addAll(members.map((doc) => _buildMemberItem(doc)));
                       }
 
@@ -239,7 +242,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
           controller: _searchController,
           style: const TextStyle(fontSize: 15),
           decoration: InputDecoration(
-            hintText: 'بحث...',
+            hintText: AppLocalizations.of(context)!.groupsSearchHint,
             hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
             prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 20),
             suffixIcon: _searchQuery.isNotEmpty
@@ -272,9 +275,10 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   }
 
   Widget _buildMemberItem(DocumentSnapshot doc) {
+    final l10n = AppLocalizations.of(context)!;
     final data = doc.data() as Map<String, dynamic>;
     final memberId = doc.id;
-    String name = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? 'عضو بالمجموعة').trim();
+    String name = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? l10n.groupsDefaultMemberName).trim();
     if (name.contains('@')) name = name.split('@').first;
     final role = data['role'] ?? 'member';
     final imageUrl = data['imageUrl'] as String?;
@@ -283,27 +287,27 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     final bool isTargetOwner = role == 'owner' || memberId == widget.group.ownerId;
     final bool isTargetAdmin = role == 'admin';
 
-    String roleLabel = "عضو";
+    String roleLabel = l10n.groupsRoleMember;
     Color roleColor = AppColors.textSecondary;
     Widget roleIcon = const SizedBox.shrink();
 
     if (isTargetOwner) {
-      roleLabel = "مالك";
+      roleLabel = l10n.groupsRoleOwner;
       roleColor = AppColors.error;
       roleIcon = const Icon(Icons.workspace_premium, color: Colors.purple, size: 18);
     } else if (isTargetAdmin) {
-      roleLabel = "مشرف";
+      roleLabel = l10n.groupsRoleAdmin;
       roleColor = AppColors.warning;
       roleIcon = const Icon(Icons.headset_mic, color: Colors.orange, size: 18);
     } else {
-      roleLabel = "عضو";
+      roleLabel = l10n.groupsRoleMember;
       roleColor = AppColors.primary;
     }
 
     // Small badge for muted/banned
     String statusNote = "";
-    if (data['status'] == 'muted') statusNote = " (مكتوم)";
-    if (data['status'] == 'banned') statusNote = " (محظور)";
+    if (data['status'] == 'muted') statusNote = l10n.groupsStatusMuted;
+    if (data['status'] == 'banned') statusNote = l10n.groupsStatusBanned;
 
     return InkWell(
       onTap: () {},
@@ -342,7 +346,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                       if (isMe) ...[
                         const SizedBox(width: 6),
                         Text(
-                          "(أنت)",
+                          l10n.groupsYouMarker,
                           style: TextStyle(color: AppColors.textSecondary.withOpacity(0.8), fontSize: 13),
                         )
                       ]
@@ -366,6 +370,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
 
   Widget _buildPopupMenu(String memberId, Map<String, dynamic> data, bool isTargetOwner, bool isTargetAdmin) {
     final status = data['status'] ?? 'active';
+    final l10n = AppLocalizations.of(context)!;
     
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
@@ -381,29 +386,29 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
         if (canManage) {
           if (_currentUserRole == 'owner' && !isTargetOwner) {
             if (isTargetAdmin) {
-              items.add(const PopupMenuItem(value: 'remove_admin', child: Text("إزالة من الإشراف", style: TextStyle(fontWeight: FontWeight.bold))));
+              items.add(PopupMenuItem(value: 'remove_admin', child: Text(l10n.groupsActionRemoveAdmin, style: const TextStyle(fontWeight: FontWeight.bold))));
             } else {
-              items.add(const PopupMenuItem(value: 'make_admin', child: Text("تعيين كمشرف", style: TextStyle(fontWeight: FontWeight.bold))));
+              items.add(PopupMenuItem(value: 'make_admin', child: Text(l10n.groupsActionMakeAdmin, style: const TextStyle(fontWeight: FontWeight.bold))));
             }
           }
 
           if (status == 'muted') {
-            items.add(const PopupMenuItem(value: 'unmute', child: Text("إلغاء الكتم", style: TextStyle(fontWeight: FontWeight.bold))));
+            items.add(PopupMenuItem(value: 'unmute', child: Text(l10n.groupsActionUnmute, style: const TextStyle(fontWeight: FontWeight.bold))));
           } else {
-            items.add(const PopupMenuItem(value: 'mute', child: Text("كتم العضو", style: TextStyle(fontWeight: FontWeight.bold))));
+            items.add(PopupMenuItem(value: 'mute', child: Text(l10n.groupsActionMute, style: const TextStyle(fontWeight: FontWeight.bold))));
           }
 
           // We removed 'ban' and just use 'kick'
           items.add(const PopupMenuDivider());
-          items.add(const PopupMenuItem(value: 'kick', child: Text("طرد العضو", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+          items.add(PopupMenuItem(value: 'kick', child: Text(l10n.groupsActionKick, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
         }
 
         if (items.isNotEmpty) items.add(const PopupMenuDivider());
-        items.add(const PopupMenuItem(value: 'report', child: Text("إبلاغ", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
+        items.add(PopupMenuItem(value: 'report', child: Text(l10n.groupsActionReport, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))));
 
         if (_currentUserRole == 'owner' && !isTargetOwner) {
           items.add(const PopupMenuDivider());
-          items.add(const PopupMenuItem(value: 'transfer_owner', child: Text("نقل الملكية", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w900))));
+          items.add(PopupMenuItem(value: 'transfer_owner', child: Text(l10n.groupsActionTransferOwner, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w900))));
         }
 
         return items;
@@ -412,6 +417,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -428,14 +434,14 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              "لا توجد نتائج",
+              l10n.groupsEmptySearchTitle,
               style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: (Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : Colors.black87)),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "لم نتمكن من العثور على أعضاء يطابقون بحثك.",
+            Text(
+              l10n.groupsEmptySearchDesc,
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
             ),
           ],
         ),

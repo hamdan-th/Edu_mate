@@ -6,6 +6,7 @@ import 'file_details_screen.dart';
 import 'file_model.dart';
 import 'library_files_service.dart';
 import 'library_theme.dart';
+import '../../l10n/app_localizations.dart';
 import 'university_academic_data.dart';
 
 class UniversityLibraryScreen extends StatefulWidget {
@@ -28,6 +29,16 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  String _getLocalizedSort(BuildContext context, String option) {
+    final l10n = AppLocalizations.of(context)!;
+    switch(option) {
+      case 'الأحدث': return l10n.libSortLatest;
+      case 'الأكثر إعجاباً': return l10n.libSortMostLiked;
+      case 'الأكثر مشاهدة': return l10n.libSortMostViewed;
+      default: return option;
+    }
   }
 
   List<FileModel> _applyFilters(List<FileModel> files) {
@@ -95,11 +106,11 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     child: SizedBox(width: 42, child: Divider(thickness: 4, color: LibraryTheme.border(context))),
                   ),
                   const SizedBox(height: 12),
-                  const Text('فلترة وترتيب', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
+                  Text(AppLocalizations.of(context)!.libFilterSortTitle, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 16),
                   _BottomSheetDropdown(
                     value: _selectedCollege,
-                    label: 'الكلية',
+                    label: AppLocalizations.of(context)!.profileCollegeLabel,
                     items: UniversityAcademicData.colleges,
                     onChanged: (value) => setModalState(() {
                       _selectedCollege = value;
@@ -109,14 +120,14 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                   const SizedBox(height: 12),
                   _BottomSheetDropdown(
                     value: _selectedMajor,
-                    label: 'التخصص',
+                    label: AppLocalizations.of(context)!.profileSpecialtyLabel,
                     items: majors,
                     onChanged: (value) => setModalState(() => _selectedMajor = value),
                   ),
                   const SizedBox(height: 12),
                   _BottomSheetDropdown(
                     value: _selectedLevel,
-                    label: 'المستوى',
+                    label: AppLocalizations.of(context)!.libFilterLevel,
                     items: UniversityAcademicData.levels,
                     onChanged: (value) => setModalState(() => _selectedLevel = value),
                   ),
@@ -127,7 +138,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     children: [
                       for (final option in ['الأحدث', 'الأكثر إعجاباً', 'الأكثر مشاهدة'])
                         ChoiceChip(
-                          label: Text(option),
+                          label: Text(_getLocalizedSort(context, option)),
                           selected: _sortOrder == option,
                           onSelected: (_) => setModalState(() => _sortOrder = option),
                         ),
@@ -147,7 +158,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                             });
                             Navigator.pop(context);
                           },
-                          child: const Text('إعادة ضبط'),
+                          child: Text(AppLocalizations.of(context)!.libFilterReset),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -161,7 +172,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                             backgroundColor: LibraryTheme.primary(context),
                             foregroundColor: Colors.white,
                           ),
-                          child: const Text('تطبيق'),
+                          child: Text(AppLocalizations.of(context)!.libFilterApply),
                         ),
                       ),
                     ],
@@ -195,7 +206,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     controller: _searchController,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      hintText: 'ابحث باسم المادة أو الدكتور أو التخصص...',
+                      hintText: AppLocalizations.of(context)!.libSearchHint,
                       hintStyle: TextStyle(color: LibraryTheme.muted(context)),
                       prefixIcon: Icon(Icons.search_rounded, color: LibraryTheme.primary(context)),
                       suffixIcon: IconButton(
@@ -220,7 +231,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                           border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                         ),
                         child: Text(
-                          'الترتيب: $_sortOrder',
+                          '${AppLocalizations.of(context)!.libSortPrefix} ${_getLocalizedSort(context, _sortOrder)}',
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -256,7 +267,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                   return Center(child: CircularProgressIndicator(color: LibraryTheme.primary(context)));
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text('حدث خطأ: ${snapshot.error}'));
+                  return Center(child: Text('${AppLocalizations.of(context)!.libErrorPrefix}${snapshot.error}'));
                 }
 
                 final docs = snapshot.data?.docs ?? [];
@@ -337,13 +348,13 @@ class _EmptyLibraryState extends StatelessWidget {
               child: Icon(Icons.library_books_rounded, size: 42, color: LibraryTheme.primary(context)),
             ),
             const SizedBox(height: 18),
-            const Text(
-              'لا توجد ملفات مطابقة',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            Text(
+              AppLocalizations.of(context)!.libEmptyTitle,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
-              'جرّب تغيير كلمات البحث أو تخفيف الفلاتر حتى تظهر لك نتائج أكثر.',
+              AppLocalizations.of(context)!.libEmptyDesc,
               textAlign: TextAlign.center,
               style: TextStyle(color: LibraryTheme.muted(context), height: 1.5),
             ),

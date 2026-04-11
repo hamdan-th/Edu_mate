@@ -247,4 +247,215 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errLoginFailed => 'Login failed';
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileNoUser => 'No user logged in';
+
+  @override
+  String get profileNoData => 'Profile data not found';
+
+  @override
+  String get profileVerifiedDoc => 'Verified Doctor';
+
+  @override
+  String get profileUserRole => 'User ';
+
+  @override
+  String get profileUsernameLabel => 'Username';
+
+  @override
+  String get profileFullNameLabel => 'Full Name';
+
+  @override
+  String get profileEmailLabel => 'Email';
+
+  @override
+  String get profileBioLabel => 'Bio';
+
+  @override
+  String get profileCollegeLabel => 'College';
+
+  @override
+  String get profileSpecialtyLabel => 'Major';
+
+  @override
+  String get profileReqDocVerification => 'Request Doctor Verification';
+
+  @override
+  String get profileLogout => 'Log Out';
+
+  @override
+  String get profileDeleteAccount => 'Delete Account';
+
+  @override
+  String get profileCancel => 'Cancel';
+
+  @override
+  String get profileDelete => 'Delete';
+
+  @override
+  String get profileDeleteConfirm =>
+      'Are you sure? Your account will be permanently deleted.';
+
+  @override
+  String get libFilterSortTitle => 'Filter and Sort';
+
+  @override
+  String get libFilterReset => 'Reset';
+
+  @override
+  String get libFilterApply => 'Apply';
+
+  @override
+  String get libFilterLevel => 'Level';
+
+  @override
+  String get libSearchHint => 'Search by subject, doctor, or major...';
+
+  @override
+  String get libSortPrefix => 'Sort: ';
+
+  @override
+  String get libEmptyTitle => 'No matching files';
+
+  @override
+  String get libEmptyDesc =>
+      'Try changing search keywords or lightening filters to see more results.';
+
+  @override
+  String get libSortLatest => 'Latest';
+
+  @override
+  String get libSortMostLiked => 'Most Liked';
+
+  @override
+  String get libSortMostViewed => 'Most Viewed';
+
+  @override
+  String get profileUpdatePhotoSuccess => 'Profile photo updated';
+
+  @override
+  String get profileUpdatePhotoFailed => 'Failed to upload photo';
+
+  @override
+  String get profileVerificationPending =>
+      'You already have a pending verification request';
+
+  @override
+  String get profileVerificationSent =>
+      'Verification request sent to dashboard';
+
+  @override
+  String get profileVerificationFailed => 'Failed to send request';
+
+  @override
+  String get profileLogoutFailed => 'Logout failed';
+
+  @override
+  String get profileDeleteRequiresLogin =>
+      'To delete account, please login again and retry';
+
+  @override
+  String get profileDeleteFailed => 'Failed to delete account';
+
+  @override
+  String get profileDeleteError => 'Error occurred while deleting account';
+
+  @override
+  String get libErrorPrefix => 'An error occurred: ';
+
+  @override
+  String get groupsManageMembersTitle => 'Manage Members';
+
+  @override
+  String get groupsSearchHint => 'Search...';
+
+  @override
+  String get groupsRoleOwnerTitle => 'Owner';
+
+  @override
+  String get groupsRoleAdminsTitle => 'Admins';
+
+  @override
+  String get groupsRoleMembersTitle => 'Members';
+
+  @override
+  String get groupsDefaultMemberName => 'Group member';
+
+  @override
+  String get groupsRoleOwner => 'Owner';
+
+  @override
+  String get groupsRoleAdmin => 'Admin';
+
+  @override
+  String get groupsRoleMember => 'Member';
+
+  @override
+  String get groupsStatusMuted => ' (Muted)';
+
+  @override
+  String get groupsStatusBanned => ' (Banned)';
+
+  @override
+  String get groupsYouMarker => '(You)';
+
+  @override
+  String get groupsActionRemoveAdmin => 'Remove Admin';
+
+  @override
+  String get groupsActionMakeAdmin => 'Make Admin';
+
+  @override
+  String get groupsActionUnmute => 'Unmute';
+
+  @override
+  String get groupsActionMute => 'Mute Member';
+
+  @override
+  String get groupsActionKick => 'Kick Member';
+
+  @override
+  String get groupsActionReport => 'Report';
+
+  @override
+  String get groupsActionTransferOwner => 'Transfer Ownership';
+
+  @override
+  String get groupsEmptySearchTitle => 'No results found';
+
+  @override
+  String get groupsEmptySearchDesc =>
+      'We couldn\'t find any members matching your search.';
+
+  @override
+  String get groupsTransferOwnershipSuccess =>
+      'Ownership transferred successfully';
+
+  @override
+  String get groupsTransferOwnershipError => 'Error transferring ownership';
+
+  @override
+  String get groupsSetAdminSuccess => 'Admin appointed';
+
+  @override
+  String get groupsRemoveAdminSuccess => 'Admin removed';
+
+  @override
+  String get groupsMuteMemberSuccess => 'Member muted';
+
+  @override
+  String get groupsUnmuteMemberSuccess => 'Member unmuted';
+
+  @override
+  String get groupsReportSent => 'Report sent to app manager';
+
+  @override
+  String get groupsKickMemberSuccess => 'Member kicked';
+
+  @override
+  String get groupsLoadMembersError => 'Failed to load members';
 }

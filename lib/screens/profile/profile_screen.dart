@@ -5,9 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../../core/theme/app_colors.dart';
-
+import '../../l10n/app_localizations.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -49,10 +48,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
         'photoUrl': imageUrl,
       });
-
-      _showMessage('تم تحديث صورة الملف الشخصي');
+      final l10n = AppLocalizations.of(context)!;
+      _showMessage(l10n.profileUpdatePhotoSuccess);
     } catch (e) {
-      _showMessage('فشل رفع الصورة');
+      final l10n = AppLocalizations.of(context)!;
+      _showMessage(l10n.profileUpdatePhotoFailed);
     } finally {
       if (mounted) {
         setState(() {
@@ -81,7 +81,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .get();
 
       if (existing.docs.isNotEmpty) {
-        _showMessage('لديك طلب توثيق قيد المراجعة بالفعل');
+        final l10n = AppLocalizations.of(context)!;
+        _showMessage(l10n.profileVerificationPending);
         return;
       }
 
@@ -98,10 +99,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'status': 'pending',
         'createdAt': FieldValue.serverTimestamp(),
       });
-
-      _showMessage('تم إرسال طلب التوثيق إلى الداشبورد');
+      final l10n = AppLocalizations.of(context)!;
+      _showMessage(l10n.profileVerificationSent);
     } catch (e) {
-      _showMessage('فشل إرسال طلب التوثيق');
+      final l10n = AppLocalizations.of(context)!;
+      _showMessage(l10n.profileVerificationFailed);
     } finally {
       if (mounted) {
         setState(() {
@@ -122,7 +124,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     } catch (e) {
-      _showMessage('فشل تسجيل الخروج');
+      final l10n = AppLocalizations.of(context)!;
+      _showMessage(l10n.profileLogoutFailed);
     } finally {
       if (mounted) {
         setState(() {
@@ -136,17 +139,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = currentUser;
     if (user == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('حذف الحساب'),
-        content: const Text(
-          'هل أنت متأكد؟ سيتم حذف الحساب كاملًا من التطبيق.',
+        title: Text(l10n.profileDeleteAccount),
+        content: Text(
+          l10n.profileDeleteConfirm,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('إلغاء'),
+            child: Text(l10n.profileCancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -154,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
             ),
-            child: const Text('حذف'),
+            child: Text(l10n.profileDelete),
           ),
         ],
       ),
@@ -190,13 +194,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     } on FirebaseAuthException catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       if (e.code == 'requires-recent-login') {
-        _showMessage('لحذف الحساب يجب تسجيل الدخول من جديد ثم إعادة المحاولة');
+        _showMessage(l10n.profileDeleteRequiresLogin);
       } else {
-        _showMessage('فشل حذف الحساب');
+        _showMessage(l10n.profileDeleteFailed);
       }
     } catch (e) {
-      _showMessage('حدث خطأ أثناء حذف الحساب');
+      final l10n = AppLocalizations.of(context)!;
+      _showMessage(l10n.profileDeleteError);
     } finally {
       if (mounted) {
         setState(() {
@@ -322,19 +328,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = currentUser;
 
     if (user == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: Text('لا يوجد مستخدم مسجل دخول'),
+          child: Text(l10n.profileNoUser),
         ),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الملف الشخصي'),
+        title: Text(l10n.profileTitle),
         elevation: 0,
         centerTitle: true,
       ),
@@ -349,8 +356,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(
-              child: Text('لم يتم العثور على بيانات الملف الشخصي'),
+            return Center(
+              child: Text(l10n.profileNoData),
             );
           }
 
@@ -428,7 +435,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
-                          isDoctorVerified ? 'دكتور موثق' : 'مستخدم $role',
+                          isDoctorVerified ? l10n.profileVerifiedDoc : l10n.profileUserRole.replaceAll('{role}', role),
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.w700,
@@ -441,32 +448,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 22),
                 _buildInfoTile(
                   icon: Icons.badge_outlined,
-                  label: 'اسم المستخدم',
+                  label: l10n.profileUsernameLabel,
                   value: username,
                 ),
                 _buildInfoTile(
                   icon: Icons.person_outline,
-                  label: 'الاسم الكامل',
+                  label: l10n.profileFullNameLabel,
                   value: fullName,
                 ),
                 _buildInfoTile(
                   icon: Icons.email_outlined,
-                  label: 'البريد الإلكتروني',
+                  label: l10n.profileEmailLabel,
                   value: email,
                 ),
                 _buildInfoTile(
                   icon: Icons.info_outline,
-                  label: 'النبذة',
+                  label: l10n.profileBioLabel,
                   value: bio,
                 ),
                 _buildInfoTile(
                   icon: Icons.account_balance_outlined,
-                  label: 'الكلية',
+                  label: l10n.profileCollegeLabel,
                   value: college,
                 ),
                 _buildInfoTile(
                   icon: Icons.school_outlined,
-                  label: 'التخصص',
+                  label: l10n.profileSpecialtyLabel,
                   value: specializationName,
                 ),
                 const SizedBox(height: 10),
@@ -487,7 +494,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       )
                           : const Icon(Icons.verified_outlined),
-                      label: const Text('طلب توثيق دكتور'),
+                      label: Text(l10n.profileReqDocVerification),
                     ),
                   ),
                 const SizedBox(height: 12),
@@ -504,7 +511,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     )
                         : const Icon(Icons.logout),
-                    label: const Text('تسجيل الخروج'),
+                    label: Text(l10n.profileLogout),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -526,7 +533,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     )
                         : const Icon(Icons.delete_outline),
-                    label: const Text('حذف الحساب'),
+                    label: Text(l10n.profileDeleteAccount),
                   ),
                 ),
               ],

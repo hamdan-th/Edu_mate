@@ -246,4 +246,212 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errLoginFailed => 'فشل تسجيل الدخول';
+
+  @override
+  String get profileTitle => 'الملف الشخصي';
+
+  @override
+  String get profileNoUser => 'لا يوجد مستخدم مسجل دخول';
+
+  @override
+  String get profileNoData => 'لم يتم العثور على بيانات الملف الشخصي';
+
+  @override
+  String get profileVerifiedDoc => 'دكتور موثق';
+
+  @override
+  String get profileUserRole => 'مستخدم ';
+
+  @override
+  String get profileUsernameLabel => 'اسم المستخدم';
+
+  @override
+  String get profileFullNameLabel => 'الاسم الكامل';
+
+  @override
+  String get profileEmailLabel => 'البريد الإلكتروني';
+
+  @override
+  String get profileBioLabel => 'النبذة';
+
+  @override
+  String get profileCollegeLabel => 'الكلية';
+
+  @override
+  String get profileSpecialtyLabel => 'التخصص';
+
+  @override
+  String get profileReqDocVerification => 'طلب توثيق دكتور';
+
+  @override
+  String get profileLogout => 'تسجيل الخروج';
+
+  @override
+  String get profileDeleteAccount => 'حذف الحساب';
+
+  @override
+  String get profileCancel => 'إلغاء';
+
+  @override
+  String get profileDelete => 'حذف';
+
+  @override
+  String get profileDeleteConfirm =>
+      'هل أنت متأكد؟ سيتم حذف الحساب كاملًا من التطبيق.';
+
+  @override
+  String get libFilterSortTitle => 'فلترة وترتيب';
+
+  @override
+  String get libFilterReset => 'إعادة ضبط';
+
+  @override
+  String get libFilterApply => 'تطبيق';
+
+  @override
+  String get libFilterLevel => 'المستوى';
+
+  @override
+  String get libSearchHint => 'ابحث باسم المادة أو الدكتور أو التخصص...';
+
+  @override
+  String get libSortPrefix => 'الترتيب: ';
+
+  @override
+  String get libEmptyTitle => 'لا توجد ملفات مطابقة';
+
+  @override
+  String get libEmptyDesc =>
+      'جرّب تغيير كلمات البحث أو تخفيف الفلاتر حتى تظهر لك نتائج أكثر.';
+
+  @override
+  String get libSortLatest => 'الأحدث';
+
+  @override
+  String get libSortMostLiked => 'الأكثر إعجاباً';
+
+  @override
+  String get libSortMostViewed => 'الأكثر مشاهدة';
+
+  @override
+  String get profileUpdatePhotoSuccess => 'تم تحديث صورة الملف الشخصي';
+
+  @override
+  String get profileUpdatePhotoFailed => 'فشل رفع الصورة';
+
+  @override
+  String get profileVerificationPending => 'لديك طلب توثيق قيد المراجعة بالفعل';
+
+  @override
+  String get profileVerificationSent => 'تم إرسال طلب التوثيق إلى الداشبورد';
+
+  @override
+  String get profileVerificationFailed => 'فشل إرسال طلب التوثيق';
+
+  @override
+  String get profileLogoutFailed => 'فشل تسجيل الخروج';
+
+  @override
+  String get profileDeleteRequiresLogin =>
+      'لحذف الحساب يجب تسجيل الدخول من جديد ثم إعادة المحاولة';
+
+  @override
+  String get profileDeleteFailed => 'فشل حذف الحساب';
+
+  @override
+  String get profileDeleteError => 'حدث خطأ أثناء حذف الحساب';
+
+  @override
+  String get libErrorPrefix => 'حدث خطأ: ';
+
+  @override
+  String get groupsManageMembersTitle => 'إدارة الأعضاء';
+
+  @override
+  String get groupsSearchHint => 'بحث...';
+
+  @override
+  String get groupsRoleOwnerTitle => 'المالك';
+
+  @override
+  String get groupsRoleAdminsTitle => 'المشرفون';
+
+  @override
+  String get groupsRoleMembersTitle => 'الأعضاء';
+
+  @override
+  String get groupsDefaultMemberName => 'عضو بالمجموعة';
+
+  @override
+  String get groupsRoleOwner => 'مالك';
+
+  @override
+  String get groupsRoleAdmin => 'مشرف';
+
+  @override
+  String get groupsRoleMember => 'عضو';
+
+  @override
+  String get groupsStatusMuted => ' (مكتوم)';
+
+  @override
+  String get groupsStatusBanned => ' (محظور)';
+
+  @override
+  String get groupsYouMarker => '(أنت)';
+
+  @override
+  String get groupsActionRemoveAdmin => 'إزالة من الإشراف';
+
+  @override
+  String get groupsActionMakeAdmin => 'تعيين كمشرف';
+
+  @override
+  String get groupsActionUnmute => 'إلغاء الكتم';
+
+  @override
+  String get groupsActionMute => 'كتم العضو';
+
+  @override
+  String get groupsActionKick => 'طرد العضو';
+
+  @override
+  String get groupsActionReport => 'إبلاغ';
+
+  @override
+  String get groupsActionTransferOwner => 'نقل الملكية';
+
+  @override
+  String get groupsEmptySearchTitle => 'لا توجد نتائج';
+
+  @override
+  String get groupsEmptySearchDesc =>
+      'لم نتمكن من العثور على أعضاء يطابقون بحثك.';
+
+  @override
+  String get groupsTransferOwnershipSuccess => 'تم نقل الملكية بنجاح';
+
+  @override
+  String get groupsTransferOwnershipError => 'حدث خطأ أثناء نقل الملكية';
+
+  @override
+  String get groupsSetAdminSuccess => 'تم تعيين المشرف';
+
+  @override
+  String get groupsRemoveAdminSuccess => 'تم إزالة المشرف';
+
+  @override
+  String get groupsMuteMemberSuccess => 'تم كتم العضو';
+
+  @override
+  String get groupsUnmuteMemberSuccess => 'تم إلغاء كتم العضو';
+
+  @override
+  String get groupsReportSent => 'تم إرسال البلاغ لمدير التطبيق';
+
+  @override
+  String get groupsKickMemberSuccess => 'تم طرد العضو';
+
+  @override
+  String get groupsLoadMembersError => 'تعذر تحميل الأعضاء';
 }
