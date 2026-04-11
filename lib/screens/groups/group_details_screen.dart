@@ -10,6 +10,7 @@ import '../../services/group_service.dart';
 import 'group_chat_screen.dart';
 import 'create_group_feed_post_screen.dart';
 import 'invite_group_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final GroupModel group;
@@ -79,7 +80,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     try {
       await GroupService.joinPublicGroup(widget.group.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الانضمام للمجموعة بنجاح')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsJoinSuccess)));
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)));
       }
     } catch (e) {
@@ -95,7 +96,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     final newDesc = _descController.text.trim();
     
     if (newName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('اسم المجموعة مطلوب')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsNameRequired)));
       return;
     }
 
@@ -111,11 +112,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           _groupDescription = newDesc;
           _isEditing = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم الحفظ بنجاح')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsSaveSuccess)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء الحفظ')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsSaveError)));
       }
     }
   }
@@ -137,7 +138,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     } catch (e) {}
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(_isNotificationMuted ? 'تم كتم الإشعارات' : 'تم تفعيل الإشعارات')),
+      SnackBar(content: Text(_isNotificationMuted ? AppLocalizations.of(context)!.groupsMuteNotificationsSuccess : AppLocalizations.of(context)!.groupsUnmuteNotificationsSuccess)),
     );
   }
 
@@ -146,7 +147,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     if (user == null) return;
 
     if (_isOwner) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('المالك لا يمكنه المغادرة، قم بنقل الملكية أولاً')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsOwnerLeaveError)));
       return;
     }
 
@@ -154,11 +155,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       await GroupService.leaveGroup(widget.group.id);
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت المغادرة بنجاح')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsLeaveSuccess)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء مغادرة المجموعة')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsLeaveError)));
       }
     }
   }
@@ -270,15 +271,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     );
   }
 
-  Future<void> _reportGroup() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("تأكيد البلاغ", style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text("هل أنت متأكد من رغبتك في الإبلاغ عن هذه المجموعة؟ سيتم مراجعة محتواها من قبل الإدارة."),
+        title: Text(l10n.groupsReportConfirmTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(l10n.groupsReportConfirmMsg),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("إلغاء")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("إبلاغ", style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.profileCancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.groupsActionReport, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
         ],
       )
     ) ?? false;
@@ -294,10 +295,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           'reportedAt': FieldValue.serverTimestamp(),
           'targetType': 'group',
         });
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم استلام البلاغ وسيتم مراجعته')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsReportReceived)));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء إرسال البلاغ')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsReportError ?? 'حدث خطأ أثناء إرسال البلاغ')));
     }
   }
 
