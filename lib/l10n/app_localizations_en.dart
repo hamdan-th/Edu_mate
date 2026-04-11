@@ -458,4 +458,125 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupsLoadMembersError => 'Failed to load members';
+
+  @override
+  String get groupsJoinSuccess => 'Joined group successfully';
+
+  @override
+  String get groupsNameRequired => 'Group name is required';
+
+  @override
+  String get groupsSaveSuccess => 'Saved successfully';
+
+  @override
+  String get groupsSaveError => 'Error saving';
+
+  @override
+  String get groupsMuteNotificationsSuccess => 'Notifications muted';
+
+  @override
+  String get groupsUnmuteNotificationsSuccess => 'Notifications unmuted';
+
+  @override
+  String get groupsOwnerLeaveError =>
+      'Owner cannot leave without transferring ownership';
+
+  @override
+  String get groupsLeaveSuccess => 'Left group successfully';
+
+  @override
+  String get groupsLeaveError => 'Error leaving group';
+
+  @override
+  String get groupsReportConfirmTitle => 'Confirm Report';
+
+  @override
+  String get groupsReportConfirmMsg =>
+      'Are you sure you want to report this group? Its content will be reviewed by administration.';
+
+  @override
+  String get groupsReportReceived => 'Report received and will be reviewed';
+
+  @override
+  String get groupsActionClearChat => 'Clear Chat History';
+
+  @override
+  String get groupsClearChatConfirmMsg =>
+      'Are you sure you want to clear all chat messages? This action cannot be undone.';
+
+  @override
+  String get groupsClearChatSubmit => 'Clear';
+
+  @override
+  String get groupsClearChatSuccess => 'Chat history cleared successfully';
+
+  @override
+  String get groupsClearChatError => 'Error clearing history';
+
+  @override
+  String get groupsActionCopyLink => 'Copy Link';
+
+  @override
+  String get groupsCopyLinkSuccess => 'Link copied';
+
+  @override
+  String get groupsActionEditGroup => 'Edit Group';
+
+  @override
+  String get groupsEditTitle => 'Edit';
+
+  @override
+  String get groupsSaveAction => 'Save';
+
+  @override
+  String get groupsNameLabel => 'Group Name';
+
+  @override
+  String get groupsDescLabel => 'Description';
+
+  @override
+  String get groupsMemberCountSuffix => 'member';
+
+  @override
+  String get groupsPublicBadge => 'Public Group';
+
+  @override
+  String get groupsPrivateBadge => 'Private Group';
+
+  @override
+  String get groupsJoinAction => 'Join Group';
+
+  @override
+  String get groupsEnableAction => 'Enable';
+
+  @override
+  String get groupsMuteAction => 'Mute';
+
+  @override
+  String get groupsLeaveAction => 'Leave';
+
+  @override
+  String get groupsMoreAction => 'More';
+
+  @override
+  String get groupsPublishFeedAction => 'Publish to Public Feed';
+
+  @override
+  String get groupsPublishFeedSub =>
+      'Share an announcement or update with all students';
+
+  @override
+  String get groupsAllowMembersChat => 'Allow members to chat';
+
+  @override
+  String get groupsTabMembers => 'Members';
+
+  @override
+  String get groupsTabMedia => 'Media';
+
+  @override
+  String get groupsTabLinks => 'Links';
+
+  @override
+  String get groupsTabSaved => 'Saved';
 }

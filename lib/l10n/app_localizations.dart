@@ -979,6 +979,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load members'**
   String get groupsLoadMembersError;
+
+  /// No description provided for @groupsJoinSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined group successfully'**
+  String get groupsJoinSuccess;
+
+  /// No description provided for @groupsNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name is required'**
+  String get groupsNameRequired;
+
+  /// No description provided for @groupsSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved successfully'**
+  String get groupsSaveSuccess;
+
+  /// No description provided for @groupsSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving'**
+  String get groupsSaveError;
+
+  /// No description provided for @groupsMuteNotificationsSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications muted'**
+  String get groupsMuteNotificationsSuccess;
+
+  /// No description provided for @groupsUnmuteNotificationsSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications unmuted'**
+  String get groupsUnmuteNotificationsSuccess;
+
+  /// No description provided for @groupsOwnerLeaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner cannot leave without transferring ownership'**
+  String get groupsOwnerLeaveError;
+
+  /// No description provided for @groupsLeaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Left group successfully'**
+  String get groupsLeaveSuccess;
+
+  /// No description provided for @groupsLeaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error leaving group'**
+  String get groupsLeaveError;
+
+  /// No description provided for @groupsReportConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Report'**
+  String get groupsReportConfirmTitle;
+
+  /// No description provided for @groupsReportConfirmMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to report this group? Its content will be reviewed by administration.'**
+  String get groupsReportConfirmMsg;
+
+  /// No description provided for @groupsReportReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Report received and will be reviewed'**
+  String get groupsReportReceived;
+
+  /// No description provided for @groupsActionClearChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Chat History'**
+  String get groupsActionClearChat;
+
+  /// No description provided for @groupsClearChatConfirmMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear all chat messages? This action cannot be undone.'**
+  String get groupsClearChatConfirmMsg;
+
+  /// No description provided for @groupsClearChatSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get groupsClearChatSubmit;
+
+  /// No description provided for @groupsClearChatSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat history cleared successfully'**
+  String get groupsClearChatSuccess;
+
+  /// No description provided for @groupsClearChatError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error clearing history'**
+  String get groupsClearChatError;
+
+  /// No description provided for @groupsActionCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Link'**
+  String get groupsActionCopyLink;
+
+  /// No description provided for @groupsCopyLinkSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get groupsCopyLinkSuccess;
+
+  /// No description provided for @groupsActionEditGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get groupsActionEditGroup;
+
+  /// No description provided for @groupsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get groupsEditTitle;
+
+  /// No description provided for @groupsSaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get groupsSaveAction;
+
+  /// No description provided for @groupsNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get groupsNameLabel;
+
+  /// No description provided for @groupsDescLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get groupsDescLabel;
+
+  /// No description provided for @groupsMemberCountSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'member'**
+  String get groupsMemberCountSuffix;
+
+  /// No description provided for @groupsPublicBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Group'**
+  String get groupsPublicBadge;
+
+  /// No description provided for @groupsPrivateBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Private Group'**
+  String get groupsPrivateBadge;
+
+  /// No description provided for @groupsJoinAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Group'**
+  String get groupsJoinAction;
+
+  /// No description provided for @groupsEnableAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get groupsEnableAction;
+
+  /// No description provided for @groupsMuteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get groupsMuteAction;
+
+  /// No description provided for @groupsLeaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get groupsLeaveAction;
+
+  /// No description provided for @groupsMoreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get groupsMoreAction;
+
+  /// No description provided for @groupsPublishFeedAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to Public Feed'**
+  String get groupsPublishFeedAction;
+
+  /// No description provided for @groupsPublishFeedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Share an announcement or update with all students'**
+  String get groupsPublishFeedSub;
+
+  /// No description provided for @groupsAllowMembersChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow members to chat'**
+  String get groupsAllowMembersChat;
+
+  /// No description provided for @groupsTabMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get groupsTabMembers;
+
+  /// No description provided for @groupsTabMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Media'**
+  String get groupsTabMedia;
+
+  /// No description provided for @groupsTabLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get groupsTabLinks;
+
+  /// No description provided for @groupsTabSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get groupsTabSaved;
 }
 
 class _AppLocalizationsDelegate

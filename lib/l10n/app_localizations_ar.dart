@@ -454,4 +454,124 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get groupsLoadMembersError => 'تعذر تحميل الأعضاء';
+
+  @override
+  String get groupsJoinSuccess => 'تم الانضمام للمجموعة بنجاح';
+
+  @override
+  String get groupsNameRequired => 'اسم المجموعة مطلوب';
+
+  @override
+  String get groupsSaveSuccess => 'تم الحفظ بنجاح';
+
+  @override
+  String get groupsSaveError => 'حدث خطأ أثناء الحفظ';
+
+  @override
+  String get groupsMuteNotificationsSuccess => 'تم كتم الإشعارات';
+
+  @override
+  String get groupsUnmuteNotificationsSuccess => 'تم تفعيل الإشعارات';
+
+  @override
+  String get groupsOwnerLeaveError =>
+      'المالك لا يمكنه المغادرة، قم بنقل الملكية أولاً';
+
+  @override
+  String get groupsLeaveSuccess => 'تمت المغادرة بنجاح';
+
+  @override
+  String get groupsLeaveError => 'حدث خطأ أثناء مغادرة المجموعة';
+
+  @override
+  String get groupsReportConfirmTitle => 'تأكيد البلاغ';
+
+  @override
+  String get groupsReportConfirmMsg =>
+      'هل أنت متأكد من رغبتك في الإبلاغ عن هذه المجموعة؟ سيتم مراجعة محتواها من قبل الإدارة.';
+
+  @override
+  String get groupsReportReceived => 'تم استلام البلاغ وسيتم مراجعته';
+
+  @override
+  String get groupsActionClearChat => 'مسح سجل الدردشة';
+
+  @override
+  String get groupsClearChatConfirmMsg =>
+      'هل أنت متأكد من مسح جميع رسائل الدردشة؟ هذا الإجراء لا يمكن التراجع عنه.';
+
+  @override
+  String get groupsClearChatSubmit => 'مسح';
+
+  @override
+  String get groupsClearChatSuccess => 'تم مسح سجل الدردشة بنجاح';
+
+  @override
+  String get groupsClearChatError => 'حدث خطأ أثناء مسح السجل';
+
+  @override
+  String get groupsActionCopyLink => 'نسخ الرابط';
+
+  @override
+  String get groupsCopyLinkSuccess => 'تم نسخ الرابط';
+
+  @override
+  String get groupsActionEditGroup => 'تعديل المجموعة';
+
+  @override
+  String get groupsEditTitle => 'تعديل';
+
+  @override
+  String get groupsSaveAction => 'حفظ';
+
+  @override
+  String get groupsNameLabel => 'اسم المجموعة';
+
+  @override
+  String get groupsDescLabel => 'الوصف';
+
+  @override
+  String get groupsMemberCountSuffix => 'عضو';
+
+  @override
+  String get groupsPublicBadge => 'مجموعة عامة';
+
+  @override
+  String get groupsPrivateBadge => 'مجموعة خاصة';
+
+  @override
+  String get groupsJoinAction => 'انضمام للمجموعة';
+
+  @override
+  String get groupsEnableAction => 'تفعيل';
+
+  @override
+  String get groupsMuteAction => 'كتم';
+
+  @override
+  String get groupsLeaveAction => 'مغادرة';
+
+  @override
+  String get groupsMoreAction => 'المزيد';
+
+  @override
+  String get groupsPublishFeedAction => 'نشر في الفيد العام';
+
+  @override
+  String get groupsPublishFeedSub => 'مشاركة إعلان أو تحديث لجميع الطلاب';
+
+  @override
+  String get groupsAllowMembersChat => 'السماح للأعضاء بالمشاركة في الدردشة';
+
+  @override
+  String get groupsTabMembers => 'الأعضاء';
+
+  @override
+  String get groupsTabMedia => 'الوسائط';
+
+  @override
+  String get groupsTabLinks => 'الروابط';
+
+  @override
+  String get groupsTabSaved => 'المحفوظات';
 }
