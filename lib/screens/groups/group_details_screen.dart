@@ -44,6 +44,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   File? _pickedImage;
   late String _currentImageUrl;
+  bool _removeImage = false;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -107,7 +108,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       imageQuality: 85,
     );
     if (picked != null) {
-      setState(() => _pickedImage = File(picked.path));
+      setState(() {
+        _pickedImage = File(picked.path);
+        _removeImage = false;
+      });
     }
   }
 
@@ -121,14 +125,23 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     }
 
     try {
-      // Upload new image if picked
-      String? newImageUrl;
+      // Determine the new image URL
+      String? newImageUrl;          // null  → no change
+      String? backfillUrl;          // value to write to posts (may be '')
+
       if (_pickedImage != null) {
+        // Case 1: new image selected
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${_pickedImage!.path.split('/').last}';
         final ref = FirebaseStorage.instance.ref().child('group_covers').child(fileName);
         await ref.putFile(_pickedImage!);
         newImageUrl = await ref.getDownloadURL();
+        backfillUrl = newImageUrl;
+      } else if (_removeImage) {
+        // Case 2: user explicitly removed the image
+        newImageUrl = '';
+        backfillUrl = '';
       }
+      // Case 3: no change → newImageUrl stays null, no backfill
 
       final updates = <String, dynamic>{
         'name': newName,
@@ -139,12 +152,28 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
       await _firestore.collection('groups').doc(widget.group.id).update(updates);
 
+      // Backfill groupImageUrl in all feed posts belonging to this group
+      if (backfillUrl != null) {
+        final postsSnap = await _firestore
+            .collection('posts')
+            .where('groupId', isEqualTo: widget.group.id)
+            .get();
+        if (postsSnap.docs.isNotEmpty) {
+          final batch = _firestore.batch();
+          for (final doc in postsSnap.docs) {
+            batch.update(doc.reference, {'groupImageUrl': backfillUrl});
+          }
+          await batch.commit();
+        }
+      }
+
       if (mounted) {
         setState(() {
           _groupName = newName;
           _groupDescription = newDesc;
           if (newImageUrl != null) _currentImageUrl = newImageUrl;
           _pickedImage = null;
+          _removeImage = false;
           _isEditing = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsSaveSuccess)));
@@ -432,7 +461,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
-            onPressed: () => setState(() => _isEditing = false),
+            onPressed: () => setState(() {
+              _isEditing = false;
+              _pickedImage = null;
+              _removeImage = false;
+              _currentImageUrl = widget.group.imageUrl;
+            }),
           ),
           title: Text(l10n.groupsEditTitle, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
           actions: [
@@ -446,27 +480,50 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: CircleAvatar(
-                  radius: 64,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                  backgroundImage: _pickedImage != null
-                      ? FileImage(_pickedImage!) as ImageProvider
-                      : (_currentImageUrl.isNotEmpty ? NetworkImage(_currentImageUrl) : null),
-                  child: Align(
-                    alignment: Alignment.bottomRight,
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  GestureDetector(
+                    onTap: _pickImage,
                     child: CircleAvatar(
-                      backgroundColor: AppColors.primary,
-                      radius: 20,
-                      child: Icon(
-                        _pickedImage != null ? Icons.check_rounded : Icons.camera_alt_rounded,
-                        color: Colors.white,
-                        size: 20,
+                      radius: 64,
+                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      backgroundImage: _pickedImage != null
+                          ? FileImage(_pickedImage!) as ImageProvider
+                          : (_currentImageUrl.isNotEmpty ? NetworkImage(_currentImageUrl) : null),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: CircleAvatar(
+                          backgroundColor: AppColors.primary,
+                          radius: 20,
+                          child: Icon(
+                            _pickedImage != null ? Icons.check_rounded : Icons.camera_alt_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  // Remove image button — shown only when there is an image
+                  if (_pickedImage != null || _currentImageUrl.isNotEmpty)
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        _pickedImage = null;
+                        _removeImage = true;
+                        _currentImageUrl = '';
+                      }),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: const BoxDecoration(
+                          color: AppColors.error,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close_rounded, color: Colors.white, size: 16),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 48),
               TextField(

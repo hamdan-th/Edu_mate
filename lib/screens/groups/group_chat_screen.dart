@@ -352,9 +352,11 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         index: idx,
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeOutCubic,
-        alignment: 0.15, // Lands the message comfortably near the top
+        alignment: 0.15,
       );
-      _flashHighlight(targetId);
+      // Defer highlight to the next frame so the scroll layout is fully
+      // settled before setState is called — prevents RenderTransform mutation.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _flashHighlight(targetId));
     }
   }
 
@@ -842,9 +844,6 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     final myId = _auth.currentUser?.uid;
                     final senderId = data['senderId'] ?? '';
                     final isMe = myId != null && myId == senderId;
-
-                    // Assign a stable GlobalKey per message for jump-to-original.
-                    _itemKeys.putIfAbsent(messageId, () => GlobalKey());
 
                     // The latest own message is the first isMe entry in the
                     // reversed list (lowest index) — show seen-by only there.
@@ -1719,24 +1718,21 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     );
 
     // Build the combined widget: swipe wrapper + optional seen-by.
-    final key = _itemKeys.putIfAbsent(messageId, () => GlobalKey());
     final isHighlighted = _highlightedMessageId == messageId;
 
     Widget content = _SwipeToReplyWrapper(
       isMe: isMe,
       onSwipe: () => _triggerReply(data, messageId, senderName),
-      child: KeyedSubtree(
-        key: key,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          decoration: BoxDecoration(
-            color: isHighlighted
-                ? AppColors.primary.withOpacity(0.14)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: bubble,
+      child: AnimatedContainer(
+        key: ValueKey(messageId),
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          color: isHighlighted
+              ? AppColors.primary.withOpacity(0.14)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
         ),
+        child: bubble,
       ),
     );
 
