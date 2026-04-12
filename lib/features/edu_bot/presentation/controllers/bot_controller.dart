@@ -309,13 +309,6 @@ class BotController extends ChangeNotifier {
         return;
       }
 
-      final snap = await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('bot_sessions')
-          .orderBy('updatedAt', descending: true)
-          .get();
-
       if (_cachedMetadata == null) {
         _cachedMetadata = {
           'uid': user.uid,
@@ -334,6 +327,13 @@ class BotController extends ChangeNotifier {
           }
         } catch (_) {}
       }
+
+      final snap = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('bot_sessions')
+          .orderBy('updatedAt', descending: true)
+          .get();
 
       if (snap.docs.isEmpty) {
         createNewChat();

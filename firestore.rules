@@ -74,6 +74,10 @@ service cloud.firestore {
       match /joined_groups/{docId} {
         allow read, write: if isAuthenticated();
       }
+
+      match /bot_sessions/{sessionId} {
+        allow read, write: if isAuthenticated();
+      }
     }
 
     match /specializations/{docId} {

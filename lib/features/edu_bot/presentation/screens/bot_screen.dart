@@ -187,6 +187,7 @@ class _BotScreenState extends State<BotScreen> {
                       ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                       : _controller.messages.isEmpty && !_controller.isSending
                           ? EmptyState(
+                              sourceScreen: widget.sourceScreen,
                               onSuggestionTap: (suggestion) => _controller.sendMessage(suggestion),
                             )
                       : ListView.builder(

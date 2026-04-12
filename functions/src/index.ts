@@ -57,16 +57,16 @@ Your core goal is to guide, inspire, and assist the user step-by-step while adap
     return baseInstruction;
   }
 
-  return \`\${baseInstruction}
+  return `${baseInstruction}
 
 -- CURRENT USER CONTEXT --
-Name: \${userContext.name || "User"}
-Role: \${userContext.role || "student"}
-College: \${userContext.college || "Unknown"}
-Specialization: \${userContext.specialization || "Unknown"}
-Current Screen: \${userContext.sourceScreen || "Unknown"}
+Name: ${userContext.name || "User"}
+Role: ${userContext.role || "student"}
+College: ${userContext.college || "Unknown"}
+Specialization: ${userContext.specialization || "Unknown"}
+Current Screen: ${userContext.sourceScreen || "Unknown"}
 
-* Tailor your response strictly for THIS user based on the context above. Use their name naturally if appropriate.\`;
+* Tailor your response strictly for THIS user based on the context above. Use their name naturally if appropriate.`;
 }
 
 export const eduBot = functions
@@ -88,6 +88,47 @@ export const eduBot = functions
         "الرسالة طويلة جداً. يرجى اختصارها بما لا يتجاوز 2000 حرف."
       );
     }
+
+    // --- SHORT-CIRCUIT IDENTITY & CONTEXT QUESTIONS ---
+    const lowerMsg = message.toLowerCase();
+    if (userContext) {
+      const name = userContext.name || "مستخدم";
+      const role = userContext.role === 'doctor' ? 'دكتور' : 'طالب';
+      const spec = userContext.specialization || "غير محدد";
+      const college = userContext.college || "غير محدد";
+      const currentScreen = userContext.sourceScreen || "Edu Mate";
+
+      const isName = lowerMsg.includes('ما اسمي') || lowerMsg.includes('وش اسمي') || lowerMsg.includes('ايش اسمي') || lowerMsg.includes('شو اسمي') || lowerMsg.includes('what is my name');
+      const isSpec = lowerMsg.includes('تخصصي') || lowerMsg.includes('ما تخصصي') || lowerMsg.includes('تخصصي ايش');
+      const isCollege = lowerMsg.includes('كليتي') || lowerMsg.includes('ما كليتي') || lowerMsg.includes('اي كلية');
+      const isRole = lowerMsg.includes('دوري') || lowerMsg.includes('صفتي') || lowerMsg.includes('حسابي') || lowerMsg.includes('هل انا طالب') || lowerMsg.includes('هل انا دكتور');
+      const isScreen = lowerMsg.includes('اي شاشة') || lowerMsg.includes('وين انا') || lowerMsg.includes('أين أنا') || lowerMsg.includes('من وين اكلمك') || lowerMsg.includes('اين اتواجد') || lowerMsg.includes('أي شاشة');
+      const isGeneral = lowerMsg.includes('من أنا') || lowerMsg.includes('مين انا') || lowerMsg.includes('من انا') || lowerMsg.includes('who am i') || lowerMsg.includes('ماذا تعرف عني') || lowerMsg.includes('ايش تعرف عني');
+
+      let replyStr = "";
+      
+      if (isScreen && !isGeneral) {
+        replyStr = `أنت تتحدث معي الآن من خلال شاشة: ${currentScreen}.`;
+      } else if (isName && !isGeneral) {
+        replyStr = `اسمك المسجل لدينا هو ${name}.`;
+      } else if (isSpec && !isGeneral) {
+        replyStr = spec !== "غير محدد" ? `أنت تدرس في تخصص ${spec}.` : "عذراً، تخصصك غير مسجل حالياً في بياناتك.";
+      } else if (isCollege && !isGeneral) {
+        replyStr = college !== "غير محدد" ? `أنت تدرس في ${college}.` : "عذراً، كليتك غير مسجلة حالياً في بياناتك.";
+      } else if (isRole && !isGeneral) {
+        replyStr = `حسابك مسجل كـ ${role}.`;
+      } else if (isGeneral || isName || isSpec || isCollege) {
+        replyStr = `أهلاً بك يا ${name}! أنت مسجل كـ ${role}` + 
+                   (spec !== "غير محدد" ? ` في تخصص ${spec}` : "") +
+                   (college !== "غير محدد" ? ` (${college})` : "") + ".";
+      }
+
+      if (replyStr !== "") {
+        console.log("EduBot: short-circuited tailored question");
+        return { reply: replyStr };
+      }
+    }
+    // ------------------------------------------
 
     try {
       console.log("EduBot: request received");

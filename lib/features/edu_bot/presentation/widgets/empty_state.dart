@@ -3,8 +3,9 @@ import '../../../../core/theme/app_colors.dart';
 
 class EmptyState extends StatefulWidget {
   final Function(String) onSuggestionTap;
+  final String? sourceScreen;
 
-  const EmptyState({super.key, required this.onSuggestionTap});
+  const EmptyState({super.key, required this.onSuggestionTap, this.sourceScreen});
 
   @override
   State<EmptyState> createState() => _EmptyStateState();
@@ -179,10 +180,45 @@ class _EmptyStateState extends State<EmptyState> with SingleTickerProviderStateM
                   ),
                 ),
                 const SizedBox(height: 54),
-                _buildCategoryBox('شروحات سريعة', Icons.lightbulb_outline_rounded, [
-                  'كيف أستفيد من مجموعات التطبيق؟',
-                  'اشرح لي كيفية نشر ملف جديد',
-                ]),
+                Builder(
+                  builder: (context) {
+                    String title = 'شروحات عامة';
+                    IconData icon = Icons.lightbulb_outline_rounded;
+                    List<String> suggestions = [
+                      'عرفني على Edu Mate',
+                      'كيف أبدأ باستخدام التطبيق؟',
+                      'ما الذي يمكنك مساعدتي فيه؟',
+                    ];
+
+                    if (widget.sourceScreen == 'feed_screen') {
+                      title = 'اقتراحات للفيد العام';
+                      icon = Icons.dynamic_feed_rounded;
+                      suggestions = [
+                        'ما الفرق بين الفيد والمجموعات؟',
+                        'كيف أستفيد من الفيد العام؟',
+                        'ماذا يمكنني أن أفعل هنا؟',
+                      ];
+                    } else if (widget.sourceScreen == 'library_screen' || widget.sourceScreen == 'my_library_screen') {
+                      title = 'اقتراحات للمكتبة الجامعية';
+                      icon = Icons.library_books_rounded;
+                      suggestions = [
+                        'كيف أبحث عن ملف؟',
+                        'كيف أرفع ملف؟',
+                        'كيف أستفيد من المكتبة؟',
+                      ];
+                    } else if (widget.sourceScreen == 'groups_screen' || widget.sourceScreen == 'group_chat_screen' || widget.sourceScreen == 'group_details_screen') {
+                      title = 'اقتراحات للمجموعات';
+                      icon = Icons.group_work_rounded;
+                      suggestions = [
+                        'كيف أستخدم المجموعة؟',
+                        'ما الفرق بين الدردشة والنشر العام؟',
+                        'كيف أستفيد من الرسائل المثبتة؟',
+                      ];
+                    }
+
+                    return _buildCategoryBox(title, icon, suggestions);
+                  }
+                ),
               ],
             ),
           ),
