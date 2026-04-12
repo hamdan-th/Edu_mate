@@ -93,13 +93,12 @@ class _SignupScreenState extends State<SignupScreen>
   }
 
   Future<bool> _isUsernameTaken(String username) async {
-    final result = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username_lowercase', isEqualTo: username.toLowerCase())
-        .limit(1)
+    final doc = await FirebaseFirestore.instance
+        .collection('usernames')
+        .doc(username.toLowerCase())
         .get();
 
-    return result.docs.isNotEmpty;
+    return doc.exists;
   }
 
   Future<void> _handleSignup() async {
@@ -163,6 +162,17 @@ class _SignupScreenState extends State<SignupScreen>
       }
 
       await FirebaseFirestore.instance.collection('users').doc(uid).set(userData);
+
+      final usernameRef = FirebaseFirestore.instance
+          .collection('usernames')
+          .doc(username.toLowerCase());
+
+      final usernameSnap = await usernameRef.get();
+      if (usernameSnap.exists) {
+        throw Exception('Username already taken');
+      }
+
+      await usernameRef.set({'uid': uid});
 
       _showMessage(l10n.signupSuccess);
 

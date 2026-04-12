@@ -37,10 +37,25 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
       String? imageUrl;
       if (_selectedImage != null) {
         final uid = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final fullPath = 'global_feed/$uid/$timestamp.jpg';
+
+        // 🔍 DIAGNOSTIC LOG — remove after confirming
+        debugPrint('──────────────────────────────────');
+        debugPrint('[UPLOAD DIAG] uid        = $uid');
+        debugPrint('[UPLOAD DIAG] full path  = $fullPath');
+        debugPrint('[UPLOAD DIAG] uid valid? = ${uid != 'unknown'}');
+        debugPrint('──────────────────────────────────');
+
+        if (uid == 'unknown') {
+          throw Exception('المستخدم غير مسجل الدخول — لا يمكن رفع الصورة');
+        }
+
         final ref = FirebaseStorage.instance
             .ref()
             .child('global_feed')
-            .child('${DateTime.now().millisecondsSinceEpoch}_$uid.jpg');
+            .child(uid)
+            .child('$timestamp.jpg');
         final uploadTask = await ref.putFile(_selectedImage!);
         imageUrl = await uploadTask.ref.getDownloadURL();
       }

@@ -1,112 +1,143 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // ==========================================
-    // HELPER FUNCTIONS
-    // ==========================================
-    
+
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    function isOwner(uid) {
-      return isAuthenticated() && request.auth.uid == uid;
-    }
-    
-    // Retrieve the user's role safely from the database
-    function getUserRole() {
-       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-    }
 
-    // ==========================================
-    // USERS COLLECTION
-    // ==========================================
-    match /users/{uid} {
-      
-      // READ LOGIC: Allowing all authenticated users to read.
-      // NECESSITY CHECK: Verified. Files like `group_chat_screen.dart` (Line 88) 
-      // dynamically query arbitrary `users/[senderId]` to populate missing avatar caches 
-      // in real-time chats, and `feed_comments_service.dart` resolves commenter profiles.
-      // Locking this down right now will completely break chat/feed rendering.
+    match /admin_users/{adminUid} {
       allow read: if isAuthenticated();
-      
-      // CREATE LOGIC: Strict constraint on exact key payload and roles.
-      allow create: if isOwner(uid) 
-                    && request.resource.data.uid == uid
-                    && request.resource.data.isDoctorVerified == false
-                    // STRICT: Block arbitrary roles entirely
-                    && request.resource.data.role in ['student', 'doctor']
-                    // STRICT: Ensure core structural shape exists natively
-                    && request.resource.data.keys().hasAll([
-                       'uid', 'username', 'email', 'role', 'isDoctorVerified', 'createdAt'
-                    ])
-                    // STRICT: Prevent arbitrary payload injection
-                    && request.resource.data.keys().hasOnly([
-                       'uid', 'username', 'username_lowercase', 'fullName', 
-                       'email', 'bio', 'role', 'isDoctorVerified', 'photoUrl', 'createdAt',
-                       'college', 'specializationId', 'specializationName'
-                    ]);
-      
-      // UPDATE LOGIC: Constrain keys specifically isolated from core auth states.
-      allow update: if isOwner(uid) 
-                    // Break process if a user attempts to manually override privilege markers
-                    && (!request.resource.data.diff(resource.data).affectedKeys()
-                        .hasAny(['role', 'isDoctorVerified', 'uid', 'email', 'createdAt', 'username_lowercase']))
-                    && request.resource.data.keys().hasOnly([
-                       'uid', 'username', 'username_lowercase', 'fullName', 
-                       'email', 'bio', 'role', 'isDoctorVerified', 'photoUrl', 'createdAt',
-                       'college', 'specializationId', 'specializationName'
-                    ]);
-      
-      allow delete: if isOwner(uid);
+      allow create, update, delete: if isAuthenticated();
     }
 
-    // ==========================================
-    // DOCTOR VERIFICATION REQUESTS
-    // ==========================================
-    match /doctor_verification_request/{requestId} {
-      // Users can ONLY view requests mapped to their own unique ID
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      
-      // CREATE LOGIC: Strictly locked to officially registered doctors.
-      allow create: if isAuthenticated() 
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.status == 'pending'
-                    // STRICT: The executing user must internally already be a doctor
-                    && getUserRole() == 'doctor'
-                    && request.resource.data.keys().hasAll([
-                      'userId', 'email', 'status', 'createdAt'
-                    ])
-                    && request.resource.data.keys().hasOnly([
-                      'userId', 'username', 'fullName', 'email', 'photoUrl', 
-                      'college', 'specializationName', 'status', 'createdAt'
-                    ]);
-      
-      // No standard user can mutate the queue status or delete valid logs
+    match /admin_sessions/{sessionId} {
+      allow read, create, update: if isAuthenticated();
+      allow delete: if false;
+    }
+
+    match /admin_audit_logs/{logId} {
+      allow read, create: if isAuthenticated();
       allow update, delete: if false;
     }
-    
-    // ==========================================
-    // TEMPORARY FALLBACKS (Groups, Posts, Library, Notifications)
-    // ==========================================
-    match /{path=**}/members/{memberId} {
+
+    match /notifications/{notificationId} {
       allow read, write: if isAuthenticated();
     }
+
     match /groups/{groupId} {
       allow read, write: if isAuthenticated();
+
+      match /members/{memberId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated();
+
+        match /reactions/{uid} {
+          allow read: if isAuthenticated();
+          allow create, update, delete: if isAuthenticated() && request.auth.uid == uid;
+        }
+      }
+
+      match /typing/{uid} {
+        allow read: if isAuthenticated();
+        allow create, update, delete: if isAuthenticated() && request.auth.uid == uid;
+      }
+
+      match /pinnedMessages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create, update, delete: if isAuthenticated();
+      }
+
+      match /savedMessages/{userId} {
+        allow read, write: if isAuthenticated();
+
+        match /items/{messageId} {
+          allow read, write: if isAuthenticated();
+        }
+      }
     }
+
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if isAuthenticated()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid']);
+      allow update, delete: if false;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isAuthenticated();
+
+      match /joined_groups/{docId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    match /specializations/{docId} {
+      allow read: if isAuthenticated();
+    }
+
     match /posts/{postId} {
       allow read, write: if isAuthenticated();
+
+      match /comments/{commentId} {
+        allow read, write: if isAuthenticated();
+
+        match /replies/{replyId} {
+          allow read, write: if isAuthenticated();
+        }
+      }
     }
+
+    match /comment_reports/{reportId} {
+      allow read, write: if isAuthenticated();
+    }
+
     match /library_files/{fileId} {
       allow read, write: if isAuthenticated();
+
+      match /views/{viewUserId} {
+        allow read, write: if isAuthenticated();
+      }
     }
-    match /notifications/{docId} {
+
+    match /{document=**}/likes/{likeUserId} {
       allow read, write: if isAuthenticated();
     }
-    match /doctor_verification_request/{document=**} {
-      allow read, write: if false; // Omit root propagation explicitly
+
+    match /{document=**}/saves/{saveUserId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /{document=**}/downloads/{downloadUserId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /{document=**}/shares/{shareUserId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /{document=**}/views/{viewUserId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /digital_saved_references/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /digital_downloads/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /university_files/{fileId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /doctor_verification/{requestId} {
+      allow read, write: if isAuthenticated();
     }
   }
 }

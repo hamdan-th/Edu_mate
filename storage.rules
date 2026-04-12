@@ -1,0 +1,99 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function isImageFile() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isReasonableImageSize() {
+      // Max 8 MB per image
+      return request.resource.size <= 8 * 1024 * 1024;
+    }
+
+    // ==========================================
+    // PROFILE IMAGES
+    // Path: profile_images/{uid}.jpg
+    // Read: any authenticated user — needed for avatars in chat/feed/groups
+    // Write: uid owner only
+    // Delete: uid owner only (account cleanup)
+    // ==========================================
+    match /profile_images/{uid}.jpg {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(uid) && isImageFile() && isReasonableImageSize();
+      allow delete: if isOwner(uid);
+    }
+
+    // ==========================================
+    // GLOBAL FEED POST IMAGES
+    // Path: global_feed/{uid}/{filename}
+    // NOTE: Dart code changed to put uid as path segment (not embedded in filename)
+    // so Rules can enforce uid-based delete accurately.
+    // Write guard (owner/admin) is enforced in Firestore — not duplicated here.
+    // ==========================================
+    match /global_feed/{uid}/{filename} {
+      allow read: if isAuthenticated();
+      // Only the uploader (who must be authenticated) can create in their own folder
+      allow create: if isOwner(uid) && isImageFile() && isReasonableImageSize();
+      // Only the uploader can delete their own image
+      allow delete: if isOwner(uid);
+      // Images are immutable once uploaded — no update
+      allow update: if false;
+    }
+
+    // ==========================================
+    // GROUP CHAT IMAGES
+    // Path: groups_chat/{groupId}/{filename}
+    // Tightened: delete is NOT open to all authenticated users.
+    // Client-side deletion of chat images is not implemented in the app,
+    // so we lock it down. If needed later, use a Cloud Function.
+    // ==========================================
+    match /groups_chat/{groupId}/{filename} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isImageFile() && isReasonableImageSize();
+      // No client-side delete — prevents mass deletion by any authenticated user
+      allow delete: if false;
+      allow update: if false;
+    }
+
+    // ==========================================
+    // GROUP COVER IMAGES
+    // Path: group_covers/{filename}
+    // The group may not exist yet when the cover is uploaded (creation flow),
+    // so we cannot verify group ownership here. Lowest safe option:
+    // authenticated create only. No client-side delete/update.
+    // ==========================================
+    match /group_covers/{filename} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isImageFile() && isReasonableImageSize();
+      // No client delete — new cover = new file, old one is orphaned (acceptable tradeoff)
+      allow update, delete: if false;
+    }
+
+    // ==========================================
+    // LIBRARY UPLOADS
+    // Path: library_uploads/{uid}/{filename}
+    // Strictly bound to uploader uid for both write and delete
+    // Max file size: 50 MB (academic files)
+    // ==========================================
+    match /library_uploads/{uid}/{filename} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(uid) && request.resource.size <= 50 * 1024 * 1024;
+      allow delete: if isOwner(uid);
+      allow update: if false;
+    }
+
+  }
+}
