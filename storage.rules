@@ -26,14 +26,21 @@ service firebase.storage {
     // ==========================================
     // PROFILE IMAGES
     // Path: profile_images/{uid}.jpg
+    // The file is stored as profile_images/<uid>.jpg (flat, no subfolder).
+    // Storage Rules cannot match extensions inside wildcards, so we use {filename}.
+    // Ownership is enforced by comparing filename (minus .jpg) to auth.uid.
     // Read: any authenticated user — needed for avatars in chat/feed/groups
     // Write: uid owner only
     // Delete: uid owner only (account cleanup)
     // ==========================================
-    match /profile_images/{uid}.jpg {
+    match /profile_images/{filename} {
       allow read: if isAuthenticated();
-      allow create, update: if isOwner(uid) && isImageFile() && isReasonableImageSize();
-      allow delete: if isOwner(uid);
+      allow create, update: if isAuthenticated()
+        && filename == (request.auth.uid + '.jpg')
+        && isImageFile()
+        && isReasonableImageSize();
+      allow delete: if isAuthenticated()
+        && filename == (request.auth.uid + '.jpg');
     }
 
     // ==========================================
