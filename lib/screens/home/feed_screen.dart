@@ -1072,31 +1072,31 @@ class _PostCardState extends State<PostCard>
     if (groupId.isEmpty) return;
 
     if (_isJoined) {
-      // Member: Navigate directly
+      // 1) Logic for Members: Direct Navigation
       try {
         final group = await GroupService.getGroupById(groupId);
         if (group != null && mounted) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => GroupChatScreen(group: group),
+              builder: (_) => GroupChatScreen(group: group),
             ),
           );
         }
-      } catch (_) {
+      } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تعذر الوصول للمجموعة حالياً')),
+            const SnackBar(content: Text('تعذر فتح المجموعة حالياً')),
           );
         }
       }
     } else {
-      // Non-member: Show preview
-      _showGroupPreview(context, groupId);
+      // 2) Logic for Non-members: Show Preview only
+      _showGroupPreview(groupId);
     }
   }
 
-  void _showGroupPreview(BuildContext context, String groupId) {
+  void _showGroupPreview(String groupId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1118,6 +1118,7 @@ class _PostCardState extends State<PostCard>
               child: Column(
                 children: [
                   const SizedBox(height: 12),
+                  // Drag Handle
                   Container(
                     width: 36, height: 4,
                     decoration: BoxDecoration(
@@ -1131,7 +1132,7 @@ class _PostCardState extends State<PostCard>
                     const Expanded(child: Center(child: Text('المجموعة غير موجودة')))
                   else ...[
                     const SizedBox(height: 24),
-                    // Group Identity Row (Image + Name + Members)
+                    // Header: Image + Identity
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Row(
@@ -1188,7 +1189,7 @@ class _PostCardState extends State<PostCard>
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Bio/Description
+                    // Body: Compact Description
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Container(
@@ -1199,7 +1200,7 @@ class _PostCardState extends State<PostCard>
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          group.description.isNotEmpty ? group.description : 'لا يوجد وصف متاح لهذه المجموعة حتى الآن.',
+                          group.description.isNotEmpty ? group.description : 'لا يوجد وصف متاح لهذه المجموعة.',
                           textAlign: TextAlign.start,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -1311,14 +1312,27 @@ class _PostCardState extends State<PostCard>
                               child: GestureDetector(
                                 onTap: _handleGroupTap,
                                 behavior: HitTestBehavior.opaque,
-                                child: Text(
-                                  (widget.post['groupName'] ?? '').toString(),
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: AppColors.primary.withOpacity(0.95),
-                                    fontSize: 12.8,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.groups_rounded,
+                                      size: 15,
+                                      color: AppColors.primary.withOpacity(0.9),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Flexible(
+                                      child: Text(
+                                        (widget.post['groupName'] ?? '').toString(),
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: AppColors.primary.withOpacity(0.95),
+                                          fontSize: 12.8,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
