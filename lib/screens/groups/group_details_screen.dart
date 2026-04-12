@@ -43,6 +43,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   final TextEditingController _descController = TextEditingController();
 
   File? _pickedImage;
+  late String _currentImageUrl;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -58,6 +59,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     
     _nameController.text = _groupName;
     _descController.text = _groupDescription;
+    _currentImageUrl = widget.group.imageUrl;
     _loadMembershipState();
   }
 
@@ -132,6 +134,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         'name': newName,
         'description': newDesc,
         if (newImageUrl != null) 'imageUrl': newImageUrl,
+        if (newImageUrl != null) 'groupImageUrl': newImageUrl,
       };
 
       await _firestore.collection('groups').doc(widget.group.id).update(updates);
@@ -140,6 +143,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         setState(() {
           _groupName = newName;
           _groupDescription = newDesc;
+          if (newImageUrl != null) _currentImageUrl = newImageUrl;
           _pickedImage = null;
           _isEditing = false;
         });
@@ -449,7 +453,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   backgroundColor: AppColors.primary.withOpacity(0.1),
                   backgroundImage: _pickedImage != null
                       ? FileImage(_pickedImage!) as ImageProvider
-                      : (widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null),
+                      : (_currentImageUrl.isNotEmpty ? NetworkImage(_currentImageUrl) : null),
                   child: Align(
                     alignment: Alignment.bottomRight,
                     child: CircleAvatar(
