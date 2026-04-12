@@ -14,8 +14,11 @@ class BotController extends ChangeNotifier {
   String? _activeSessionId;
   bool _isSending = false;
   bool _isLoading = true;
+  
+  Map<String, dynamic>? _cachedMetadata;
+  final String? sourceScreen;
 
-  BotController(this._repository) {
+  BotController(this._repository, {this.sourceScreen}) {
     _initDefaultSession();
   }
 
@@ -110,7 +113,8 @@ class BotController extends ChangeNotifier {
         .toList();
 
     try {
-      final botReply = await _repository.sendMessage(trimmedText, historyToPass);
+      final contextPayload = _cachedMetadata;
+      final botReply = await _repository.sendMessage(trimmedText, historyToPass, context: contextPayload);
 
       _updateMessageInSession(
         curSessionId,
@@ -311,6 +315,25 @@ class BotController extends ChangeNotifier {
           .collection('bot_sessions')
           .orderBy('updatedAt', descending: true)
           .get();
+
+      if (_cachedMetadata == null) {
+        _cachedMetadata = {
+          'uid': user.uid,
+          'sourceScreen': sourceScreen ?? 'unknown',
+        };
+        try {
+          final userDoc = await _firestore.collection('users').doc(user.uid).get();
+          if (userDoc.exists) {
+            final data = userDoc.data()!;
+            _cachedMetadata!.addAll({
+              'name': data['fullName'] ?? data['username'] ?? '',
+              'college': data['college'] ?? '',
+              'specialization': data['specializationName'] ?? '',
+              'role': data['role'] ?? 'student',
+            });
+          }
+        } catch (_) {}
+      }
 
       if (snap.docs.isEmpty) {
         createNewChat();

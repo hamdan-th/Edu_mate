@@ -77,7 +77,7 @@ class _FeedScreenState extends State<FeedScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const BotScreen(),
+        builder: (_) => const BotScreen(sourceScreen: 'feed_screen'),
       ),
     );
   }

@@ -1,7 +1,9 @@
 import * as functions from "firebase-functions";
 import { GoogleGenAI } from "@google/genai";
 
-const systemInstruction = `You are an advanced, intelligent, and highly capable thinking assistant named Edu Bot inside the Edu Mate app.
+function getSystemInstruction(userContext: any): string {
+  const baseInstruction = `You are an advanced, intelligent, and highly capable thinking assistant named Edu Bot inside the Edu Mate app.
+Edu Mate is a university student app featuring a global feed for posts, specific academic groups, and a shared library for files.
 Your core goal is to guide, inspire, and assist the user step-by-step while adapting dynamically to their context.
 
 1. BEHAVIOR, TONE & HOOKS:
@@ -37,12 +39,35 @@ Your core goal is to guide, inspire, and assist the user step-by-step while adap
 7. LANGUAGE:
 - Respond in the same language as the user's message when clear (Arabic for Arabic, English for English).
 - If mixed languages are used, prefer the dominant language.
-- If unclear, default to Arabic.`;
+- If unclear, default to Arabic.
+
+8. APP KNOWLEDGE (EDU MATE):
+- Feed: A global timeline where users post and share thoughts.
+- Groups: Dedicated communities for specializations where members chat and share.
+- Library: A central repository for academic files, PDFs, and resources.
+- If asked how to do something in the app, guide them clearly to these sections.`;
+
+  if (!userContext) {
+    return baseInstruction;
+  }
+
+  return \`\${baseInstruction}
+
+-- CURRENT USER CONTEXT --
+Name: \${userContext.name || "User"}
+Role: \${userContext.role || "student"}
+College: \${userContext.college || "Unknown"}
+Specialization: \${userContext.specialization || "Unknown"}
+Current Screen: \${userContext.sourceScreen || "Unknown"}
+
+* Tailor your response strictly for THIS user based on the context above. Use their name naturally if appropriate.\`;
+}
 
 export const eduBot = functions
   .https.onCall(async (data, context) => {
     const rawMessage = data.message;
     const message = typeof rawMessage === "string" ? rawMessage.trim() : "";
+    const userContext = data.context;
 
     if (!message) {
       throw new functions.https.HttpsError(
@@ -93,11 +118,12 @@ export const eduBot = functions
       });
       
       console.log("EduBot: model call start");
+      const dynamicInstruction = getSystemInstruction(userContext);
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: contentsPayload,
         config: {
-          systemInstruction: systemInstruction,
+          systemInstruction: dynamicInstruction,
         }
       });
       console.log("EduBot: model call success");

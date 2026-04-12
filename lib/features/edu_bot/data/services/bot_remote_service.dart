@@ -6,7 +6,7 @@ class BotRemoteService {
   BotRemoteService({FirebaseFunctions? functions})
       : _functions = functions ?? FirebaseFunctions.instanceFor(region: 'us-central1');
 
-  Future<String> sendToBot(String message, List<Map<String, String>> historyPayload) async {
+  Future<String> sendToBot(String message, List<Map<String, String>> historyPayload, {Map<String, dynamic>? contextPayload}) async {
     try {
       final callable = _functions.httpsCallable(
         'eduBot',
@@ -16,6 +16,7 @@ class BotRemoteService {
       final results = await callable.call(<String, dynamic>{
         'message': message,
         if (historyPayload.isNotEmpty) 'history': historyPayload,
+        if (contextPayload != null) 'context': contextPayload,
       });
 
       final data = results.data as Map<String, dynamic>?;

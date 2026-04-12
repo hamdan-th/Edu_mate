@@ -10,7 +10,9 @@ import '../widgets/empty_state.dart';
 import '../widgets/chat_history_drawer.dart';
 
 class BotScreen extends StatefulWidget {
-  const BotScreen({super.key});
+  final String? sourceScreen;
+  
+  const BotScreen({super.key, this.sourceScreen});
 
   @override
   State<BotScreen> createState() => _BotScreenState();
@@ -26,7 +28,7 @@ class _BotScreenState extends State<BotScreen> {
     super.initState();
     final remoteService = BotRemoteService();
     final repository = BotRepository(remoteService);
-    _controller = BotController(repository);
+    _controller = BotController(repository, sourceScreen: widget.sourceScreen);
     
     _controller.addListener(_scrollToBottomIfNeed);
   }
