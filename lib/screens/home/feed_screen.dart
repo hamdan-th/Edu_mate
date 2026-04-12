@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../notifications/notifications_screen.dart';
@@ -13,6 +14,8 @@ import '../profile/profile_screen.dart';
 import '../settings/settings_bottom_sheet.dart';
 import '../../features/edu_bot/presentation/screens/bot_screen.dart';
 import '../../services/notifications_service.dart';
+import '../../models/group_model.dart';
+import '../groups/group_chat_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -796,6 +799,429 @@ class _PostCardState extends State<PostCard>
     }
   }
 
+  void _showPostMenu(BuildContext context) {
+    final postId  = widget.post['postId']?.toString() ?? '';
+    final authorId = widget.post['authorId']?.toString() ?? '';
+    final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final isOwner = currentUid == authorId;
+    final l10n = AppLocalizations.of(context)!;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final sheetColor = isDark ? AppColors.surface : Colors.white;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: sheetColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // drag handle
+              Container(
+                width: 40, height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              if (isOwner) ...[
+                _MenuTile(
+                  icon: Icons.edit_outlined,
+                  label: 'تعديل المنشور',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showEditSheet(context, postId);
+                  },
+                ),
+                _MenuTile(
+                  icon: Icons.delete_outline_rounded,
+                  label: 'حذف المنشور',
+                  color: AppColors.error,
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('حذف المنشور'),
+                        content: const Text('هل أنت متأكد أنك تريد حذف هذا المنشور؟'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('إلغاء'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text('حذف', style: TextStyle(color: AppColors.error)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true && postId.isNotEmpty) {
+                      try {
+                        await FeedService.deletePost(postId);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('تم حذف المنشور')),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                          );
+                        }
+                      }
+                    }
+                  },
+                ),
+              ],
+              if (!isOwner)
+                _MenuTile(
+                  icon: Icons.flag_outlined,
+                  label: 'إبلاغ عن المنشور',
+                  color: AppColors.error,
+                  onTap: () async {
+                    Navigator.pop(context);
+                    if (postId.isEmpty) return;
+                    try {
+                      await FeedService.reportPost(
+                        postId: postId,
+                        reason: 'user_report',
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('تم إرسال البلاغ، شكرًا لك')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                        );
+                      }
+                    }
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEditSheet(BuildContext context, String postId) {
+    final currentText = widget.post['content']?.toString() ?? '';
+    final controller = TextEditingController(text: currentText);
+    bool isSaving = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final sheetColor = isDark ? AppColors.surface : Colors.white;
+
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: sheetColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40, height: 4,
+                        margin: const EdgeInsets.only(bottom: 18),
+                        decoration: BoxDecoration(
+                          color: AppColors.border,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'تعديل المنشور',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? AppColors.textPrimary : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.background.withOpacity(0.6)
+                            : const Color(0xFFF7F8FB),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.border.withOpacity(0.5)
+                              : Colors.black12,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: controller,
+                        maxLines: null,
+                        minLines: 4,
+                        style: TextStyle(
+                          fontSize: 15.5,
+                          height: 1.55,
+                          color: isDark ? AppColors.textPrimary : Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.all(16),
+                          hintText: 'اكتب المنشور...',
+                          hintStyle: TextStyle(
+                            color: isDark
+                                ? AppColors.textSecondary
+                                : Colors.black38,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                        ),
+                        onPressed: isSaving
+                            ? null
+                            : () async {
+                                final newText = controller.text.trim();
+                                if (newText.isEmpty || newText == currentText) {
+                                  Navigator.pop(sheetCtx);
+                                  return;
+                                }
+                                setSheetState(() => isSaving = true);
+                                try {
+                                  await FeedService.updatePost(
+                                    postId: postId,
+                                    newText: newText,
+                                  );
+                                  if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('تم تعديل المنشور بنجاح')),
+                                    );
+                                  }
+                                } catch (e) {
+                                  setSheetState(() => isSaving = false);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                                    );
+                                  }
+                                }
+                              },
+                        child: isSaving
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'حفظ التعديل',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15.5,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(() => controller.dispose());
+  }
+
+  void _handleGroupTap() async {
+    final groupId = widget.post['groupId']?.toString() ?? '';
+    if (groupId.isEmpty) return;
+
+    if (_isJoined) {
+      // Member: Navigate directly
+      try {
+        final group = await GroupService.getGroupById(groupId);
+        if (group != null && mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GroupChatScreen(group: group),
+            ),
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('تعذر الوصول للمجموعة حالياً')),
+          );
+        }
+      }
+    } else {
+      // Non-member: Show preview
+      _showGroupPreview(context, groupId);
+    }
+  }
+
+  void _showGroupPreview(BuildContext context, String groupId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return FutureBuilder<GroupModel?>(
+          future: GroupService.getGroupById(groupId),
+          builder: (context, snapshot) {
+            final group = snapshot.data;
+            final isLoading = snapshot.connectionState == ConnectionState.waiting;
+
+            return Container(
+              height: 310,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF151A22) : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 36, height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white10 : Colors.black.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  if (isLoading)
+                    const Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3)))
+                  else if (group == null)
+                    const Expanded(child: Center(child: Text('المجموعة غير موجودة')))
+                  else ...[
+                    const SizedBox(height: 24),
+                    // Group Identity Row (Image + Name + Members)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 68, height: 68,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.primary.withOpacity(0.12), width: 2.5),
+                            ),
+                            child: ClipOval(
+                              child: group.imageUrl.isNotEmpty
+                                  ? Image.network(group.imageUrl, fit: BoxFit.cover)
+                                  : Container(
+                                      color: AppColors.primary.withOpacity(0.08),
+                                      child: const Icon(Icons.groups_rounded, size: 32, color: AppColors.primary),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: 18),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  group.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.w900,
+                                    color: isDark ? AppColors.textPrimary : const Color(0xFF181A20),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.people_alt_rounded, size: 14, color: AppColors.primary),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '${group.membersCounts} عضو نشط',
+                                      style: const TextStyle(
+                                        color: AppColors.primary,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Bio/Description
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withOpacity(0.03) : const Color(0xFFF8F9FB),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          group.description.isNotEmpty ? group.description : 'لا يوجد وصف متاح لهذه المجموعة حتى الآن.',
+                          textAlign: TextAlign.start,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            height: 1.5,
+                            color: isDark ? AppColors.textSecondary : const Color(0xFF6A6E7D),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ]
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _likeController.dispose();
@@ -882,13 +1308,17 @@ class _PostCardState extends State<PostCard>
                         Row(
                           children: [
                             Flexible(
-                              child: Text(
-                                (widget.post['groupName'] ?? '').toString(),
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: AppColors.primary.withOpacity(0.95),
-                                  fontSize: 12.8,
-                                  fontWeight: FontWeight.w700,
+                              child: GestureDetector(
+                                onTap: _handleGroupTap,
+                                behavior: HitTestBehavior.opaque,
+                                child: Text(
+                                  (widget.post['groupName'] ?? '').toString(),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: AppColors.primary.withOpacity(0.95),
+                                    fontSize: 12.8,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
@@ -950,21 +1380,24 @@ class _PostCardState extends State<PostCard>
                       ),
                     ),
                   const SizedBox(width: 8),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.background.withOpacity(0.7)
-                          : const Color(0xFFF7F8FB),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.more_horiz,
-                      color: isDark
-                          ? AppColors.textSecondary
-                          : Colors.black45,
-                      size: 20,
+                  GestureDetector(
+                    onTap: () => _showPostMenu(context),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.background.withOpacity(0.7)
+                            : const Color(0xFFF7F8FB),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.more_horiz,
+                        color: isDark
+                            ? AppColors.textSecondary
+                            : Colors.black45,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -1213,6 +1646,49 @@ class FlatPostAction extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+  final VoidCallback onTap;
+
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveColor = color ??
+        (isDark ? AppColors.textPrimary : Colors.black87);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 6),
+        child: Row(
+          children: [
+            Icon(icon, size: 22, color: effectiveColor),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w600,
+                color: effectiveColor,
+              ),
+            ),
           ],
         ),
       ),

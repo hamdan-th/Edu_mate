@@ -89,4 +89,35 @@ class FeedService {
           return posts;
         });
   }
+
+  /// Deletes a post. Only the author should call this.
+  static Future<void> deletePost(String postId) async {
+    await _firestore.collection('posts').doc(postId).delete();
+  }
+
+  /// Updates the text content of a post. Only the author should call this.
+  static Future<void> updatePost({
+    required String postId,
+    required String newText,
+  }) async {
+    await _firestore.collection('posts').doc(postId).update({
+      'contentText': newText,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Submits a report for a post.
+  static Future<void> reportPost({
+    required String postId,
+    required String reason,
+  }) async {
+    final uid = _auth.currentUser?.uid ?? '';
+    await _firestore.collection('comment_reports').add({
+      'type': 'post',
+      'postId': postId,
+      'reportedBy': uid,
+      'reason': reason,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
 }

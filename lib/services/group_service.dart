@@ -1444,5 +1444,16 @@ class GroupService {
         .orderBy('pinnedAt', descending: true)
         .snapshots();
   }
+
+  /// Fetches a single group by its ID.
+  static Future<GroupModel?> getGroupById(String groupId) async {
+    try {
+      final doc = await _groups.doc(groupId).get();
+      if (!doc.exists) return null;
+      return GroupModel.fromDoc(doc as DocumentSnapshot<Map<String, dynamic>>);
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
