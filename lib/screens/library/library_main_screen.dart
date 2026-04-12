@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 import '../../l10n/app_localizations.dart';
 import 'digital_library_screen.dart';
 import 'library_theme.dart';
@@ -45,6 +46,12 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
 
     return Scaffold(
       backgroundColor: LibraryTheme.bg(context),
+      floatingActionButton: const SafeArea(
+        child: FloatingBotButton(
+          sourceScreen: 'library_screen',
+          padding: EdgeInsets.only(bottom: 16),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [

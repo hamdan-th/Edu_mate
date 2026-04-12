@@ -13,6 +13,7 @@ import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 import '../settings/settings_bottom_sheet.dart';
 import '../../features/edu_bot/presentation/screens/bot_screen.dart';
+import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 import '../../services/notifications_service.dart';
 import '../../models/group_model.dart';
 import '../groups/group_chat_screen.dart';
@@ -120,12 +121,10 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: SafeArea(
+      floatingActionButton: const SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 96),
-          child: FloatingStudyBotButton(
-            onTap: _openBot,
-          ),
+          padding: EdgeInsets.only(bottom: 96),
+          child: FloatingBotButton(sourceScreen: 'feed_screen'),
         ),
       ),
       body: Stack(
@@ -397,66 +396,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 }
 
-class FloatingStudyBotButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const FloatingStudyBotButton({
-    super.key,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-          decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.surface.withOpacity(0.97)
-                : Colors.white.withOpacity(0.98),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.12),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.menu_book_rounded,
-                color: AppColors.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                l10n.feedBotName,
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13,
-                  color: isDark ? AppColors.textPrimary : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class FeedTopActionButton extends StatelessWidget {
+  class FeedTopActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool hasBadge;
