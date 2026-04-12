@@ -1864,7 +1864,12 @@ class _EmptyChatState extends StatelessWidget {
 
 /// Streams live typing state from `groups/{groupId}/typing` and renders
 /// an animated indicator above the composer.
-class _TypingIndicator extends StatelessWidget {
+///
+/// MUST be a StatefulWidget so the Firestore stream is created ONCE in
+/// initState and survives parent rebuilds. A StatelessWidget would create
+/// a new stream on every parent setState(), which resets the StreamBuilder
+/// back to its loading state and kills the live indicator.
+class _TypingIndicator extends StatefulWidget {
   final String groupId;
   final String currentUid;
   final Color muted;
@@ -1875,24 +1880,38 @@ class _TypingIndicator extends StatelessWidget {
     required this.muted,
   });
 
-  Stream<List<String>> _typingStream() {
-    return FirebaseFirestore.instance
+  @override
+  State<_TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<_TypingIndicator> {
+  late final Stream<List<String>> _stream;
+
+  @override
+  void initState() {
+    super.initState();
+    // Stream created ONCE — immune to parent rebuilds.
+    _stream = FirebaseFirestore.instance
         .collection('groups')
-        .doc(groupId)
+        .doc(widget.groupId)
         .collection('typing')
         .where('isTyping', isEqualTo: true)
         .snapshots()
         .map((snap) {
-      final staleThreshold = DateTime.now().subtract(const Duration(seconds: 8));
+      final staleThreshold =
+          DateTime.now().subtract(const Duration(seconds: 10));
       final names = <String>[];
       for (final doc in snap.docs) {
         final data = doc.data();
         final uid = (data['uid'] ?? '').toString();
-        if (uid == currentUid) continue; // never show self
+        if (uid == widget.currentUid) continue; // never show self
         final updatedAt = (data['updatedAt'] as Timestamp?)?.toDate();
-        if (updatedAt == null || updatedAt.isBefore(staleThreshold)) continue;
+        // Treat null updatedAt as "just written" (serverTimestamp pending) —
+        // do NOT treat it as stale. Only discard when we have a real timestamp
+        // that is demonstrably old.
+        if (updatedAt != null && updatedAt.isBefore(staleThreshold)) continue;
         final name = (data['displayName'] ?? '').toString().trim();
-        if (name.isNotEmpty) names.add(name.split(' ').first); // first name only
+        if (name.isNotEmpty) names.add(name.split(' ').first);
       }
       return names;
     });
@@ -1901,7 +1920,7 @@ class _TypingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<String>>(
-      stream: _typingStream(),
+      stream: _stream,
       builder: (context, snapshot) {
         final typers = snapshot.data ?? [];
         if (typers.isEmpty) return const SizedBox.shrink();
@@ -1917,7 +1936,7 @@ class _TypingIndicator extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 6, left: 4),
           child: Row(
             children: [
-              _BouncingDots(color: muted),
+              _BouncingDots(color: widget.muted),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -1926,7 +1945,7 @@ class _TypingIndicator extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12.5,
-                    color: muted,
+                    color: widget.muted,
                     fontWeight: FontWeight.w600,
                     fontStyle: FontStyle.italic,
                   ),
@@ -1939,6 +1958,7 @@ class _TypingIndicator extends StatelessWidget {
     );
   }
 }
+
 
 /// Three-dot animated typing animation.
 class _BouncingDots extends StatefulWidget {
