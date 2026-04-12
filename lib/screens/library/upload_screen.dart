@@ -191,8 +191,9 @@ class _UploadScreenState extends State<UploadScreen> {
         .toSet()
         .toList();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: isDark ? LibraryTheme.bg(context) : const Color(0xFFF7F9FC),
       body: Stack(
         children: [
           Positioned(
@@ -396,6 +397,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         InkWell(
@@ -405,21 +407,28 @@ class _TopBar extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1E2229) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: LibraryTheme.border(context).withOpacity(0.3),
-                width: 0.5,
+                color: isDark
+                    ? Colors.white.withOpacity(0.10)
+                    : LibraryTheme.border(context).withOpacity(0.3),
+                width: isDark ? 1.0 : 0.5,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
             ),
-            child: const Icon(Icons.arrow_back_rounded),
+            child: Icon(
+              Icons.arrow_back_rounded,
+              color: isDark ? Colors.white.withOpacity(0.85) : null,
+            ),
           ),
         ),
         const Spacer(),
@@ -457,8 +466,9 @@ class _HeroUploadCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7B61FF).withOpacity(0.22),
-            blurRadius: 18,
+            color: const Color(0xFF7B61FF).withOpacity(
+                Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.22),
+            blurRadius: Theme.of(context).brightness == Brightness.dark ? 24 : 18,
             offset: const Offset(0, 10),
           ),
         ],
@@ -558,7 +568,9 @@ class _FilePickerCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: LibraryTheme.bg(context),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1A1D24)
+                  : LibraryTheme.bg(context),
               borderRadius: BorderRadius.circular(22),
             ),
             child: hasFile
@@ -625,29 +637,35 @@ class _FilePickerCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color:
-                      LibraryTheme.border(context).withOpacity(0.3),
-                      width: 0.5,
+                Builder(builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
                     ),
-                  ),
-                  child: Text(
-                    l10n.upBtnChangeFile,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: LibraryTheme.primary(context),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? LibraryTheme.primary(context).withOpacity(0.12)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark
+                            ? LibraryTheme.primary(context).withOpacity(0.35)
+                            : LibraryTheme.border(context).withOpacity(0.3),
+                        width: isDark ? 1.0 : 0.5,
+                      ),
                     ),
-                  ),
-                ),
+                    child: Text(
+                      l10n.upBtnChangeFile,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: LibraryTheme.primary(context),
+                      ),
+                    ),
+                  );
+                }),
               ],
             )
                 : Column(
@@ -691,29 +709,35 @@ class _FilePickerCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color:
-                      LibraryTheme.border(context).withOpacity(0.3),
-                      width: 0.5,
+                Builder(builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
                     ),
-                  ),
-                  child: Text(
-                    l10n.upBtnChooseFile,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: LibraryTheme.primary(context),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? LibraryTheme.primary(context).withOpacity(0.12)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark
+                            ? LibraryTheme.primary(context).withOpacity(0.35)
+                            : LibraryTheme.border(context).withOpacity(0.3),
+                        width: isDark ? 1.0 : 0.5,
+                      ),
                     ),
-                  ),
-                ),
+                    child: Text(
+                      l10n.upBtnChooseFile,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: LibraryTheme.primary(context),
+                      ),
+                    ),
+                  );
+                }),
               ],
             ),
           ),
@@ -736,22 +760,27 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF16191F) : Colors.white,
         borderRadius: BorderRadius.circular(26),
         border: Border.all(
-          color: LibraryTheme.border(context).withOpacity(0.3),
-          width: 0.5,
+          color: isDark
+              ? Colors.white.withOpacity(0.07)
+              : LibraryTheme.border(context).withOpacity(0.3),
+          width: isDark ? 1.0 : 0.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 14,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 14,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -811,7 +840,9 @@ class _ModernTextField extends StatelessWidget {
         labelText: label,
         prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1E2229)
+            : const Color(0xFFF8FAFD),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 16,
@@ -887,7 +918,9 @@ class _ModernDropdown extends StatelessWidget {
         labelText: label,
         prefixIcon: Icon(icon, size: 19),
         filled: true,
-        fillColor: const Color(0xFFF8FAFD),
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1E2229)
+            : const Color(0xFFF8FAFD),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 16,

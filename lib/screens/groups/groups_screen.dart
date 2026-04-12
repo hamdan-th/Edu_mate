@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -689,6 +690,25 @@ class _PremiumGroupCard extends StatefulWidget {
 
 class _PremiumGroupCardState extends State<_PremiumGroupCard> {
   bool _isPressed = false;
+  int _unreadCount = 0;
+  StreamSubscription<int>? _unreadSub;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.isDiscover) {
+      _unreadSub = GroupService.streamUnreadCount(widget.group.id)
+          .listen((count) {
+        if (mounted) setState(() => _unreadCount = count);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _unreadSub?.cancel();
+    super.dispose();
+  }
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
   Color get _cardBg => _isDark ? const Color(0xFF171C25) : Colors.white;
@@ -842,15 +862,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                                   ? (_isDark ? AppColors.success : const Color(0xFF059669))
                                   : (_isDark ? AppColors.warning : const Color(0xFFD97706)),
                             )
-                          else if (group.messagesCount > 0)
-                            _TinyPill(
-                              icon: Icons.chat_bubble_rounded,
-                              text: group.messagesCount > 99
-                                  ? '+99'
-                                  : '${group.messagesCount}',
-                              bg: AppColors.primary.withOpacity(0.10),
-                              fg: AppColors.primary,
-                            ),
+                          else if (_unreadCount > 0)
+                            _UnreadBadge(count: _unreadCount),
                         ],
                       ),
                       const SizedBox(height: 7),
@@ -1029,6 +1042,49 @@ class _TinyPill extends StatelessWidget {
     );
   }
 }
+
+/// A compact unread-message badge — red pill with count.
+class _UnreadBadge extends StatelessWidget {
+  final int count;
+
+  const _UnreadBadge({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final label = count > 99 ? '99+' : '$count';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.error.withOpacity(0.18)
+            : AppColors.error.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.mark_chat_unread_rounded,
+            size: 11,
+            color: AppColors.error,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
+              color: AppColors.error,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 
 class _KeepAlivePage extends StatefulWidget {
   final Widget child;

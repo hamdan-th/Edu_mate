@@ -619,6 +619,51 @@ class GroupService {
     await batch.commit();
   }
 
+  /// Marks all messages in [groupId] as read for the current user by
+  /// stamping their membership doc with the current server time.
+  static Future<void> markGroupAsRead(String groupId) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      await _groups
+          .doc(groupId)
+          .collection('members')
+          .doc(uid)
+          .set({'lastReadAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+    } catch (_) {}
+  }
+
+  /// Returns a live stream of the unread message count for the current user
+  /// in [groupId]. A message is unread when its [createdAt] is after the
+  /// user's [lastReadAt] marker and its sender is not the current user.
+  static Stream<int> streamUnreadCount(String groupId) {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return Stream.value(0);
+
+    // First, stream the member doc to get the latest lastReadAt value.
+    return _groups
+        .doc(groupId)
+        .collection('members')
+        .doc(uid)
+        .snapshots()
+        .asyncMap((memberSnap) async {
+      final lastReadAt =
+          (memberSnap.data() ?? {})['lastReadAt'] as Timestamp?;
+
+      Query<Map<String, dynamic>> query = _groups
+          .doc(groupId)
+          .collection('messages')
+          .where('senderId', isNotEqualTo: uid);
+
+      if (lastReadAt != null) {
+        query = query.where('createdAt', isGreaterThan: lastReadAt);
+      }
+
+      final snap = await query.count().get();
+      return snap.count ?? 0;
+    });
+  }
+
   static Future<void> shareLibraryFileToGroup({
     required String groupId,
     required String fileId,
