@@ -630,7 +630,17 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     final senderId = data['senderId'] ?? '';
                     final isMe = myId != null && myId == senderId;
 
-                    return _buildMessageBubble(data, messageId, isMe);
+                    // The latest own message is the first isMe entry in the
+                    // reversed list (lowest index) — show seen-by only there.
+                    final isLatestOwn = isMe &&
+                        !docs
+                            .sublist(0, index)
+                            .any((d) =>
+                                (d.data() as Map<String, dynamic>)['senderId'] ==
+                                myId);
+
+                    return _buildMessageBubble(
+                        data, messageId, isMe, isLatestOwn);
                   },
                 );
               },
@@ -842,8 +852,9 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   Widget _buildMessageBubble(
       Map<String, dynamic> data,
       String messageId,
-      bool isMe,
-      ) {
+      bool isMe, [
+      bool isLatestOwn = false,
+      ]) {
     final text = data['text'] ?? '';
     final imageUrl = data['imageUrl'] as String?;
     final senderId = data['senderId'] ?? '';
@@ -904,7 +915,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         ? (_isDark ? Colors.white.withOpacity(0.95) : Colors.white)
         : _text;
 
-    return GestureDetector(
+    final bubble = GestureDetector(
       onLongPress: () async {
         final isSaved = await GroupService.isMessageSaved(
           groupId: widget.group.id,
@@ -1132,6 +1143,25 @@ class _GroupChatScreenState extends State<GroupChatScreen>
           ],
         ),
       ),
+    );
+
+    // Seen-by indicator — only on the current user's latest outgoing message.
+    if (!isLatestOwn) return bubble;
+
+    final createdAt = data['createdAt'] as Timestamp?;
+    if (createdAt == null) return bubble;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        bubble,
+        _SeenByWidget(
+          groupId: widget.group.id,
+          currentUid: _auth.currentUser?.uid ?? '',
+          messageCreatedAt: createdAt,
+          muted: _muted,
+        ),
+      ],
     );
   }
 
@@ -1976,4 +2006,77 @@ class _BouncingDotsState extends State<_BouncingDots>
       },
     );
   }
-}
+}
+
+/// Streams how many group members have read past a given message, and
+/// shows a compact "Seen by N" label below the sender's latest bubble.
+class _SeenByWidget extends StatelessWidget {
+  final String groupId;
+  final String currentUid;
+  final Timestamp messageCreatedAt;
+  final Color muted;
+
+  const _SeenByWidget({
+    required this.groupId,
+    required this.currentUid,
+    required this.messageCreatedAt,
+    required this.muted,
+  });
+
+  Stream<int> _seenCountStream() {
+    return FirebaseFirestore.instance
+        .collection('groups')
+        .doc(groupId)
+        .collection('members')
+        .snapshots()
+        .map((snap) {
+      int count = 0;
+      for (final doc in snap.docs) {
+        final uid = doc.id;
+        if (uid == currentUid) continue; // exclude self
+        final lastReadAt = (doc.data()['lastReadAt'] as Timestamp?);
+        if (lastReadAt == null) continue;
+        // Member has read past this message if their marker is >= its timestamp.
+        if (!lastReadAt.toDate().isBefore(messageCreatedAt.toDate())) {
+          count++;
+        }
+      }
+      return count;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<int>(
+      stream: _seenCountStream(),
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+        if (count == 0) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 3, right: 4, bottom: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.done_all_rounded,
+                size: 13,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Seen by $count',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: muted,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
