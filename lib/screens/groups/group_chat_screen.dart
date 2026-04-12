@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,6 +53,10 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   final Map<String, Map<String, dynamic>> _userCache = {};
   Map<String, dynamic>? _replyMessage;
 
+  // ── Typing indicator ──────────────────────────────────────────────
+  Timer? _typingTimer;
+  bool _isCurrentlyTyping = false;
+
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
   Color get _pageBg =>
       _isDark ? const Color(0xFF0B0D12) : const Color(0xFFF3F5F7);
@@ -95,15 +100,81 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     if (state == AppLifecycleState.resumed) {
       GroupService.markGroupAsRead(widget.group.id);
     }
+    // Stop typing indicator if app goes to background/is paused.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _clearTyping();
+    }
   }
 
   @override
   void dispose() {
+    _typingTimer?.cancel();
+    _clearTyping(); // best-effort — fire-and-forget
     WidgetsBinding.instance.removeObserver(this);
     _messageController.dispose();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // ── Typing indicator helpers ──────────────────────────────────────
+
+  /// Called on every keystroke in the message field.
+  void _onTypingChanged(String value) {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    if (value.trim().isEmpty) {
+      _clearTyping();
+      return;
+    }
+
+    // Cancel previous debounce timer.
+    _typingTimer?.cancel();
+
+    // Write typing=true if not already set.
+    if (!_isCurrentlyTyping) {
+      _isCurrentlyTyping = true;
+      _setTyping(uid, isTyping: true);
+    } else {
+      // Refresh the timestamp so it doesn't go stale.
+      _setTyping(uid, isTyping: true);
+    }
+
+    // Auto-clear after 5 s of no keystroke.
+    _typingTimer = Timer(const Duration(seconds: 5), () {
+      _clearTyping();
+    });
+  }
+
+  /// Writes the typing marker to Firestore (fire-and-forget).
+  void _setTyping(String uid, {required bool isTyping}) {
+    final displayName = _auth.currentUser?.displayName ??
+        _auth.currentUser?.email ??
+        'User';
+    _firestore
+        .collection('groups')
+        .doc(widget.group.id)
+        .collection('typing')
+        .doc(uid)
+        .set({
+      'uid': uid,
+      'displayName': displayName,
+      'isTyping': isTyping,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }).catchError((_) {});
+  }
+
+  /// Clears the typing marker for the current user.
+  void _clearTyping() {
+    _typingTimer?.cancel();
+    _typingTimer = null;
+    if (!_isCurrentlyTyping) return;
+    _isCurrentlyTyping = false;
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+    _setTyping(uid, isTyping: false);
   }
 
   Future<void> _checkPermissions() async {
@@ -148,6 +219,9 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   Future<void> _send() async {
     final text = _messageController.text.trim();
     if (text.isEmpty && _selectedImage == null) return;
+
+    // Clear typing indicator immediately on send.
+    _clearTyping();
 
     if (mounted) {
       setState(() {
@@ -1324,6 +1398,12 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Live typing indicator — shown above reply/image previews.
+          _TypingIndicator(
+            groupId: widget.group.id,
+            currentUid: _auth.currentUser?.uid ?? '',
+            muted: _muted,
+          ),
           if (_replyMessage != null)
             Container(
               margin: const EdgeInsets.only(bottom: 8),
@@ -1442,6 +1522,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     maxLines: 5,
                     textInputAction: TextInputAction.newline,
                     cursorColor: AppColors.primary,
+                    onChanged: _onTypingChanged,
                     style: TextStyle(
                       color: _text,
                       fontSize: 15.6,
@@ -1750,3 +1831,149 @@ class _EmptyChatState extends StatelessWidget {
     );
   }
 }
+
+/// Streams live typing state from `groups/{groupId}/typing` and renders
+/// an animated indicator above the composer.
+class _TypingIndicator extends StatelessWidget {
+  final String groupId;
+  final String currentUid;
+  final Color muted;
+
+  const _TypingIndicator({
+    required this.groupId,
+    required this.currentUid,
+    required this.muted,
+  });
+
+  Stream<List<String>> _typingStream() {
+    return FirebaseFirestore.instance
+        .collection('groups')
+        .doc(groupId)
+        .collection('typing')
+        .where('isTyping', isEqualTo: true)
+        .snapshots()
+        .map((snap) {
+      final staleThreshold = DateTime.now().subtract(const Duration(seconds: 8));
+      final names = <String>[];
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final uid = (data['uid'] ?? '').toString();
+        if (uid == currentUid) continue; // never show self
+        final updatedAt = (data['updatedAt'] as Timestamp?)?.toDate();
+        if (updatedAt == null || updatedAt.isBefore(staleThreshold)) continue;
+        final name = (data['displayName'] ?? '').toString().trim();
+        if (name.isNotEmpty) names.add(name.split(' ').first); // first name only
+      }
+      return names;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<String>>(
+      stream: _typingStream(),
+      builder: (context, snapshot) {
+        final typers = snapshot.data ?? [];
+        if (typers.isEmpty) return const SizedBox.shrink();
+
+        final String label;
+        if (typers.length == 1) {
+          label = '${typers.first} is typing...';
+        } else {
+          label = '${typers.length} people are typing...';
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 6, left: 4),
+          child: Row(
+            children: [
+              _BouncingDots(color: muted),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: muted,
+                    fontWeight: FontWeight.w600,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Three-dot animated typing animation.
+class _BouncingDots extends StatefulWidget {
+  final Color color;
+  const _BouncingDots({required this.color});
+
+  @override
+  State<_BouncingDots> createState() => _BouncingDotsState();
+}
+
+class _BouncingDotsState extends State<_BouncingDots>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final List<Animation<double>> _anims;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+
+    _anims = List.generate(3, (i) {
+      final start = i * 0.2;
+      return Tween<double>(begin: 0, end: -4).animate(
+        CurvedAnimation(
+          parent: _ctrl,
+          curve: Interval(start, start + 0.4, curve: Curves.easeInOut),
+        ),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (_, __) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (i) {
+            return Transform.translate(
+              offset: Offset(0, _anims[i].value),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 1.5),
+                child: Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: widget.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+}
