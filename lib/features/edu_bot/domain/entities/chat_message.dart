@@ -8,6 +8,7 @@ class ChatMessage {
   final DateTime createdAt;
   final MessageStatus status;
   final String? errorMessage;
+  final List<Map<String, dynamic>>? suggestedFiles;
 
   const ChatMessage({
     required this.id,
@@ -16,5 +17,6 @@ class ChatMessage {
     required this.createdAt,
     this.status = MessageStatus.sent,
     this.errorMessage,
+    this.suggestedFiles,
   });
 }

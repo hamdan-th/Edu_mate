@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/chat_message.dart';
+import '../../../../../screens/library/file_details_screen.dart';
+import '../../../../../screens/library/file_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -124,6 +127,10 @@ class MessageBubble extends StatelessWidget {
                               fontWeight: isUser ? FontWeight.w500 : FontWeight.w400,
                             ),
                           ),
+                          if (message.suggestedFiles != null && message.suggestedFiles!.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            ...message.suggestedFiles!.map((file) => _buildMiniFileCard(context, file, isUser)),
+                          ],
                           if (isFailed) ...[
                             const SizedBox(height: 12),
                             Container(
@@ -223,6 +230,101 @@ class MessageBubble extends StatelessWidget {
                   ),
                 ),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniFileCard(BuildContext context, Map<String, dynamic> fileMap, bool isUser) {
+    final title = (fileMap['title'] ?? fileMap['subjectName'] ?? 'بدون عنوان').toString();
+    final ext = (fileMap['fileType'] ?? 'pdf').toString().toLowerCase();
+    final IconData icon = ext.contains('pdf') ? Icons.picture_as_pdf_rounded : Icons.insert_drive_file_rounded;
+    final Color iconColor = ext.contains('pdf') ? const Color(0xFFE57373) : const Color(0xFF64B5F6);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () {
+          // Construct dummy doc data so FileModel.fromFirestore can parse it if needed
+          // Or we can just build FileModel cleanly.
+          final fileModel = FileModel(
+            id: fileMap['id']?.toString() ?? '',
+            title: title,
+            author: (fileMap['doctorName'] ?? fileMap['author'] ?? '').toString(),
+            course: title,
+            university: (fileMap['university'] ?? '').toString(),
+            college: (fileMap['college'] ?? '').toString(),
+            major: (fileMap['specialization'] ?? fileMap['major'] ?? '').toString(),
+            semester: '',
+            fileType: ext,
+            thumbnailUrl: (fileMap['thumbnailUrl'] ?? '').toString(),
+            fileUrl: (fileMap['fileUrl'] ?? '').toString(),
+            uploaderName: (fileMap['uploaderName'] ?? '').toString(),
+            uploaderUsername: (fileMap['uploaderUsername'] ?? '').toString(),
+            description: (fileMap['description'] ?? '').toString(),
+            createdAt: fileMap['createdAt'] is int ? DateTime.fromMillisecondsSinceEpoch(fileMap['createdAt']) : DateTime.now(),
+            likes: fileMap['likesCount'] ?? 0,
+            saves: fileMap['savesCount'] ?? 0,
+            downloads: fileMap['downloadsCount'] ?? 0,
+            views: fileMap['viewsCount'] ?? 0,
+            shares: fileMap['sharesCount'] ?? 0,
+            status: 'approved',
+            userId: (fileMap['userId'] ?? '').toString(),
+            storagePath: (fileMap['storagePath'] ?? '').toString(),
+          );
+
+          Navigator.push(context, MaterialPageRoute(
+             builder: (_) => FileDetailsScreen(file: fileModel),
+          ));
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isUser ? Colors.white.withOpacity(0.1) : AppColors.background,
+            border: Border.all(color: isUser ? Colors.white24 : AppColors.border.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isUser ? Colors.white24 : iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: isUser ? Colors.white : iconColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.5,
+                        color: isUser ? Colors.white : AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'اضغط للفتح المباشر',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isUser ? Colors.white70 : AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, size: 14, color: isUser ? Colors.white54 : AppColors.textSecondary.withOpacity(0.5)),
             ],
           ),
         ),

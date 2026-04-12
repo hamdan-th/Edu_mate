@@ -116,6 +116,53 @@ class BotController extends ChangeNotifier {
       final contextPayload = _cachedMetadata;
       final botReply = await _repository.sendMessage(trimmedText, historyToPass, context: contextPayload);
 
+      String replyText = botReply.text;
+      List<Map<String, dynamic>>? suggestedFiles;
+
+      final RegExp searchRegex = RegExp(r'\[ACTION:SEARCH_LIBRARY:(.+?)\]');
+      final match = searchRegex.firstMatch(replyText);
+
+      if (match != null) {
+        String keyword = match.group(1)?.trim() ?? '';
+        replyText = replyText.replaceAll(match.group(0)!, '').trim();
+
+        try {
+          // Efficient query: get most recent approved files
+          final snap = await _firestore.collection('library_files')
+             .where('visibility', isEqualTo: 'public')
+             .where('status', isEqualTo: 'approved')
+             .orderBy('createdAt', descending: true)
+             .limit(40) // Increased limit to find matches in memory for simple keyword match
+             .get();
+             
+          final results = snap.docs.where((doc) {
+             final data = doc.data();
+             final title = (data['subjectName'] ?? data['title'] ?? '').toString().toLowerCase();
+             final desc = (data['description'] ?? '').toString().toLowerCase();
+             final spec = (data['specialization'] ?? data['major'] ?? '').toString().toLowerCase();
+             final searchKey = keyword.toLowerCase();
+             
+             return title.contains(searchKey) || 
+                    desc.contains(searchKey) || 
+                    spec.contains(searchKey);
+          }).take(3).toList();
+          
+          if (results.isEmpty) {
+             // If no specific match, maybe try a broader match or just inform
+             // For MVP, we'll just say not found if no keyword match
+          } else {
+             suggestedFiles = [];
+             for (var doc in results) {
+                final d = doc.data();
+                d['id'] = doc.id;
+                suggestedFiles!.add(d);
+             }
+          }
+        } catch (e) {
+          debugPrint("Error searching library: $e");
+        }
+      }
+
       _updateMessageInSession(
         curSessionId,
         userMsgId,
@@ -128,7 +175,14 @@ class BotController extends ChangeNotifier {
         ),
       );
 
-      _appendMessageToSession(curSessionId, botReply);
+      _appendMessageToSession(curSessionId, ChatMessage(
+          id: botReply.id,
+          text: replyText,
+          sender: botReply.sender,
+          createdAt: botReply.createdAt,
+          status: botReply.status,
+          suggestedFiles: suggestedFiles,
+      ));
     } catch (e) {
       final String rawError = e.toString().toLowerCase();
       String friendlyError = "عذراً، واجهنا خطأ تقني. يرجى المحاولة لاحقاً.";
@@ -323,6 +377,10 @@ class BotController extends ChangeNotifier {
               'college': data['college'] ?? '',
               'specialization': data['specializationName'] ?? '',
               'role': data['role'] ?? 'student',
+              'system_instructions': 'You are Edu Bot, an academic assistant for Yemeni university students. '
+                  'If the user asks for study materials, files, or specific academic subjects (e.g. Mathematics, Algebra), '
+                  'provide a helpful brief answer then MUST append exactly: [ACTION:SEARCH_LIBRARY:keyword] '
+                  'where keyword is the main subject name in Arabic or English.',
             });
           }
         } catch (_) {}
@@ -408,6 +466,9 @@ class BotController extends ChangeNotifier {
       // Restore failed/sent. Treat sending as failed if loaded fresh.
       status: map['status'] == 2 ? MessageStatus.failed : MessageStatus.sent,
       errorMessage: map['errorMessage']?.toString(),
+      suggestedFiles: map['suggestedFiles'] != null
+          ? List<Map<String, dynamic>>.from(map['suggestedFiles'])
+          : null,
     );
   }
 
@@ -419,6 +480,7 @@ class BotController extends ChangeNotifier {
       'createdAt': msg.createdAt.millisecondsSinceEpoch,
       'status': (msg.status == MessageStatus.sending || msg.status == MessageStatus.failed) ? 2 : 1,
       if (msg.errorMessage != null) 'errorMessage': msg.errorMessage,
+      if (msg.suggestedFiles != null) 'suggestedFiles': msg.suggestedFiles,
     };
   }
 }
