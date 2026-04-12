@@ -24,6 +24,8 @@ class GroupModel {
   final int adminsCount;
   final int messagesCount;
   final String lastMessageText;
+  final String lastMessageType;       // 'text' | 'image' | 'library_file_link' | ''
+  final String lastMessageSenderId;   // uid of the sender of the last message
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -48,6 +50,8 @@ class GroupModel {
     required this.adminsCount,
     required this.messagesCount,
     required this.lastMessageText,
+    required this.lastMessageType,
+    required this.lastMessageSenderId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -80,6 +84,8 @@ class GroupModel {
       adminsCount: (data['adminsCount'] as num?)?.toInt() ?? 0,
       messagesCount: (data['messagesCount'] as num?)?.toInt() ?? 0,
       lastMessageText: (data['lastMessageText'] ?? '').toString(),
+      lastMessageType: (data['lastMessageType'] ?? '').toString(),
+      lastMessageSenderId: (data['lastMessageSenderId'] ?? '').toString(),
       createdAt: _toDateTime(data['createdAt']),
       updatedAt: _toDateTime(data['updatedAt']),
     );

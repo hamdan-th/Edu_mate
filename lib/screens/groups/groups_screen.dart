@@ -890,39 +890,43 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      if (description.isNotEmpty)
-                        Text(
-                          description,
-                          maxLines: widget.isDiscover ? 2 : 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13.4,
-                            color: _muted.withOpacity(0.95),
-                            fontWeight: FontWeight.w500,
-                            height: 1.45,
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _softBg,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Text(
-                            widget.isDiscover
-                                ? AppLocalizations.of(context)!.groupsCardDiscoverSub
-                                : AppLocalizations.of(context)!.groupsCardMyGroupsSub,
+                      if (widget.isDiscover)
+                        // Discover: show group description as before
+                        if (description.isNotEmpty)
+                          Text(
+                            description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 12.5,
-                              color: _muted,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 13.4,
+                              color: _muted.withOpacity(0.95),
+                              fontWeight: FontWeight.w500,
+                              height: 1.45,
                             ),
-                          ),
-                        ),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _softBg,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)!.groupsCardDiscoverSub,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: _muted,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          )
+                      else
+                        // My Groups: show last-message preview
+                        _LastMessagePreview(group: group, muted: _muted, softBg: _softBg),
+
                     ],
                   ),
                 ),
@@ -935,7 +939,75 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
   }
 }
 
+/// Shows a compact last-message preview row on My Groups cards.
+class _LastMessagePreview extends StatelessWidget {
+  final GroupModel group;
+  final Color muted;
+  final Color softBg;
+
+  const _LastMessagePreview({
+    required this.group,
+    required this.muted,
+    required this.softBg,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final text = group.lastMessageText.trim();
+    final type = group.lastMessageType;
+    final senderId = group.lastMessageSenderId;
+    final isMe = senderId.isNotEmpty && senderId == currentUid;
+
+    String preview;
+    IconData icon;
+
+    if (text.isEmpty && type.isEmpty) {
+      // No messages yet
+      preview = AppLocalizations.of(context)!.groupsCardMyGroupsSub;
+      icon = Icons.chat_bubble_outline_rounded;
+    } else {
+      switch (type) {
+        case 'image':
+          preview = '📷 Photo';
+          icon = Icons.image_rounded;
+          break;
+        case 'library_file_link':
+          preview = text.isNotEmpty ? text : '📎 File';
+          icon = Icons.attach_file_rounded;
+          break;
+        default:
+          // Plain text or legacy entries without type
+          preview = text.isNotEmpty ? text : '...';
+          icon = Icons.chat_bubble_rounded;
+      }
+      if (isMe) preview = 'You: $preview';
+    }
+
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: muted),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            preview,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              color: muted,
+              fontWeight: FontWeight.w500,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _GroupAvatar extends StatelessWidget {
+
   final GroupModel group;
 
   const _GroupAvatar({required this.group});

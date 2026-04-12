@@ -159,8 +159,11 @@ class GroupService {
             }
 
             result.sort((a, b) {
-              final aTime = a.createdAt?.millisecondsSinceEpoch ?? 0;
-              final bTime = b.createdAt?.millisecondsSinceEpoch ?? 0;
+              // Sort by latest activity (updatedAt) so recently active groups
+              // rise to the top, falling back to createdAt for groups with
+              // no messages yet.
+              final aTime = (a.updatedAt ?? a.createdAt)?.millisecondsSinceEpoch ?? 0;
+              final bTime = (b.updatedAt ?? b.createdAt)?.millisecondsSinceEpoch ?? 0;
               return bTime.compareTo(aTime);
             });
 
@@ -612,7 +615,9 @@ class GroupService {
       'messagesCount': FieldValue.increment(1),
       'lastMessageText': cleanText.isNotEmpty
           ? cleanText
-          : (imageUrl != null ? 'صورة' : ''),
+          : (imageUrl != null ? '📷 Photo' : ''),
+      'lastMessageType': imageUrl != null ? 'image' : 'text',
+      'lastMessageSenderId': currentUid,
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
@@ -762,6 +767,8 @@ class GroupService {
     batch.update(groupRef, {
       'messagesCount': FieldValue.increment(1),
       'lastMessageText': cleanTitle,
+      'lastMessageType': 'library_file_link',
+      'lastMessageSenderId': currentUid,
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
