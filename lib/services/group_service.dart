@@ -634,12 +634,17 @@ class GroupService {
   }
 
   /// Returns a live stream of the unread message count for the current user
-  /// in [groupId]. A message is unread when its [createdAt] is after the
-  /// user's [lastReadAt] marker and its sender is not the current user.
+  /// in [groupId].
+  ///
+  /// Design: avoids Firestore two-field inequality (which requires a composite
+  /// index that may not exist). Instead:
+  ///   - Queries messages ONLY by createdAt > lastReadAt  (single inequality –
+  ///     no composite index needed beyond the default createdAt index).
+  ///   - Filters out the current user's own messages client-side.
   ///
   /// Reacts to TWO triggers:
-  ///   1. The member doc changes (lastReadAt is updated when chat is opened).
-  ///   2. A new message arrives in the messages subcollection.
+  ///   1. Member doc snapshot fires (lastReadAt changed → user opened chat).
+  ///   2. Any new message arrives in the messages subcollection.
   static Stream<int> streamUnreadCount(String groupId) {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return Stream.value(0);
@@ -657,14 +662,19 @@ class GroupService {
     Future<void> recount() async {
       if (controller.isClosed) return;
       try {
-        Query<Map<String, dynamic>> query =
-            messagesRef.where('senderId', isNotEqualTo: uid);
+        // Single-field inequality only → no composite index required.
+        Query<Map<String, dynamic>> query = messagesRef;
         if (lastReadAt != null) {
           query = query.where('createdAt', isGreaterThan: lastReadAt);
         }
-        final snap = await query.count().get();
-        if (!controller.isClosed) controller.add(snap.count ?? 0);
-      } catch (_) {
+        final snap = await query.get();
+        // Exclude own messages client-side.
+        final count = snap.docs.where((d) {
+          final sender = (d.data()['senderId'] ?? '').toString();
+          return sender.isNotEmpty && sender != uid;
+        }).length;
+        if (!controller.isClosed) controller.add(count);
+      } catch (e) {
         if (!controller.isClosed) controller.add(0);
       }
     }
@@ -678,14 +688,10 @@ class GroupService {
       recount();
     });
 
-    // Also listen to message changes so badge updates when new messages arrive.
-    messagesSub = messagesRef
-        .orderBy('createdAt', descending: true)
-        .limit(1)
-        .snapshots()
-        .listen((_) {
+    // Listen for new messages — fires whenever a message is added or changed.
+    messagesSub = messagesRef.snapshots().listen((_) {
       if (ready) recount();
-    });
+    }, onError: (_) {});
 
     controller.onCancel = () {
       memberSub?.cancel();
