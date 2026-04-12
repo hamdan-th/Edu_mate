@@ -4,6 +4,7 @@ class FeedPostModel {
   final String id;
   final String groupId;
   final String groupName;
+  final String groupImageUrl;
   final String authorId;
   final String authorName;
   final String contentText;
@@ -19,6 +20,7 @@ class FeedPostModel {
     required this.id,
     required this.groupId,
     required this.groupName,
+    required this.groupImageUrl,
     required this.authorId,
     required this.authorName,
     required this.contentText,
@@ -36,6 +38,7 @@ class FeedPostModel {
       id: map['postId']?.toString() ?? documentId,
       groupId: map['groupId']?.toString() ?? '',
       groupName: map['groupName']?.toString() ?? '',
+      groupImageUrl: map['groupImageUrl']?.toString() ?? '',
       authorId: map['authorId']?.toString() ?? '',
       authorName: map['authorName']?.toString() ?? '',
       contentText: map['contentText']?.toString() ?? '',

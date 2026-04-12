@@ -366,6 +366,7 @@ class _FeedScreenState extends State<FeedScreen> {
                               'authorId': data.authorId,
                               'authorName': data.authorName,
                               'groupName': data.groupName,
+                              'groupImageUrl': data.groupImageUrl,
                               'groupMeta': 'Public Group',
                               'time': _formatTime(data.createdAt, l10n),
                               'content': data.contentText,
@@ -1274,23 +1275,33 @@ class _PostCardState extends State<PostCard>
                 children: [
                   GestureDetector(
                     onTap: _handleGroupTap,
-                    child: Container(
-                      width: 46,
-                      height: 46,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.primary, AppColors.primaryDark],
+                    child: () {
+                      final groupImg = (widget.post['groupImageUrl'] ?? '').toString();
+                      if (groupImg.isNotEmpty) {
+                        return CircleAvatar(
+                          radius: 23,
+                          backgroundColor: AppColors.primary.withOpacity(0.12),
+                          backgroundImage: NetworkImage(groupImg),
+                        );
+                      }
+                      return Container(
+                        width: 46,
+                        height: 46,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [AppColors.primary, AppColors.primaryDark],
+                          ),
+                          shape: BoxShape.circle,
                         ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.person_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
+                        child: const Icon(
+                          Icons.person_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      );
+                    }(),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
