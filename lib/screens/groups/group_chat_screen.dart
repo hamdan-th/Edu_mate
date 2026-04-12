@@ -62,6 +62,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   String? _highlightedMessageId;
   // Latest snapshot of message docs; used by _jumpToMessage to locate items.
   List<QueryDocumentSnapshot> _loadedDocs = [];
+  late Stream<QuerySnapshot> _messagesStream;
 
   // ── Typing indicator ──────────────────────────────────────────────
   Timer? _typingTimer;
@@ -99,6 +100,12 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   @override
   void initState() {
     super.initState();
+    _messagesStream = _firestore
+        .collection('groups')
+        .doc(widget.group.id)
+        .collection('messages')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
     WidgetsBinding.instance.addObserver(this);
     _checkPermissions();
     // Mark group as read immediately when the screen opens.
@@ -779,12 +786,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('groups')
-                  .doc(widget.group.id)
-                  .collection('messages')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots(),
+              stream: _messagesStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState ==
                     ConnectionState.waiting) {

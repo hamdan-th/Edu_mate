@@ -181,10 +181,12 @@ class _BotScreenState extends State<BotScreen> {
             return Column(
               children: [
                 Expanded(
-                  child: _controller.messages.isEmpty && !_controller.isSending
-                      ? EmptyState(
-                          onSuggestionTap: (suggestion) => _controller.sendMessage(suggestion),
-                        )
+                  child: _controller.isLoading
+                      ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                      : _controller.messages.isEmpty && !_controller.isSending
+                          ? EmptyState(
+                              onSuggestionTap: (suggestion) => _controller.sendMessage(suggestion),
+                            )
                       : ListView.builder(
                           controller: _scrollController,
                           physics: const BouncingScrollPhysics(),

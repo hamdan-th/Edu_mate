@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_session.dart';
 import '../../data/repositories/bot_repository.dart';
 
 class BotController extends ChangeNotifier {
   final BotRepository _repository;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   
   final List<ChatSession> _sessions = [];
   String? _activeSessionId;
   bool _isSending = false;
+  bool _isLoading = true;
 
   BotController(this._repository) {
     _initDefaultSession();
   }
 
-  void _initDefaultSession() {
-    if (_sessions.isEmpty) {
-      createNewChat();
-    }
+  Future<void> _initDefaultSession() async {
+    await _loadSessions();
   }
 
   List<ChatSession> get sessions {
@@ -25,6 +28,7 @@ class BotController extends ChangeNotifier {
   }
 
   bool get isSending => _isSending;
+  bool get isLoading => _isLoading;
   
   ChatSession? get activeSession {
     if (_activeSessionId == null) return null;
@@ -50,6 +54,7 @@ class BotController extends ChangeNotifier {
     );
     _sessions.add(newSession);
     _activeSessionId = newSession.id;
+    _saveSession(newSession);
     notifyListeners();
   }
 
@@ -66,6 +71,7 @@ class BotController extends ChangeNotifier {
     if (_isSending && _activeSessionId == sessionId) return;
 
     _sessions.removeWhere((s) => s.id == sessionId);
+    _deleteSessionFirestore(sessionId);
     
     if (_sessions.isEmpty) {
       createNewChat();
@@ -203,7 +209,9 @@ class BotController extends ChangeNotifier {
     if (sessionIndex != -1) {
        final session = _sessions[sessionIndex];
        final updatedMessages = List<ChatMessage>.from(session.messages)..removeAt(index);
-       _sessions[sessionIndex] = session.copyWith(messages: updatedMessages, updatedAt: DateTime.now());
+       final newSession = session.copyWith(messages: updatedMessages, updatedAt: DateTime.now());
+       _sessions[sessionIndex] = newSession;
+       _saveSession(newSession);
        notifyListeners();
     }
 
@@ -240,7 +248,9 @@ class BotController extends ChangeNotifier {
     if (_activeSessionId == null) return;
     final index = _sessions.indexWhere((s) => s.id == _activeSessionId);
     if (index != -1) {
-       _sessions[index] = _sessions[index].copyWith(messages: const [], title: 'محادثة جديدة', updatedAt: DateTime.now());
+       final newSession = _sessions[index].copyWith(messages: const [], title: 'محادثة جديدة', updatedAt: DateTime.now());
+       _sessions[index] = newSession;
+       _saveSession(newSession);
        notifyListeners();
     }
   }
@@ -256,11 +266,13 @@ class BotController extends ChangeNotifier {
         newTitle = updateTitle.length > 25 ? '${updateTitle.substring(0, 25)}...' : updateTitle;
       }
       
-      _sessions[index] = session.copyWith(
+      final newSession = session.copyWith(
         messages: newMessages,
         title: newTitle,
         updatedAt: DateTime.now(),
       );
+      _sessions[index] = newSession;
+      _saveSession(newSession);
     }
   }
 
@@ -272,11 +284,118 @@ class BotController extends ChangeNotifier {
        if (msgIndex != -1) {
           final newMessages = List<ChatMessage>.from(session.messages);
           newMessages[msgIndex] = update(newMessages[msgIndex]);
-          _sessions[sessionIndex] = session.copyWith(
+          final newSession = session.copyWith(
              messages: newMessages,
              updatedAt: DateTime.now(),
           );
+          _sessions[sessionIndex] = newSession;
+          _saveSession(newSession);
        }
     }
+  }
+
+  // --- Firestore Persistence ---
+
+  Future<void> _loadSessions() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      final snap = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('bot_sessions')
+          .orderBy('updatedAt', descending: true)
+          .get();
+
+      if (snap.docs.isEmpty) {
+        createNewChat();
+      } else {
+        _sessions.clear();
+        for (var doc in snap.docs) {
+          _sessions.add(_sessionFromMap(doc.data(), doc.id));
+        }
+        _activeSessionId = _sessions.first.id;
+      }
+    } catch (_) {
+      if (_sessions.isEmpty) createNewChat();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveSession(ChatSession session) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('bot_sessions')
+          .doc(session.id)
+          .set(_sessionToMap(session));
+    } catch (_) {}
+  }
+
+  Future<void> _deleteSessionFirestore(String sessionId) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('bot_sessions')
+          .doc(sessionId)
+          .delete();
+    } catch (_) {}
+  }
+
+  ChatSession _sessionFromMap(Map<String, dynamic> map, String docId) {
+    return ChatSession(
+      id: docId,
+      title: map['title']?.toString() ?? 'محادثة',
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? DateTime.now().millisecondsSinceEpoch),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch),
+      messages: (map['messages'] as List<dynamic>? ?? [])
+          .map((m) => _messageFromMap(m as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> _sessionToMap(ChatSession session) {
+    return {
+      'title': session.title,
+      'createdAt': session.createdAt.millisecondsSinceEpoch,
+      'updatedAt': session.updatedAt.millisecondsSinceEpoch,
+      'messages': session.messages.map((m) => _messageToMap(m)).toList(),
+    };
+  }
+
+  ChatMessage _messageFromMap(Map<String, dynamic> map) {
+    return ChatMessage(
+      id: map['id']?.toString() ?? '',
+      text: map['text']?.toString() ?? '',
+      sender: map['sender'] == 1 ? MessageSender.bot : MessageSender.user,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? DateTime.now().millisecondsSinceEpoch),
+      // Restore failed/sent. Treat sending as failed if loaded fresh.
+      status: map['status'] == 2 ? MessageStatus.failed : MessageStatus.sent,
+      errorMessage: map['errorMessage']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> _messageToMap(ChatMessage msg) {
+    return {
+      'id': msg.id,
+      'text': msg.text,
+      'sender': msg.sender == MessageSender.user ? 0 : 1,
+      'createdAt': msg.createdAt.millisecondsSinceEpoch,
+      'status': (msg.status == MessageStatus.sending || msg.status == MessageStatus.failed) ? 2 : 1,
+      if (msg.errorMessage != null) 'errorMessage': msg.errorMessage,
+    };
   }
 }
