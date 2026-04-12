@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../models/group_message_model.dart';
 import '../../models/group_model.dart';
@@ -37,6 +41,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
+
+  File? _pickedImage;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -93,6 +99,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (picked != null) {
+      setState(() => _pickedImage = File(picked.path));
+    }
+  }
+
   Future<void> _saveEdits() async {
     final newName = _nameController.text.trim();
     final newDesc = _descController.text.trim();
@@ -103,15 +119,28 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     }
 
     try {
-      await _firestore.collection('groups').doc(widget.group.id).update({
+      // Upload new image if picked
+      String? newImageUrl;
+      if (_pickedImage != null) {
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}_${_pickedImage!.path.split('/').last}';
+        final ref = FirebaseStorage.instance.ref().child('group_covers').child(fileName);
+        await ref.putFile(_pickedImage!);
+        newImageUrl = await ref.getDownloadURL();
+      }
+
+      final updates = <String, dynamic>{
         'name': newName,
         'description': newDesc,
-      });
+        if (newImageUrl != null) 'imageUrl': newImageUrl,
+      };
+
+      await _firestore.collection('groups').doc(widget.group.id).update(updates);
 
       if (mounted) {
         setState(() {
           _groupName = newName;
           _groupDescription = newDesc;
+          _pickedImage = null;
           _isEditing = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsSaveSuccess)));
@@ -413,16 +442,25 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             children: [
-              CircleAvatar(
-                radius: 64,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
-                backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
-                child: const Align(
-                  alignment: Alignment.bottomRight,
-                  child: CircleAvatar(
-                    backgroundColor: AppColors.primary,
-                    radius: 20,
-                    child: Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
+              GestureDetector(
+                onTap: _pickImage,
+                child: CircleAvatar(
+                  radius: 64,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundImage: _pickedImage != null
+                      ? FileImage(_pickedImage!) as ImageProvider
+                      : (widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: CircleAvatar(
+                      backgroundColor: AppColors.primary,
+                      radius: 20,
+                      child: Icon(
+                        _pickedImage != null ? Icons.check_rounded : Icons.camera_alt_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
                   ),
                 ),
               ),
