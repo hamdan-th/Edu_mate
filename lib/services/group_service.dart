@@ -110,8 +110,8 @@ class GroupService {
     final status = data['status']?.toString() ?? 'active';
     final groupOwnerId = (groupData['ownerId'] ?? '').toString();
 
-    final isOwner = groupOwnerId == user.uid || role == 'owner';
-    final isAdmin = role == 'admin';
+    final isOwner = groupOwnerId == user.uid;
+    final isAdmin = role == 'admin' || (role == 'owner' && !isOwner);
     final isMuted = status == 'muted';
 
     bool canSend = false;
@@ -559,6 +559,62 @@ class GroupService {
     });
   }
 
+  static Future<void> deleteMessage({
+    required String groupId,
+    required String messageId,
+  }) async {
+    final state = await getUserGroupState(groupId);
+    if (!state.isMember) throw Exception('غير مصرح لك');
+    
+    final docRef = _groups.doc(groupId).collection('messages').doc(messageId);
+    final doc = await docRef.get();
+    if (!doc.exists) throw Exception('الرسالة غير موجودة');
+    final data = doc.data()!;
+    if (data['senderId'] != currentUid) {
+      throw Exception('لا يمكنك حذف رسالة شخص آخر');
+    }
+
+    await docRef.update({
+      'text': '🚫 تم حذف هذه الرسالة',
+      'isDeleted': true,
+      'deletedAt': FieldValue.serverTimestamp(),
+      'type': 'text',
+      'imageUrl': FieldValue.delete(),
+    });
+  }
+
+  static Future<void> editMessage({
+    required String groupId,
+    required String messageId,
+    required String newText,
+  }) async {
+    final cleanText = newText.trim();
+    if (cleanText.isEmpty) throw Exception('لا يمكن أن تكون الرسالة فارغة');
+
+    final state = await getUserGroupState(groupId);
+    if (!state.isMember) throw Exception('غير مصرح لك');
+    if (state.isBanned) throw Exception('أنت محظور من هذه المجموعة');
+    if (state.isMuted) throw Exception('تم كتمك داخل هذه المجموعة');
+    if (!state.canSend) throw Exception('المجموعة للقراءة فقط حاليًا');
+
+    final docRef = _groups.doc(groupId).collection('messages').doc(messageId);
+    final doc = await docRef.get();
+    if (!doc.exists) throw Exception('الرسالة غير موجودة');
+    final data = doc.data()!;
+    if (data['senderId'] != currentUid) {
+      throw Exception('لا يمكنك تعديل رسالة شخص آخر');
+    }
+    if (data['isDeleted'] == true) {
+      throw Exception('الرسالة محذوفة ولا يمكن تعديلها');
+    }
+
+    await docRef.update({
+      'text': cleanText,
+      'isEdited': true,
+      'editedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   static Future<void> sendMessage({
     required String groupId,
     required String text,
@@ -914,13 +970,11 @@ class GroupService {
         throw Exception('العضو المحدد ليس عضوًا في المجموعة');
       }
 
-      final membersSnap = await groupRef.collection('members').get();
+      final duplicateOwnersSnap =
+          await groupRef.collection('members').where('role', isEqualTo: 'owner').get();
 
-      for (final memberDoc in membersSnap.docs) {
-        final role = (memberDoc.data()['role'] ?? 'member').toString();
-        if (role == 'owner') {
-          tx.update(memberDoc.reference, {'role': 'admin'});
-        }
+      for (final memberDoc in duplicateOwnersSnap.docs) {
+        tx.update(memberDoc.reference, {'role': 'admin'});
       }
 
       final oldOwnerMemberRef = groupRef.collection('members').doc(currentOwnerId);

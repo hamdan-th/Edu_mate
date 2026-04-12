@@ -60,18 +60,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     if (oldOwnerId == null) return;
 
     try {
-      WriteBatch batch = _firestore.batch();
-
-      final groupRef = _firestore.collection('groups').doc(widget.group.id);
-      batch.update(groupRef, {'ownerId': newOwnerId});
-
-      final oldOwnerRef = groupRef.collection('members').doc(oldOwnerId);
-      batch.update(oldOwnerRef, {'role': 'admin'});
-
-      final newOwnerRef = groupRef.collection('members').doc(newOwnerId);
-      batch.update(newOwnerRef, {'role': 'owner'});
-
-      await batch.commit();
+      await GroupService.transferOwnership(widget.group.id, newOwnerId);
 
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
@@ -184,9 +173,12 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                         }
 
                         final role = data['role'] ?? 'member';
-                        if (role == 'owner' || doc.id == widget.group.ownerId) {
+                        final isTrueOwner = doc.id == widget.group.ownerId;
+                        
+                        if (isTrueOwner) {
                           owners.add(doc);
-                        } else if (role == 'admin') {
+                        } else if (role == 'admin' || role == 'owner') {
+                          // if they have 'owner' but aren't the group ownerId, treat as admin
                           admins.add(doc);
                         } else {
                           members.add(doc);
@@ -293,8 +285,8 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     final imageUrl = data['imageUrl'] as String?;
 
     final bool isMe = memberId == _auth.currentUser?.uid;
-    final bool isTargetOwner = role == 'owner' || memberId == widget.group.ownerId;
-    final bool isTargetAdmin = role == 'admin';
+    final bool isTargetOwner = memberId == widget.group.ownerId;
+    final bool isTargetAdmin = role == 'admin' || (role == 'owner' && !isTargetOwner);
 
     String roleLabel = l10n.groupsRoleMember;
     Color roleColor = AppColors.textSecondary;

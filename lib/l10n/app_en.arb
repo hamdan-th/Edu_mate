@@ -46,6 +46,8 @@
   "signupCollegeHint": "College",
   "signupMajorHint": "Major",
   "signupBioHint": "Bio",
+  "signupRoleStudent": "Student",
+  "signupRoleDoctor": "Doctor",
   "signupBtn": "Create Account",
   "signupAlreadyHaveAccount": "Already have an account? Log in",
   "signupSuccess": "Account created successfully",

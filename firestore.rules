@@ -1,0 +1,112 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+    
+    // Retrieve the user's role safely from the database
+    function getUserRole() {
+       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // ==========================================
+    // USERS COLLECTION
+    // ==========================================
+    match /users/{uid} {
+      
+      // READ LOGIC: Allowing all authenticated users to read.
+      // NECESSITY CHECK: Verified. Files like `group_chat_screen.dart` (Line 88) 
+      // dynamically query arbitrary `users/[senderId]` to populate missing avatar caches 
+      // in real-time chats, and `feed_comments_service.dart` resolves commenter profiles.
+      // Locking this down right now will completely break chat/feed rendering.
+      allow read: if isAuthenticated();
+      
+      // CREATE LOGIC: Strict constraint on exact key payload and roles.
+      allow create: if isOwner(uid) 
+                    && request.resource.data.uid == uid
+                    && request.resource.data.isDoctorVerified == false
+                    // STRICT: Block arbitrary roles entirely
+                    && request.resource.data.role in ['student', 'doctor']
+                    // STRICT: Ensure core structural shape exists natively
+                    && request.resource.data.keys().hasAll([
+                       'uid', 'username', 'email', 'role', 'isDoctorVerified', 'createdAt'
+                    ])
+                    // STRICT: Prevent arbitrary payload injection
+                    && request.resource.data.keys().hasOnly([
+                       'uid', 'username', 'username_lowercase', 'fullName', 
+                       'email', 'bio', 'role', 'isDoctorVerified', 'photoUrl', 'createdAt',
+                       'college', 'specializationId', 'specializationName'
+                    ]);
+      
+      // UPDATE LOGIC: Constrain keys specifically isolated from core auth states.
+      allow update: if isOwner(uid) 
+                    // Break process if a user attempts to manually override privilege markers
+                    && (!request.resource.data.diff(resource.data).affectedKeys()
+                        .hasAny(['role', 'isDoctorVerified', 'uid', 'email', 'createdAt', 'username_lowercase']))
+                    && request.resource.data.keys().hasOnly([
+                       'uid', 'username', 'username_lowercase', 'fullName', 
+                       'email', 'bio', 'role', 'isDoctorVerified', 'photoUrl', 'createdAt',
+                       'college', 'specializationId', 'specializationName'
+                    ]);
+      
+      allow delete: if isOwner(uid);
+    }
+
+    // ==========================================
+    // DOCTOR VERIFICATION REQUESTS
+    // ==========================================
+    match /doctor_verification_request/{requestId} {
+      // Users can ONLY view requests mapped to their own unique ID
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // CREATE LOGIC: Strictly locked to officially registered doctors.
+      allow create: if isAuthenticated() 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    // STRICT: The executing user must internally already be a doctor
+                    && getUserRole() == 'doctor'
+                    && request.resource.data.keys().hasAll([
+                      'userId', 'email', 'status', 'createdAt'
+                    ])
+                    && request.resource.data.keys().hasOnly([
+                      'userId', 'username', 'fullName', 'email', 'photoUrl', 
+                      'college', 'specializationName', 'status', 'createdAt'
+                    ]);
+      
+      // No standard user can mutate the queue status or delete valid logs
+      allow update, delete: if false;
+    }
+    
+    // ==========================================
+    // TEMPORARY FALLBACKS (Groups, Posts, Library, Notifications)
+    // ==========================================
+    match /{path=**}/members/{memberId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /groups/{groupId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /posts/{postId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /library_files/{fileId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /notifications/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /doctor_verification_request/{document=**} {
+      allow read, write: if false; // Omit root propagation explicitly
+    }
+  }
+}

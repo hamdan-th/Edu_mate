@@ -374,6 +374,18 @@ abstract class AppLocalizations {
   /// **'Bio'**
   String get signupBioHint;
 
+  /// No description provided for @signupRoleStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get signupRoleStudent;
+
+  /// No description provided for @signupRoleDoctor.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor'**
+  String get signupRoleDoctor;
+
   /// No description provided for @signupBtn.
   ///
   /// In en, this message translates to:

@@ -21,6 +21,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isSendingVerification = false;
   bool _isDeleting = false;
   bool _isLoggingOut = false;
+  bool _isVerificationPending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPendingVerification();
+  }
+
+  Future<void> _checkPendingVerification() async {
+    final user = currentUser;
+    if (user == null) return;
+    try {
+      final existing = await FirebaseFirestore.instance
+          .collection('doctor_verification_request')
+          .where('userId', isEqualTo: user.uid)
+          .where('status', isEqualTo: 'pending')
+          .limit(1)
+          .get();
+      if (existing.docs.isNotEmpty && mounted) {
+        setState(() {
+          _isVerificationPending = true;
+        });
+      }
+    } catch (_) {}
+  }
 
   Future<void> _pickAndUploadProfileImage() async {
     final user = currentUser;
@@ -101,6 +126,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       final l10n = AppLocalizations.of(context)!;
       _showMessage(l10n.profileVerificationSent);
+      setState(() {
+        _isVerificationPending = true;
+      });
     } catch (e) {
       final l10n = AppLocalizations.of(context)!;
       _showMessage(l10n.profileVerificationFailed);
@@ -466,25 +494,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   label: l10n.profileBioLabel,
                   value: bio,
                 ),
-                _buildInfoTile(
-                  icon: Icons.account_balance_outlined,
-                  label: l10n.profileCollegeLabel,
-                  value: college,
-                ),
-                _buildInfoTile(
-                  icon: Icons.school_outlined,
-                  label: l10n.profileSpecialtyLabel,
-                  value: specializationName,
-                ),
+                if (role != 'doctor') ...[
+                  _buildInfoTile(
+                    icon: Icons.account_balance_outlined,
+                    label: l10n.profileCollegeLabel,
+                    value: college,
+                  ),
+                  _buildInfoTile(
+                    icon: Icons.school_outlined,
+                    label: l10n.profileSpecialtyLabel,
+                    value: specializationName,
+                  ),
+                ],
                 const SizedBox(height: 10),
-                if (!isDoctorVerified)
+                if (role == 'doctor' && !isDoctorVerified)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: _isSendingVerification
+                      onPressed: _isVerificationPending || _isSendingVerification
                           ? null
                           : () => _sendDoctorVerificationRequest(data),
-                      icon: _isSendingVerification
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isVerificationPending ? Colors.grey.shade400 : null,
+                      ),
+                      icon: _isVerificationPending 
+                          ? const Icon(Icons.hourglass_empty_rounded, color: Colors.white)
+                          : _isSendingVerification
                           ? const SizedBox(
                         width: 18,
                         height: 18,
@@ -494,7 +529,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       )
                           : const Icon(Icons.verified_outlined),
-                      label: Text(l10n.profileReqDocVerification),
+                      label: Text(
+                        _isVerificationPending
+                            ? l10n.profileVerificationPending
+                            : l10n.profileReqDocVerification,
+                      ),
                     ),
                   ),
                 const SizedBox(height: 12),

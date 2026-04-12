@@ -46,6 +46,8 @@
   "signupCollegeHint": "الكلية",
   "signupMajorHint": "التخصص",
   "signupBioHint": "نبذة تعريفية",
+  "signupRoleStudent": "طالب",
+  "signupRoleDoctor": "دكتور",
   "signupBtn": "إنشاء حساب",
   "signupAlreadyHaveAccount": "لديك حساب بالفعل؟ تسجيل الدخول",
   "signupSuccess": "تم إنشاء الحساب بنجاح",

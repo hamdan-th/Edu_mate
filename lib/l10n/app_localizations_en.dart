@@ -148,6 +148,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signupBioHint => 'Bio';
 
   @override
+  String get signupRoleStudent => 'Student';
+
+  @override
+  String get signupRoleDoctor => 'Doctor';
+
+  @override
   String get signupBtn => 'Create Account';
 
   @override

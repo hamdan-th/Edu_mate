@@ -171,14 +171,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     if (oldOwnerId == null) return;
 
     try {
-      WriteBatch batch = _firestore.batch();
-      final groupRef = _firestore.collection('groups').doc(widget.group.id);
-      batch.update(groupRef, {'ownerId': newOwnerId});
-      final oldOwnerRef = groupRef.collection('members').doc(oldOwnerId);
-      batch.update(oldOwnerRef, {'role': 'admin'});
-      final newOwnerRef = groupRef.collection('members').doc(newOwnerId);
-      batch.update(newOwnerRef, {'role': 'owner'});
-      await batch.commit();
+      await GroupService.transferOwnership(widget.group.id, newOwnerId);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsTransferOwnershipSuccess)));

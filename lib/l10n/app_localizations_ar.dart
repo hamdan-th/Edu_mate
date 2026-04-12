@@ -147,6 +147,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signupBioHint => 'نبذة تعريفية';
 
   @override
+  String get signupRoleStudent => 'طالب';
+
+  @override
+  String get signupRoleDoctor => 'دكتور';
+
+  @override
   String get signupBtn => 'إنشاء حساب';
 
   @override

@@ -15,6 +15,7 @@ import 'group_details_screen.dart';
 import 'invite_group_screen.dart';
 import 'package:flutter/gestures.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final GroupModel group;
@@ -31,7 +32,8 @@ class GroupChatScreen extends StatefulWidget {
 class _GroupChatScreenState extends State<GroupChatScreen>
     with WidgetsBindingObserver {
   final TextEditingController _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener = ItemPositionsListener.create();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ImagePicker _picker = ImagePicker();
@@ -48,6 +50,8 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   int _membersCount = 0;
   bool _isSearching = false;
   String _searchQuery = '';
+  List<int> _searchMatchIndices = [];
+  int _currentSearchMatchCursor = -1;
   final TextEditingController _searchController = TextEditingController();
 
   final Map<String, Map<String, dynamic>> _userCache = {};
@@ -144,7 +148,6 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     WidgetsBinding.instance.removeObserver(this);
     _messageController.dispose();
     _searchController.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -282,27 +285,55 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     );
   }
 
-  /// Scrolls to the message with [targetId] and briefly highlights it.
-  ///
-  /// Strategy:
-  ///
-  /// FAST PATH — item already rendered:
-  ///   Read the item's actual RenderBox position, compute the exact pixel
-  ///   offset to place it 35% from the top of the viewport, then animateTo
-  ///   that precise offset. This avoids the "nudge" caused by ensureVisible
-  ///   only scrolling the bare minimum.
-  ///
-  /// SLOW PATH — item not yet in the render tree:
-  ///   Scroll progressively in large steps toward the estimated position,
-  ///   waiting one frame between steps. As soon as the item's GlobalKey
-  ///   becomes available, switch to the fast path for exact placement.
-  Future<void> _jumpToMessage(String targetId) async {
-    // ── FAST PATH: item already in render tree ──────────────────────
-    // _tryExactJump returns true immediately if the key is found and
-    // schedules the precise animateTo inside a post-frame callback.
-    if (_tryExactJump(targetId)) return;
+  void _doMatchSearchLocally() {
+    final query = _searchQuery.toLowerCase();
+    final matches = <int>[];
+    if (query.isNotEmpty) {
+      for (int i = 0; i < _loadedDocs.length; i++) {
+        final data = _loadedDocs[i].data() as Map<String, dynamic>;
+        final text = (data['text'] ?? '').toString().toLowerCase();
+        final shared = (data['sharedFileTitle'] ?? '').toString().toLowerCase();
+        if (text.contains(query) || shared.contains(query)) {
+          matches.add(i);
+        }
+      }
+    }
+    _searchMatchIndices = matches;
+    if (matches.isEmpty) {
+      _currentSearchMatchCursor = -1;
+    } else {
+      _currentSearchMatchCursor = 0;
+      _jumpToSearchMatch(); 
+    }
+  }
 
-    // ── SLOW PATH: item not yet rendered ───────────────────────────
+  void _jumpToSearchMatch() {
+    if (_searchMatchIndices.isEmpty || _currentSearchMatchCursor < 0) return;
+    final idx = _searchMatchIndices[_currentSearchMatchCursor];
+    final doc = _loadedDocs[idx];
+    _jumpToMessage(doc.id);
+  }
+
+  void _nextSearchMatch() {
+    if (_searchMatchIndices.isEmpty) return;
+    setState(() {
+      _currentSearchMatchCursor = (_currentSearchMatchCursor + 1) % _searchMatchIndices.length;
+    });
+    _jumpToSearchMatch();
+  }
+
+  void _prevSearchMatch() {
+    if (_searchMatchIndices.isEmpty) return;
+    setState(() {
+      _currentSearchMatchCursor = (_currentSearchMatchCursor - 1 + _searchMatchIndices.length) % _searchMatchIndices.length;
+    });
+    _jumpToSearchMatch();
+  }
+
+  /// True index-based navigation strategy.
+  /// Locates the real index of the message in the loaded chat history
+  /// and natively scrolls the list to perfectly mount it.
+  Future<void> _jumpToMessage(String targetId) async {
     final idx = _loadedDocs.indexWhere((d) => d.id == targetId);
     if (idx == -1) {
       if (mounted) {
@@ -316,114 +347,15 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       return;
     }
 
-    // Single-shot estimated jump: one smooth animation to the best-guess
-    // position, then one post-frame correction via _tryExactJump.
-    // This avoids the jerky stepped-loop that was visible on screen.
-    final maxExt     = _scrollController.position.maxScrollExtent;
-    const estH       = 95.0;
-    final guess1     = (idx * estH).clamp(0.0, maxExt);
-
-    await _scrollController.animateTo(
-      guess1,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-
-    // Wait one frame for Flutter to build newly visible items.
-    final c1 = Completer<void>();
-    WidgetsBinding.instance.addPostFrameCallback((_) => c1.complete());
-    await c1.future;
-
-    // Try exact correction immediately.
-    if (!mounted) return;
-    if (_tryExactJump(targetId)) return;
-
-    // Item still not built — scroll one more estimated step further
-    // (handles cases where the estimate was short by several messages)
-    // and retry once more.
-    final pos2   = _scrollController.position.pixels;
-    final going  = guess1 > _scrollController.position.pixels
-        || (guess1 - pos2).abs() < 10;
-    final guess2 = going
-        ? (pos2 + 800.0).clamp(0.0, maxExt)
-        : (pos2 - 800.0).clamp(0.0, maxExt);
-
-    await _scrollController.animateTo(
-      guess2,
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOut,
-    );
-
-    final c2 = Completer<void>();
-    WidgetsBinding.instance.addPostFrameCallback((_) => c2.complete());
-    await c2.future;
-
-    if (!mounted) return;
-    if (!_tryExactJump(targetId)) {
-      // Genuine fallback: item still off-screen — flash at current position.
+    if (_itemScrollController.isAttached) {
+      await _itemScrollController.scrollTo(
+        index: idx,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+        alignment: 0.15, // Lands the message comfortably near the top
+      );
       _flashHighlight(targetId);
     }
-  }
-
-  /// Reads the item's real rendered position and schedules an exact animateTo
-  /// inside a post-frame callback so coordinates are read after the current
-  /// layout pass (including any in-progress sheet dismissal) has settled.
-  ///
-  /// Returns true immediately if the item is in the render tree (even if the
-  /// animation hasn't started yet).
-  bool _tryExactJump(String targetId) {
-    final key = _itemKeys[targetId];
-    if (key == null || key.currentContext == null) return false;
-
-    final renderBox = key.currentContext!.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.hasSize) return false;
-
-    // Defer coordinate reading to next frame so any in-progress layout
-    // (e.g. sheet dismiss animation) finishes first.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final rb = key.currentContext?.findRenderObject() as RenderBox?;
-      if (rb == null || !rb.hasSize) {
-        _flashHighlight(targetId);
-        return;
-      }
-
-      final itemGlobalTop = rb.localToGlobal(Offset.zero).dy;
-
-      final scrollable = Scrollable.maybeOf(key.currentContext!);
-      if (scrollable == null) {
-        _flashHighlight(targetId);
-        return;
-      }
-      final vpBox =
-          scrollable.context.findRenderObject() as RenderBox?;
-      if (vpBox == null) {
-        _flashHighlight(targetId);
-        return;
-      }
-
-      final vpTop    = vpBox.localToGlobal(Offset.zero).dy;
-      final vpHeight = vpBox.size.height;
-
-      // Land the item at 30% from top of the viewport.
-      final desiredTop = vpTop + vpHeight * 0.30;
-      final delta      = itemGlobalTop - desiredTop;
-      final newOffset  = (_scrollController.position.pixels + delta)
-          .clamp(0.0, _scrollController.position.maxScrollExtent);
-
-      if (delta.abs() > 6) {
-        _scrollController
-            .animateTo(
-              newOffset,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOutCubic,
-            )
-            .then((_) => _flashHighlight(targetId));
-      } else {
-        _flashHighlight(targetId);
-      }
-    });
-    return true;
   }
 
   /// Briefly highlights the message bubble with [targetId].
@@ -489,9 +421,9 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         });
       }
 
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          0.0,
+      if (_itemScrollController.isAttached) {
+        _itemScrollController.scrollTo(
+          index: 0,
           duration: const Duration(milliseconds: 280),
           curve: Curves.easeOut,
         );
@@ -701,32 +633,63 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(color: _border),
                       ),
-                      child: TextField(
-                        controller: _searchController,
-                        autofocus: true,
-                        cursorColor: AppColors.primary,
-                        style: TextStyle(
-                          color: _text,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)!.groupsChatSearchHint,
-                          hintStyle: TextStyle(
-                            color: _muted.withOpacity(0.75),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              autofocus: true,
+                              cursorColor: AppColors.primary,
+                              style: TextStyle(
+                                color: _text,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: AppLocalizations.of(context)!.groupsChatSearchHint,
+                                hintStyle: TextStyle(
+                                  color: _muted.withOpacity(0.75),
+                                ),
+                                border: InputBorder.none,
+                                prefixIcon: Icon(
+                                  Icons.search_rounded,
+                                  color: _muted,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                              ),
+                              onChanged: (val) =>
+                                  setState(() {
+                                     _searchQuery = val.trim();
+                                     _doMatchSearchLocally();
+                                  }),
+                            ),
                           ),
-                          border: InputBorder.none,
-                          prefixIcon: Icon(
-                            Icons.search_rounded,
-                            color: _muted,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                        ),
-                        onChanged: (val) =>
-                            setState(() => _searchQuery = val.trim()),
+                          if (_searchMatchIndices.isNotEmpty) ...[
+                            Text(
+                              '${_currentSearchMatchCursor + 1}/${_searchMatchIndices.length}',
+                              style: TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.bold),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.keyboard_arrow_up_rounded),
+                              color: AppColors.primary,
+                              iconSize: 22,
+                              constraints: const BoxConstraints(),
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              onPressed: _nextSearchMatch,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                              color: AppColors.primary,
+                              iconSize: 22,
+                              constraints: const BoxConstraints(),
+                              padding: const EdgeInsets.only(right: 8, left: 4),
+                              onPressed: _prevSearchMatch,
+                            ),
+                          ],
+                        ]
                       ),
                     )
                         : InkWell(
@@ -847,19 +810,8 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                   if (mounted) _loadedDocs = List.unmodifiable(docs);
                 });
 
-                if (_searchQuery.isNotEmpty) {
-                  final query = _searchQuery.toLowerCase();
-                  docs = docs.where((doc) {
-                    final data = doc.data() as Map<String, dynamic>;
-                    final text =
-                    (data['text'] ?? '').toString().toLowerCase();
-                    final sharedTitle = (data['sharedFileTitle'] ?? '')
-                        .toString()
-                        .toLowerCase();
-                    return text.contains(query) ||
-                        sharedTitle.contains(query);
-                  }).toList();
-                }
+                // Search no longer destructively filters the chat list.
+                // It highlights matches in-place instead.
 
                 if (docs.isEmpty) {
                   return _searchQuery.isNotEmpty
@@ -876,8 +828,9 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                       : const _EmptyChatState();
                 }
 
-                return ListView.builder(
-                  controller: _scrollController,
+                return ScrollablePositionedList.builder(
+                  itemScrollController: _itemScrollController,
+                  itemPositionsListener: _itemPositionsListener,
                   reverse: true,
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(14, 18, 14, 16),
@@ -1013,17 +966,20 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.only(top: 10, bottom: 20),
-        decoration: BoxDecoration(
-          color: _surface,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(26),
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: Container(
+          padding: const EdgeInsets.only(top: 10, bottom: 20),
+          decoration: BoxDecoration(
+            color: _surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(26),
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
             // ── Quick emoji reactions ─────────────────────────────────
             Padding(
               padding:
@@ -1209,8 +1165,102 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                   }
                 },
               ),
+            if ((_auth.currentUser?.uid ?? '') == (data['senderId'] ?? '') && data['type'] == 'text')
+              ListTile(
+                leading: Icon(Icons.edit_rounded, color: AppColors.primary),
+                title: Text(
+                  'Edit Message',
+                  style: TextStyle(
+                    color: _text,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditMessageDialog(messageId, data['text']?.toString() ?? '');
+                },
+              ),
+            if ((_auth.currentUser?.uid ?? '') == (data['senderId'] ?? ''))
+              ListTile(
+                leading: const Icon(Icons.delete_rounded, color: Colors.red),
+                title: const Text(
+                  'Delete Message',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteMessageDialog(messageId);
+                },
+              ),
           ],
         ),
+      ),
+    ),
+  ));
+}
+
+  void _showEditMessageDialog(String messageId, String currentText) {
+    final editCtrl = TextEditingController(text: currentText);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: _surface,
+        title: Text('Edit Message', style: TextStyle(color: _text)),
+        content: TextField(
+          controller: editCtrl,
+          style: TextStyle(color: _text),
+          decoration: InputDecoration(
+             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: _border)),
+             focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
+          ),
+          maxLines: null,
+          minLines: 1,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+               Navigator.pop(ctx);
+               if (editCtrl.text.trim().isNotEmpty && editCtrl.text.trim() != currentText.trim()) {
+                 await GroupService.editMessage(
+                   groupId: widget.group.id,
+                   messageId: messageId,
+                   newText: editCtrl.text.trim(),
+                 );
+               }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteMessageDialog(String messageId) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: _surface,
+        title: Text('Delete Message', style: TextStyle(color: _text)),
+        content: Text('Are you sure you want to delete this message?', style: TextStyle(color: _text)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+               Navigator.pop(ctx);
+               await GroupService.deleteMessage(
+                 groupId: widget.group.id,
+                 messageId: messageId,
+               );
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
@@ -1602,17 +1652,36 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                           const SizedBox(width: 8),
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              _formatTimestamp(timestamp, AppLocalizations.of(context)!),
-                              style: TextStyle(
-                                fontSize: 10.6,
-                                fontWeight: FontWeight.w700,
-                                color: isMe
-                                    ? (_isDark
-                                    ? primaryColor.withOpacity(0.85)
-                                    : Colors.white70)
-                                    : _muted.withOpacity(0.82),
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (data['isEdited'] == true) ...[
+                                  Text(
+                                    'edited',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FontStyle.italic,
+                                      color: isMe
+                                          ? (_isDark ? Colors.white54 : Colors.white60)
+                                          : _muted.withOpacity(0.6),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                ],
+                                Text(
+                                  _formatTimestamp(timestamp, AppLocalizations.of(context)!),
+                                  style: TextStyle(
+                                    fontSize: 10.6,
+                                    fontWeight: FontWeight.w700,
+                                    color: isMe
+                                        ? (_isDark
+                                        ? primaryColor.withOpacity(0.85)
+                                        : Colors.white70)
+                                        : _muted.withOpacity(0.82),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -1923,6 +1992,32 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     );
   }
 
+  Widget _buildHighlightedText(String text, String query, TextStyle textStyle) {
+    if (query.isEmpty) return Text(text, style: textStyle);
+    
+    final lowerText = text.toLowerCase();
+    int start = 0;
+    List<TextSpan> spans = [];
+    
+    while (true) {
+      final idx = lowerText.indexOf(query, start);
+      if (idx == -1) {
+        spans.add(TextSpan(text: text.substring(start), style: textStyle));
+        break;
+      }
+      if (idx > start) {
+        spans.add(TextSpan(text: text.substring(start, idx), style: textStyle));
+      }
+      spans.add(TextSpan(
+        text: text.substring(idx, idx + query.length),
+        style: textStyle.copyWith(backgroundColor: AppColors.primary.withOpacity(0.4)),
+      ));
+      start = idx + query.length;
+    }
+    
+    return RichText(text: TextSpan(children: spans));
+  }
+
   Widget _buildMessageText(String text, bool isMe, bool isDark) {
     final textColor = isDark
         ? Colors.white.withOpacity(0.95)
@@ -1934,7 +2029,12 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       fontWeight: FontWeight.w600,
     );
 
+    final query = _searchQuery.toLowerCase();
+
     if (!text.contains('edumate://invite')) {
+      if (query.isNotEmpty) {
+        return _buildHighlightedText(text, query, textStyle);
+      }
       return Text(text, style: textStyle);
     }
 

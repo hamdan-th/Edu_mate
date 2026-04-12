@@ -25,6 +25,7 @@ class _SignupScreenState extends State<SignupScreen>
 
   String _selectedCollege = collegesList.first;
   String _specializationId = '';
+  String _accountType = 'student';
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -110,9 +111,13 @@ class _SignupScreenState extends State<SignupScreen>
     final bio = _bioController.text.trim();
     final password = _passwordController.text.trim();
 
-    final selectedItem = specializationsList.firstWhere(
-          (item) => item.id == _specializationId,
-    );
+    SpecializationItem? selectedItem;
+    if (_accountType == 'student') {
+      selectedItem = specializationsList.firstWhere(
+            (item) => item.id == _specializationId,
+        orElse: () => specializationsList.first,
+      );
+    }
 
     setState(() {
       _isLoading = true;
@@ -138,21 +143,26 @@ class _SignupScreenState extends State<SignupScreen>
 
       final uid = credential.user!.uid;
 
-      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      final userData = <String, dynamic>{
         'uid': uid,
         'username': username,
         'username_lowercase': username.toLowerCase(),
         'fullName': fullName,
         'email': email,
         'bio': bio,
-        'college': _selectedCollege,
-        'specializationId': selectedItem.id,
-        'specializationName': selectedItem.name,
-        'role': 'student',
+        'role': _accountType,
         'isDoctorVerified': false,
         'photoUrl': '',
         'createdAt': FieldValue.serverTimestamp(),
-      });
+      };
+
+      if (_accountType == 'student' && selectedItem != null) {
+        userData['college'] = _selectedCollege;
+        userData['specializationId'] = selectedItem.id;
+        userData['specializationName'] = selectedItem.name;
+      }
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).set(userData);
 
       _showMessage(l10n.signupSuccess);
 
@@ -294,8 +304,38 @@ class _SignupScreenState extends State<SignupScreen>
                                     },
                                   ),
                                   const SizedBox(height: 14),
-                                  DropdownButtonFormField<String>(
-                                    initialValue: _selectedCollege,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: RadioListTile<String>(
+                                          title: Text(l10n.signupRoleStudent, style: textTheme.bodyMedium),
+                                          value: 'student',
+                                          groupValue: _accountType,
+                                          contentPadding: EdgeInsets.zero,
+                                          dense: true,
+                                          onChanged: (val) {
+                                            if (val != null) setState(() => _accountType = val);
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: RadioListTile<String>(
+                                          title: Text(l10n.signupRoleDoctor, style: textTheme.bodyMedium),
+                                          value: 'doctor',
+                                          groupValue: _accountType,
+                                          contentPadding: EdgeInsets.zero,
+                                          dense: true,
+                                          onChanged: (val) {
+                                            if (val != null) setState(() => _accountType = val);
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (_accountType == 'student') ...[
+                                    const SizedBox(height: 14),
+                                    DropdownButtonFormField<String>(
+                                      initialValue: _selectedCollege,
                                     dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
                                     style: textTheme.bodyLarge,
                                     decoration: _inputDecoration(
@@ -318,28 +358,31 @@ class _SignupScreenState extends State<SignupScreen>
                                       });
                                     },
                                   ),
-                                  const SizedBox(height: 14),
-                                  DropdownButtonFormField<String>(
-                                    initialValue: _specializationId,
-                                    dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
-                                    style: textTheme.bodyLarge,
-                                    decoration: _inputDecoration(
-                                      label: l10n.signupMajorHint,
-                                      icon: Icons.school_outlined,
+                                  ],
+                                  if (_accountType == 'student') ...[
+                                    const SizedBox(height: 14),
+                                    DropdownButtonFormField<String>(
+                                      initialValue: _specializationId,
+                                      dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
+                                      style: textTheme.bodyLarge,
+                                      decoration: _inputDecoration(
+                                        label: l10n.signupMajorHint,
+                                        icon: Icons.school_outlined,
+                                      ),
+                                      items: _filteredSpecializations.map((item) {
+                                        return DropdownMenuItem<String>(
+                                          value: item.id,
+                                          child: Text(item.name),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        if (value == null) return;
+                                        setState(() {
+                                          _specializationId = value;
+                                        });
+                                      },
                                     ),
-                                    items: _filteredSpecializations.map((item) {
-                                      return DropdownMenuItem<String>(
-                                        value: item.id,
-                                        child: Text(item.name),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      if (value == null) return;
-                                      setState(() {
-                                        _specializationId = value;
-                                      });
-                                    },
-                                  ),
+                                  ],
                                   const SizedBox(height: 14),
                                   TextFormField(
                                     controller: _bioController,
