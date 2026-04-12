@@ -636,32 +636,63 @@ class GroupService {
   /// Returns a live stream of the unread message count for the current user
   /// in [groupId]. A message is unread when its [createdAt] is after the
   /// user's [lastReadAt] marker and its sender is not the current user.
+  ///
+  /// Reacts to TWO triggers:
+  ///   1. The member doc changes (lastReadAt is updated when chat is opened).
+  ///   2. A new message arrives in the messages subcollection.
   static Stream<int> streamUnreadCount(String groupId) {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return Stream.value(0);
 
-    // First, stream the member doc to get the latest lastReadAt value.
-    return _groups
-        .doc(groupId)
-        .collection('members')
-        .doc(uid)
-        .snapshots()
-        .asyncMap((memberSnap) async {
-      final lastReadAt =
-          (memberSnap.data() ?? {})['lastReadAt'] as Timestamp?;
+    final memberRef = _groups.doc(groupId).collection('members').doc(uid);
+    final messagesRef = _groups.doc(groupId).collection('messages');
 
-      Query<Map<String, dynamic>> query = _groups
-          .doc(groupId)
-          .collection('messages')
-          .where('senderId', isNotEqualTo: uid);
+    final StreamController<int> controller = StreamController<int>.broadcast();
+    StreamSubscription? memberSub;
+    StreamSubscription? messagesSub;
 
-      if (lastReadAt != null) {
-        query = query.where('createdAt', isGreaterThan: lastReadAt);
+    Timestamp? lastReadAt;
+    bool ready = false;
+
+    Future<void> recount() async {
+      if (controller.isClosed) return;
+      try {
+        Query<Map<String, dynamic>> query =
+            messagesRef.where('senderId', isNotEqualTo: uid);
+        if (lastReadAt != null) {
+          query = query.where('createdAt', isGreaterThan: lastReadAt);
+        }
+        final snap = await query.count().get();
+        if (!controller.isClosed) controller.add(snap.count ?? 0);
+      } catch (_) {
+        if (!controller.isClosed) controller.add(0);
       }
+    }
 
-      final snap = await query.count().get();
-      return snap.count ?? 0;
+    memberSub = memberRef.snapshots().listen((snap) {
+      lastReadAt = (snap.data() ?? {})['lastReadAt'] as Timestamp?;
+      ready = true;
+      recount();
+    }, onError: (_) {
+      ready = true;
+      recount();
     });
+
+    // Also listen to message changes so badge updates when new messages arrive.
+    messagesSub = messagesRef
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .snapshots()
+        .listen((_) {
+      if (ready) recount();
+    });
+
+    controller.onCancel = () {
+      memberSub?.cancel();
+      messagesSub?.cancel();
+    };
+
+    return controller.stream;
   }
 
   static Future<void> shareLibraryFileToGroup({
