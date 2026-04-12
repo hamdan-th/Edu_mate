@@ -53,9 +53,16 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   final Map<String, Map<String, dynamic>> _userCache = {};
   Map<String, dynamic>? _replyMessage;
 
+  // ── Jump-to-original & swipe-reply ─────────────────────────────
+  final Map<String, GlobalKey> _itemKeys = {};
+  String? _highlightedMessageId;
+  // Latest snapshot of message docs; used by _jumpToMessage to locate items.
+  List<QueryDocumentSnapshot> _loadedDocs = [];
+
   // ── Typing indicator ──────────────────────────────────────────────
   Timer? _typingTimer;
   bool _isCurrentlyTyping = false;
+  String _resolvedDisplayName = '';  // populated from Firestore users collection
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
   Color get _pageBg =>
@@ -92,6 +99,29 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     _checkPermissions();
     // Mark group as read immediately when the screen opens.
     GroupService.markGroupAsRead(widget.group.id);
+    // Pre-fetch the real display name from Firestore so typing indicator
+    // shows a meaningful name rather than FirebaseAuth.displayName (often empty).
+    _fetchDisplayName();
+  }
+
+  Future<void> _fetchDisplayName() async {
+    try {
+      final uid = _auth.currentUser?.uid;
+      if (uid == null) return;
+      // Mirror the same lookup GroupService uses for senderName in messages.
+      final directSnap =
+          await _firestore.collection('users').doc(uid).get();
+      final data = directSnap.data() ?? {};
+      final name = (data['displayName'] ??
+              data['fullName'] ??
+              data['username'] ??
+              _auth.currentUser?.displayName ??
+              _auth.currentUser?.email ??
+              '')
+          .toString()
+          .trim();
+      if (name.isNotEmpty) _resolvedDisplayName = name;
+    } catch (_) {}
   }
 
   @override
@@ -130,29 +160,24 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       return;
     }
 
-    // Cancel previous debounce timer.
+    // Cancel the idle-delete timer.
     _typingTimer?.cancel();
 
-    // Write typing=true if not already set.
-    if (!_isCurrentlyTyping) {
-      _isCurrentlyTyping = true;
-      _setTyping(uid, isTyping: true);
-    } else {
-      // Refresh the timestamp so it doesn't go stale.
-      _setTyping(uid, isTyping: true);
-    }
+    // Write/refresh the typing doc on every keystroke.
+    _isCurrentlyTyping = true;
+    _writeTyping(uid);
 
-    // Auto-clear after 5 s of no keystroke.
-    _typingTimer = Timer(const Duration(seconds: 5), () {
-      _clearTyping();
-    });
+    // Auto-delete after 6 s of no keystroke.
+    _typingTimer = Timer(const Duration(seconds: 6), _clearTyping);
   }
 
-  /// Writes the typing marker to Firestore (fire-and-forget).
-  void _setTyping(String uid, {required bool isTyping}) {
-    final displayName = _auth.currentUser?.displayName ??
-        _auth.currentUser?.email ??
-        'User';
+  /// Writes the typing marker to Firestore.
+  /// Uses Timestamp.now() — NOT serverTimestamp() — so the snapshot
+  /// arrives immediately without a null pendingWrite phase.
+  void _writeTyping(String uid) {
+    final name = _resolvedDisplayName.isNotEmpty
+        ? _resolvedDisplayName
+        : (_auth.currentUser?.email?.split('@').first ?? 'User');
     _firestore
         .collection('groups')
         .doc(widget.group.id)
@@ -160,13 +185,24 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         .doc(uid)
         .set({
       'uid': uid,
-      'displayName': displayName,
-      'isTyping': isTyping,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'displayName': name,
+      'updatedAt': Timestamp.now(),
     }).catchError((_) {});
   }
 
-  /// Clears the typing marker for the current user.
+  /// Deletes the typing doc for the current user.
+  /// Deletion is the canonical signal that the user stopped typing.
+  void _deleteTypingDoc(String uid) {
+    _firestore
+        .collection('groups')
+        .doc(widget.group.id)
+        .collection('typing')
+        .doc(uid)
+        .delete()
+        .catchError((_) {});
+  }
+
+  /// Stops typing: cancels the debounce timer and deletes the doc.
   void _clearTyping() {
     _typingTimer?.cancel();
     _typingTimer = null;
@@ -174,7 +210,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     _isCurrentlyTyping = false;
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
-    _setTyping(uid, isTyping: false);
+    _deleteTypingDoc(uid);
   }
 
   Future<void> _checkPermissions() async {
@@ -192,6 +228,212 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         _isLoadingRole = false;
       });
     }
+  }
+
+  /// Shared helper to set reply state from any trigger (long-press or swipe).
+  void _triggerReply(Map<String, dynamic> data, String messageId, String senderName) {
+    final type = (data['type'] ?? 'text').toString();
+    final text = (data['text'] ?? '').toString().trim();
+    String previewText;
+    if (text.isNotEmpty) {
+      previewText = text;
+    } else if (type == 'image') {
+      previewText = '📷 Photo';
+    } else if (type == 'library_file_link') {
+      previewText = (data['sharedFileTitle'] ?? '📎 File').toString();
+    } else {
+      previewText = '...';
+    }
+    setState(() {
+      _replyMessage = {
+        'id': messageId,
+        'text': previewText,
+        'senderName': senderName,
+        'type': type,
+      };
+    });
+  }
+
+  /// Opens the pinned messages history bottom sheet.
+  void _showPinnedHistory() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _PinnedHistorySheet(
+        groupId: widget.group.id,
+        canUnpin: _isOwner || _isAdmin,
+        isDark: _isDark,
+        surface: _surface,
+        border: _border,
+        muted: _muted,
+        text: _text,
+        onJump: (msgId) {
+          // Pop the sheet first, then wait for its dismiss animation to
+          // complete before reading RenderBox coordinates. Without this
+          // delay, localToGlobal returns wrong values from the
+          // partially-dismissed frame and produces the shake.
+          Navigator.pop(context);
+          Future.delayed(const Duration(milliseconds: 280), () {
+            if (mounted) _jumpToMessage(msgId);
+          });
+        },
+      ),
+    );
+  }
+
+  /// Scrolls to the message with [targetId] and briefly highlights it.
+  ///
+  /// Strategy:
+  ///
+  /// FAST PATH — item already rendered:
+  ///   Read the item's actual RenderBox position, compute the exact pixel
+  ///   offset to place it 35% from the top of the viewport, then animateTo
+  ///   that precise offset. This avoids the "nudge" caused by ensureVisible
+  ///   only scrolling the bare minimum.
+  ///
+  /// SLOW PATH — item not yet in the render tree:
+  ///   Scroll progressively in large steps toward the estimated position,
+  ///   waiting one frame between steps. As soon as the item's GlobalKey
+  ///   becomes available, switch to the fast path for exact placement.
+  Future<void> _jumpToMessage(String targetId) async {
+    // ── FAST PATH: item already in render tree ──────────────────────
+    // _tryExactJump returns true immediately if the key is found and
+    // schedules the precise animateTo inside a post-frame callback.
+    if (_tryExactJump(targetId)) return;
+
+    // ── SLOW PATH: item not yet rendered ───────────────────────────
+    final idx = _loadedDocs.indexWhere((d) => d.id == targetId);
+    if (idx == -1) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Message not in current chat window'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Single-shot estimated jump: one smooth animation to the best-guess
+    // position, then one post-frame correction via _tryExactJump.
+    // This avoids the jerky stepped-loop that was visible on screen.
+    final maxExt     = _scrollController.position.maxScrollExtent;
+    const estH       = 95.0;
+    final guess1     = (idx * estH).clamp(0.0, maxExt);
+
+    await _scrollController.animateTo(
+      guess1,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+
+    // Wait one frame for Flutter to build newly visible items.
+    final c1 = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) => c1.complete());
+    await c1.future;
+
+    // Try exact correction immediately.
+    if (!mounted) return;
+    if (_tryExactJump(targetId)) return;
+
+    // Item still not built — scroll one more estimated step further
+    // (handles cases where the estimate was short by several messages)
+    // and retry once more.
+    final pos2   = _scrollController.position.pixels;
+    final going  = guess1 > _scrollController.position.pixels
+        || (guess1 - pos2).abs() < 10;
+    final guess2 = going
+        ? (pos2 + 800.0).clamp(0.0, maxExt)
+        : (pos2 - 800.0).clamp(0.0, maxExt);
+
+    await _scrollController.animateTo(
+      guess2,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOut,
+    );
+
+    final c2 = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) => c2.complete());
+    await c2.future;
+
+    if (!mounted) return;
+    if (!_tryExactJump(targetId)) {
+      // Genuine fallback: item still off-screen — flash at current position.
+      _flashHighlight(targetId);
+    }
+  }
+
+  /// Reads the item's real rendered position and schedules an exact animateTo
+  /// inside a post-frame callback so coordinates are read after the current
+  /// layout pass (including any in-progress sheet dismissal) has settled.
+  ///
+  /// Returns true immediately if the item is in the render tree (even if the
+  /// animation hasn't started yet).
+  bool _tryExactJump(String targetId) {
+    final key = _itemKeys[targetId];
+    if (key == null || key.currentContext == null) return false;
+
+    final renderBox = key.currentContext!.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return false;
+
+    // Defer coordinate reading to next frame so any in-progress layout
+    // (e.g. sheet dismiss animation) finishes first.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final rb = key.currentContext?.findRenderObject() as RenderBox?;
+      if (rb == null || !rb.hasSize) {
+        _flashHighlight(targetId);
+        return;
+      }
+
+      final itemGlobalTop = rb.localToGlobal(Offset.zero).dy;
+
+      final scrollable = Scrollable.maybeOf(key.currentContext!);
+      if (scrollable == null) {
+        _flashHighlight(targetId);
+        return;
+      }
+      final vpBox =
+          scrollable.context.findRenderObject() as RenderBox?;
+      if (vpBox == null) {
+        _flashHighlight(targetId);
+        return;
+      }
+
+      final vpTop    = vpBox.localToGlobal(Offset.zero).dy;
+      final vpHeight = vpBox.size.height;
+
+      // Land the item at 30% from top of the viewport.
+      final desiredTop = vpTop + vpHeight * 0.30;
+      final delta      = itemGlobalTop - desiredTop;
+      final newOffset  = (_scrollController.position.pixels + delta)
+          .clamp(0.0, _scrollController.position.maxScrollExtent);
+
+      if (delta.abs() > 6) {
+        _scrollController
+            .animateTo(
+              newOffset,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOutCubic,
+            )
+            .then((_) => _flashHighlight(targetId));
+      } else {
+        _flashHighlight(targetId);
+      }
+    });
+    return true;
+  }
+
+  /// Briefly highlights the message bubble with [targetId].
+  void _flashHighlight(String targetId) {
+    if (!mounted) return;
+    setState(() => _highlightedMessageId = targetId);
+    // Longer flash so the landing is clearly visible after a scroll.
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      if (mounted) setState(() => _highlightedMessageId = null);
+    });
   }
 
   Future<void> _pickImage() async {
@@ -558,6 +800,18 @@ class _GroupChatScreenState extends State<GroupChatScreen>
           ? _buildNonMemberState()
           : Column(
         children: [
+          // ── Pinned message banner — directly below AppBar, above messages ─
+          _PinnedBanner(
+            groupId: widget.group.id,
+            canUnpin: _isOwner || _isAdmin,
+            isDark: _isDark,
+            surface: _surface,
+            border: _border,
+            muted: _muted,
+            text: _text,
+            onJump: _jumpToMessage,
+            onViewAll: () => _showPinnedHistory(),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
@@ -586,6 +840,12 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                 }
 
                 var docs = snapshot.data?.docs ?? [];
+
+                // Cache the latest docs list so _jumpToMessage can locate
+                // items by index even before their widget is built.
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _loadedDocs = List.unmodifiable(docs);
+                });
 
                 if (_searchQuery.isNotEmpty) {
                   final query = _searchQuery.toLowerCase();
@@ -629,6 +889,9 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     final myId = _auth.currentUser?.uid;
                     final senderId = data['senderId'] ?? '';
                     final isMe = myId != null && myId == senderId;
+
+                    // Assign a stable GlobalKey per message for jump-to-original.
+                    _itemKeys.putIfAbsent(messageId, () => GlobalKey());
 
                     // The latest own message is the first isMe entry in the
                     // reversed list (lowest index) — show seen-by only there.
@@ -743,6 +1006,8 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       String messageId,
       String resolvedSenderName,
       bool isSaved,
+      bool isPinned,
+      String? currentUserReaction,
       ) {
     final parentContext = context;
     showModalBottomSheet(
@@ -759,6 +1024,59 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // ── Quick emoji reactions ─────────────────────────────────
+            Padding(
+              padding:
+                  const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  for (final emoji in const [
+                    '👍', '❤️', '😂', '😮', '😢', '🔥'
+                  ])
+                    Builder(builder: (ctx) {
+                      final isActive = emoji == currentUserReaction;
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          GroupService.toggleReaction(
+                            groupId: widget.group.id,
+                            messageId: messageId,
+                            emoji: emoji,
+                          );
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 160),
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? AppColors.primary.withOpacity(
+                                    _isDark ? 0.28 : 0.14)
+                                : (_isDark
+                                    ? Colors.white.withOpacity(0.06)
+                                    : Colors.black.withOpacity(0.04)),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isActive
+                                  ? AppColors.primary.withOpacity(0.65)
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(emoji,
+                                style: TextStyle(
+                                    fontSize: isActive ? 26 : 23)),
+                          ),
+                        ),
+                      );
+                    }),
+                ],
+              ),
+            ),
+            Divider(height: 1, color: _border),
+            const SizedBox(height: 10),
             Container(
               width: 42,
               height: 5,
@@ -780,18 +1098,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
               ),
               onTap: () {
                 Navigator.pop(context);
-                setState(() {
-                  _replyMessage = {
-                    'id': messageId,
-                    'text': (data['text'] != null &&
-                        data['text'].toString().isNotEmpty)
-                        ? data['text']
-                        : (data['type'] == 'library_file_link'
-                        ? (data['sharedFileTitle'] ?? AppLocalizations.of(context)!.groupsChatLibraryFile)
-                        : AppLocalizations.of(context)!.groupsChatImageAttached),
-                    'senderName': resolvedSenderName,
-                  };
-                });
+                _triggerReply(data, messageId, resolvedSenderName);
               },
             ),
             ListTile(
@@ -843,6 +1150,65 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                 }
               },
             ),
+            if (_isOwner || _isAdmin)
+              ListTile(
+                leading: Icon(
+                  isPinned
+                      ? Icons.push_pin_rounded
+                      : Icons.push_pin_outlined,
+                  color: isPinned
+                      ? const Color(0xFFD4AF37)
+                      : AppColors.primary,
+                ),
+                title: Text(
+                  isPinned ? 'Unpin Message' : 'Pin Message',
+                  style: TextStyle(
+                    color: _text,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    if (isPinned) {
+                      await GroupService.unpinMessage(
+                        groupId: widget.group.id,
+                        messageId: messageId,
+                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(parentContext).showSnackBar(
+                          const SnackBar(content: Text('Message unpinned')),
+                        );
+                      }
+                    } else {
+                      await GroupService.pinMessage(
+                        groupId: widget.group.id,
+                        messageId: messageId,
+                        data: data,
+                        pinnedByName: _resolvedDisplayName.isNotEmpty
+                            ? _resolvedDisplayName
+                            : (_auth.currentUser?.email
+                                    ?.split('@')
+                                    .first ??
+                                ''),
+                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(parentContext).showSnackBar(
+                          const SnackBar(content: Text('Message pinned')),
+                        );
+                      }
+                    }
+                  } catch (_) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(parentContext).showSnackBar(
+                        const SnackBar(
+                            content: Text('Failed. Please try again.')),
+                      );
+                    }
+                  }
+                },
+              ),
           ],
         ),
       ),
@@ -917,12 +1283,39 @@ class _GroupChatScreenState extends State<GroupChatScreen>
 
     final bubble = GestureDetector(
       onLongPress: () async {
-        final isSaved = await GroupService.isMessageSaved(
-          groupId: widget.group.id,
-          messageId: messageId,
-        );
+        final results = await Future.wait([
+          GroupService.isMessageSaved(
+            groupId: widget.group.id,
+            messageId: messageId,
+          ),
+          GroupService.isPinned(
+            groupId: widget.group.id,
+            messageId: messageId,
+          ),
+        ]);
+        // Also fetch current user's reaction for the picker highlight.
+        final currentUid = _auth.currentUser?.uid ?? '';
+        String? currentUserReaction;
+        if (currentUid.isNotEmpty) {
+          try {
+            final reactionSnap = await _firestore
+                .collection('groups')
+                .doc(widget.group.id)
+                .collection('messages')
+                .doc(messageId)
+                .collection('reactions')
+                .doc(currentUid)
+                .get();
+            if (reactionSnap.exists) {
+              currentUserReaction =
+                  reactionSnap.data()?['emoji']?.toString();
+            }
+          } catch (_) {}
+        }
         if (!mounted) return;
-        _showMessageOptions(data, messageId, senderName, isSaved);
+        _showMessageOptions(
+            data, messageId, senderName, results[0], results[1],
+            currentUserReaction);
       },
       behavior: HitTestBehavior.opaque,
       child: Padding(
@@ -955,11 +1348,11 @@ class _GroupChatScreenState extends State<GroupChatScreen>
             Flexible(
               child: Container(
                 constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.80,
+                  maxWidth: MediaQuery.of(context).size.width * 0.74,
                 ),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 11,
+                  horizontal: 13,
+                  vertical: 9,
                 ),
                 decoration: BoxDecoration(
                   color: bubbleBg,
@@ -996,42 +1389,66 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                         ),
                       ),
                     if (replyToText != null) ...[
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.fromLTRB(10, 7, 10, 8),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            right: BorderSide(color: senderColor, width: 3.2),
-                          ),
-                          color: senderColor.withOpacity(0.10),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              replyToSender ?? AppLocalizations.of(context)!.groupsChatReplyAction,
-                              style: TextStyle(
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          final replyId = data['replyToMessageId']?.toString();
+                          if (replyId != null) _jumpToMessage(replyId);
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.fromLTRB(10, 7, 10, 8),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              left: BorderSide(
                                 color: senderColor,
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w900,
+                                width: 3.5,
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              replyToText,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: isMe
-                                    ? Colors.white.withOpacity(0.78)
-                                    : _muted,
-                                fontSize: 12.6,
-                                fontWeight: FontWeight.w600,
+                            color: senderColor.withOpacity(0.09),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    _replyTypeIcon(data['replyToType']?.toString()),
+                                    size: 11,
+                                    color: senderColor.withOpacity(0.85),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      replyToSender ?? AppLocalizations.of(context)!.groupsChatReplyAction,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: senderColor,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 3),
+                              Text(
+                                replyToText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: isMe
+                                      ? Colors.white.withOpacity(0.75)
+                                      : _muted,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -1050,33 +1467,114 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                         padding: EdgeInsets.only(
                           bottom: text.toString().isNotEmpty ? 8 : 4,
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return Container(
-                                height: 165,
-                                width: double.infinity,
-                                color: _surfaceSoft,
-                                alignment: Alignment.center,
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.primary,
+                        child: GestureDetector(
+                          onTap: () {
+                            // Fullscreen image preview.
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                opaque: false,
+                                barrierDismissible: true,
+                                barrierColor: Colors.black87,
+                                pageBuilder: (_, __, ___) =>
+                                    _FullscreenImageViewer(
+                                        imageUrl: imageUrl,
+                                        heroTag: 'img_$messageId'),
+                              ),
+                            );
+                          },
+                          child: Hero(
+                            tag: 'img_$messageId',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width *
+                                          0.65,
+                                  minHeight: 60,
+                                  maxHeight: 230,
                                 ),
-                              );
-                            },
-                            errorBuilder: (_, __, ___) => Container(
-                              height: 120,
-                              color: _surfaceSoft,
-                              alignment: Alignment.center,
-                              child: Text(
-                                AppLocalizations.of(context)!.groupsChatImageDisplayError,
-                                style: TextStyle(
-                                  color: _muted,
-                                  fontWeight: FontWeight.w600,
+                                child: Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  loadingBuilder:
+                                      (context, child, progress) {
+                                    if (progress == null) return child;
+                                    final pct = progress
+                                                .expectedTotalBytes !=
+                                            null
+                                        ? progress
+                                                .cumulativeBytesLoaded /
+                                            progress.expectedTotalBytes!
+                                        : null;
+                                    return Container(
+                                      height: 220,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: _isDark
+                                            ? Colors.white
+                                                .withOpacity(0.05)
+                                            : Colors.black
+                                                .withOpacity(0.04),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: 32,
+                                            height: 32,
+                                            child:
+                                                CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              color: AppColors.primary,
+                                              value: pct,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Icon(
+                                            Icons.image_rounded,
+                                            color: _muted.withOpacity(0.4),
+                                            size: 22,
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (_, __, ___) => Container(
+                                    height: 110,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: _isDark
+                                          ? Colors.white.withOpacity(0.04)
+                                          : Colors.black.withOpacity(0.04),
+                                      borderRadius:
+                                          BorderRadius.circular(14),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.broken_image_rounded,
+                                          color: _muted.withOpacity(0.55),
+                                          size: 32,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          AppLocalizations.of(context)!
+                                              .groupsChatImageDisplayError,
+                                          style: TextStyle(
+                                            color: _muted,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -1131,7 +1629,13 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                             style: TextStyle(
                               fontSize: 10.8,
                               fontWeight: FontWeight.w700,
-                              color: _muted.withOpacity(0.82),
+                              // Honour isMe colour: gold on dark purple,
+                              // white-70 on solid primary, muted on others' bubbles.
+                              color: isMe
+                                  ? (_isDark
+                                      ? primaryColor.withOpacity(0.85)
+                                      : Colors.white70)
+                                  : _muted.withOpacity(0.82),
                             ),
                           ),
                         ),
@@ -1145,16 +1649,77 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       ),
     );
 
-    // Seen-by indicator — only on the current user's latest outgoing message.
-    if (!isLatestOwn) return bubble;
+    // Build the combined widget: swipe wrapper + optional seen-by.
+    final key = _itemKeys.putIfAbsent(messageId, () => GlobalKey());
+    final isHighlighted = _highlightedMessageId == messageId;
+
+    Widget content = _SwipeToReplyWrapper(
+      isMe: isMe,
+      onSwipe: () => _triggerReply(data, messageId, senderName),
+      child: KeyedSubtree(
+        key: key,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          decoration: BoxDecoration(
+            color: isHighlighted
+                ? AppColors.primary.withOpacity(0.14)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: bubble,
+        ),
+      ),
+    );
+
+    if (!isLatestOwn) {
+      return Column(
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          content,
+          _ReactionsBar(
+            groupId: widget.group.id,
+            messageId: messageId,
+            currentUid: _auth.currentUser?.uid ?? '',
+            isMe: isMe,
+            isDark: _isDark,
+            muted: _muted,
+          ),
+        ],
+      );
+    }
 
     final createdAt = data['createdAt'] as Timestamp?;
-    if (createdAt == null) return bubble;
+    if (createdAt == null) {
+      return Column(
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          content,
+          _ReactionsBar(
+            groupId: widget.group.id,
+            messageId: messageId,
+            currentUid: _auth.currentUser?.uid ?? '',
+            isMe: isMe,
+            isDark: _isDark,
+            muted: _muted,
+          ),
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        bubble,
+        content,
+        _ReactionsBar(
+          groupId: widget.group.id,
+          messageId: messageId,
+          currentUid: _auth.currentUser?.uid ?? '',
+          isMe: isMe,
+          isDark: _isDark,
+          muted: _muted,
+        ),
         _SeenByWidget(
           groupId: widget.group.id,
           currentUid: _auth.currentUser?.uid ?? '',
@@ -1175,93 +1740,109 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     final sharedFileUrl = (data['sharedFileUrl'] ?? '').toString();
 
     final cardColor = isMe
-        ? (_isDark ? Colors.white.withOpacity(0.06) : Colors.white.withOpacity(0.16))
+        ? (_isDark ? Colors.white.withOpacity(0.06) : Colors.white.withOpacity(0.12))
         : _surfaceSoft;
-
     final borderColor = isMe
-        ? (_isDark ? Colors.white.withOpacity(0.10) : Colors.white.withOpacity(0.25))
+        ? (_isDark ? Colors.white.withOpacity(0.10) : Colors.white.withOpacity(0.22))
         : _border;
-
-    final titleColor = isMe
-        ? (_isDark ? Colors.white : Colors.white)
-        : _text;
-
-    final subtitleColor = isMe
-        ? (_isDark ? Colors.white70 : Colors.white.withOpacity(0.88))
-        : _muted;
+    final titleColor = isMe ? Colors.white : _text;
+    final openColor = isMe ? Colors.white : AppColors.primary;
 
     return InkWell(
       onTap: () => _openSharedLibraryFile(data),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(11),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: _isDark
+                  ? Colors.black.withOpacity(0.10)
+                  : Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Icon / thumbnail
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: thumbnailUrl.isNotEmpty
                   ? Image.network(
-                thumbnailUrl,
-                width: 56,
-                height: 56,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildSharedFileIconBox(
-                  fileType: fileType,
-                ),
-              )
+                      thumbnailUrl,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (_, child, progress) {
+                        if (progress == null) return child;
+                        return _buildSharedFileIconBox(fileType: fileType);
+                      },
+                      errorBuilder: (_, __, ___) =>
+                          _buildSharedFileIconBox(fileType: fileType),
+                    )
                   : _buildSharedFileIconBox(fileType: fileType),
             ),
-            const SizedBox(width: 11),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // File type badge pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 7, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4AF37).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      fileType.isNotEmpty
+                          ? fileType.toUpperCase()
+                          : AppLocalizations.of(context)!.groupsChatLibraryFile,
+                      style: const TextStyle(
+                        color: Color(0xFFD4AF37),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  // Title
                   Text(
                     title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: titleColor,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14.2,
-                      height: 1.25,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    fileType.isNotEmpty ? fileType.toUpperCase() : AppLocalizations.of(context)!.groupsChatLibraryFile,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: subtitleColor,
-                      fontSize: 12.4,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13.8,
+                      height: 1.3,
                     ),
                   ),
                   if (sharedFileUrl.isNotEmpty) ...[
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 7),
                     Row(
                       children: [
                         Icon(
                           Icons.open_in_new_rounded,
-                          size: 13.5,
-                          color: subtitleColor,
+                          size: 13,
+                          color: openColor,
                         ),
                         const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            AppLocalizations.of(context)!.groupsChatOpenFileAction,
-                            style: TextStyle(
-                              color: subtitleColor,
-                              fontSize: 11.8,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        Text(
+                          AppLocalizations.of(context)!.groupsChatOpenFileAction,
+                          style: TextStyle(
+                            color: openColor,
+                            fontSize: 11.8,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -1280,30 +1861,64 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     required String fileType,
   }) {
     final normalized = fileType.toLowerCase();
-    IconData icon = Icons.insert_drive_file_rounded;
+    IconData icon;
+    Color iconColor;
 
     if (normalized.contains('pdf')) {
       icon = Icons.picture_as_pdf_rounded;
+      iconColor = const Color(0xFFE53935);
     } else if (normalized.contains('word') ||
         normalized.contains('doc') ||
         normalized.contains('docx')) {
       icon = Icons.description_rounded;
+      iconColor = const Color(0xFF1565C0);
     } else if (normalized.contains('ppt') ||
         normalized.contains('presentation')) {
       icon = Icons.slideshow_rounded;
+      iconColor = const Color(0xFFE65100);
+    } else if (normalized.contains('xls') ||
+        normalized.contains('sheet') ||
+        normalized.contains('csv')) {
+      icon = Icons.table_chart_rounded;
+      iconColor = const Color(0xFF2E7D32);
+    } else if (normalized.contains('zip') ||
+        normalized.contains('rar') ||
+        normalized.contains('7z')) {
+      icon = Icons.folder_zip_rounded;
+      iconColor = const Color(0xFF6A1B9A);
+    } else if (normalized.contains('image') ||
+        normalized.contains('jpg') ||
+        normalized.contains('png') ||
+        normalized.contains('jpeg')) {
+      icon = Icons.image_rounded;
+      iconColor = const Color(0xFF00838F);
+    } else {
+      icon = Icons.insert_drive_file_rounded;
+      iconColor = const Color(0xFFD4AF37);
     }
 
     return Container(
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: _isDark ? Colors.white.withOpacity(0.06) : Colors.white,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            iconColor.withOpacity(_isDark ? 0.22 : 0.12),
+            iconColor.withOpacity(_isDark ? 0.10 : 0.06),
+          ],
+        ),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: iconColor.withOpacity(0.18),
+          width: 1,
+        ),
       ),
       child: Icon(
         icon,
-        color: const Color(0xFFD4AF37),
-        size: 29,
+        color: iconColor,
+        size: 27,
       ),
     );
   }
@@ -1437,57 +2052,68 @@ class _GroupChatScreenState extends State<GroupChatScreen>
           if (_replyMessage != null)
             Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: _surfaceSoft,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: _border),
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.reply_rounded,
-                    color: Color(0xFF64B5F6),
-                    size: 22,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _replyMessage!['senderName'],
-                          style: const TextStyle(
-                            color: Color(0xFF64B5F6),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w900,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      // Left accent bar
+                      Container(width: 4, color: AppColors.primary),
+                      const SizedBox(width: 10),
+                      Icon(
+                        _replyTypeIcon(_replyMessage!['type']?.toString()),
+                        color: AppColors.primary,
+                        size: 17,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                (_replyMessage!['senderName'] ?? '').toString(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                (_replyMessage!['text'] ?? '').toString(),
+                                style: TextStyle(
+                                  color: _muted,
+                                  fontSize: 12.5,
+                                  height: 1.2,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _replyMessage!['text'],
-                          style: TextStyle(
-                            color: _muted,
-                            fontSize: 13,
-                            height: 1.2,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      ),
+                      GestureDetector(
+                        onTap: () => setState(() => _replyMessage = null),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Icon(Icons.close_rounded, color: _muted, size: 20),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.close_rounded,
-                      color: _muted,
-                    ),
-                    onPressed: () => setState(() => _replyMessage = null),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
+                ),
               ),
             ),
           if (_selectedImage != null)
@@ -1650,6 +2276,566 @@ class _GroupChatScreenState extends State<GroupChatScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+/// Compact banner below AppBar showing the latest pinned message.
+///
+/// Tapping the body opens the full pinned-messages history sheet.
+/// The ✕ button (owner/admin only) quick-unpins the latest pin.
+/// Shows "1 pinned" / "N pinned" counter + chevron affordance.
+class _PinnedBanner extends StatefulWidget {
+  final String groupId;
+  final bool canUnpin;
+  final bool isDark;
+  final Color surface;
+  final Color border;
+  final Color muted;
+  final Color text;
+  final void Function(String messageId) onJump;
+  final VoidCallback onViewAll;
+
+  const _PinnedBanner({
+    required this.groupId,
+    required this.canUnpin,
+    required this.isDark,
+    required this.surface,
+    required this.border,
+    required this.muted,
+    required this.text,
+    required this.onJump,
+    required this.onViewAll,
+  });
+
+  @override
+  State<_PinnedBanner> createState() => _PinnedBannerState();
+}
+
+class _PinnedBannerState extends State<_PinnedBanner> {
+  late final Stream<QuerySnapshot<Map<String, dynamic>>> _allStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _allStream = GroupService.streamAllPins(widget.groupId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: _allStream,
+      builder: (context, snapshot) {
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) return const SizedBox.shrink();
+
+        final latestData = docs.first.data();
+        final latestId   =
+            (latestData['messageId'] ?? docs.first.id).toString();
+        final preview    = (latestData['previewText'] ?? '').toString();
+        final sender     = (latestData['senderName'] ?? '').toString();
+        final totalPins  = docs.length;
+
+        // Header label: "Pinned" (1 pin) or "Pinned · 3" (multi-pin).
+        final headerLabel = totalPins > 1
+            ? 'Pinned · $totalPins'
+            : 'Pinned';
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            // Full banner tap → open history sheet.
+            onTap: widget.onViewAll,
+            child: Container(
+              decoration: BoxDecoration(
+                color: widget.surface,
+                border: Border(
+                  bottom: BorderSide(color: widget.border),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Left gold accent bar.
+                  Container(
+                    width: 3.5,
+                    height: 44,
+                    color: const Color(0xFFD4AF37),
+                  ),
+                  const SizedBox(width: 10),
+                  const Icon(
+                    Icons.push_pin_rounded,
+                    size: 15,
+                    color: Color(0xFFD4AF37),
+                  ),
+                  const SizedBox(width: 8),
+                  // Text content.
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Header row: label + count.
+                          Text(
+                            headerLabel,
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFFD4AF37),
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          // Sender name on its own line (bolder).
+                          if (sender.isNotEmpty)
+                            Text(
+                              sender,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: widget.text,
+                              ),
+                            ),
+                          // Preview text on second line (lighter).
+                          if (preview.isNotEmpty)
+                            Text(
+                              preview,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: widget.muted,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Chevron: affordance that tapping opens history list.
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: widget.muted.withOpacity(0.6),
+                  ),
+                  // Unpin button (owner/admin only).
+                  if (widget.canUnpin)
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => GroupService.unpinMessage(
+                        groupId: widget.groupId,
+                        messageId: latestId,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 12, 12, 12),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 17,
+                          color: widget.muted.withOpacity(0.7),
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox(width: 12),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pinned Messages History Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Bottom sheet listing all pinned messages for the group (newest first).
+///
+/// * Any member can view and jump to a message.
+/// * Owners / admins get a trash icon to unpin per item.
+class _PinnedHistorySheet extends StatefulWidget {
+  final String groupId;
+  final bool canUnpin;
+  final bool isDark;
+  final Color surface;
+  final Color border;
+  final Color muted;
+  final Color text;
+  final void Function(String messageId) onJump;
+
+  const _PinnedHistorySheet({
+    required this.groupId,
+    required this.canUnpin,
+    required this.isDark,
+    required this.surface,
+    required this.border,
+    required this.muted,
+    required this.text,
+    required this.onJump,
+  });
+
+  @override
+  State<_PinnedHistorySheet> createState() => _PinnedHistorySheetState();
+}
+
+class _PinnedHistorySheetState extends State<_PinnedHistorySheet> {
+  late final Stream<QuerySnapshot<Map<String, dynamic>>> _stream;
+
+  @override
+  void initState() {
+    super.initState();
+    _stream = GroupService.streamAllPins(widget.groupId);
+  }
+
+  String _relativeTime(Timestamp? ts) {
+    if (ts == null) return '';
+    final now = DateTime.now();
+    final diff = now.difference(ts.toDate());
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    final d = ts.toDate();
+    return '${d.day}/${d.month}/${d.year}';
+  }
+
+  IconData _typeIcon(String? type) {
+    switch (type) {
+      case 'image':
+        return Icons.image_rounded;
+      case 'library_file_link':
+        return Icons.attach_file_rounded;
+      default:
+        return Icons.chat_bubble_outline_rounded;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.75,
+      ),
+      decoration: BoxDecoration(
+        color: widget.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(widget.isDark ? 0.35 : 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Handle ────────────────────────────────────────────────
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 4),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: widget.border,
+              borderRadius: BorderRadius.circular(99),
+            ),
+          ),
+          // ── Header ────────────────────────────────────────────────
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.push_pin_rounded,
+                    size: 20,
+                    color: Color(0xFFD4AF37),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Pinned Messages',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: widget.text,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: widget.border),
+          // ── List ─────────────────────────────────────────────────
+          Flexible(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: _stream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                          color: AppColors.primary, strokeWidth: 2),
+                    ),
+                  );
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+
+                if (docs.isEmpty) {
+                  return Padding(
+                    padding:
+                        EdgeInsets.fromLTRB(24, 32, 24, bottomPad + 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.push_pin_outlined,
+                          size: 48,
+                          color: widget.muted.withOpacity(0.35),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No pinned messages yet',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: widget.muted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.only(
+                      top: 4, bottom: bottomPad + 16),
+                  itemCount: docs.length,
+                  itemBuilder: (_, i) {
+                    final data    = docs[i].data();
+                    final msgId   = (data['messageId'] ?? docs[i].id).toString();
+                    final preview = (data['previewText'] ?? '').toString();
+                    final sender  = (data['senderName'] ?? '').toString();
+                    final pinnedBy = (data['pinnedByName'] ?? '').toString();
+                    final pinnedAt  = data['pinnedAt'] as Timestamp?;
+                    final msgType  = (data['messageType'] ?? 'text').toString();
+
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (i > 0)
+                          Divider(height: 1, color: widget.border),
+                        InkWell(
+                          onTap: () => widget.onJump(msgId),
+                          splashColor: const Color(0xFFD4AF37).withOpacity(0.08),
+                          highlightColor: const Color(0xFFD4AF37).withOpacity(0.05),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Type icon badge.
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFD4AF37).withOpacity(
+                                        widget.isDark ? 0.14 : 0.08),
+                                    borderRadius: BorderRadius.circular(11),
+                                    border: Border.all(
+                                      color: const Color(0xFFD4AF37).withOpacity(0.22),
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    _typeIcon(msgType),
+                                    size: 18,
+                                    color: const Color(0xFFD4AF37),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Sender + time row.
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              sender.isNotEmpty ? sender : 'Unknown',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w800,
+                                                color: widget.text,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            _relativeTime(pinnedAt),
+                                            style: TextStyle(
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w600,
+                                              color: widget.muted.withOpacity(0.65),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      // Preview.
+                                      Text(
+                                        preview.isNotEmpty ? preview : '…',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w500,
+                                          color: widget.muted,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                      // "Pinned by" attribution.
+                                      if (pinnedBy.isNotEmpty) ...[
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          'Pinned by $pinnedBy',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                            color: widget.muted.withOpacity(0.48),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                // Unpin button — clear remove action.
+                                if (widget.canUnpin)
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => GroupService.unpinMessage(
+                                      groupId: widget.groupId,
+                                      messageId: msgId,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 10),
+                                      child: Icon(
+                                        Icons.remove_circle_outline_rounded,
+                                        size: 20,
+                                        color: widget.muted.withOpacity(0.50),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/// Full-screen image viewer opened when a chat image is tapped.
+///
+/// Uses [Hero] for a smooth expand animation from the bubble.
+/// [InteractiveViewer] allows pinch-to-zoom / pan.
+class _FullscreenImageViewer extends StatelessWidget {
+  final String imageUrl;
+  final String heroTag;
+
+  const _FullscreenImageViewer({
+    required this.imageUrl,
+    required this.heroTag,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          children: [
+            Positioned.fill(child: Container(color: Colors.transparent)),
+            Center(
+              child: InteractiveViewer(
+                minScale: 0.8,
+                maxScale: 5.0,
+                child: Hero(
+                  tag: heroTag,
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.contain,
+                    loadingBuilder: (_, child, progress) {
+                      if (progress == null) return child;
+                      return const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                          strokeWidth: 2.5,
+                        ),
+                      );
+                    },
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.broken_image_rounded,
+                      color: Colors.white54,
+                      size: 64,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Close button
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 12,
+              right: 16,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.55),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1862,6 +3048,285 @@ class _EmptyChatState extends StatelessWidget {
   }
 }
 
+/// Returns the appropriate icon for a given reply/message type.
+IconData _replyTypeIcon(String? type) {
+  switch (type) {
+    case 'image':
+      return Icons.image_rounded;
+    case 'library_file_link':
+      return Icons.attach_file_rounded;
+    default:
+      return Icons.reply_rounded;
+  }
+}
+
+/// Streams live reactions for a single message and renders compact emoji chips.
+///
+/// Doc-presence model: each doc is one user's reaction with {uid, emoji}.
+/// Groups by emoji → shows count + highlights current user's own reaction.
+class _ReactionsBar extends StatefulWidget {
+  final String groupId;
+  final String messageId;
+  final String currentUid;
+  final bool isMe;
+  final bool isDark;
+  final Color muted;
+
+  const _ReactionsBar({
+    required this.groupId,
+    required this.messageId,
+    required this.currentUid,
+    required this.isMe,
+    required this.isDark,
+    required this.muted,
+  });
+
+  @override
+  State<_ReactionsBar> createState() => _ReactionsBarState();
+}
+
+class _ReactionsBarState extends State<_ReactionsBar> {
+  late final Stream<QuerySnapshot<Map<String, dynamic>>> _stream;
+
+  @override
+  void initState() {
+    super.initState();
+    // Stream created ONCE — immune to parent rebuilds.
+    _stream = FirebaseFirestore.instance
+        .collection('groups')
+        .doc(widget.groupId)
+        .collection('messages')
+        .doc(widget.messageId)
+        .collection('reactions')
+        .snapshots();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: _stream,
+      builder: (context, snapshot) {
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) return const SizedBox.shrink();
+
+        // Group by emoji → {emoji: count}, sorted by count desc.
+        final Map<String, int> counts = {};
+        String? myEmoji;
+        for (final doc in docs) {
+          final data = doc.data();
+          final emoji = (data['emoji'] ?? '').toString();
+          if (emoji.isEmpty) continue;
+          counts[emoji] = (counts[emoji] ?? 0) + 1;
+          if ((data['uid'] ?? '') == widget.currentUid) myEmoji = emoji;
+        }
+        if (counts.isEmpty) return const SizedBox.shrink();
+
+        // Sort highest count first so most-popular emoji leads.
+        final sorted = counts.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+
+        return Padding(
+          padding: EdgeInsets.only(
+            // Align below bubble: avatar=36+8px on others' side.
+            left: widget.isMe ? 0 : 44,
+            right: widget.isMe ? 8 : 0,
+            top: 4,
+            bottom: 6,
+          ),
+          child: Wrap(
+            alignment:
+                widget.isMe ? WrapAlignment.end : WrapAlignment.start,
+            spacing: 6,
+            runSpacing: 5,
+            children: sorted.map((entry) {
+              final emoji = entry.key;
+              final count = entry.value;
+              final isMine = emoji == myEmoji;
+
+              // Colours.
+              final chipBg = isMine
+                  ? AppColors.primary.withOpacity(widget.isDark ? 0.28 : 0.16)
+                  : (widget.isDark
+                      ? Colors.white.withOpacity(0.08)
+                      : Colors.black.withOpacity(0.055));
+              final chipBorder = isMine
+                  ? AppColors.primary.withOpacity(widget.isDark ? 0.70 : 0.50)
+                  : (widget.isDark
+                      ? Colors.white.withOpacity(0.12)
+                      : Colors.black.withOpacity(0.10));
+              final countColor = isMine
+                  ? (widget.isDark ? AppColors.primary : AppColors.primary)
+                  : (widget.isDark
+                      ? Colors.white.withOpacity(0.70)
+                      : Colors.black.withOpacity(0.55));
+
+              return GestureDetector(
+                onTap: () => GroupService.toggleReaction(
+                  groupId: widget.groupId,
+                  messageId: widget.messageId,
+                  emoji: emoji,
+                ),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 9, vertical: 4.5),
+                  decoration: BoxDecoration(
+                    color: chipBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: chipBorder, width: 1.4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(emoji,
+                          style: const TextStyle(fontSize: 16,
+                              // Let system render emoji at native quality.
+                              fontFamilyFallback: ['Apple Color Emoji',
+                                'Noto Color Emoji'])),
+                      const SizedBox(width: 5),
+                      Text(
+                        // Always show count — even 1 is meaningful.
+                        '$count',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: isMine
+                              ? FontWeight.w900
+                              : FontWeight.w700,
+                          color: countColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Wraps a message bubble with a horizontal swipe gesture that triggers reply.
+///
+/// - Right-swipe triggers reply (works for both own and others' messages).
+/// - A reply icon fades in as the user drags.
+/// - Releases with a spring-back animation after triggering.
+/// - Vertical dominance check prevents fighting with ListView scroll.
+class _SwipeToReplyWrapper extends StatefulWidget {
+  final Widget child;
+  final bool isMe;
+  final VoidCallback onSwipe;
+
+  const _SwipeToReplyWrapper({
+    required this.child,
+    required this.isMe,
+    required this.onSwipe,
+  });
+
+  @override
+  State<_SwipeToReplyWrapper> createState() => _SwipeToReplyWrapperState();
+}
+
+class _SwipeToReplyWrapperState extends State<_SwipeToReplyWrapper>
+    with SingleTickerProviderStateMixin {
+  double _offset = 0;
+  bool _triggered = false;
+  late final AnimationController _spring;
+  late Animation<double> _springAnim;
+  bool _trackingAxis = false;
+  bool _isHorizontalDrag = false;
+
+  static const double _triggerThreshold = 62;
+
+  @override
+  void initState() {
+    super.initState();
+    _spring = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    )..addListener(() {
+        setState(() => _offset = _springAnim.value);
+      });
+  }
+
+  @override
+  void dispose() {
+    _spring.dispose();
+    super.dispose();
+  }
+
+  void _onDragUpdate(DragUpdateDetails d) {
+    if (!_trackingAxis) {
+      _trackingAxis = true;
+      _isHorizontalDrag =
+          d.delta.dx.abs() > d.delta.dy.abs();
+    }
+    if (!_isHorizontalDrag) return;
+
+    final dx = d.delta.dx;
+    // Allow right swipe only (positive dx).
+    if (dx < 0 && _offset <= 0) return;
+
+    setState(() {
+      _offset = (_offset + dx).clamp(-8.0, _triggerThreshold + 12);
+    });
+
+    if (_offset >= _triggerThreshold && !_triggered) {
+      _triggered = true;
+      widget.onSwipe();
+    }
+  }
+
+  void _onDragEnd(DragEndDetails _) {
+    _trackingAxis = false;
+    _isHorizontalDrag = false;
+    _triggered = false;
+    // Spring back to 0.
+    _springAnim = Tween<double>(begin: _offset, end: 0).animate(
+      CurvedAnimation(parent: _spring, curve: Curves.elasticOut),
+    );
+    _spring.forward(from: 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final revealProgress = (_offset / _triggerThreshold).clamp(0.0, 1.0);
+
+    return GestureDetector(
+      onHorizontalDragUpdate: _onDragUpdate,
+      onHorizontalDragEnd: _onDragEnd,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Reply icon revealed when swiping.
+          Positioned(
+            left: widget.isMe ? null : 0,
+            right: widget.isMe ? 0 : null,
+            top: 0,
+            bottom: 0,
+            child: Opacity(
+              opacity: revealProgress,
+              child: Transform.scale(
+                scale: 0.6 + 0.4 * revealProgress,
+                child: const Icon(
+                  Icons.reply_rounded,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+          Transform.translate(
+            offset: Offset(_offset, 0),
+            child: widget.child,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Streams live typing state from `groups/{groupId}/typing` and renders
 /// an animated indicator above the composer.
 ///
@@ -1870,6 +3335,7 @@ class _EmptyChatState extends StatelessWidget {
 /// a new stream on every parent setState(), which resets the StreamBuilder
 /// back to its loading state and kills the live indicator.
 class _TypingIndicator extends StatefulWidget {
+
   final String groupId;
   final String currentUid;
   final Color muted;
@@ -1891,24 +3357,25 @@ class _TypingIndicatorState extends State<_TypingIndicator> {
   void initState() {
     super.initState();
     // Stream created ONCE — immune to parent rebuilds.
+    // Doc-presence model: a doc existing = user is typing.
+    // No isTyping filter needed. A 12-second stale guard is a safety net
+    // only (e.g. if the app crashes before deleting the doc).
     _stream = FirebaseFirestore.instance
         .collection('groups')
         .doc(widget.groupId)
         .collection('typing')
-        .where('isTyping', isEqualTo: true)
         .snapshots()
         .map((snap) {
       final staleThreshold =
-          DateTime.now().subtract(const Duration(seconds: 10));
+          DateTime.now().subtract(const Duration(seconds: 12));
       final names = <String>[];
       for (final doc in snap.docs) {
         final data = doc.data();
         final uid = (data['uid'] ?? '').toString();
         if (uid == widget.currentUid) continue; // never show self
         final updatedAt = (data['updatedAt'] as Timestamp?)?.toDate();
-        // Treat null updatedAt as "just written" (serverTimestamp pending) —
-        // do NOT treat it as stale. Only discard when we have a real timestamp
-        // that is demonstrably old.
+        // updatedAt is Timestamp.now() so it arrives immediately.
+        // Only skip if demonstrably old (crash/disconnect stale guard).
         if (updatedAt != null && updatedAt.isBefore(staleThreshold)) continue;
         final name = (data['displayName'] ?? '').toString().trim();
         if (name.isNotEmpty) names.add(name.split(' ').first);

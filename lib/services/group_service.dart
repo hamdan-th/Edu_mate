@@ -1265,4 +1265,130 @@ class GroupService {
       await batch.commit();
     }
   }
+
+  /// Toggle a reaction emoji on a message.
+  ///
+  /// Rules (one reaction per user per message):
+  /// * Same emoji tapped again → delete the doc (toggle off).
+  /// * Different emoji → overwrite (replaces old reaction).
+  /// * No previous reaction → create the doc.
+  static Future<void> toggleReaction({
+    required String groupId,
+    required String messageId,
+    required String emoji,
+  }) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    final ref = _groups
+        .doc(groupId)
+        .collection('messages')
+        .doc(messageId)
+        .collection('reactions')
+        .doc(uid);
+
+    final snap = await ref.get();
+    if (snap.exists && snap.data()?['emoji'] == emoji) {
+      // Same emoji → toggle off.
+      await ref.delete();
+    } else {
+      // New or different emoji → set/overwrite.
+      await ref.set({
+        'uid': uid,
+        'emoji': emoji,
+        'updatedAt': Timestamp.now(),
+      });
+    }
+  }
+
+  // ── Pinned Messages ────────────────────────────────────────────────
+
+  /// Pins a message at the group level.
+  /// Stored in `groups/{groupId}/pinnedMessages/{messageId}`.
+  static Future<void> pinMessage({
+    required String groupId,
+    required String messageId,
+    required Map<String, dynamic> data,
+    required String pinnedByName,
+  }) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    final type = (data['type'] ?? 'text').toString();
+    final text = (data['text'] ?? '').toString().trim();
+    String previewText;
+    if (text.isNotEmpty) {
+      previewText = text.length > 120 ? '${text.substring(0, 120)}…' : text;
+    } else if (type == 'image') {
+      previewText = '📷 Photo';
+    } else if (type == 'library_file_link') {
+      previewText =
+          (data['sharedFileTitle'] ?? '📎 File').toString();
+    } else {
+      previewText = '…';
+    }
+
+    await _groups
+        .doc(groupId)
+        .collection('pinnedMessages')
+        .doc(messageId)
+        .set({
+      'messageId': messageId,
+      'pinnedBy': uid,
+      'pinnedByName': pinnedByName,
+      'pinnedAt': Timestamp.now(),
+      'messageType': type,
+      'previewText': previewText,
+      'senderName': (data['senderName'] ?? '').toString(),
+    });
+  }
+
+  /// Removes a pinned message.
+  static Future<void> unpinMessage({
+    required String groupId,
+    required String messageId,
+  }) async {
+    await _groups
+        .doc(groupId)
+        .collection('pinnedMessages')
+        .doc(messageId)
+        .delete();
+  }
+
+  /// One-shot check: is this message currently pinned?
+  static Future<bool> isPinned({
+    required String groupId,
+    required String messageId,
+  }) async {
+    final snap = await _groups
+        .doc(groupId)
+        .collection('pinnedMessages')
+        .doc(messageId)
+        .get();
+    return snap.exists;
+  }
+
+  /// Streams the most recently pinned message for the group banner.
+  static Stream<DocumentSnapshot<Map<String, dynamic>>?> streamLatestPin(
+      String groupId) {
+    return _groups
+        .doc(groupId)
+        .collection('pinnedMessages')
+        .orderBy('pinnedAt', descending: true)
+        .limit(1)
+        .snapshots()
+        .map((snap) => snap.docs.isEmpty ? null : snap.docs.first);
+  }
+
+  /// Streams ALL pinned messages ordered by pinnedAt DESC — for the pinned
+  /// history sheet.
+  static Stream<QuerySnapshot<Map<String, dynamic>>> streamAllPins(
+      String groupId) {
+    return _groups
+        .doc(groupId)
+        .collection('pinnedMessages')
+        .orderBy('pinnedAt', descending: true)
+        .snapshots();
+  }
 }
+
