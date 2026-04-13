@@ -169,16 +169,32 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         '/mainNav',
         (route) => false,
       );
-    } catch (_) {
+    } on FirebaseAuthException catch (e) {
+      // 🔍 DEBUG: طباعة الخطأ الحقيقي في debug console
+      // ignore: avoid_print
+      print('[GuestLogin] FirebaseAuthException: code=${e.code} | message=${e.message}');
+      if (mounted) {
+        String msg = 'تعذّر الدخول كضيف.';
+        if (e.code == 'operation-not-allowed') {
+          msg = 'تسجيل الدخول كضيف غير مفعّل. يرجى التواصل مع المطوّر.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('[GuestLogin] Unknown error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تعذّر الدخول كضيف. تحقق من اتصالك بالإنترنت.')),
+          SnackBar(content: Text('خطأ غير متوقع: $e')),
         );
       }
     } finally {
       if (mounted) setState(() => _isGuestLoading = false);
     }
   }
+
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)

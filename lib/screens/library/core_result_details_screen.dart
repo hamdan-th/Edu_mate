@@ -5,6 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'digital_library_firestore_service.dart';
 import 'library_theme.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/guest_provider.dart';
+import '../../widgets/guest_action_dialog.dart';
 
 class CoreResultDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> resultData;
@@ -82,6 +85,16 @@ class CoreResultDetailsScreen extends StatelessWidget {
                     ),
                     label: Text(isSaved ? l10n.digitalLibActionSaved : l10n.digitalLibActionSave),
                     onPressed: () async {
+                      // 🚫 Guest cannot save
+                      if (context.read<GuestProvider>().isGuest) {
+                        GuestActionDialog.show(
+                          context,
+                          title: 'تسجيل الدخول مطلوب',
+                          subtitle: 'لحفظ الملفات في مكتبتك، سجّل دخولك أولًا.',
+                        );
+                        return;
+                      }
+
                       try {
                         if (!isSaved) {
                           await DigitalLibraryFirestoreService.saveReference(
@@ -138,6 +151,16 @@ class CoreResultDetailsScreen extends StatelessWidget {
                   icon: const Icon(Icons.download_rounded),
                   label: Text(l10n.digitalLibActionDownloadPdf),
                   onPressed: () async {
+                    // 🚫 Guest cannot download
+                    if (context.read<GuestProvider>().isGuest) {
+                      GuestActionDialog.show(
+                        context,
+                        title: 'تسجيل الدخول مطلوب',
+                        subtitle: 'تصفح الملفات متاح كضيف، لكن التحميل متاح للمستخدمين المسجلين فقط.',
+                      );
+                      return;
+                    }
+
                     try {
                       await DigitalLibraryFirestoreService.registerDownload(
                         resultData,

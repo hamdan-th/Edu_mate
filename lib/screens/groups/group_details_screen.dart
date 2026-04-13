@@ -9,6 +9,9 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../models/group_message_model.dart';
 import '../../models/group_model.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/guest_provider.dart';
+import '../../widgets/guest_action_dialog.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/group_service.dart';
 import 'group_chat_screen.dart';
@@ -87,6 +90,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   Future<void> _joinPublicGroup() async {
+    // 🚫 Guest cannot join groups
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(
+        context,
+        title: 'تسجيل الدخول مطلوب',
+        subtitle: 'يمكنك مشاهدة المجموعات كضيف، وللانضمام يجب تسجيل الدخول.',
+      );
+      return;
+    }
+
     setState(() => _isJoining = true);
     try {
       await GroupService.joinPublicGroup(widget.group.id);

@@ -1534,9 +1534,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                               ),
                             );
                           },
-                          child: Hero(
-                            tag: 'img_$messageId',
-                            child: ClipRRect(
+                          child: ClipRRect(
                               borderRadius: BorderRadius.circular(14),
                               child: ConstrainedBox(
                                 constraints: BoxConstraints(
@@ -1631,8 +1629,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                             ),
                           ),
                         ),
-                      ),
-                    if (text.toString().isNotEmpty)
+                      if (text.toString().isNotEmpty)
                       Wrap(
                         alignment: WrapAlignment.end,
                         crossAxisAlignment: WrapCrossAlignment.end,
@@ -2886,10 +2883,8 @@ class _FullscreenImageViewer extends StatelessWidget {
               child: InteractiveViewer(
                 minScale: 0.8,
                 maxScale: 5.0,
-                child: Hero(
-                  tag: heroTag,
-                  child: Image.network(
-                    imageUrl,
+                child: Image.network(
+                  imageUrl,
                     fit: BoxFit.contain,
                     loadingBuilder: (_, child, progress) {
                       if (progress == null) return child;
@@ -2905,8 +2900,6 @@ class _FullscreenImageViewer extends StatelessWidget {
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.broken_image_rounded,
                       color: Colors.white54,
-                      size: 64,
-                    ),
                   ),
                 ),
               ),
@@ -3328,7 +3321,7 @@ class _SwipeToReplyWrapper extends StatefulWidget {
 
 class _SwipeToReplyWrapperState extends State<_SwipeToReplyWrapper>
     with SingleTickerProviderStateMixin {
-  double _offset = 0;
+  final ValueNotifier<double> _offsetNode = ValueNotifier<double>(0.0);
   bool _triggered = false;
   late final AnimationController _spring;
   late Animation<double> _springAnim;
@@ -3344,13 +3337,14 @@ class _SwipeToReplyWrapperState extends State<_SwipeToReplyWrapper>
       vsync: this,
       duration: const Duration(milliseconds: 280),
     )..addListener(() {
-        setState(() => _offset = _springAnim.value);
+        _offsetNode.value = _springAnim.value;
       });
   }
 
   @override
   void dispose() {
     _spring.dispose();
+    _offsetNode.dispose();
     super.dispose();
   }
 
@@ -3364,13 +3358,11 @@ class _SwipeToReplyWrapperState extends State<_SwipeToReplyWrapper>
 
     final dx = d.delta.dx;
     // Allow right swipe only (positive dx).
-    if (dx < 0 && _offset <= 0) return;
+    if (dx < 0 && _offsetNode.value <= 0) return;
 
-    setState(() {
-      _offset = (_offset + dx).clamp(-8.0, _triggerThreshold + 12);
-    });
+    _offsetNode.value = (_offsetNode.value + dx).clamp(-8.0, _triggerThreshold + 12);
 
-    if (_offset >= _triggerThreshold && !_triggered) {
+    if (_offsetNode.value >= _triggerThreshold && !_triggered) {
       _triggered = true;
       widget.onSwipe();
     }
@@ -3381,7 +3373,7 @@ class _SwipeToReplyWrapperState extends State<_SwipeToReplyWrapper>
     _isHorizontalDrag = false;
     _triggered = false;
     // Spring back to 0.
-    _springAnim = Tween<double>(begin: _offset, end: 0).animate(
+    _springAnim = Tween<double>(begin: _offsetNode.value, end: 0).animate(
       CurvedAnimation(parent: _spring, curve: Curves.elasticOut),
     );
     _spring.forward(from: 0);
@@ -3389,8 +3381,6 @@ class _SwipeToReplyWrapperState extends State<_SwipeToReplyWrapper>
 
   @override
   Widget build(BuildContext context) {
-    final revealProgress = (_offset / _triggerThreshold).clamp(0.0, 1.0);
-
     return GestureDetector(
       onHorizontalDragUpdate: _onDragUpdate,
       onHorizontalDragEnd: _onDragEnd,
@@ -3398,26 +3388,37 @@ class _SwipeToReplyWrapperState extends State<_SwipeToReplyWrapper>
         clipBehavior: Clip.none,
         children: [
           // Reply icon revealed when swiping.
-          Positioned(
-            left: widget.isMe ? null : 0,
-            right: widget.isMe ? 0 : null,
-            top: 0,
-            bottom: 0,
-            child: Opacity(
-              opacity: revealProgress,
-              child: Transform.scale(
-                scale: 0.6 + 0.4 * revealProgress,
-                child: const Icon(
-                  Icons.reply_rounded,
-                  color: AppColors.primary,
-                  size: 22,
+          ValueListenableBuilder<double>(
+            valueListenable: _offsetNode,
+            builder: (context, val, child) {
+              final revealProgress = (val / _triggerThreshold).clamp(0.0, 1.0);
+              return Positioned(
+                left: widget.isMe ? null : 0,
+                right: widget.isMe ? 0 : null,
+                top: 0,
+                bottom: 0,
+                child: Opacity(
+                  opacity: revealProgress,
+                  child: Transform.scale(
+                    scale: 0.6 + 0.4 * revealProgress,
+                    child: const Icon(
+                      Icons.reply_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
-          Transform.translate(
-            offset: Offset(_offset, 0),
-            child: widget.child,
+          ValueListenableBuilder<double>(
+            valueListenable: _offsetNode,
+            builder: (context, val, child) {
+              return Transform.translate(
+                offset: Offset(val, 0),
+                child: widget.child,
+              );
+            },
           ),
         ],
       ),

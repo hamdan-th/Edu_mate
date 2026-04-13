@@ -5,6 +5,9 @@ import '../../../models/feed_comment_reply_model.dart';
 import '../../../services/feed_comments_service.dart';
 import '../../../services/feed_comment_reactions_service.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/guest_provider.dart';
+import '../../../widgets/guest_action_dialog.dart';
 
 class PostCommentsSheet extends StatefulWidget {
   final Map<String, dynamic> postCardData;
@@ -40,6 +43,16 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
     final postId = widget.postCardData['postId']?.toString() ?? '';
 
     if (text.isEmpty || postId.isEmpty || _isSending) return;
+
+    // 🚫 Guest cannot comment
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(
+        context,
+        title: 'تسجيل الدخول مطلوب',
+        subtitle: 'التصفح متاح كضيف، لكن التعليق يحتاج إلى تسجيل الدخول.',
+      );
+      return;
+    }
 
     setState(() {
       _isSending = true;
@@ -380,6 +393,16 @@ class _CommentItemState extends State<_CommentItem> {
   }
 
   Future<void> _toggleLike() async {
+    // 🚫 Guest cannot like
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(
+        context,
+        title: 'تسجيل الدخول مطلوب',
+        subtitle: 'أنت الآن في وضع الضيف. سجّل دخولك لتتمكن من الإعجاب بالتعليقات.',
+      );
+      return;
+    }
+
     if (_isLoadingLike) return;
 
     final oldLiked = _isLiked;

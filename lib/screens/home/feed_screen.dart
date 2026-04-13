@@ -672,7 +672,11 @@ class _PostCardState extends State<PostCard>
 
     // 🚫 Guest cannot join
     if (context.read<GuestProvider>().isGuest) {
-      GuestActionDialog.show(context);
+      GuestActionDialog.show(
+        context,
+        title: 'تسجيل الدخول مطلوب',
+        subtitle: 'يمكنك مشاهدة المجموعات كضيف، وللانضمام يجب تسجيل الدخول.',
+      );
       return;
     }
 
@@ -718,7 +722,11 @@ class _PostCardState extends State<PostCard>
 
     // 🚫 Guest cannot like
     if (context.read<GuestProvider>().isGuest) {
-      GuestActionDialog.show(context);
+      GuestActionDialog.show(
+        context,
+        title: 'تسجيل الدخول مطلوب',
+        subtitle: 'أنت الآن في وضع الضيف. سجّل دخولك لتتمكن من الإعجاب بالمنشورات.',
+      );
       return;
     }
 

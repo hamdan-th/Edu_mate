@@ -8,7 +8,7 @@ import '../core/theme/app_colors.dart';
 class GuestActionDialog {
   GuestActionDialog._();
 
-  static Future<void> show(BuildContext context) {
+  static Future<void> show(BuildContext context, {String? title, String? subtitle}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return showModalBottomSheet(
@@ -54,7 +54,7 @@ class GuestActionDialog {
 
               // Title
               Text(
-                'هذه الميزة للأعضاء فقط',
+                title ?? 'هذه الميزة للأعضاء فقط',
                 style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w900,
@@ -65,7 +65,7 @@ class GuestActionDialog {
 
               // Subtitle
               Text(
-                'سجّل دخولك أو أنشئ حسابًا مجانيًا\nللتفاعل مع المحتوى.',
+                subtitle ?? 'سجّل دخولك أو أنشئ حسابًا مجانيًا\nللتفاعل مع المحتوى.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,

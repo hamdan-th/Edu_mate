@@ -14,6 +14,9 @@ import 'university_academic_data.dart';
 import '../../services/group_service.dart';
 import '../../models/group_model.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/guest_provider.dart';
+import '../../widgets/guest_action_dialog.dart';
 
 class FileDetailsScreen extends StatefulWidget {
   final FileModel file;
@@ -413,6 +416,16 @@ $url
   }
 
   Future<void> _downloadFile(String url) async {
+    // 🚫 Guest cannot download
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(
+        context,
+        title: 'تسجيل الدخول مطلوب',
+        subtitle: 'تصفح الملفات متاح كضيف، لكن التحميل متاح للمستخدمين المسجلين فقط.',
+      );
+      return;
+    }
+
     if (url.trim().isEmpty) {
       _snack(AppLocalizations.of(context)!.myFilesNoLink);
       return;
@@ -1173,6 +1186,15 @@ $url
                                   count: updatedFile.likes,
                                   active: liked,
                                   onTap: () async {
+                                    // 🚫 Guest cannot like files
+                                    if (context.read<GuestProvider>().isGuest) {
+                                      GuestActionDialog.show(
+                                        context,
+                                        title: 'تسجيل الدخول مطلوب',
+                                        subtitle: 'أنت الآن في وضع الضيف. سجّل دخولك لتتمكن من الإعجاب بالملفات.',
+                                      );
+                                      return;
+                                    }
                                     try {
                                       await LibraryReactionsService.toggleLike(
                                         fileId: widget.file.id,
@@ -1206,6 +1228,15 @@ $url
                                   count: updatedFile.saves,
                                   active: saved,
                                   onTap: () async {
+                                    // 🚫 Guest cannot save files
+                                    if (context.read<GuestProvider>().isGuest) {
+                                      GuestActionDialog.show(
+                                        context,
+                                        title: 'تسجيل الدخول مطلوب',
+                                        subtitle: 'لحفظ الملفات في مكتبتك، سجّل دخولك أولًا.',
+                                      );
+                                      return;
+                                    }
                                     try {
                                       await LibraryReactionsService.toggleSave(
                                         fileId: widget.file.id,
