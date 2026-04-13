@@ -21,13 +21,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   bool _isGuestLoading = false;
 
   late final AnimationController _entranceController;
-  late final AnimationController _floatController;
-  late final AnimationController _glowController;
 
   late final Animation<double> _cardOpacity;
   late final Animation<Offset> _cardSlide;
-  late final Animation<double> _floatAnimation;
-  late final Animation<double> _glowAnimation;
 
   @override
   void initState() {
@@ -237,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
                   
                   // 1. Header Section - Logo
                   Container(
@@ -253,13 +249,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     ),
                     child: Image.asset(
                       'assets/images/university_logo.png',
-                      width: 100,
-                      height: 100,
+                      width: 84,
+                      height: 84,
                       fit: BoxFit.contain,
                     ),
                   ),
                         
-                  const SizedBox(height: 36), // Increased spacing
+                  const SizedBox(height: 20),
                         
                         Text(
                           l10n.app_name,
@@ -271,7 +267,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           style: textTheme.bodyMedium,
                         ),
                         
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 24),
                         
                         // 3. Login Card with Entrance Animation
                         SlideTransition(
@@ -281,97 +277,76 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             child: Container(
                               decoration: BoxDecoration(
                                 color: colorScheme.surface,
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: isDark ? AppColors.border.withOpacity(0.5) : Colors.black12,
                                   width: 1,
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(isDark ? 0.16 : 0.05),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       l10n.loginTitle,
                                       style: TextStyle(
-                                        color: isDark ? Colors.white : Colors.black87,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? AppColors.textPrimary : Colors.black87,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: -0.3,
                                       ),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
                                       l10n.loginSubtitle,
                                       style: TextStyle(
-                                        color: isDark ? Colors.white.withOpacity(0.6) : Colors.black54,
+                                        color: isDark ? AppColors.textSecondary : Colors.black54,
                                         fontSize: 13,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                     const SizedBox(height: 28),
                                     
-                                    // 4. Input Fields
-                                    Theme(
-                                      data: Theme.of(context).copyWith(
-                                        inputDecorationTheme: InputDecorationTheme(
-                                          fillColor: isDark ? AppColors.inputDarkFill : const Color(0xFFF3F4F6),
-                                          filled: true,
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                                          labelStyle: TextStyle(
-                                            color: isDark ? Colors.white.withOpacity(0.4) : Colors.black54,
-                                          ),
-                                          prefixIconColor: AppColors.primary.withOpacity(0.8),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: BorderSide.none,
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: BorderSide(
-                                              color: isDark ? AppColors.border.withOpacity(0.2) : Colors.black12,
-                                            ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            borderSide: const BorderSide(
-                                              color: AppColors.primary,
-                                              width: 2.0,
-                                            ),
+                                    // 4. Input Fields — inherit global AppTheme.inputDecorationTheme
+                                    Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: _loginController,
+                                          keyboardType: TextInputType.emailAddress,
+                                          style: textTheme.bodyLarge,
+                                          decoration: _inputDecoration(
+                                            label: l10n.loginEmailHint,
+                                            icon: Icons.person_outline_rounded,
                                           ),
                                         ),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          TextFormField(
-                                            controller: _loginController,
-                                            keyboardType: TextInputType.emailAddress,
-                                            style: textTheme.bodyLarge,
-                                            decoration: _inputDecoration(
-                                              label: l10n.loginEmailHint,
-                                              icon: Icons.person_outline_rounded,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 16),
-                                          TextFormField(
-                                            controller: _passwordController,
-                                            obscureText: _obscurePassword,
-                                            style: textTheme.bodyLarge,
-                                            decoration: _inputDecoration(
-                                              label: l10n.loginPasswordHint,
-                                              icon: Icons.lock_outline_rounded,
-                                              suffixIcon: IconButton(
-                                                onPressed: () {
-                                                  setState(() => _obscurePassword = !_obscurePassword);
-                                                },
-                                                icon: Icon(
-                                                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                                  color: isDark ? AppColors.textSecondary : Colors.black54,
-                                                ),
+                                        const SizedBox(height: 14),
+                                        TextFormField(
+                                          controller: _passwordController,
+                                          obscureText: _obscurePassword,
+                                          style: textTheme.bodyLarge,
+                                          decoration: _inputDecoration(
+                                            label: l10n.loginPasswordHint,
+                                            icon: Icons.lock_outline_rounded,
+                                            suffixIcon: IconButton(
+                                              onPressed: () {
+                                                setState(() => _obscurePassword = !_obscurePassword);
+                                              },
+                                              icon: Icon(
+                                                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                                color: isDark ? AppColors.textSecondary : Colors.black54,
                                               ),
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                     
                                     const SizedBox(height: 12),
@@ -382,9 +357,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       child: TextButton(
                                         onPressed: _isLoading ? null : _resetPassword,
                                         style: TextButton.styleFrom(
-                                          foregroundColor: isDark ? Colors.white.withOpacity(0.6) : Colors.black54, 
+                                          foregroundColor: isDark ? AppColors.textSecondary : Colors.black54,
                                         ),
-                                        child: Text(l10n.loginForgotPassword, style: const TextStyle(fontSize: 12)),
+                                        child: Text(l10n.loginForgotPassword, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                                       ),
                                     ),
                                     
@@ -416,7 +391,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                         Text(
                                           l10n.loginNoAccount,
                                           style: textTheme.bodyMedium?.copyWith(
-                                            color: isDark ? Colors.white.withOpacity(0.5) : Colors.black54,
+                                            color: isDark ? AppColors.textSecondary : Colors.black54,
                                             fontSize: 13,
                                           ),
                                         ),
@@ -445,8 +420,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                             : _browseAsGuest,
                                         style: TextButton.styleFrom(
                                           foregroundColor: isDark
-                                              ? Colors.white.withOpacity(0.40)
-                                              : Colors.black38,
+                                              ? AppColors.textSecondary
+                                              : Colors.black54,
                                         ),
                                         child: _isGuestLoading
                                             ? const SizedBox(

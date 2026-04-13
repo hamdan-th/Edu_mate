@@ -18,6 +18,7 @@ import 'group_chat_screen.dart';
 import 'create_group_feed_post_screen.dart';
 import 'invite_group_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../widgets/feed/post_card_wrapper.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final GroupModel group;
@@ -953,12 +954,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                       unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       tabs: [
+                        if (widget.group.isPublic)
+                          const Tab(text: 'المنشورات'),
                         Tab(text: AppLocalizations.of(context)!.groupsTabMembers),
                         Tab(text: AppLocalizations.of(context)!.groupsTabMedia),
                         Tab(text: AppLocalizations.of(context)!.groupsTabLinks),
                         Tab(text: AppLocalizations.of(context)!.groupsTabSaved),
-                        if (widget.group.isPublic)
-                          const Tab(text: 'منشورات المجموعة'),
                       ],
                     ),
                   ),
@@ -970,12 +971,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             color: Theme.of(context).scaffoldBackgroundColor,
             child: TabBarView(
               children: [
+                if (widget.group.isPublic)
+                  _KeepAlivePage(child: _buildAnnouncementsTab()),
                 _KeepAlivePage(child: _buildMembersTab()),
                 _KeepAlivePage(child: _buildMediaTab()),
                 _KeepAlivePage(child: _buildLinksTab()),
                 _KeepAlivePage(child: _buildSavedMessagesTab()),
-                if (widget.group.isPublic)
-                  _KeepAlivePage(child: _buildAnnouncementsTab()),
               ],
             ),
           ),
@@ -1318,17 +1319,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     }
                   }
                 }
-                // Future enhancement: launchUrl(Uri.parse(url))
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-  Widget _buildAnnouncementsTab() {
-    final currentUid = _auth.currentUser?.uid ?? '';
-
+                // Future enhancement: launchUrl(Uri.parse(  Widget _buildAnnouncementsTab() {
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore
           .collection('posts')
@@ -1341,383 +1332,45 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           return const Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
         if (snapshot.hasError) {
-          return _buildEmptyState(Icons.error_outline_rounded, 'تعذّر تحميل الإعلانات');
+          return _buildEmptyState(Icons.error_outline_rounded, 'تعذّر تحميل المنشورات');
         }
 
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
-          return _buildEmptyState(Icons.campaign_rounded, 'لا توجد إعلانات عامة بعد');
+          return _buildEmptyState(Icons.campaign_rounded, 'لا توجد منشورات في هذه المجموعة بعد');
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final doc = docs[index];
             final data = doc.data() as Map<String, dynamic>;
-            final postId = doc.id;
-            final authorId = data['authorId']?.toString() ?? '';
-            final authorName = data['authorName']?.toString() ?? 'مجهول';
-            final contentText = data['contentText']?.toString() ?? '';
-            final imageUrl = data['contentImageUrl']?.toString() ?? '';
-            final ts = data['createdAt'] as Timestamp?;
-            final dateStr = ts != null
-                ? '${ts.toDate().day}/${ts.toDate().month}/${ts.toDate().year}'
-                : '';
+            
+            // Map data to match PostCardWrapper/PostCard expectations
+            final post = {
+              'postId': doc.id,
+              'authorId': data['authorId'] ?? '',
+              'authorName': data['authorName'] ?? '',
+              'groupName': data['groupName'] ?? widget.group.name,
+              'groupImageUrl': data['groupImageUrl'] ?? widget.group.imageUrl,
+              'time': '', // Wrapper will handle formatting or we can pass a formatted time
+              'createdAt': data['createdAt'],
+              'contentText': data['contentText'] ?? '',
+              'contentImageUrl': data['contentImageUrl'] ?? '',
+              'likesCount': data['likesCount'] ?? 0,
+              'commentsCount': data['commentsCount'] ?? 0,
+              'groupId': widget.group.id,
+              'tag': 'Public',
+            };
 
-            final canEdit = authorId == currentUid;
-            // المالك له حذف أي منشور في مجموعته
-            // المشرف لا يملك صلاحية حذف منشورات غيره
-            // صاحب المنشور يحذف منشوره دائماً
-            final canDelete = authorId == currentUid || _isOwner;
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: _isDark ? AppColors.surface : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _isDark
-                      ? AppColors.border
-                      : Colors.black12,
-                ),
-                boxShadow: _isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        )
-                      ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header row
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundColor: AppColors.primary.withOpacity(0.12),
-                          child: Text(
-                            authorName.isNotEmpty ? authorName[0].toUpperCase() : 'م',
-                            style: const TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                authorName,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14,
-                                  color: _isDark
-                                      ? AppColors.textPrimary
-                                      : const Color(0xFF111827),
-                                ),
-                              ),
-                              if (dateStr.isNotEmpty)
-                                Text(
-                                  dateStr,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: _isDark
-                                        ? AppColors.textSecondary
-                                        : const Color(0xFF6B7280),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        // Actions menu
-                        if (canEdit || canDelete)
-                          PopupMenuButton<String>(
-                            icon: Icon(
-                              Icons.more_vert_rounded,
-                              color: _isDark
-                                  ? AppColors.textSecondary
-                                  : const Color(0xFF6B7280),
-                              size: 20,
-                            ),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
-                            onSelected: (action) async {
-                              if (action == 'edit') {
-                                final controller =
-                                    TextEditingController(text: contentText);
-                                // Full bottom sheet editor — no existing screen found in project
-                                await showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (_) => Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: MediaQuery.of(context).viewInsets.bottom,
-                                    ),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: _isDark ? AppColors.surface : Colors.white,
-                                        borderRadius: const BorderRadius.vertical(
-                                            top: Radius.circular(24)),
-                                      ),
-                                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Center(
-                                            child: Container(
-                                              width: 40,
-                                              height: 4,
-                                              decoration: BoxDecoration(
-                                                color: AppColors.border,
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            'تعديل المنشور',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w900,
-                                              fontSize: 18,
-                                              color: _isDark
-                                                  ? AppColors.textPrimary
-                                                  : const Color(0xFF111827),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 16),
-                                          TextField(
-                                            controller: controller,
-                                            autofocus: true,
-                                            minLines: 4,
-                                            maxLines: 10,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              height: 1.5,
-                                              color: _isDark
-                                                  ? AppColors.textPrimary
-                                                  : const Color(0xFF1F2937),
-                                            ),
-                                            decoration: InputDecoration(
-                                              hintText: 'نص المنشور...',
-                                              hintStyle: const TextStyle(
-                                                  color: AppColors.textSecondary),
-                                              filled: true,
-                                              fillColor: _isDark
-                                                  ? AppColors.background
-                                                  : const Color(0xFFF9FAFB),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(14),
-                                                borderSide: BorderSide.none,
-                                              ),
-                                              contentPadding:
-                                                  const EdgeInsets.all(14),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 16),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: OutlinedButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                  style: OutlinedButton.styleFrom(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                            vertical: 14),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              14),
-                                                    ),
-                                                  ),
-                                                  child: const Text('إلغاء',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: ElevatedButton(
-                                                  onPressed: () async {
-                                                    final newText =
-                                                        controller.text.trim();
-                                                    if (newText.isEmpty) return;
-                                                    try {
-                                                      await _firestore
-                                                          .collection('posts')
-                                                          .doc(postId)
-                                                          .update({
-                                                        'contentText': newText
-                                                      });
-                                                      if (context.mounted) {
-                                                        Navigator.pop(context);
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                          const SnackBar(
-                                                              content: Text(
-                                                                  'تم تعديل المنشور')),
-                                                        );
-                                                      }
-                                                    } catch (_) {
-                                                      if (context.mounted) {
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                          const SnackBar(
-                                                              content: Text(
-                                                                  'فشل التعديل')),
-                                                        );
-                                                      }
-                                                    }
-                                                  },
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        AppColors.primary,
-                                                    foregroundColor: Colors.white,
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                            vertical: 14),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              14),
-                                                    ),
-                                                  ),
-                                                  child: const Text('حفظ',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              } else if (action == 'delete') {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (_) => AlertDialog(
-                                    title: const Text('حذف الإعلان',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.error)),
-                                    content: const Text(
-                                        'هل تريد حذف هذا الإعلان نهائياً؟'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, false),
-                                        child: const Text('إلغاء'),
-                                      ),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.error,
-                                            foregroundColor: Colors.white),
-                                        onPressed: () =>
-                                            Navigator.pop(context, true),
-                                        child: const Text('حذف'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                if (confirm == true) {
-                                  try {
-                                    await _firestore
-                                        .collection('posts')
-                                        .doc(postId)
-                                        .delete();
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                              content:
-                                                  Text('تم حذف الإعلان')));
-                                    }
-                                  } catch (_) {
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                              content: Text('فشل الحذف')));
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            itemBuilder: (_) => [
-                              if (canEdit)
-                                const PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.edit_rounded,
-                                          size: 18, color: AppColors.primary),
-                                      SizedBox(width: 10),
-                                      Text('تعديل',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                ),
-                              if (canDelete)
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.delete_outline_rounded,
-                                          size: 18, color: AppColors.error),
-                                      SizedBox(width: 10),
-                                      Text('حذف',
-                                          style: TextStyle(
-                                              color: AppColors.error,
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                      ],
-                    ),
-                    // Content
-                    if (contentText.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        contentText,
-                        style: TextStyle(
-                          fontSize: 15,
-                          height: 1.5,
-                          color: _isDark
-                              ? AppColors.textPrimary
-                              : const Color(0xFF1F2937),
-                        ),
-                      ),
-                    ],
-                    // Image
-                    if (imageUrl.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          imageUrl,
-                          width: double.infinity,
+            return PostCardWrapper(post: post);
+          },
+        );
+      },
+    );
+  }
+double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                         ),

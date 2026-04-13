@@ -41,7 +41,7 @@ class _SignupScreenState extends State<SignupScreen>
       duration: const Duration(milliseconds: 2400),
     )..repeat(reverse: true);
 
-    _floatAnimation = Tween<double>(begin: -5, end: 5).animate(
+    _floatAnimation = Tween<double>(begin: -3, end: 3).animate(
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
 
@@ -83,8 +83,8 @@ class _SignupScreenState extends State<SignupScreen>
           offset: Offset(0, _floatAnimation.value),
           child: Image.asset(
             'assets/images/university_logo.png',
-            width: 112,
-            height: 112,
+            width: 84,
+            height: 84,
             fit: BoxFit.contain,
           ),
         );
@@ -238,9 +238,9 @@ class _SignupScreenState extends State<SignupScreen>
                       key: _formKey,
                       child: Column(
                         children: [
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 16),
                           _buildLogo(),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 20),
                           Text(
                             l10n.signupTitle,
                             style: textTheme.headlineLarge,
@@ -250,10 +250,10 @@ class _SignupScreenState extends State<SignupScreen>
                             l10n.signupSubtitle,
                             style: textTheme.bodyMedium,
                           ),
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 24),
                           Card(
                             child: Padding(
-                              padding: const EdgeInsets.all(22),
+                              padding: const EdgeInsets.all(20),
                               child: Column(
                                 children: [
                                   TextFormField(
@@ -321,6 +321,7 @@ class _SignupScreenState extends State<SignupScreen>
                                           title: Text(l10n.signupRoleStudent, style: textTheme.bodyMedium),
                                           value: 'student',
                                           groupValue: _accountType,
+                                          activeColor: AppColors.primary,
                                           contentPadding: EdgeInsets.zero,
                                           dense: true,
                                           onChanged: (val) {
@@ -333,6 +334,7 @@ class _SignupScreenState extends State<SignupScreen>
                                           title: Text(l10n.signupRoleDoctor, style: textTheme.bodyMedium),
                                           value: 'doctor',
                                           groupValue: _accountType,
+                                          activeColor: AppColors.primary,
                                           contentPadding: EdgeInsets.zero,
                                           dense: true,
                                           onChanged: (val) {
@@ -449,13 +451,15 @@ class _SignupScreenState extends State<SignupScreen>
                                           : Text(l10n.signupBtn),
                                     ),
                                   ),
-                                  const SizedBox(height: 14),
+                                  const SizedBox(height: 16),
                                   TextButton(
                                     onPressed: () => Navigator.of(context).pushReplacementNamed('/login'),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.primary,
+                                    ),
                                     child: Text(
                                       l10n.signupAlreadyHaveAccount,
                                       style: const TextStyle(
-                                        color: AppColors.primary,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
