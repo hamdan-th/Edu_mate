@@ -207,6 +207,12 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
   }
 
   Future<void> _shareFileToGroup() async {
+    // 🚫 Guest cannot share to groups
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(context);
+      return;
+    }
+
     final url = widget.file.fileUrl.trim();
     if (url.isEmpty) {
       _snack(AppLocalizations.of(context)!.detailsNoShareLink);
@@ -421,7 +427,7 @@ $url
       GuestActionDialog.show(
         context,
         title: 'تسجيل الدخول مطلوب',
-        subtitle: 'تصفح الملفات متاح كضيف، لكن التحميل متاح للمستخدمين المسجلين فقط.',
+        subtitle: 'أنت الآن في وضع الضيف. سجّل دخولك لتتمكن من تحميل الملفات.',
       );
       return;
     }

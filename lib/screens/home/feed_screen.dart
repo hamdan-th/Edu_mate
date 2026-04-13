@@ -62,11 +62,6 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   void _openProfile() {
-    final isGuest = context.read<GuestProvider>().isGuest;
-    if (isGuest) {
-      GuestActionDialog.show(context);
-      return;
-    }
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const ProfileScreen()),
@@ -197,6 +192,27 @@ class _FeedScreenState extends State<FeedScreen> {
                       ),
                       Row(
                         children: [
+                          if (context.watch<GuestProvider>().isGuest)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(end: 8),
+                              child: TextButton(
+                                onPressed: () async {
+                                  await FirebaseAuth.instance.signOut();
+                                  if (!mounted) return;
+                                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: AppColors.primary.withOpacity(0.12),
+                                  foregroundColor: AppColors.primary,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: const Text(
+                                  'تسجيل الدخول',
+                                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+                                ),
+                              ),
+                            ),
                           FeedTopActionButton(
                             icon: Icons.settings_rounded,
                             onTap: () => SettingsBottomSheet.show(context),
@@ -858,6 +874,13 @@ class _PostCardState extends State<PostCard>
                   color: AppColors.error,
                   onTap: () async {
                     Navigator.pop(context);
+                    
+                    // 🚫 Guest cannot report
+                    if (context.read<GuestProvider>().isGuest) {
+                      GuestActionDialog.show(context);
+                      return;
+                    }
+
                     if (postId.isEmpty) return;
                     try {
                       await FeedService.reportPost(
