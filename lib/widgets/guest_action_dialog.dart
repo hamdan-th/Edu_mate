@@ -143,8 +143,9 @@ class GuestActionDialog {
               ),
             ],
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 }

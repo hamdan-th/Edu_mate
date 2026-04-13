@@ -193,10 +193,11 @@ class _FeedScreenState extends State<FeedScreen> {
                         ),
                       ),
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           if (context.watch<GuestProvider>().isGuest)
                             Padding(
-                              padding: const EdgeInsetsDirectional.only(end: 8),
+                              padding: const EdgeInsetsDirectional.only(end: 4),
                               child: ElevatedButton(
                                 onPressed: () async {
                                   await FirebaseAuth.instance.signOut();
@@ -209,12 +210,12 @@ class _FeedScreenState extends State<FeedScreen> {
                                   minimumSize: Size.zero,
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   elevation: 0,
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 ),
                                 child: const Text(
                                   'دخول',
-                                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
                                 ),
                               ),
                             ),
@@ -222,7 +223,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             icon: Icons.settings_rounded,
                             onTap: () => SettingsBottomSheet.show(context),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 4),
                           StreamBuilder<int>(
                             stream: NotificationsService.streamUnreadCount(),
                             builder: (context, snapshot) {
