@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/feed_comment_model.dart';
 import '../../services/feed_comments_service.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/guest_provider.dart';
+import '../../widgets/guest_action_dialog.dart';
 
 class PostCommentsScreen extends StatefulWidget {
   final Map<String, dynamic> postCardData;
@@ -35,6 +38,16 @@ class _PostCommentsScreenState extends State<PostCommentsScreen> {
     final postId = widget.postCardData['postId']?.toString() ?? '';
 
     if (text.isEmpty || postId.isEmpty || _isSending) return;
+
+    // 🚫 Guest cannot comment
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(
+        context,
+        title: 'تسجيل الدخول مطلوب',
+        subtitle: 'التصفح متاح كضيف، لكن التعليق يحتاج إلى تسجيل الدخول.',
+      );
+      return;
+    }
 
     setState(() {
       _isSending = true;

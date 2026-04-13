@@ -7,6 +7,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../services/notifications_service.dart';
+import '../../services/presence_service.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/guest_provider.dart';
+import '../../widgets/guest_action_dialog.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
 import '../library/file_details_screen.dart';
@@ -963,6 +968,16 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       bool isPinned,
       String? currentUserReaction,
       ) {
+    // 🚫 Guest cannot interact with messages
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(
+        context,
+        title: 'تسجيل الدخول مطلوب',
+        subtitle: 'أنت الآن في وضع الضيف. التفاعل مع الرسائل يتطلب تسجيل الدخول.',
+      );
+      return;
+    }
+
     final parentContext = context;
     showModalBottomSheet(
       context: context,
@@ -3252,11 +3267,22 @@ class _ReactionsBarState extends State<_ReactionsBar> {
                       : Colors.black.withOpacity(0.55));
 
               return GestureDetector(
-                onTap: () => GroupService.toggleReaction(
-                  groupId: widget.groupId,
-                  messageId: widget.messageId,
-                  emoji: emoji,
-                ),
+                onTap: () {
+                  // 🚫 Guest cannot interact
+                  if (context.read<GuestProvider>().isGuest) {
+                    GuestActionDialog.show(
+                      context,
+                      title: 'تسجيل الدخول مطلوب',
+                      subtitle: 'أنت الآن تتصفح كضيف. للتفاعل مع الرسائل سجل دخولك أولاً.',
+                    );
+                    return;
+                  }
+                  GroupService.toggleReaction(
+                    groupId: widget.groupId,
+                    messageId: widget.messageId,
+                    emoji: emoji,
+                  );
+                },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(

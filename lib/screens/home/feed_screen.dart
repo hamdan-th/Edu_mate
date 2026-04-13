@@ -1513,6 +1513,15 @@ class _PostCardState extends State<PostCard>
                       active: false,
                       activeColor: AppColors.primary,
                       onTap: () {
+                        // 🚫 Guest cannot share
+                        if (context.read<GuestProvider>().isGuest) {
+                          GuestActionDialog.show(
+                            context,
+                            title: 'تسجيل الدخول مطلوب',
+                            subtitle: 'أنت الآن تتصفح كضيف. لتتمكن من مشاركة المنشورات، يرجى تسجيل الدخول.',
+                          );
+                          return;
+                        }
                         final feedPost = FeedPostModel.fromMap(
                           widget.post,
                           widget.post['postId']?.toString() ?? '',

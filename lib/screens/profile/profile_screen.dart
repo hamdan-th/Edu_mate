@@ -5,7 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/providers/guest_provider.dart';
 import '../../l10n/app_localizations.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -363,6 +365,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return Scaffold(
         body: Center(
           child: Text(l10n.profileNoUser),
+        ),
+      );
+    }
+
+    // 🚫 Guest profile state (Login button)
+    if (context.read<GuestProvider>().isGuest) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.profileTitle), elevation: 0, centerTitle: true),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.person_off_rounded, size: 80, color: AppColors.primary.withOpacity(0.5)),
+                const SizedBox(height: 24),
+                Text(
+                  'أنت الآن في وضع الضيف',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: isDark ? AppColors.textPrimary : Colors.black87),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'سجل دخولك لتتمتع بكامل مميزات التطبيق مثل الإعجاب، التعليق، حفظ الملفات والدردشة مع الآخرين بمجموعاتك الأكاديمية.',
+                  style: TextStyle(fontSize: 14.5, height: 1.6, color: isDark ? AppColors.textSecondary : Colors.black54),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 48),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // 1. Sign out anonymous session
+                      await FirebaseAuth.instance.signOut();
+                      if (!mounted) return;
+                      // 2. Head to login screen directly
+                      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 4,
+                      shadowColor: AppColors.primary.withOpacity(0.4),
+                    ),
+                    child: const Text('تسجيل الدخول / إنشاء حساب', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
