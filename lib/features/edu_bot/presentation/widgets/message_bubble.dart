@@ -129,6 +129,21 @@ class MessageBubble extends StatelessWidget {
                           ),
                           if (message.suggestedFiles != null && message.suggestedFiles!.isNotEmpty) ...[
                             const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Icon(Icons.library_books_rounded, size: 14, color: isUser ? Colors.white70 : AppColors.primary),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'ملفات مقترحة من المكتبة:',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: isUser ? Colors.white70 : AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
                             ...message.suggestedFiles!.map((file) => _buildMiniFileCard(context, file, isUser)),
                           ],
                           if (isFailed) ...[

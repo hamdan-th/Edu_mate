@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/entities/chat_message.dart';
@@ -119,48 +119,76 @@ class BotController extends ChangeNotifier {
       String replyText = botReply.text;
       List<Map<String, dynamic>>? suggestedFiles;
 
-      final RegExp searchRegex = RegExp(r'\[ACTION:SEARCH_LIBRARY:(.+?)\]');
+      final RegExp searchRegex = RegExp(r'\[ACTION\s*:\s*SEARCH_LIBRARY\s*:\s*(.+?)\]', caseSensitive: false);
       final match = searchRegex.firstMatch(replyText);
-
+      
+      String? keyword;
       if (match != null) {
-        String keyword = match.group(1)?.trim() ?? '';
+        keyword = match.group(1)?.trim();
         replyText = replyText.replaceAll(match.group(0)!, '').trim();
+        debugPrint('[BOT] ✅ regex matched → keyword="$keyword"');
+      } else if (_detectLibraryIntent(trimmedText, replyText)) {
+        // Fallback: extract keyword from user query directly
+        final rawKeyword = _extractSearchKeyword(trimmedText);
+        keyword = _normalizeArabicKeyword(rawKeyword);
+        debugPrint('[BOT] ⚠️ regex miss → fallback intent hit → raw="$rawKeyword" → keyword="$keyword"');
+      } else {
+        debugPrint('[BOT] ❌ No library intent detected for: "$trimmedText"');
+      }
 
+      if (keyword != null && keyword.length >= 2) {
         try {
-          // Efficient query: get most recent approved files
+          // Build two search keys: normalized root + full original word
+          final rawForSearch = _extractSearchKeyword(trimmedText);
+          final searchKeys = <String>{
+            keyword.toLowerCase(),
+            rawForSearch.toLowerCase(),
+          }.where((k) => k.length >= 2).toList();
+          
+          debugPrint('[BOT] 🔍 Firestore search with keys: $searchKeys');
+
           final snap = await _firestore.collection('library_files')
              .where('visibility', isEqualTo: 'public')
              .where('status', isEqualTo: 'approved')
              .orderBy('createdAt', descending: true)
-             .limit(40) // Increased limit to find matches in memory for simple keyword match
+             .limit(60)
              .get();
+
+          debugPrint('[BOT] 📦 Firestore returned ${snap.docs.length} docs');
              
           final results = snap.docs.where((doc) {
              final data = doc.data();
              final title = (data['subjectName'] ?? data['title'] ?? '').toString().toLowerCase();
              final desc = (data['description'] ?? '').toString().toLowerCase();
              final spec = (data['specialization'] ?? data['major'] ?? '').toString().toLowerCase();
-             final searchKey = keyword.toLowerCase();
+             final tags = (data['tags'] ?? '').toString().toLowerCase();
              
-             return title.contains(searchKey) || 
-                    desc.contains(searchKey) || 
-                    spec.contains(searchKey);
+             return searchKeys.any((k) =>
+               title.contains(k) ||
+               desc.contains(k) ||
+               spec.contains(k) ||
+               tags.contains(k)
+             );
           }).take(3).toList();
+
+          debugPrint('[BOT] 🎯 Matching results: ${results.length}');
           
-          if (results.isEmpty) {
-             // If no specific match, maybe try a broader match or just inform
-             // For MVP, we'll just say not found if no keyword match
-          } else {
+          if (results.isNotEmpty) {
              suggestedFiles = [];
              for (var doc in results) {
                 final d = doc.data();
                 d['id'] = doc.id;
-                suggestedFiles!.add(d);
+                suggestedFiles.add(d);
              }
+             debugPrint('[BOT] ✅ suggestedFiles filled with ${suggestedFiles.length} items');
+          } else {
+             debugPrint('[BOT] ❌ No matching files found in ${snap.docs.length} docs for keys $searchKeys');
           }
         } catch (e) {
-          debugPrint("Error searching library: $e");
+          debugPrint('[BOT] ❌ Error searching library: $e');
         }
+      } else {
+        debugPrint('[BOT] ⏭️ keyword null or too short → skipping library search');
       }
 
       _updateMessageInSession(
@@ -482,5 +510,91 @@ class BotController extends ChangeNotifier {
       if (msg.errorMessage != null) 'errorMessage': msg.errorMessage,
       if (msg.suggestedFiles != null) 'suggestedFiles': msg.suggestedFiles,
     };
+  }
+
+  // --- Helper Methods for Library Intent ---
+
+  bool _detectLibraryIntent(String query, String reply) {
+    final lowerQuery = query.toLowerCase();
+    final lowerReply = reply.toLowerCase();
+    
+    // Keywords indicating user wants files
+    final List<String> triggers = [
+      'ملف', 'مكتبة', 'ملخص', 'محاضرة', 'كتاب', 'تحميل', 'pdf', 'مرجع', 'مراجع', 'دراسة',
+      'رياضيات', 'جبر', 'تفاضل', 'فيزياء', 'برمجة', 'كيمياء', 'هندسة'
+    ];
+
+    for (var t in triggers) {
+      if (lowerQuery.contains(t)) return true;
+    }
+    
+    // Or if the bot mentions "Library" or "Files" in context of providing them
+    if (lowerReply.contains('المكتبة') || lowerReply.contains('ملفات')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  String _extractSearchKeyword(String query) {
+    if (query.trim().isEmpty) return '';
+
+    // Stop words — words that carry no subject meaning
+    final stopWords = {
+      'أريد', 'اريد', 'أحتاج', 'احتاج', 'بدي', 'ابي', 'أبي', 'ابغى', 'ابغا', 'لي', 'ممكن',
+      'عن', 'في', 'حول', 'مع', 'من', 'إلى', 'الى', 'هل', 'ما', 'هو', 'هي',
+      'ملف', 'ملفات', 'مكتبة', 'المكتبة', 'كتاب', 'كتب', 'محاضرة', 'محاضرات', 'ملخص', 'ملخصات',
+      'مرجع', 'مراجع', 'بحث', 'بحوث', 'اقترح', 'عرض', 'وريني', 'اعطيني', 'ساعدني', 'كيف', 'شو', 'ايش',
+      'تحميل', 'ابحث', 'جيب', 'عندك', 'فيه',
+    };
+
+    // FIX: Dart's \w is ASCII-only — it strips ALL Arabic letters.
+    // Use explicit punctuation removal instead, keeping Arabic chars intact.
+    final cleanQuery = query
+        .replaceAll(RegExp(r"""[!?،؟؛.,;:()'"\[\]{}]"""), ' ')
+        .trim();
+
+    final words = cleanQuery
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+
+    if (words.isEmpty) return '';
+
+    final meaningfulWords = words.where((w) => !stopWords.contains(w)).toList();
+
+    if (meaningfulWords.isNotEmpty) {
+      // Prefer the LONGEST meaningful word — most likely to be the subject name
+      meaningfulWords.sort((a, b) => b.length.compareTo(a.length));
+      return meaningfulWords.first;
+    }
+
+    // Last resort: return the last word of the original query
+    return words.last;
+  }
+
+  String _normalizeArabicKeyword(String word) {
+    String w = word.trim();
+    if (w.length <= 2) return w;
+
+    // Remove Al- (definite article)
+    if (w.startsWith('ال')) {
+      w = w.substring(2);
+    }
+    
+    // Remove common prefixes (Li-, Bi-, Ka-, Fa-) if word remains long enough
+    // Only if it doesn't break common 3-letter roots
+    if (w.length > 3) {
+       if (w.startsWith('ل') || w.startsWith('ب') || w.startsWith('ك') || w.startsWith('ف')) {
+         w = w.substring(1);
+       }
+    }
+
+    // Secondary Al- check (in case of double prefix like L-al-Math)
+    if (w.startsWith('ال') && w.length > 3) {
+      w = w.substring(2);
+    }
+
+    return w;
   }
 }
