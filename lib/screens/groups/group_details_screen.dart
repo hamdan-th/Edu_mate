@@ -600,7 +600,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         child: Container(
           width: double.infinity,
           color: Theme.of(context).scaffoldBackgroundColor,
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 56, bottom: 40),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 32, bottom: 40),
           child: Column(
             children: [
               Container(
@@ -616,7 +616,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   ],
                 ),
                 child: CircleAvatar(
-                  radius: 64,
+                  radius: 48,
                   backgroundColor: AppColors.primary.withOpacity(_isDark ? 0.1 : 0.18),
                   backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
                   child: widget.group.imageUrl.isEmpty
@@ -773,7 +773,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                             )
                           ],
                   ),
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48, bottom: 20),
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 28, bottom: 20),
                   child: Column(
                     children: [
                       Container(
@@ -793,7 +793,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                                 ],
                         ),
                         child: CircleAvatar(
-                          radius: 56,
+                          radius: 48,
                           backgroundColor: AppColors.primary.withOpacity(_isDark ? 0.10 : 0.15),
                           backgroundImage: widget.group.imageUrl.isNotEmpty ? NetworkImage(widget.group.imageUrl) : null,
                           child: widget.group.imageUrl.isEmpty
@@ -871,7 +871,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                                     margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
-                                        colors: [AppColors.primary, Color(0xFF8A4DFF)],
+                                        colors: [AppColors.primary, AppColors.primaryDark],
                                       ),
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: [
@@ -945,7 +945,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     color: Theme.of(context).scaffoldBackgroundColor,
                     child: TabBar(
                       indicatorColor: AppColors.primary,
-                      indicatorWeight: 3,
+                      indicatorWeight: 2,
                       labelColor: AppColors.primary,
                       unselectedLabelColor: Theme.of(context).brightness == Brightness.dark 
                           ? AppColors.textSecondary 
@@ -990,10 +990,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(13),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: _isDark ? color.withOpacity(0.12) : color.withOpacity(0.10),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               border: _isDark
                   ? Border.all(color: color.withOpacity(0.15))
                   : Border.all(color: color.withOpacity(0.22), width: 1.5),
@@ -1007,7 +1007,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       )
                     ],
             ),
-            child: Icon(icon, color: color, size: 26),
+            child: Icon(icon, color: color, size: 22),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1372,27 +1372,27 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             final canDelete = authorId == currentUid || _isOwner;
 
             return Container(
-              margin: const EdgeInsets.only(bottom: 14),
+              margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: _isDark ? AppColors.surface : Colors.white,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: _isDark
-                      ? Colors.white.withOpacity(0.06)
-                      : Colors.black.withOpacity(0.07),
+                      ? AppColors.border
+                      : Colors.black12,
                 ),
                 boxShadow: _isDark
                     ? null
                     : [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         )
                       ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

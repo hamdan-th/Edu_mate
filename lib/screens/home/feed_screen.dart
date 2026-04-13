@@ -132,30 +132,6 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
       body: Stack(
         children: [
-          Positioned(
-            top: -90,
-            right: -50,
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.05),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 120,
-            left: -70,
-            child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primaryDark.withOpacity(0.04),
-              ),
-            ),
-          ),
           SafeArea(
             child: Column(
               children: [
@@ -250,7 +226,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                   child: Container(
-                    height: 48,
+                    height: 42,
                     decoration: BoxDecoration(
                       color: isDark
                           ? AppColors.surface.withOpacity(0.92)
@@ -264,8 +240,8 @@ class _FeedScreenState extends State<FeedScreen> {
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(isDark ? 0.10 : 0.04),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -292,14 +268,14 @@ class _FeedScreenState extends State<FeedScreen> {
                           size: 20,
                         ),
                         contentPadding:
-                        const EdgeInsets.symmetric(vertical: 13),
+                        const EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 10),
                 SizedBox(
-                  height: 40,
+                  height: 36,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -446,29 +422,29 @@ class _FeedScreenState extends State<FeedScreen> {
       clipBehavior: Clip.none,
       children: [
         InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           onTap: onTap,
           child: Container(
-            width: 48,
-            height: 48,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: isDark ? AppColors.surface.withOpacity(0.98) : Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDark ? AppColors.border : Colors.black12,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.06),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  color: AppColors.primary.withOpacity(0.05),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
             child: Icon(
               icon,
               color: isDark ? AppColors.textPrimary : Colors.black87,
-              size: 21,
+              size: 20,
             ),
           ),
         ),
@@ -520,14 +496,14 @@ class ModernChip extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: active
             ? AppColors.primary.withOpacity(0.12)
             : (isDark
             ? AppColors.surface.withOpacity(0.4)
             : Colors.white.withOpacity(0.75)),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(14),
         border: active
             ? Border.all(color: AppColors.primary.withOpacity(0.30))
             : Border.all(
@@ -1110,8 +1086,8 @@ class _PostCardState extends State<PostCard>
             return Container(
               height: 310,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF151A22) : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                color: isDark ? AppColors.surface : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: Column(
                 children: [
@@ -1162,7 +1138,7 @@ class _PostCardState extends State<PostCard>
                                   style: TextStyle(
                                     fontSize: 19,
                                     fontWeight: FontWeight.w900,
-                                    color: isDark ? AppColors.textPrimary : const Color(0xFF181A20),
+                                    color: isDark ? AppColors.textPrimary : Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -1205,7 +1181,7 @@ class _PostCardState extends State<PostCard>
                           style: TextStyle(
                             fontSize: 13.5,
                             height: 1.5,
-                            color: isDark ? AppColors.textSecondary : const Color(0xFF6A6E7D),
+                            color: isDark ? AppColors.textSecondary : Colors.black54,
                           ),
                         ),
                       ),
@@ -1242,11 +1218,11 @@ class _PostCardState extends State<PostCard>
         scale: isPressed ? 0.988 : 1,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          margin: const EdgeInsets.only(bottom: 14),
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
           decoration: BoxDecoration(
             color: Theme.of(context).cardTheme.color ?? AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark
                   ? AppColors.border.withOpacity(0.50)
@@ -1440,10 +1416,10 @@ class _PostCardState extends State<PostCard>
               if ((widget.post['hasImage'] ?? false) == true) ...[
                 const SizedBox(height: 14),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(14),
                   child: Container(
                     width: double.infinity,
-                    height: 230,
+                    height: 190,
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: AppColors.border.withOpacity(0.25),
@@ -1779,11 +1755,11 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
       builder: (context, _) {
         final c = _mix(base, highlight, _controller.value);
         return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surface : Colors.white,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? AppColors.border : Colors.black12,
             ),
@@ -1839,9 +1815,9 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
               const SizedBox(height: 14),
               SkeletonBox(
                 width: double.infinity,
-                height: 170,
+                height: 190,
                 color: c,
-                radius: 18,
+                radius: 14,
               ),
               const SizedBox(height: 14),
               const Divider(
@@ -1917,10 +1893,17 @@ class EmptyStateCard extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark ? AppColors.border : Colors.black12,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.14 : 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [

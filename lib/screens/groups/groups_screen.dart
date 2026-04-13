@@ -38,17 +38,16 @@ class _GroupsScreenState extends State<GroupsScreen>
   bool _publicOnly = false;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-  Color get _pageBg =>
-      _isDark ? const Color(0xFF0B0D12) : const Color(0xFFF0F2F5);
-  Color get _cardBg => _isDark ? const Color(0xFF171C25) : Colors.white;
+  Color get _pageBg => Theme.of(context).scaffoldBackgroundColor;
+  Color get _cardBg => _isDark ? AppColors.surface : Colors.white;
   Color get _softBg =>
-      _isDark ? const Color(0xFF10141C) : const Color(0xFFF1F3F7);
+      _isDark ? AppColors.background.withOpacity(0.6) : const Color(0xFFF7F8FB);
   Color get _text =>
-      _isDark ? AppColors.textPrimary : const Color(0xFF111827);
+      _isDark ? AppColors.textPrimary : Colors.black87;
   Color get _muted =>
-      _isDark ? AppColors.textSecondary : const Color(0xFF6B7280);
+      _isDark ? AppColors.textSecondary : Colors.black54;
   Color get _border =>
-      _isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.12);
+      _isDark ? AppColors.border : Colors.black12;
 
   @override
   void initState() {
@@ -109,14 +108,14 @@ class _GroupsScreenState extends State<GroupsScreen>
             return Container(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-                top: 16,
-                left: 20,
-                right: 20,
+                top: 14,
+                left: 16,
+                right: 16,
               ),
               decoration: BoxDecoration(
                 color: _cardBg,
                 borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(28)),
+                const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -169,7 +168,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 18,
-                        vertical: 16,
+                        vertical: 14,
                       ),
                     ),
                     icon: const Icon(
@@ -218,7 +217,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 18,
-                          vertical: 16,
+                          vertical: 14,
                         ),
                       ),
                       icon: const Icon(
@@ -371,7 +370,7 @@ class _GroupsScreenState extends State<GroupsScreen>
         backgroundColor: _cardBg,
         elevation: 0,
         centerTitle: !_isSearching,
-        toolbarHeight: 74,
+        toolbarHeight: 66,
         title: _isSearching
             ? Container(
           height: 46,
@@ -442,15 +441,15 @@ class _GroupsScreenState extends State<GroupsScreen>
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(78),
+          preferredSize: const Size.fromHeight(68),
           child: Container(
             color: _cardBg,
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Container(
-              height: 52,
+              height: 46,
               decoration: BoxDecoration(
                 color: _softBg,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: _border),
               ),
               child: TabBar(
@@ -459,7 +458,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                   color: _isDark
                       ? AppColors.primary.withOpacity(0.16)
                       : AppColors.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
@@ -600,15 +599,15 @@ class _GroupsScreenState extends State<GroupsScreen>
           padding: const EdgeInsets.all(26),
           decoration: BoxDecoration(
             color: _cardBg,
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: _border),
             boxShadow: [
               BoxShadow(
                 color: _isDark
                     ? Colors.black.withOpacity(0.22)
                     : Colors.black.withOpacity(0.04),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -671,17 +670,17 @@ class _TopActionButton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        width: 42,
-        height: 42,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1C222D) : const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(16),
+          color: isDark ? AppColors.surface.withOpacity(0.98) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isDark
-                ? Colors.white.withOpacity(0.1)
-                : Colors.black.withOpacity(0.1),
+                ? AppColors.border
+                : Colors.black12,
           ),
         ),
         child: Icon(
@@ -730,15 +729,15 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
   }
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-  Color get _cardBg => _isDark ? const Color(0xFF171C25) : Colors.white;
+  Color get _cardBg => _isDark ? AppColors.surface : Colors.white;
   Color get _softBg =>
-      _isDark ? const Color(0xFF10141C) : const Color(0xFFF8FAFD);
+      _isDark ? AppColors.background.withOpacity(0.6) : const Color(0xFFF8FAFD);
   Color get _text =>
-      _isDark ? AppColors.textPrimary : const Color(0xFF181A20);
+      _isDark ? AppColors.textPrimary : Colors.black87;
   Color get _muted =>
-      _isDark ? AppColors.textSecondary : const Color(0xFF6B7280);
+      _isDark ? AppColors.textSecondary : Colors.black54;
   Color get _border =>
-      _isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.12);
+      _isDark ? AppColors.border : Colors.black12;
 
   void _openGroupDetails() {
     Navigator.push(
@@ -831,23 +830,23 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
         duration: const Duration(milliseconds: 130),
         curve: Curves.easeOut,
         child: Container(
-          margin: const EdgeInsets.only(bottom: 14),
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: _cardBg,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: _border),
             boxShadow: [
               BoxShadow(
                 color: _isDark
-                    ? Colors.black.withOpacity(0.24)
-                    : Colors.black.withOpacity(0.06),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+                    ? Colors.black.withOpacity(0.20)
+                    : Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1046,9 +1045,9 @@ class _GroupAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.18),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -1059,7 +1058,7 @@ class _GroupAvatar extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary, Color(0xFFC79A22)],
+                  colors: [AppColors.primary, AppColors.primaryDark],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),

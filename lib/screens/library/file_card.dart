@@ -25,7 +25,7 @@ class _FileCardState extends State<FileCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final gold = const Color(0xFFD4AF37);
+    final primary = LibraryTheme.primary(context);
     final scale = _isPressed ? 0.98 : (_isHovering ? 1.005 : 1.0);
 
     return MouseRegion(
@@ -44,7 +44,7 @@ class _FileCardState extends State<FileCard> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.14),
                     width: 1,
@@ -52,7 +52,7 @@ class _FileCardState extends State<FileCard> {
                   gradient: LinearGradient(
                     colors: [
                       LibraryTheme.surface(context),
-                      isDark ? LibraryTheme.surface(context) : gold.withOpacity(0.025),
+                      isDark ? LibraryTheme.surface(context) : primary.withOpacity(0.025),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -61,8 +61,8 @@ class _FileCardState extends State<FileCard> {
                     if (!_isPressed)
                       BoxShadow(
                         color: Colors.black.withOpacity(isDark ? 0.25 : 0.045),
-                        blurRadius: _isHovering ? 16 : 12,
-                        offset: Offset(0, _isHovering ? 8 : 4),
+                        blurRadius: _isHovering ? 12 : 8,
+                        offset: Offset(0, _isHovering ? 4 : 2),
                       ),
                   ],
                 ),
@@ -70,13 +70,13 @@ class _FileCardState extends State<FileCard> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: widget.onTap,
-                    borderRadius: BorderRadius.circular(20),
-                    highlightColor: gold.withOpacity(0.05),
-                    splashColor: gold.withOpacity(0.10),
+                    borderRadius: BorderRadius.circular(14),
+                    highlightColor: primary.withOpacity(0.05),
+                    splashColor: primary.withOpacity(0.10),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 14,
+                        vertical: 12,
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -93,7 +93,7 @@ class _FileCardState extends State<FileCard> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 15.8,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w800,
                                     color: LibraryTheme.text(context),
                                     height: 1.2,
@@ -105,34 +105,29 @@ class _FileCardState extends State<FileCard> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 12.8,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: LibraryTheme.muted(context),
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      _MetricChip(
-                                        icon: Icons.favorite_border_rounded,
-                                        value: widget.file.likes,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      _MetricChip(
-                                        icon: Icons.file_download_outlined,
-                                        value: widget.file.downloads,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      _MetricChip(
-                                        icon: Icons.remove_red_eye_outlined,
-                                        value: widget.file.views,
-                                      ),
-                                    ],
-                                  ),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    _MetricChip(
+                                      icon: Icons.favorite_border_rounded,
+                                      value: widget.file.likes,
+                                    ),
+                                    _MetricChip(
+                                      icon: Icons.file_download_outlined,
+                                      value: widget.file.downloads,
+                                    ),
+                                    _MetricChip(
+                                      icon: Icons.remove_red_eye_outlined,
+                                      value: widget.file.views,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -152,10 +147,10 @@ class _FileCardState extends State<FileCard> {
                 child: Container(
                   width: 4,
                   decoration: BoxDecoration(
-                    color: gold.withOpacity(0.85),
+                    color: primary.withOpacity(0.85),
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomLeft: Radius.circular(20),
+                      topLeft: Radius.circular(14),
+                      bottomLeft: Radius.circular(14),
                     ),
                   ),
                 ),
@@ -190,10 +185,10 @@ class _FileCardState extends State<FileCard> {
 
     if (widget.file.thumbnailUrl.trim().isNotEmpty) {
       return Container(
-        width: 48,
-        height: 48,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Colors.grey.withOpacity(0.14)),
           boxShadow: [
             BoxShadow(
@@ -204,7 +199,7 @@ class _FileCardState extends State<FileCard> {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           child: Image.network(
             widget.file.thumbnailUrl,
             fit: BoxFit.cover,
@@ -223,12 +218,12 @@ class _FileCardState extends State<FileCard> {
         : type.toUpperCase();
 
     return Container(
-      width: 48,
-      height: 48,
-      padding: const EdgeInsets.all(4),
+      width: 40,
+      height: 40,
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: color.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: color.withOpacity(0.20),
           width: 1,
@@ -325,7 +320,7 @@ class _GridFileCardState extends State<GridFileCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final gold = const Color(0xFFD4AF37);
+    final primary = LibraryTheme.primary(context);
     final scale = _isPressed ? 0.98 : (_isHovering ? 1.005 : 1.0);
 
     return MouseRegion(
@@ -344,7 +339,7 @@ class _GridFileCardState extends State<GridFileCard> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.14),
                     width: 1,
@@ -352,7 +347,7 @@ class _GridFileCardState extends State<GridFileCard> {
                   gradient: LinearGradient(
                     colors: [
                       LibraryTheme.surface(context),
-                      isDark ? LibraryTheme.surface(context) : gold.withOpacity(0.025),
+                      isDark ? LibraryTheme.surface(context) : primary.withOpacity(0.025),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -361,8 +356,8 @@ class _GridFileCardState extends State<GridFileCard> {
                     if (!_isPressed)
                       BoxShadow(
                         color: Colors.black.withOpacity(isDark ? 0.25 : 0.04),
-                        blurRadius: _isHovering ? 16 : 12,
-                        offset: Offset(0, _isHovering ? 8 : 4),
+                        blurRadius: _isHovering ? 12 : 8,
+                        offset: Offset(0, _isHovering ? 4 : 2),
                       ),
                   ],
                 ),
@@ -370,11 +365,11 @@ class _GridFileCardState extends State<GridFileCard> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: widget.onTap,
-                    borderRadius: BorderRadius.circular(22),
-                    highlightColor: gold.withOpacity(0.05),
-                    splashColor: gold.withOpacity(0.10),
+                    borderRadius: BorderRadius.circular(14),
+                    highlightColor: primary.withOpacity(0.05),
+                    splashColor: primary.withOpacity(0.10),
                     child: Padding(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -391,7 +386,7 @@ class _GridFileCardState extends State<GridFileCard> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 14.8,
+                              fontSize: 14,
                               fontWeight: FontWeight.w800,
                               color: LibraryTheme.text(context),
                               height: 1.25,
@@ -405,29 +400,25 @@ class _GridFileCardState extends State<GridFileCard> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 12.3,
+                              fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: LibraryTheme.muted(context),
                             ),
                           ),
                           const SizedBox(height: 10),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            physics: const NeverScrollableScrollPhysics(),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                _MetricChip(
-                                  icon: Icons.file_download_outlined,
-                                  value: widget.file.downloads,
-                                ),
-                                const SizedBox(width: 8),
-                                _MetricChip(
-                                  icon: Icons.remove_red_eye_outlined,
-                                  value: widget.file.views,
-                                ),
-                              ],
-                            ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              _MetricChip(
+                                icon: Icons.file_download_outlined,
+                                value: widget.file.downloads,
+                              ),
+                              _MetricChip(
+                                icon: Icons.remove_red_eye_outlined,
+                                value: widget.file.views,
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -442,10 +433,10 @@ class _GridFileCardState extends State<GridFileCard> {
                 child: Container(
                   width: 4,
                   decoration: BoxDecoration(
-                    color: gold.withOpacity(0.85),
+                    color: primary.withOpacity(0.85),
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(22),
-                      bottomLeft: Radius.circular(22),
+                      topLeft: Radius.circular(14),
+                      bottomLeft: Radius.circular(14),
                     ),
                   ),
                 ),
@@ -464,10 +455,10 @@ class _GridFileCardState extends State<GridFileCard> {
 
     if (widget.file.thumbnailUrl.trim().isNotEmpty) {
       return Container(
-        width: 42,
-        height: 42,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Colors.grey.withOpacity(0.14)),
           boxShadow: [
             BoxShadow(
@@ -478,7 +469,7 @@ class _GridFileCardState extends State<GridFileCard> {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           child: Image.network(
             widget.file.thumbnailUrl,
             fit: BoxFit.cover,
@@ -493,11 +484,11 @@ class _GridFileCardState extends State<GridFileCard> {
 
   Widget _fallbackBadge(Color color, IconData icon) {
     return Container(
-      width: 42,
-      height: 42,
+      width: 36,
+      height: 36,
       decoration: BoxDecoration(
         color: color.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: color.withOpacity(0.20)),
       ),
       child: Center(
@@ -565,8 +556,8 @@ class _ActionButtonState extends State<_ActionButton> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final horizontal = widget.compact ? 12.0 : 14.0;
-    final vertical = widget.compact ? 8.0 : 10.0;
+    final horizontal = widget.compact ? 12.0 : 12.0;
+    final vertical = widget.compact ? 6.0 : 8.0;
     final fontSize = widget.compact ? 12.0 : 13.0;
     final iconSize = widget.compact ? 15.0 : 16.0;
 
@@ -587,14 +578,14 @@ class _ActionButtonState extends State<_ActionButton> {
               vertical: vertical,
             ),
             constraints: BoxConstraints(
-              minWidth: widget.compact ? 70 : 82,
-              minHeight: widget.compact ? 34 : 40,
+              minWidth: widget.compact ? 64 : 74,
+              minHeight: widget.compact ? 30 : 34,
             ),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [
-                  Color(0xFFF1D570),
-                  Color(0xFFD4AF37),
+                  LibraryTheme.primary(context).withOpacity(0.85),
+                  LibraryTheme.primary(context),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -602,7 +593,7 @@ class _ActionButtonState extends State<_ActionButton> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFD4AF37)
+                  color: LibraryTheme.primary(context)
                       .withOpacity(_isHovering ? 0.40 : 0.24),
                   blurRadius: _isHovering ? 14 : 10,
                   offset: const Offset(0, 4),
@@ -650,11 +641,11 @@ class _MetricChip extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      height: 26,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 24,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E222A) : Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? LibraryTheme.surface(context) : Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.18),
           width: 0.5,
@@ -665,7 +656,7 @@ class _MetricChip extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 14.5,
+            size: 14,
             color: LibraryTheme.muted(context),
           ),
           const SizedBox(width: 5),

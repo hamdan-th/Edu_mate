@@ -6,17 +6,11 @@ class LibraryTheme {
   // ========================
 
   static Color bg(BuildContext context) {
-    if (Theme.of(context).brightness == Brightness.dark) {
-      return const Color(0xFF0C0E12);
-    }
     return Theme.of(context).scaffoldBackgroundColor;
   }
 
   static Color surface(BuildContext context) {
-    if (Theme.of(context).brightness == Brightness.dark) {
-      return const Color(0xFF14171C);
-    }
-    return Theme.of(context).cardColor;
+    return Theme.of(context).colorScheme.surface;
   }
 
   static Color text(BuildContext context) {
@@ -41,24 +35,21 @@ class LibraryTheme {
   }
 
   // ========================
-  // BRAND COLORS (ثابتة)
+  // BRAND COLORS (Legacy fallbacks)
   // ========================
 
-  static const Color primaryColor = Color(0xFFD4AF37);
-  static const Color secondaryColor = Color(0xFFFFC107);
-  static const Color accentColor = Color(0xFFB8962E);
-
-  static const Color dangerColor = Color(0xFFE53935);
   static const Color successColor = Color(0xFF43A047);
 
   // ========================
-  // SAFE WRAPPERS (مهم جدا)
+  // SAFE WRAPPERS
   // ========================
 
-  static Color primary(BuildContext context) => primaryColor;
-  static Color secondary(BuildContext context) => secondaryColor;
-  static Color accent(BuildContext context) => accentColor;
-
-  static Color danger(BuildContext context) => dangerColor;
+  static Color primary(BuildContext context) => Theme.of(context).colorScheme.primary;
+  
+  // Restored compatibility wrappers
+  static Color secondary(BuildContext context) => Theme.of(context).colorScheme.secondary;
+  static Color accent(BuildContext context) => Theme.of(context).colorScheme.secondary;
+  static Color error(BuildContext context) => Theme.of(context).colorScheme.error;
+  static Color danger(BuildContext context) => Theme.of(context).colorScheme.error;
   static Color success(BuildContext context) => successColor;
 }

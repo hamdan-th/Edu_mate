@@ -199,7 +199,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: LibraryTheme.surface(context),
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                   ),
                   child: TextField(
@@ -214,8 +214,8 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                         icon: const Icon(Icons.tune_rounded),
                         color: LibraryTheme.primary(context),
                       ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     ),
                   ),
                 ),
@@ -227,7 +227,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
                           color: LibraryTheme.surface(context),
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                         ),
                         child: Text(
@@ -241,13 +241,13 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     const SizedBox(width: 10),
                     InkWell(
                       onTap: () => setState(() => _isGridView = !_isGridView),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(12),
                       child: Container(
-                        width: 52,
-                        height: 52,
+                        width: 46,
+                        height: 46,
                         decoration: BoxDecoration(
                           color: LibraryTheme.surface(context),
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
                         ),
                         child: Icon(
@@ -292,13 +292,12 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final file = filtered[index];
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(22),
+                      return GridFileCard(
+                        file: file,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => FileDetailsScreen(file: file)),
                         ),
-                        child: GridFileCard(file: file),
                       );
                     },
                   );
@@ -310,13 +309,12 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final file = filtered[index];
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(22),
+                    return FileCard(
+                      file: file,
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => FileDetailsScreen(file: file)),
                       ),
-                      child: FileCard(file: file),
                     );
                   },
                 );
@@ -384,9 +382,9 @@ class _BottomSheetDropdown extends StatelessWidget {
         labelText: label,
         filled: true,
         fillColor: LibraryTheme.bg(context),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: LibraryTheme.border(context))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide(color: LibraryTheme.primary(context), width: 1.4)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LibraryTheme.border(context))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: LibraryTheme.primary(context), width: 1.4)),
       ),
       items: items.map((e) => DropdownMenuItem<String>(value: e, child: Text(e))).toList(),
       onChanged: onChanged,

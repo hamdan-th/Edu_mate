@@ -122,22 +122,22 @@ class _ModernHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             LibraryTheme.primary(context),
-            LibraryTheme.secondary(context),
+            LibraryTheme.primary(context).withOpacity(0.85),
           ],
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.bottomEnd,
         ),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: LibraryTheme.primary(context).withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.05 : 0.25),
-            blurRadius: 25,
-            offset: const Offset(0, 10),
+            color: LibraryTheme.primary(context).withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.05 : 0.15),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -149,10 +149,10 @@ class _ModernHeader extends StatelessWidget {
               /// 🔥 Glass Icon
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                width: 60,
-                height: 60,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(14),
                   gradient: LinearGradient(
                     colors: [
                       Colors.white.withOpacity(0.25),
@@ -178,11 +178,11 @@ class _ModernHeader extends StatelessWidget {
                 child: Icon(
                   currentTab.icon,
                   color: Colors.white,
-                  size: 28,
+                  size: 24,
                 ),
               ),
 
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
 
               Expanded(
                 child: Column(
@@ -192,11 +192,11 @@ class _ModernHeader extends StatelessWidget {
                       currentTab.title,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 26,
+                        fontSize: 22,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       AppLocalizations.of(context)!.libraryHeaderSubtitle,
                       style: TextStyle(
@@ -210,11 +210,11 @@ class _ModernHeader extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
 
           /// 🔥 MODERN TABS
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.12),
               borderRadius: BorderRadius.circular(24),

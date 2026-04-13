@@ -451,7 +451,7 @@ class _SignupScreenState extends State<SignupScreen>
                                   ),
                                   const SizedBox(height: 14),
                                   TextButton(
-                                    onPressed: () => Navigator.pop(context),
+                                    onPressed: () => Navigator.of(context).pushReplacementNamed('/login'),
                                     child: Text(
                                       l10n.signupAlreadyHaveAccount,
                                       style: const TextStyle(

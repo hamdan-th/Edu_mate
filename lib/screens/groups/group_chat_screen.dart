@@ -74,17 +74,16 @@ class _GroupChatScreenState extends State<GroupChatScreen>
   String _resolvedDisplayName = '';  // populated from Firestore users collection
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-  Color get _pageBg =>
-      _isDark ? const Color(0xFF0B0D12) : const Color(0xFFF3F5F7);
-  Color get _surface => _isDark ? const Color(0xFF151A22) : Colors.white;
+  Color get _pageBg => Theme.of(context).scaffoldBackgroundColor;
+  Color get _surface => _isDark ? AppColors.surface : Colors.white;
   Color get _surfaceSoft =>
-      _isDark ? const Color(0xFF0F131A) : const Color(0xFFF8FAFD);
+      _isDark ? AppColors.background.withOpacity(0.6) : const Color(0xFFF7F8FB);
   Color get _text =>
-      _isDark ? AppColors.textPrimary : const Color(0xFF181A20);
+      _isDark ? AppColors.textPrimary : Colors.black87;
   Color get _muted =>
-      _isDark ? AppColors.textSecondary : const Color(0xFF7B808A);
+      _isDark ? AppColors.textSecondary : Colors.black54;
   Color get _border =>
-      _isDark ? Colors.white.withOpacity(0.07) : Colors.black.withOpacity(0.06);
+      _isDark ? AppColors.border : Colors.black12;
 
   Future<void> _fetchUserIfNeeded(String userId) async {
     if (userId.isEmpty || _userCache.containsKey(userId)) return;
@@ -881,15 +880,15 @@ class _GroupChatScreenState extends State<GroupChatScreen>
           padding: const EdgeInsets.all(26),
           decoration: BoxDecoration(
             color: _surface,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: _border),
             boxShadow: [
               BoxShadow(
                 color: _isDark
-                    ? Colors.black.withOpacity(0.22)
-                    : Colors.black.withOpacity(0.04),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+                    ? Colors.black.withOpacity(0.18)
+                    : Colors.black.withOpacity(0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -1128,7 +1127,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                       ? Icons.push_pin_rounded
                       : Icons.push_pin_outlined,
                   color: isPinned
-                      ? const Color(0xFFD4AF37)
+                      ? AppColors.primary
                       : AppColors.primary,
                 ),
                 title: Text(
@@ -1318,7 +1317,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     if (senderName.contains('@')) senderName = senderName.split('@').first;
 
     final timestamp = data['createdAt'] as Timestamp?;
-    final primaryColor = const Color(0xFFD4AF37);
+    const primaryColor = AppColors.primary;
 
     final List<Color> nameColors = [
       const Color(0xFFE53935),
@@ -1384,7 +1383,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       },
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(bottom: 8),
         child: Row(
           mainAxisAlignment:
           isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -1423,18 +1422,18 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                   color: bubbleBg,
                   border: Border.all(color: bubbleBorder),
                   borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(22),
-                    topRight: const Radius.circular(22),
-                    bottomLeft: Radius.circular(isMe ? 22 : 8),
-                    bottomRight: Radius.circular(isMe ? 8 : 22),
+                    topLeft: const Radius.circular(16),
+                    topRight: const Radius.circular(16),
+                    bottomLeft: Radius.circular(isMe ? 16 : 4),
+                    bottomRight: Radius.circular(isMe ? 4 : 16),
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: _isDark
-                          ? Colors.black.withOpacity(0.16)
-                          : Colors.black.withOpacity(0.035),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                          ? Colors.black.withOpacity(0.12)
+                          : Colors.black.withOpacity(0.025),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -1877,7 +1876,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 7, vertical: 2.5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withOpacity(0.15),
+                      color: AppColors.primary.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -1885,7 +1884,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                           ? fileType.toUpperCase()
                           : AppLocalizations.of(context)!.groupsChatLibraryFile,
                       style: const TextStyle(
-                        color: Color(0xFFD4AF37),
+                        color: AppColors.primary,
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.5,
@@ -1972,7 +1971,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
       iconColor = const Color(0xFF00838F);
     } else {
       icon = Icons.insert_drive_file_rounded;
-      iconColor = const Color(0xFFD4AF37);
+      iconColor = AppColors.primary;
     }
 
     return Container(
@@ -2257,9 +2256,9 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close_rounded,
-                      color: Color(0xFFE53935),
+                      color: AppColors.error,
                     ),
                     onPressed: () => setState(() => _selectedImage = null),
                   ),
@@ -2278,7 +2277,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                 child: Container(
                   decoration: BoxDecoration(
                     color: _surfaceSoft,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: _border),
                   ),
                   child: TextField(
@@ -2311,12 +2310,16 @@ class _GroupChatScreenState extends State<GroupChatScreen>
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: _isSending ? null : _send,
-                child: Container(
-                  height: 50,
-                  width: 50,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  height: 48,
+                  width: 48,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary,
+                        AppColors.primaryDark,
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -2324,9 +2327,9 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     boxShadow: [
                       if (!_isSending)
                         BoxShadow(
-                          color: const Color(0xFFD4AF37).withOpacity(0.32),
-                          blurRadius: 14,
-                          offset: const Offset(0, 5),
+                          color: AppColors.primary.withOpacity(0.22),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
                         ),
                     ],
                   ),
@@ -2344,7 +2347,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                       : const Icon(
                     Icons.send_rounded,
                     color: Colors.white,
-                    size: 23,
+                    size: 22,
                   ),
                 ),
               ),
@@ -2469,15 +2472,15 @@ class _PinnedBannerState extends State<_PinnedBanner> {
                 children: [
                   // Left gold accent bar.
                   Container(
-                    width: 3.5,
-                    height: 44,
-                    color: const Color(0xFFD4AF37),
+                    width: 3,
+                    height: 40,
+                    color: AppColors.primary,
                   ),
                   const SizedBox(width: 10),
                   const Icon(
                     Icons.push_pin_rounded,
-                    size: 15,
-                    color: Color(0xFFD4AF37),
+                    size: 14,
+                    color: AppColors.primary,
                   ),
                   const SizedBox(width: 8),
                   // Text content.
@@ -2494,7 +2497,7 @@ class _PinnedBannerState extends State<_PinnedBanner> {
                             style: const TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFFD4AF37),
+                              color: AppColors.primary,
                               letterSpacing: 0.4,
                             ),
                           ),
@@ -2667,13 +2670,13 @@ class _PinnedHistorySheetState extends State<_PinnedHistorySheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withOpacity(0.12),
+                    color: AppColors.primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.push_pin_rounded,
                     size: 20,
-                    color: Color(0xFFD4AF37),
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -2752,8 +2755,8 @@ class _PinnedHistorySheetState extends State<_PinnedHistorySheet> {
                           Divider(height: 1, color: widget.border),
                         InkWell(
                           onTap: () => widget.onJump(msgId),
-                          splashColor: const Color(0xFFD4AF37).withOpacity(0.08),
-                          highlightColor: const Color(0xFFD4AF37).withOpacity(0.05),
+                          splashColor: AppColors.primary.withOpacity(0.08),
+                          highlightColor: AppColors.primary.withOpacity(0.05),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 18, vertical: 10),
@@ -2765,17 +2768,17 @@ class _PinnedHistorySheetState extends State<_PinnedHistorySheet> {
                                   width: 38,
                                   height: 38,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD4AF37).withOpacity(
+                                    color: AppColors.primary.withOpacity(
                                         widget.isDark ? 0.14 : 0.08),
                                     borderRadius: BorderRadius.circular(11),
                                     border: Border.all(
-                                      color: const Color(0xFFD4AF37).withOpacity(0.22),
+                                      color: AppColors.primary.withOpacity(0.22),
                                     ),
                                   ),
                                   child: Icon(
                                     _typeIcon(msgType),
                                     size: 18,
-                                    color: const Color(0xFFD4AF37),
+                                    color: AppColors.primary,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -3096,15 +3099,15 @@ class _EmptyChatState extends StatelessWidget {
           padding: const EdgeInsets.all(26),
           decoration: BoxDecoration(
             color: surface,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: border),
             boxShadow: [
               BoxShadow(
                 color: isDark
-                    ? Colors.black.withOpacity(0.22)
-                    : Colors.black.withOpacity(0.04),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+                    ? Colors.black.withOpacity(0.18)
+                    : Colors.black.withOpacity(0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),

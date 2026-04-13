@@ -42,24 +42,32 @@ class NotificationsScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () async {
-              await NotificationsService.markAllAsRead();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.notificationsMarkAllReadSuccess),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
-              }
-            },
-            child: Text(
-              l10n.notificationsMarkAllRead,
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-                fontSize: 12.5,
+          Padding(
+            padding: const EdgeInsets.only(right: 16, left: 16, top: 10, bottom: 10),
+            child: TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: AppColors.primary.withOpacity(0.12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onPressed: () async {
+                await NotificationsService.markAllAsRead();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.notificationsMarkAllReadSuccess),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                }
+              },
+              child: Text(
+                l10n.notificationsMarkAllRead,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12.5,
+                ),
               ),
             ),
           ),
@@ -183,7 +191,7 @@ class _NotificationTile extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(16),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             width: double.infinity,
@@ -192,7 +200,7 @@ class _NotificationTile extends StatelessWidget {
               color: item.isRead
                   ? (isDark ? AppColors.surface : Colors.white)
                   : accent.withOpacity(isDark ? 0.10 : 0.08),
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: item.isRead
                     ? (isDark
@@ -206,8 +214,8 @@ class _NotificationTile extends StatelessWidget {
                   color: isDark
                       ? Colors.black.withOpacity(0.14)
                       : Colors.black.withOpacity(0.04),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -220,7 +228,7 @@ class _NotificationTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: item.isRead ? Colors.transparent : accent,
                       borderRadius: const BorderRadius.horizontal(
-                        left: Radius.circular(22),
+                        left: Radius.circular(16),
                       ),
                     ),
                   ),
@@ -231,8 +239,8 @@ class _NotificationTile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            width: 50,
-                            height: 50,
+                            width: 44,
+                            height: 44,
                             decoration: BoxDecoration(
                               color: accent.withOpacity(0.12),
                               shape: BoxShape.circle,
@@ -243,7 +251,7 @@ class _NotificationTile extends StatelessWidget {
                             child: Icon(
                               item.icon,
                               color: accent,
-                              size: 22,
+                              size: 20,
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -314,8 +322,7 @@ class _NotificationTile extends StatelessWidget {
                                   boxShadow: [
                                     BoxShadow(
                                       color: accent.withOpacity(0.35),
-                                      blurRadius: 10,
-                                      spreadRadius: 1,
+                                      blurRadius: 4,
                                     ),
                                   ],
                                 ),
@@ -353,15 +360,15 @@ class _NotificationsEmptyState extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surface : Colors.white,
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isDark ? AppColors.border : Colors.black12,
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(isDark ? 0.14 : 0.04),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),

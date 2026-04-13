@@ -257,41 +257,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String value,
     Color? iconColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.08)),
+        color: isDark ? AppColors.surface : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: isDark ? AppColors.border : Colors.black.withOpacity(0.05)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: iconColor ?? AppColors.primary,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(isDark ? 0.12 : 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor ?? AppColors.primary, size: 20),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
+                  style: TextStyle(
+                    color: isDark ? AppColors.textSecondary : Colors.black54,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   value.isEmpty ? '-' : value,
                   style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    color: isDark ? AppColors.textPrimary : Colors.black87,
                     fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
@@ -331,9 +336,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.secondary,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(
+                  color: Theme.of(context).dividerColor.withOpacity(0.12), 
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: _isUploadingImage
                   ? const SizedBox(
@@ -341,13 +356,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.primaryDark,
+                  color: AppColors.primary,
                 ),
               )
                   : const Icon(
-                Icons.camera_alt_rounded,
+                Icons.photo_camera_rounded,
                 size: 18,
-                color: AppColors.primaryDark,
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -380,7 +395,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.person_off_rounded, size: 80, color: AppColors.primary.withOpacity(0.5)),
+                Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.person_outline_rounded, size: 64, color: AppColors.primary.withOpacity(0.85)),
+                ),
                 const SizedBox(height: 24),
                 Text(
                   'أنت الآن في وضع الضيف',
@@ -408,8 +430,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                      shadowColor: AppColors.primary.withOpacity(0.4),
+                      elevation: 0,
                     ),
                     child: const Text('تسجيل الدخول / إنشاء حساب', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
@@ -455,21 +476,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final role = data['role'] ?? 'student';
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: Column(
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(22),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardTheme.color,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? AppColors.border : Colors.black.withOpacity(0.06)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
@@ -492,7 +513,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (isDoctorVerified)
                             const Icon(
                               Icons.verified,
-                              color: Colors.lightBlueAccent,
+                              color: AppColors.success,
                               size: 22,
                             ),
                         ],
@@ -513,13 +534,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                          color: AppColors.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           isDoctorVerified ? l10n.profileVerifiedDoc : l10n.profileUserRole.replaceAll('{role}', role),
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                          style: const TextStyle(
+                            color: AppColors.primary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -569,24 +590,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ? null
                           : () => _sendDoctorVerificationRequest(data),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _isVerificationPending ? Colors.grey.shade400 : null,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: _isVerificationPending ? Colors.grey.shade400 : AppColors.primary,
+                        elevation: 0,
                       ),
                       icon: _isVerificationPending 
-                          ? const Icon(Icons.hourglass_empty_rounded, color: Colors.white)
+                          ? const Icon(Icons.hourglass_empty_rounded, color: Colors.white, size: 20)
                           : _isSendingVerification
                           ? const SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.primaryDark,
+                          color: Colors.white,
                         ),
                       )
-                          : const Icon(Icons.verified_outlined),
+                          : const Icon(Icons.verified_outlined, size: 20, color: Colors.white),
                       label: Text(
                         _isVerificationPending
                             ? l10n.profileVerificationPending
                             : l10n.profileReqDocVerification,
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                     ),
                   ),
@@ -595,6 +620,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: _isLoggingOut ? null : _logout,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.15)),
+                    ),
                     icon: _isLoggingOut
                         ? const SizedBox(
                       width: 18,
@@ -603,18 +633,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         strokeWidth: 2,
                       ),
                     )
-                        : const Icon(Icons.logout),
-                    label: Text(l10n.profileLogout),
+                        : const Icon(Icons.logout_rounded, size: 20),
+                    label: Text(l10n.profileLogout, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: _isDeleting ? null : _deleteAccount,
                     style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       backgroundColor: AppColors.error,
                       foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
                     ),
                     icon: _isDeleting
                         ? const SizedBox(
@@ -625,8 +658,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.white,
                       ),
                     )
-                        : const Icon(Icons.delete_outline),
-                    label: Text(l10n.profileDeleteAccount),
+                        : const Icon(Icons.delete_outline_rounded, size: 20),
+                    label: Text(l10n.profileDeleteAccount, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
