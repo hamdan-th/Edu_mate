@@ -77,7 +77,7 @@ class EduApp extends StatelessWidget {
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
-  Future<bool> _isSessionValid() async {
+  Future<bool> _isSessionValid(BuildContext context) async {
     final auth = FirebaseAuth.instance;
     final user = auth.currentUser;
 
@@ -85,7 +85,10 @@ class AuthGate extends StatelessWidget {
 
     // ✅ Guest (anonymous) sessions are always valid —
     // they have no Firestore user doc, so we skip that check.
-    if (user.isAnonymous) return true;
+    if (user.isAnonymous) {
+      context.read<GuestProvider>().setGuest(true);
+      return true;
+    }
 
     try {
       // يحدث بيانات المستخدم من Firebase
@@ -140,7 +143,7 @@ class AuthGate extends StatelessWidget {
         }
 
         return FutureBuilder<bool>(
-          future: _isSessionValid(),
+          future: _isSessionValid(context),
           builder: (context, validationSnapshot) {
             if (validationSnapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(

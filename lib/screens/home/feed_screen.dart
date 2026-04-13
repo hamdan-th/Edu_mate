@@ -195,21 +195,22 @@ class _FeedScreenState extends State<FeedScreen> {
                           if (context.watch<GuestProvider>().isGuest)
                             Padding(
                               padding: const EdgeInsetsDirectional.only(end: 8),
-                              child: TextButton(
+                              child: ElevatedButton(
                                 onPressed: () async {
                                   await FirebaseAuth.instance.signOut();
                                   if (!mounted) return;
                                   Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
                                 },
-                                style: TextButton.styleFrom(
-                                  backgroundColor: AppColors.primary.withOpacity(0.12),
-                                  foregroundColor: AppColors.primary,
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 child: const Text(
-                                  'تسجيل الدخول',
-                                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+                                  'إنهاء جلسة الضيف',
+                                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
                                 ),
                               ),
                             ),
