@@ -164,31 +164,33 @@ class _FeedScreenState extends State<FeedScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.app_name,
-                            style: TextStyle(
-                              color:
-                              isDark ? AppColors.textPrimary : Colors.black87,
-                              fontSize: 26,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.8,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.app_name,
+                              style: TextStyle(
+                                color:
+                                isDark ? AppColors.textPrimary : Colors.black87,
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.8,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            l10n.filterForYou,
-                            style: TextStyle(
-                              color: isDark
-                                  ? AppColors.textSecondary
-                                  : Colors.black54,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                            const SizedBox(height: 2),
+                            Text(
+                              l10n.filterForYou,
+                              style: TextStyle(
+                                color: isDark
+                                    ? AppColors.textSecondary
+                                    : Colors.black54,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       Row(
                         children: [
@@ -204,13 +206,15 @@ class _FeedScreenState extends State<FeedScreen> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
                                   foregroundColor: Colors.white,
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   elevation: 0,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 child: const Text(
-                                  'إنهاء جلسة الضيف',
-                                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                                  'دخول',
+                                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
                                 ),
                               ),
                             ),
