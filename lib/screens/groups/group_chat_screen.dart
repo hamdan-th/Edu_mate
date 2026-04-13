@@ -8,7 +8,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../services/notifications_service.dart';
-import '../../services/presence_service.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/guest_provider.dart';
 import '../../widgets/guest_action_dialog.dart';
