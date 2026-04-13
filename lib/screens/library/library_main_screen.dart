@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/providers/guest_provider.dart';
 import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 import '../../l10n/app_localizations.dart';
+import '../../widgets/guest_action_dialog.dart';
 import 'digital_library_screen.dart';
 import 'library_theme.dart';
 import 'my_library_screen.dart';
@@ -61,7 +64,14 @@ class _LibraryMainScreenState extends State<LibraryMainScreen> {
                 currentTab: currentTab,
                 selectedIndex: _selectedIndex,
                 tabs: tabs,
-                onTabChanged: (i) => setState(() => _selectedIndex = i),
+                onTabChanged: (i) {
+                  // 🚫 Guest cannot access My Library (index 2)
+                  if (i == 2 && context.read<GuestProvider>().isGuest) {
+                    GuestActionDialog.show(context);
+                    return;
+                  }
+                  setState(() => _selectedIndex = i);
+                },
               ),
             ),
 

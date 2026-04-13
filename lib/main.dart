@@ -9,6 +9,7 @@ import 'l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers/app_settings_provider.dart';
+import 'core/providers/guest_provider.dart';
 import 'firebase_options.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
@@ -28,8 +29,11 @@ Future<void> main() async {
   await Hive.initFlutter();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppSettingsProvider(prefs),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppSettingsProvider(prefs)),
+        ChangeNotifierProvider(create: (_) => GuestProvider()),
+      ],
       child: const EduApp(),
     ),
   );
@@ -78,6 +82,10 @@ class AuthGate extends StatelessWidget {
     final user = auth.currentUser;
 
     if (user == null) return false;
+
+    // ✅ Guest (anonymous) sessions are always valid —
+    // they have no Firestore user doc, so we skip that check.
+    if (user.isAnonymous) return true;
 
     try {
       // يحدث بيانات المستخدم من Firebase

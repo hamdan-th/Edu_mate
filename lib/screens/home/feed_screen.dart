@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../notifications/notifications_screen.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/providers/guest_provider.dart';
+import '../../widgets/guest_action_dialog.dart';
 import '../../services/feed_reactions_service.dart';
 import '../../services/feed_service.dart';
 import '../../services/feed_share_service.dart';
@@ -59,6 +62,11 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   void _openProfile() {
+    final isGuest = context.read<GuestProvider>().isGuest;
+    if (isGuest) {
+      GuestActionDialog.show(context);
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const ProfileScreen()),
@@ -662,6 +670,12 @@ class _PostCardState extends State<PostCard>
   Future<void> _joinGroup() async {
     if (_isLoadingJoined || _isJoined) return;
 
+    // 🚫 Guest cannot join
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(context);
+      return;
+    }
+
     final groupId = widget.post['groupId']?.toString() ?? '';
     if (groupId.isEmpty) return;
 
@@ -701,6 +715,12 @@ class _PostCardState extends State<PostCard>
 
   Future<void> _toggleLike() async {
     if (_isLoadingLike) return;
+
+    // 🚫 Guest cannot like
+    if (context.read<GuestProvider>().isGuest) {
+      GuestActionDialog.show(context);
+      return;
+    }
 
     final postId = widget.post['postId']?.toString() ?? '';
     if (postId.isEmpty) return;
@@ -1458,6 +1478,11 @@ class _PostCardState extends State<PostCard>
                       active: false,
                       activeColor: AppColors.primary,
                       onTap: () {
+                        // 🚫 Guest cannot comment
+                        if (context.read<GuestProvider>().isGuest) {
+                          GuestActionDialog.show(context);
+                          return;
+                        }
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,

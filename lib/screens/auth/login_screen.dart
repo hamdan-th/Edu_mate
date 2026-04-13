@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
-
+import '../../core/providers/guest_provider.dart';
 import '../../core/theme/app_colors.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isGuestLoading = false;
 
   late final AnimationController _entranceController;
   late final AnimationController _floatController;
@@ -154,6 +156,28 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   void _goToSignup() {
     Navigator.pushNamed(context, '/signup');
+  }
+
+  Future<void> _browseAsGuest() async {
+    setState(() => _isGuestLoading = true);
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      if (!mounted) return;
+      // Mark this session as guest in the provider
+      context.read<GuestProvider>().setGuest(true);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/mainNav',
+        (route) => false,
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذّر الدخول كضيف. تحقق من اتصالك بالإنترنت.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isGuestLoading = false);
+    }
   }
 
   void _showMessage(String message) {
@@ -394,6 +418,36 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           ),
                                         ),
                                       ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    // Browse as Guest button
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: TextButton(
+                                        onPressed: (_isLoading || _isGuestLoading)
+                                            ? null
+                                            : _browseAsGuest,
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: isDark
+                                              ? Colors.white.withOpacity(0.40)
+                                              : Colors.black38,
+                                        ),
+                                        child: _isGuestLoading
+                                            ? const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                ),
+                                              )
+                                            : const Text(
+                                                'تصفح كضيف',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 13.5,
+                                                ),
+                                              ),
+                                      ),
                                     ),
                                   ],
                                 ),
