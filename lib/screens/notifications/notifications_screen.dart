@@ -26,19 +26,34 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.surface.withValues(alpha: isDark ? 0.55 : 0.25),
+                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.0),
+              ],
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         centerTitle: false,
         titleSpacing: 20,
         title: Text(
           l10n.notificationsTitle,
           style: const TextStyle(
             fontSize: 24,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.4,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
           ),
         ),
         actions: [
@@ -46,7 +61,7 @@ class NotificationsScreen extends StatelessWidget {
             padding: const EdgeInsets.only(right: 16, left: 16, top: 10, bottom: 10),
             child: TextButton(
               style: TextButton.styleFrom(
-                backgroundColor: AppColors.primary.withOpacity(0.12),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
               ),
@@ -152,14 +167,14 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(start: 4),
       child: Text(
         title,
         style: TextStyle(
-          color: isDark ? AppColors.textPrimary : AppColors.textOnLight,
+          color: colorScheme.onSurface,
           fontSize: 16,
           fontWeight: FontWeight.w800,
         ),
@@ -183,6 +198,7 @@ class _NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
     final accent = item.badgeColor(context);
 
     return Padding(
@@ -198,21 +214,19 @@ class _NotificationTile extends StatelessWidget {
             padding: EdgeInsets.zero,
             decoration: BoxDecoration(
               color: item.isRead
-                  ? (isDark ? AppColors.surface : Colors.white)
-                  : accent.withOpacity(isDark ? 0.10 : 0.08),
+                  ? colorScheme.surface
+                  : accent.withValues(alpha: isDark ? 0.10 : 0.08),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: item.isRead
-                    ? (isDark
-                    ? AppColors.border.withOpacity(0.45)
-                    : AppColors.lightBorder)
-                    : accent.withOpacity(0.30),
-                width: item.isRead ? 1 : 1.2,
+                    ? colorScheme.outline.withValues(alpha: isDark ? 0.45 : 0.15)
+                    : accent.withValues(alpha: 0.30),
+                width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: (isDark ? Colors.black : AppColors.lightShadow).withOpacity(isDark ? 0.14 : 0.8),
-                  blurRadius: isDark ? 8 : 15,
+                  color: Colors.black.withValues(alpha: isDark ? 0.08 : 0.02),
+                  blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
               ],
@@ -240,10 +254,10 @@ class _NotificationTile extends StatelessWidget {
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: accent.withOpacity(0.12),
+                              color: accent.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: accent.withOpacity(0.20),
+                                color: accent.withValues(alpha: 0.20),
                               ),
                             ),
                             child: Icon(
@@ -265,9 +279,7 @@ class _NotificationTile extends StatelessWidget {
                                       child: Text(
                                         item.localizedTitle(l10n),
                                         style: TextStyle(
-                                          color: isDark
-                                              ? AppColors.textPrimary
-                                              : AppColors.textOnLight,
+                                          color: colorScheme.onSurface,
                                           fontSize: 15,
                                           fontWeight: item.isRead
                                               ? FontWeight.w700
@@ -282,9 +294,7 @@ class _NotificationTile extends StatelessWidget {
                                         timeLabel,
                                         textAlign: TextAlign.end,
                                         style: TextStyle(
-                                          color: isDark
-                                              ? AppColors.textSecondary
-                                              : AppColors.lightTextSecondary.withOpacity(0.8),
+                                          color: colorScheme.onSurface.withValues(alpha: 0.6),
                                           fontSize: 11.5,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -319,7 +329,7 @@ class _NotificationTile extends StatelessWidget {
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: accent.withOpacity(0.35),
+                                      color: accent.withValues(alpha: 0.35),
                                       blurRadius: 4,
                                     ),
                                   ],
@@ -348,6 +358,7 @@ class _NotificationsEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Center(
       child: Padding(
@@ -357,15 +368,15 @@ class _NotificationsEmptyState extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 420),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surface : Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: isDark ? AppColors.border : Colors.black12,
+              color: colorScheme.outline.withValues(alpha: isDark ? 0.45 : 0.15),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.14 : 0.04),
-                blurRadius: 10,
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -377,7 +388,7 @@ class _NotificationsEmptyState extends StatelessWidget {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.10),
+                  color: AppColors.primary.withValues(alpha: 0.10),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
