@@ -95,73 +95,70 @@ class _MainNavScreenState extends State<MainNavScreen> {
           child: _screens[_currentIndex],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
+      bottomNavigationBar: Container(
+        margin: EdgeInsets.fromLTRB(24, 0, 24, 16 + MediaQuery.of(context).viewPadding.bottom),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.06),
+              blurRadius: 12,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkSurface.withOpacity(0.85) : Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                  width: 1,
+                ),
               ),
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.06),
-                blurRadius: 12,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface.withOpacity(0.85) : Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
-                    width: 1,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.home_outlined,
+                      activeIcon: Icons.home_rounded,
+                      label: l10n.navHome,
+                      selected: _currentIndex == 0,
+                      isDark: isDark,
+                      onTap: () => setState(() => _currentIndex = 0),
+                    ),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _NavItem(
-                        icon: Icons.home_outlined,
-                        activeIcon: Icons.home_rounded,
-                        label: l10n.navHome,
-                        selected: _currentIndex == 0,
-                        isDark: isDark,
-                        onTap: () => setState(() => _currentIndex = 0),
-                      ),
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.groups_outlined,
+                      activeIcon: Icons.groups_rounded,
+                      label: l10n.navGroups,
+                      selected: _currentIndex == 1,
+                      isDark: isDark,
+                      onTap: () => setState(() => _currentIndex = 1),
                     ),
-                    Expanded(
-                      child: _NavItem(
-                        icon: Icons.groups_outlined,
-                        activeIcon: Icons.groups_rounded,
-                        label: l10n.navGroups,
-                        selected: _currentIndex == 1,
-                        isDark: isDark,
-                        onTap: () => setState(() => _currentIndex = 1),
-                      ),
+                  ),
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.library_books_outlined,
+                      activeIcon: Icons.library_books_rounded,
+                      label: l10n.navLibrary,
+                      selected: _currentIndex == 2,
+                      isDark: isDark,
+                      onTap: () => setState(() => _currentIndex = 2),
                     ),
-                    Expanded(
-                      child: _NavItem(
-                        icon: Icons.library_books_outlined,
-                        activeIcon: Icons.library_books_rounded,
-                        label: l10n.navLibrary,
-                        selected: _currentIndex == 2,
-                        isDark: isDark,
-                        onTap: () => setState(() => _currentIndex = 2),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
