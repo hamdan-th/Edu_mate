@@ -8,10 +8,14 @@ class SettingsBottomSheet extends StatelessWidget {
   const SettingsBottomSheet({super.key});
 
   static void show(BuildContext context) {
+    final settingsProvider = Provider.of<AppSettingsProvider>(context, listen: false);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => const SettingsBottomSheet(),
+      builder: (sheetContext) => ChangeNotifierProvider.value(
+        value: settingsProvider,
+        child: const SettingsBottomSheet(),
+      ),
     );
   }
 

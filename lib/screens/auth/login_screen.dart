@@ -221,21 +221,23 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
+          // 1. Premium Reactive Radial Gradient Background
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment.topCenter,
                 radius: 1.5,
                 colors: [
-                  AppColors.surface,
-                  AppColors.background,
+                  colorScheme.surface,
+                  theme.scaffoldBackgroundColor,
                 ],
               ),
             ),
@@ -251,13 +253,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   child: IconButton(
                     onPressed: () => SettingsBottomSheet.show(context),
                     icon: const Icon(
-                      Icons.translate_rounded, // or language_rounded
-                      color: AppColors.textSecondary,
+                      Icons.translate_rounded,
                       size: 24,
                     ),
                     tooltip: l10n.settings,
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.surface.withOpacity(0.5),
+                      backgroundColor: colorScheme.surface.withOpacity(0.5),
+                      foregroundColor: colorScheme.onSurface.withOpacity(0.7),
                       padding: const EdgeInsets.all(12),
                     ),
                   ),
@@ -277,13 +279,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     children: [
                       const SizedBox(height: 12),
                       
+                      // 1. Header Section - Logo with Reactive Glow
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withOpacity(0.12),
+                              color: colorScheme.primary.withOpacity(0.12),
                               blurRadius: 40,
                               spreadRadius: 8,
                             ),
@@ -302,6 +305,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       Text(
                         l10n.app_name,
                         style: textTheme.headlineLarge?.copyWith(
+                          color: colorScheme.onBackground,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.5,
                         ),
@@ -310,7 +314,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       Text(
                         l10n.loginWelcomeBack,
                         style: textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: colorScheme.onSurface.withOpacity(0.6),
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0.2,
                         ),
@@ -318,218 +322,223 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       
                       const SizedBox(height: 32),
                         
-                        SlideTransition(
-                          position: _cardSlide,
-                          child: FadeTransition(
-                            opacity: _cardOpacity,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  color: AppColors.border.withOpacity(0.5),
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.4),
-                                    blurRadius: 30,
-                                    offset: const Offset(0, 15),
-                                  ),
-                                ],
+                      // 3. Login Card with Entrance Animation
+                      SlideTransition(
+                        position: _cardSlide,
+                        child: FadeTransition(
+                          opacity: _cardOpacity,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: colorScheme.outline.withOpacity(0.2),
+                                width: 1.2,
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      l10n.loginTitle,
-                                      style: textTheme.headlineSmall?.copyWith(
-                                        color: AppColors.textPrimary,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -0.5,
-                                      ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(isDark ? 0.4 : 0.08),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 15),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.loginTitle,
+                                    style: textTheme.headlineSmall?.copyWith(
+                                      color: colorScheme.onSurface,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.5,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      l10n.loginSubtitle,
-                                      style: textTheme.bodySmall?.copyWith(
-                                        color: AppColors.textSecondary,
-                                        height: 1.4,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.loginSubtitle,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurface.withOpacity(0.6),
+                                      height: 1.4,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    const SizedBox(height: 32),
-                                    
-                                    Column(
-                                      children: [
-                                        TextFormField(
-                                          controller: _loginController,
-                                          keyboardType: TextInputType.emailAddress,
-                                          style: textTheme.bodyLarge,
-                                          decoration: _inputDecoration(
-                                            label: l10n.loginEmailHint,
-                                            icon: Icons.person_outline_rounded,
-                                          ),
+                                  ),
+                                  const SizedBox(height: 32),
+                                  
+                                  // 4. Input Fields
+                                  Column(
+                                    children: [
+                                      TextFormField(
+                                        controller: _loginController,
+                                        keyboardType: TextInputType.emailAddress,
+                                        style: textTheme.bodyLarge,
+                                        decoration: _inputDecoration(
+                                          label: l10n.loginEmailHint,
+                                          icon: Icons.person_outline_rounded,
                                         ),
-                                        const SizedBox(height: 14),
-                                        TextFormField(
-                                          controller: _passwordController,
-                                          obscureText: _obscurePassword,
-                                          style: textTheme.bodyLarge,
-                                          decoration: _inputDecoration(
-                                            label: l10n.loginPasswordHint,
-                                            icon: Icons.lock_outline_rounded,
-                                            suffixIcon: IconButton(
-                                              onPressed: () {
-                                                setState(() => _obscurePassword = !_obscurePassword);
-                                              },
-                                              icon: Icon(
-                                                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                                color: isDark ? AppColors.textSecondary : Colors.black54,
-                                              ),
+                                      ),
+                                      const SizedBox(height: 14),
+                                      TextFormField(
+                                        controller: _passwordController,
+                                        obscureText: _obscurePassword,
+                                        style: textTheme.bodyLarge,
+                                        decoration: _inputDecoration(
+                                          label: l10n.loginPasswordHint,
+                                          icon: Icons.lock_outline_rounded,
+                                          suffixIcon: IconButton(
+                                            onPressed: () {
+                                              setState(() => _obscurePassword = !_obscurePassword);
+                                            },
+                                            icon: Icon(
+                                              _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                              color: colorScheme.onSurface.withOpacity(0.5),
                                             ),
                                           ),
                                         ),
-                                      ],
+                                      ),
+                                    ],
+                                  ),
+                                  
+                                  const SizedBox(height: 12),
+                                  
+                                  // Secondary Elements -> Forgot Password
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: ScaleOnPress(
+                                      child: TextButton(
+                                        onPressed: _isLoading ? null : _resetPassword,
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: colorScheme.primary,
+                                          padding: EdgeInsets.zero,
+                                        ),
+                                        child: Text(
+                                          l10n.loginForgotPassword, 
+                                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                                        ),
+                                      ),
                                     ),
-                                    
-                                    const SizedBox(height: 12),
-                                    
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: ScaleOnPress(
+                                  ),
+                                  
+                                  const SizedBox(height: 32),
+                                  
+                                  // 5. Login Button
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 54,
+                                    child: ScaleOnPress(
+                                      onTap: _isLoading ? null : _handleLogin,
+                                      child: ElevatedButton(
+                                        onPressed: _isLoading ? null : _handleLogin,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: colorScheme.primary,
+                                          foregroundColor: isDark ? Colors.black : Colors.white,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                        ),
+                                        child: _isLoading
+                                            ? SizedBox(
+                                                width: 22,
+                                                height: 22,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2.5,
+                                                  color: isDark ? Colors.black : Colors.white,
+                                                ),
+                                              )
+                                            : Text(
+                                                l10n.loginTitle,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  
+                                  const SizedBox(height: 24),
+                                  
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        l10n.loginNoAccount,
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.onSurface.withOpacity(0.6),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      ScaleOnPress(
                                         child: TextButton(
-                                          onPressed: _isLoading ? null : _resetPassword,
+                                          onPressed: _goToSignup,
                                           style: TextButton.styleFrom(
-                                            foregroundColor: AppColors.primary,
-                                            padding: EdgeInsets.zero,
+                                            foregroundColor: colorScheme.primary,
+                                            padding: const EdgeInsets.symmetric(horizontal: 4),
                                           ),
                                           child: Text(
-                                            l10n.loginForgotPassword, 
-                                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                                            l10n.loginSignupAction,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: 14,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    
-                                    const SizedBox(height: 32),
-                                    
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 54,
-                                      child: ScaleOnPress(
-                                        onTap: _isLoading ? null : _handleLogin,
-                                        child: ElevatedButton(
-                                          onPressed: _isLoading ? null : _handleLogin,
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.primary,
-                                            foregroundColor: Colors.black,
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
-                                            ),
-                                          ),
-                                          child: _isLoading
-                                              ? const SizedBox(
-                                                  width: 22,
-                                                  height: 22,
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 2.5,
-                                                    color: Colors.black,
-                                                  ),
-                                                )
-                                              : Text(
-                                                  l10n.loginTitle,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.w900,
-                                                    fontSize: 16,
-                                                  ),
+                                    ],
+                                  ),
+                                  
+                                  const SizedBox(height: 12),
+                                  
+                                  // Browse as Guest button
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ScaleOnPress(
+                                      child: TextButton(
+                                        onPressed: (_isLoading || _isGuestLoading)
+                                            ? null
+                                            : _browseAsGuest,
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: colorScheme.onSurface.withOpacity(0.5),
+                                        ),
+                                        child: _isGuestLoading
+                                            ? const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
                                                 ),
-                                        ),
-                                      ),
-                                    ),
-                                    
-                                    const SizedBox(height: 24),
-                                    
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          l10n.loginNoAccount,
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            color: AppColors.textSecondary,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        ScaleOnPress(
-                                          child: TextButton(
-                                            onPressed: _goToSignup,
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: AppColors.primary,
-                                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                                            ),
-                                            child: Text(
-                                              l10n.loginSignupAction,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w900,
-                                                fontSize: 14,
+                                              )
+                                            : Text(
+                                                l10n.loginGuestAction,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 14,
+                                                  letterSpacing: 0.5,
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    
-                                    const SizedBox(height: 12),
-                                    
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: ScaleOnPress(
-                                        child: TextButton(
-                                          onPressed: (_isLoading || _isGuestLoading)
-                                              ? null
-                                              : _browseAsGuest,
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: AppColors.textSecondary,
-                                          ),
-                                          child: _isGuestLoading
-                                              ? const SizedBox(
-                                                  width: 18,
-                                                  height: 18,
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                  ),
-                                                )
-                                              : Text(
-                                                  l10n.loginGuestAction,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.w700,
-                                                    fontSize: 14,
-                                                    letterSpacing: 0.5,
-                                                  ),
-                                                ),
-                                        ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
   }
 }
