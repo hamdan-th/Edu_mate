@@ -758,16 +758,23 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                   ),
                   const SizedBox(width: 10),
                   if (!_isSearching) ...[
-                    _TopIconButton(
-                      icon: Icons.remove_red_eye_outlined,
-                      onTap: () {
+                    TextButton(
+                      onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => GroupProfileScreen(group: widget.group)),
                         );
                       },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        foregroundColor: AppColors.primary,
+                      ),
+                      child: const Text(
+                        'معلومات المجموعة',
+                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                      ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 4),
                     _TopIconButton(
                       icon: Icons.search_rounded,
                       onTap: () => setState(() => _isSearching = true),

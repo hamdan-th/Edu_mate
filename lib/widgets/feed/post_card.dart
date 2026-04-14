@@ -93,14 +93,14 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             color: Theme.of(context).cardTheme.color ?? AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isDark ? AppColors.border.withOpacity(0.50) : Colors.black12,
+              color: isDark ? AppColors.border.withOpacity(0.50) : AppColors.border.withOpacity(0.12),
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(
-                  _isPressed ? (isDark ? 0.18 : 0.05) : (isDark ? 0.10 : 0.03),
+                  _isPressed ? (isDark ? 0.20 : 0.08) : (isDark ? 0.12 : 0.05),
                 ),
-                blurRadius: _isPressed ? 10 : 6,
+                blurRadius: _isPressed ? 12 : 8,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -245,7 +245,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   Text(
                     timeStr,
                     style: TextStyle(
-                      color: AppColors.textSecondary.withOpacity(0.7),
+                      color: isDark 
+                          ? AppColors.textSecondary.withOpacity(0.7)
+                          : Colors.black.withOpacity(0.5),
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -284,20 +286,20 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
         _ActionItem(
           icon: widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
           label: widget.likesCount.toString(),
-          color: widget.isLiked ? AppColors.error : (isDark ? AppColors.textSecondary : Colors.black54),
+          color: widget.isLiked ? AppColors.error : (isDark ? AppColors.textSecondary : Colors.black87),
           onTap: widget.onLike,
           scale: widget.isLiked ? _likeScale : null,
         ),
         _ActionItem(
           icon: Icons.chat_bubble_outline_rounded,
           label: widget.commentsCount.toString(),
-          color: isDark ? AppColors.textSecondary : Colors.black54,
+          color: isDark ? AppColors.textSecondary : Colors.black87,
           onTap: widget.onComment,
         ),
         _ActionItem(
           icon: Icons.share_rounded,
           label: l10n.shareAction,
-          color: isDark ? AppColors.textSecondary : Colors.black54,
+          color: isDark ? AppColors.textSecondary : Colors.black87,
           onTap: widget.onShare,
         ),
       ],

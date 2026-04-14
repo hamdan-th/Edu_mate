@@ -756,21 +756,23 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           actions: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.remove_red_eye_outlined, size: 16),
-                label: const Text('الملف الشخصي', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.black.withOpacity(0.3),
-                  side: BorderSide.none,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                ),
+              child: TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => GroupProfileScreen(group: widget.group)),
                   );
                 },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white.withOpacity(0.12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+                child: const Text(
+                  'الملف الشخصي',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+                ),
               ),
             ),
           ],
