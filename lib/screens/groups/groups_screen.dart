@@ -15,7 +15,6 @@ import 'group_details_screen.dart';
 import 'group_chat_screen.dart';
 import '../../widgets/common/premium_transitions.dart';
 import '../../l10n/app_localizations.dart';
-import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 
 class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
@@ -508,25 +507,15 @@ class _GroupsScreenState extends State<GroupsScreen>
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 92),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            const FloatingBotButton(
-              sourceScreen: 'groups_screen',
-              padding: EdgeInsets.only(bottom: 16),
-            ),
-            FloatingActionButton(
-              onPressed: _openCreateGroup,
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.secondary,
-              elevation: 6,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: const Icon(Icons.add_rounded, size: 30),
-            ),
-          ],
+        child: FloatingActionButton(
+          onPressed: _openCreateGroup,
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.secondary,
+          elevation: 6,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: const Icon(Icons.add_rounded, size: 30),
         ),
       ),
     );

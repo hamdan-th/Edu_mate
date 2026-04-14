@@ -7,6 +7,7 @@ import '../../services/app_link_handler.dart';
 import '../groups/groups_screen.dart';
 import '../library/library_main_screen.dart';
 import 'feed_screen.dart';
+import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 
 class MainNavScreen extends StatefulWidget {
   const MainNavScreen({super.key});
@@ -23,6 +24,19 @@ class _MainNavScreenState extends State<MainNavScreen> {
     GroupsScreen(),
     LibraryMainScreen(),
   ];
+
+  String _getCurrentScreenName() {
+    switch (_currentIndex) {
+      case 0:
+        return 'feed_screen';
+      case 1:
+        return 'groups_screen';
+      case 2:
+        return 'library_screen';
+      default:
+        return 'main_nav';
+    }
+  }
 
   @override
   void initState() {
@@ -48,6 +62,13 @@ class _MainNavScreenState extends State<MainNavScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       extendBody: true,
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 96),
+        child: FloatingBotButton(
+          sourceScreen: _getCurrentScreenName(),
+        ),
+      ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 280),
         transitionBuilder: (child, animation) {

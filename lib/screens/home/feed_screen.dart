@@ -10,7 +10,6 @@ import '../../services/feed_service.dart';
 import '../../models/feed_post_model.dart';
 import '../profile/profile_screen.dart';
 import '../settings/settings_bottom_sheet.dart';
-import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 import '../../services/notifications_service.dart';
 import '../../widgets/feed/post_card_wrapper.dart';
 import '../../widgets/common/premium_transitions.dart';
@@ -110,13 +109,6 @@ class _FeedScreenState extends State<FeedScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: const SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 96),
-          child: FloatingBotButton(sourceScreen: 'feed_screen'),
-        ),
-      ),
       body: Stack(
         children: [
           // Subtle top gradient accent — mirrors login/signup premium depth

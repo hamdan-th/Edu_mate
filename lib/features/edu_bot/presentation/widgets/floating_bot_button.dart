@@ -60,38 +60,27 @@ class _FloatingBotButtonState extends State<FloatingBotButton> with SingleTicker
           animation: _controller,
           builder: (context, child) {
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                color: const Color(0xFF16161A), // Dark charcoal base
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFD4AF37).withOpacity(0.4 + (_controller.value * 0.4)),
+                  width: 1.5,
                 ),
-                borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFD4AF37).withOpacity(0.3 + (_controller.value * 0.2)),
-                    blurRadius: 10 + (_controller.value * 8),
-                    spreadRadius: 2,
-                    offset: const Offset(0, 4),
+                    color: const Color(0xFFD4AF37).withOpacity(0.15 + (_controller.value * 0.2)),
+                    blurRadius: 12 + (_controller.value * 8),
+                    spreadRadius: 2 + (_controller.value * 3),
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    "مساعد Bot",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ],
+              child: const Icon(
+                Icons.auto_awesome_rounded, // Premium AI icon
+                color: Color(0xFFD4AF37), // Gold accent
+                size: 26,
               ),
             );
           }
