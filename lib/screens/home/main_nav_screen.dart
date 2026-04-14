@@ -137,37 +137,39 @@ class _MainNavScreenState extends State<MainNavScreen> {
                   ),
                   child: Row(
                     children: [
-                  Expanded(
-                    child: _NavItem(
-                      icon: Icons.home_outlined,
-                      activeIcon: Icons.home_rounded,
-                      label: l10n.navHome,
-                      selected: _currentIndex == 0,
-                      isDark: isDark,
-                      onTap: () => setState(() => _currentIndex = 0),
-                    ),
+                      Expanded(
+                        child: _NavItem(
+                          icon: Icons.home_outlined,
+                          activeIcon: Icons.home_rounded,
+                          label: l10n.navHome,
+                          selected: _currentIndex == 0,
+                          isDark: isDark,
+                          onTap: () => setState(() => _currentIndex = 0),
+                        ),
+                      ),
+                      Expanded(
+                        child: _NavItem(
+                          icon: Icons.groups_outlined,
+                          activeIcon: Icons.groups_rounded,
+                          label: l10n.navGroups,
+                          selected: _currentIndex == 1,
+                          isDark: isDark,
+                          onTap: () => setState(() => _currentIndex = 1),
+                        ),
+                      ),
+                      Expanded(
+                        child: _NavItem(
+                          icon: Icons.library_books_outlined,
+                          activeIcon: Icons.library_books_rounded,
+                          label: l10n.navLibrary,
+                          selected: _currentIndex == 2,
+                          isDark: isDark,
+                          onTap: () => setState(() => _currentIndex = 2),
+                        ),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: _NavItem(
-                      icon: Icons.groups_outlined,
-                      activeIcon: Icons.groups_rounded,
-                      label: l10n.navGroups,
-                      selected: _currentIndex == 1,
-                      isDark: isDark,
-                      onTap: () => setState(() => _currentIndex = 1),
-                    ),
-                  ),
-                  Expanded(
-                    child: _NavItem(
-                      icon: Icons.library_books_outlined,
-                      activeIcon: Icons.library_books_rounded,
-                      label: l10n.navLibrary,
-                      selected: _currentIndex == 2,
-                      isDark: isDark,
-                      onTap: () => setState(() => _currentIndex = 2),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

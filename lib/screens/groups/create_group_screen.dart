@@ -21,7 +21,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
-  String _groupType = 'public';
+  String _groupType = 'private'; // safe default while role loads
 
   String? _selectedCollegeId;
   String? _selectedCollegeName;
@@ -33,6 +33,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   bool _isLoading = false;
 
+  /// True once the Firestore role check confirms the user is a doctor.
+  /// Defaults to false so non-doctors never see the public option prematurely.
+  bool _isDoctor = false;
+
   CollegeItem? get _selectedCollege {
     if (_selectedCollegeId == null) return null;
     for (final college in AcademicStructure.colleges) {
@@ -43,6 +47,24 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   List<SpecializationItem> get _availableSpecializations {
     return _selectedCollege?.specializations ?? [];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  /// Fetches the current user's role from Firestore once and updates the UI.
+  Future<void> _loadUserRole() async {
+    final isDoctor = await GroupService.isCurrentUserDoctor();
+    if (!mounted) return;
+    setState(() {
+      _isDoctor = isDoctor;
+      // Doctors may create public groups; students are locked to private.
+      if (!isDoctor) _groupType = 'private';
+      if (isDoctor) _groupType = 'public';
+    });
   }
 
   @override
@@ -403,20 +425,23 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(
-                      child: _TypeSelectorCard(
-                        title: l10n.groupsCreateTypePublicTitle,
-                        subtitle: l10n.groupsCreateTypePublicSub,
-                        icon: Icons.public_rounded,
-                        selected: _groupType == 'public',
-                        onTap: () {
-                          setState(() {
-                            _groupType = 'public';
-                          });
-                        },
+                    // Public group creation is restricted to doctors only.
+                    if (_isDoctor) ...([
+                      Expanded(
+                        child: _TypeSelectorCard(
+                          title: l10n.groupsCreateTypePublicTitle,
+                          subtitle: l10n.groupsCreateTypePublicSub,
+                          icon: Icons.public_rounded,
+                          selected: _groupType == 'public',
+                          onTap: () {
+                            setState(() {
+                              _groupType = 'public';
+                            });
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
+                      const SizedBox(width: 10),
+                    ]),
                     Expanded(
                       child: _TypeSelectorCard(
                         title: l10n.groupsCreateTypePrivateTitle,

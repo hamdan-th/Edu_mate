@@ -61,6 +61,21 @@ class GroupService {
         .toString();
   }
 
+  /// Returns true if the currently-signed-in user has role == 'doctor'
+  /// in their Firestore profile.  Conservative default: returns false on any
+  /// read failure so that permission is never accidentally granted.
+  static Future<bool> isCurrentUserDoctor() async {
+    try {
+      final ref = await _userRefByUid(currentUid);
+      final snap = await ref.get();
+      final data = snap.data() ?? {};
+      final role = (data['role'] ?? '').toString().toLowerCase().trim();
+      return role == 'doctor';
+    } catch (_) {
+      return false;
+    }
+  }
+
   static String _generateInviteCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     final rand = Random();
@@ -274,6 +289,24 @@ class GroupService {
       throw Exception('التخصص مطلوب');
     }
 
+    // Normalise the type string so dirty input (e.g. 'Public' / ' public ')
+    // never bypasses the guard below.
+    final normalizedType = type.trim().toLowerCase();
+    if (normalizedType != 'public' && normalizedType != 'private') {
+      throw Exception('نوع المجموعة غير صالح');
+    }
+
+    // Business rule: only doctors may create public (global) groups.
+    if (normalizedType == 'public') {
+      final isDoctor = await isCurrentUserDoctor();
+      if (!isDoctor) {
+        throw Exception(
+          'المجموعات العامة يمكن إنشاؤها من قِبَل الدكتور فقط. '
+          'يُرجى اختيار نوع المجموعة الخاصة.',
+        );
+      }
+    }
+
     final duplicate = await _groups
         .where('nameLowercase', isEqualTo: nameLowercase)
         .limit(1)
@@ -301,7 +334,7 @@ class GroupService {
       'groupName': cleanName,
       'nameLowercase': nameLowercase,
       'description': cleanDescription,
-      'type': type,
+      'type': normalizedType,
       'collegeId': collegeId,
       'collegeName': collegeName,
       'specializationId': specializationId,
@@ -335,7 +368,7 @@ class GroupService {
       'groupName': cleanName,
       'roleInGroup': 'owner',
       'joinedAt': FieldValue.serverTimestamp(),
-      'type': type,
+      'type': normalizedType,
     });
 
     await batch.commit();
@@ -1037,8 +1070,10 @@ class GroupService {
 
   static Future<void> promoteToAdmin(String groupId, String memberId) async {
     final state = await getUserGroupState(groupId);
-    if (!state.isOwner && !state.isAdmin) {
-      throw Exception('غير مصرح لك بهذا الإجراء');
+    // Only the group owner may promote members to admin.
+    // Admins are explicitly excluded to satisfy business rules 2 and 4.
+    if (!state.isOwner) {
+      throw Exception('المالك فقط يمكنه ترقية الأعضاء إلى مشرفين');
     }
 
     final groupRef = _groups.doc(groupId);
