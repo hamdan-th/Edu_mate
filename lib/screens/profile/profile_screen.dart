@@ -265,27 +265,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String value,
     Color? iconColor,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surface : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isDark ? AppColors.border : Colors.black.withOpacity(0.05)),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: isDark ? 0.45 : 0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(isDark ? 0.12 : 0.08),
-              borderRadius: BorderRadius.circular(10),
+              color: (iconColor ?? colorScheme.primary).withValues(alpha: isDark ? 0.15 : 0.08),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: iconColor ?? AppColors.primary, size: 20),
+            child: Icon(icon, color: iconColor ?? colorScheme.primary, size: 22),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,17 +302,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: isDark ? AppColors.textSecondary : Colors.black54,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 Text(
                   value.isEmpty ? '-' : value,
                   style: TextStyle(
-                    color: isDark ? AppColors.textPrimary : Colors.black87,
-                    fontSize: 15,
+                    color: colorScheme.onSurface,
+                    fontSize: 15.5,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -322,7 +332,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         CircleAvatar(
           radius: 48,
-          backgroundColor: AppColors.primary.withOpacity(0.12),
+          backgroundColor: AppColors.primary.withValues(alpha: 0.12),
           backgroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
           child: photoUrl.isEmpty
               ? Text(
@@ -347,12 +357,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: Theme.of(context).scaffoldBackgroundColor,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Theme.of(context).dividerColor.withOpacity(0.12), 
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.12), 
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   ),
@@ -406,10 +416,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: AppColors.primary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.person_outline_rounded, size: 64, color: AppColors.primary.withOpacity(0.85)),
+                  child: Icon(Icons.person_outline_rounded, size: 64, color: AppColors.primary.withValues(alpha: 0.85)),
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -450,9 +460,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.profileTitle),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.surface.withValues(alpha: isDark ? 0.55 : 0.25),
+                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.0),
+              ],
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        title: Text(l10n.profileTitle, style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5)),
         elevation: 0,
         centerTitle: true,
       ),
@@ -489,16 +515,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? AppColors.border : Colors.black.withOpacity(0.06)),
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: colorScheme.outline.withValues(alpha: isDark ? 0.45 : 0.15)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
+                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -530,7 +556,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         '@$username',
                         style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -542,7 +568,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
@@ -631,7 +657,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.15)),
+                      side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.15)),
                     ),
                     icon: _isLoggingOut
                         ? const SizedBox(
