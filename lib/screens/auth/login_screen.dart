@@ -250,20 +250,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               alignment: Alignment.topRight,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: ScaleOnPress(
-                  child: IconButton(
-                    onPressed: () => SettingsBottomSheet.show(context),
-                    icon: const Icon(
-                      Icons.translate_rounded,
-                      size: 24,
-                    ),
-                    tooltip: l10n.settings,
-                    style: IconButton.styleFrom(
-                      backgroundColor: colorScheme.surface.withOpacity(0.5),
-                      foregroundColor: colorScheme.onSurface.withOpacity(0.7),
-                      padding: const EdgeInsets.all(12),
-                    ),
-                  ),
+                child: LoginTopActionButton(
+                  icon: Icons.translate_rounded,
+                  onTap: () => SettingsBottomSheet.show(context),
                 ),
               ),
             ),
@@ -543,3 +532,48 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 }
+
+/// Reused proven action button implementation from feed_screen.dart
+class LoginTopActionButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const LoginTopActionButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surface.withOpacity(0.98) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? AppColors.border : Colors.black12,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          color: isDark ? AppColors.textPrimary : Colors.black87,
+          size: 20,
+        ),
+      ),
+    );
+  }
+}
