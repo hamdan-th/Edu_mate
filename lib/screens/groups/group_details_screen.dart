@@ -384,30 +384,60 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     }
   }
 
-  Future<void> _clearChatHistory() async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(l10n.groupsActionClearChat, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
-        content: Text(l10n.groupsClearChatConfirmMsg),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.profileCancel)),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.groupsClearChatSubmit, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
-        ],
-      )
-    ) ?? false;
-
-    if (!confirm) return;
-
-    try {
-      await GroupService.clearGroupChat(widget.group.id);
-
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsClearChatSuccess)));
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsClearChatError)));
     }
   }
+
+  Future<void> _confirmDeleteGroup() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.groupsDeleteConfirmTitle, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+        content: Text(l10n.groupsDeleteConfirmMsg),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.profileCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.profileDelete, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      
+      // Show non-dismissible loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+
+      try {
+        await GroupService.deleteGroup(widget.group.id);
+        if (mounted) {
+          // Pop loading dialog
+          Navigator.pop(context);
+          // Pop screen(s) and show success
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsDeleteSuccess)));
+        }
+      } catch (e) {
+        if (mounted) {
+          // Pop loading dialog
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsDeleteError)));
+        }
+      }
+    }
+  }
+
   void _openMoreMenu() {
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
@@ -434,7 +464,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   _reportGroup();
                 },
               ),
-              if (_isOwner)
+              if (_isOwner) ...[
                 ListTile(
                   leading: const Icon(Icons.cleaning_services_rounded, color: AppColors.error),
                   title: Text(l10n.groupsActionClearChat, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
@@ -443,6 +473,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     _clearChatHistory();
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.delete_forever_rounded, color: AppColors.error),
+                  title: Text(l10n.groupsActionDeleteGroup, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmDeleteGroup();
+                  },
+                ),
+              ],
               ListTile(
                 leading: const Icon(Icons.link_rounded, color: AppColors.textPrimary),
                 title: Text(l10n.groupsActionCopyLink, style: const TextStyle(fontWeight: FontWeight.bold)),

@@ -10,6 +10,7 @@ import '../models/group_membership_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'upload_screening_service.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class GroupService {
   GroupService._();
@@ -1493,6 +1494,17 @@ class GroupService {
       return GroupModel.fromDoc(doc as DocumentSnapshot<Map<String, dynamic>>);
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Deletes the group and all its associated data via a secure Cloud Function.
+  /// Only the group owner can successfully call this.
+  static Future<void> deleteGroup(String groupId) async {
+    try {
+      final callable = FirebaseFunctions.instance.httpsCallable('deleteGroup');
+      await callable.call({'groupId': groupId});
+    } catch (e) {
+      rethrow;
     }
   }
 }

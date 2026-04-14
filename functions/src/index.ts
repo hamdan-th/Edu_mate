@@ -1,6 +1,10 @@
 import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 import { ImageAnnotatorClient } from "@google-cloud/vision";
 import { GoogleGenAI } from "@google/genai";
+
+admin.initializeApp();
+const db = admin.firestore();
 
 function getSystemInstruction(userContext: any): string {
   const baseInstruction = `You are an advanced, intelligent, and highly capable thinking assistant named Edu Bot inside the Edu Mate app.
@@ -272,5 +276,127 @@ export const screenContent = functions.https.onCall(async (data, context) => {
     // but in strict academic environment, we might want to check.
     // Let's allow but log.
     return { status: "allow", note: "screening_skipped_due_to_error" };
+  }
+});
+
+/**
+ * deleteGroup
+ * Securely deletes a group and all its associated data.
+ * Enforcement: Only the group owner (verified via Firestore ownerId) can trigger this.
+ */
+export const deleteGroup = functions.https.onCall(async (data, context) => {
+  // 1. Authentication Check
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      "unauthenticated",
+      "يجب تسجيل الدخول للقيام بهذا الإجراء."
+    );
+  }
+
+  const { groupId } = data;
+  if (!groupId) {
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "معرف المجموعة مطلوب."
+    );
+  }
+
+  const groupRef = db.collection("groups").doc(groupId);
+  const groupSnap = await groupRef.get();
+
+  if (!groupSnap.exists) {
+    throw new functions.https.HttpsError(
+      "not-found",
+      "المجموعة غير موجودة."
+    );
+  }
+
+  const groupData = groupSnap.data()!;
+  const ownerId = groupData.ownerId;
+
+  // 2. Ownership Verification (Primary source of truth: Firestore ownerId)
+  if (ownerId !== context.auth.uid) {
+    throw new functions.https.HttpsError(
+      "permission-denied",
+      "مالك المجموعة فقط يمكنه حذفها."
+    );
+  }
+
+  try {
+    console.log(`Starting deletion for group: ${groupId}`);
+
+    // 3. Mark as deleting (Conservative flow: prevent new actions while cleaning up)
+    await groupRef.update({
+      status: "deleting",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // 4. Cleanup Members: Remove joined_groups reference from all members
+    const membersSnap = await groupRef.collection("members").get();
+    const memberCleanupPromises = membersSnap.docs.map(async (doc) => {
+      const uid = doc.id;
+      return db
+        .collection("users")
+        .doc(uid)
+        .collection("joined_groups")
+        .doc(groupId)
+        .delete()
+        .catch((err) => console.error(`Failed to remove joined_group for ${uid}:`, err));
+    });
+    await Promise.all(memberCleanupPromises);
+
+    // 5. Cleanup Posts: Remove all feed posts linked to this group
+    const postsSnap = await db
+      .collection("posts")
+      .where("groupId", "==", groupId)
+      .get();
+    const postCleanupPromises = postsSnap.docs.map((doc) =>
+      doc.ref.delete().catch((err) => console.error(`Failed to delete post ${doc.id}:`, err))
+    );
+    await Promise.all(postCleanupPromises);
+
+    // 6. Cleanup Reports: Remove all reports linked to this group
+    const reportsSnap = await db
+      .collection("reports")
+      .where("groupId", "==", groupId)
+      .get();
+    const reportCleanupPromises = reportsSnap.docs.map((doc) =>
+      doc.ref.delete().catch((err) => console.error(`Failed to delete report ${doc.id}:`, err))
+    );
+    await Promise.all(reportCleanupPromises);
+
+    // 7. Storage Cleanup: Chat images folder
+    const bucket = admin.storage().bucket();
+    // Conservative prefix deletion for chat images
+    await bucket.deleteFiles({ prefix: `groups_chat/${groupId}/` }).catch((err) => {
+      console.warn("Storage cleanup (chat) failed or was empty:", err.message);
+    });
+
+    // Cover image cleanup (identify if URL belongs to Edu Mate storage)
+    const imageUrl = (groupData.imageUrl || groupData.groupImageUrl || "") as string;
+    if (imageUrl.includes("group_covers%2F")) {
+      try {
+        // Extract filename from the encoded Firebase Storage URL
+        const fileNameMatch = imageUrl.match(/group_covers%2F([^?]+)/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          const fileName = decodeURIComponent(fileNameMatch[1]);
+          await bucket.file(`group_covers/${fileName}`).delete().catch(() => {});
+        }
+      } catch (err) {
+        console.warn("Cover image storage cleanup failed:", err);
+      }
+    }
+
+    // 8. Recursive Subcollection Deletion & Main Document Delete (Last Step)
+    await db.recursiveDelete(groupRef);
+
+    console.log(`Successfully deleted group: ${groupId}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Group deletion failed:", error);
+    throw new functions.https.HttpsError(
+      "internal",
+      "حدث خطأ أثناء حذف المجموعة. يرجى المحاولة لاحقاً."
+    );
   }
 });

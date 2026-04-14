@@ -104,6 +104,7 @@ class _GroupProfileScreenState extends State<GroupProfileScreen>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return Container(
           decoration: BoxDecoration(
             color: isDark ? AppColors.surface : Colors.white,
@@ -119,12 +120,12 @@ class _GroupProfileScreenState extends State<GroupProfileScreen>
               // Role-based actions
               _buildMenuItem(
                 icon: Icons.link_rounded,
-                title: 'نسخ الرابط',
+                title: l10n.groupsActionCopyLink,
                 onTap: () {
                   final link = GroupService.buildInviteLink(groupId: widget.group.id, inviteCode: widget.group.inviteCode);
                   Clipboard.setData(ClipboardData(text: link));
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ الرابط'), behavior: SnackBarBehavior.floating));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsCopyLinkSuccess), behavior: SnackBarBehavior.floating));
                 },
               ),
               if (!guest && _isMember) ...[
@@ -161,12 +162,22 @@ class _GroupProfileScreenState extends State<GroupProfileScreen>
                 ),
                 _buildMenuItem(
                   icon: Icons.people_rounded,
-                  title: 'إدارة الأعضاء',
+                  title: l10n.groupsManageMembersTitle,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, PremiumPageRoute(page: GroupDetailsScreen(group: widget.group)));
                   },
                 ),
+                if (_isOwner)
+                  _buildMenuItem(
+                    icon: Icons.delete_forever_rounded,
+                    title: l10n.groupsActionDeleteGroup,
+                    color: AppColors.error,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _confirmDeleteGroup();
+                    },
+                  ),
               ],
               const SizedBox(height: 8),
             ],
@@ -176,29 +187,50 @@ class _GroupProfileScreenState extends State<GroupProfileScreen>
     );
   }
 
-  void _confirmLeave() async {
+    }
+  }
+
+  void _confirmDeleteGroup() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('مغادرة المجموعة', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('هل أنت متأكد من رغبتك في مغادرة هذه المجموعة؟'),
+        title: Text(l10n.groupsDeleteConfirmTitle, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+        content: Text(l10n.groupsDeleteConfirmMsg),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('إلغاء')),
           TextButton(
-            onPressed: () => Navigator.pop(context, true), 
-            child: const Text('مغادرة', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.profileCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.profileDelete, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
+
     if (confirmed == true) {
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+
       try {
-        await GroupService.leaveGroup(widget.group.id);
+        await GroupService.deleteGroup(widget.group.id);
         if (mounted) {
+          Navigator.pop(context); // Pop loading
           Navigator.of(context).popUntil((route) => route.isFirst);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsDeleteSuccess)));
         }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        if (mounted) {
+          Navigator.pop(context); // Pop loading
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsDeleteError)));
+        }
       }
     }
   }
