@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../l10n/app_localizations.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -59,75 +60,83 @@ class _MainNavScreenState extends State<MainNavScreen> {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      extendBody: true,
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 96),
-        child: FloatingBotButton(
-          sourceScreen: _getCurrentScreenName(),
-        ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280),
-        transitionBuilder: (child, animation) {
-          final offsetAnimation = Tween<Offset>(
-            begin: const Offset(0.06, 0),
-            end: Offset.zero,
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-            ),
-          );
-
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            ),
-          );
-        },
-        child: KeyedSubtree(
-          key: ValueKey(_currentIndex),
-          child: _screens[_currentIndex],
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        extendBody: true,
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 96),
+          child: FloatingBotButton(
+            sourceScreen: _getCurrentScreenName(),
+          ),
         ),
-      ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.fromLTRB(24, 0, 24, 16 + MediaQuery.of(context).viewPadding.bottom),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.06),
-              blurRadius: 12,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface.withOpacity(0.85) : Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
-                  width: 1,
-                ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 280),
+          transitionBuilder: (child, animation) {
+            final offsetAnimation = Tween<Offset>(
+              begin: const Offset(0.06, 0),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
               ),
-              child: Row(
-                children: [
+            );
+
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              ),
+            );
+          },
+          child: KeyedSubtree(
+            key: ValueKey(_currentIndex),
+            child: _screens[_currentIndex],
+          ),
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.4),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.06),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface.withOpacity(0.85) : Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
                   Expanded(
                     child: _NavItem(
                       icon: Icons.home_outlined,
