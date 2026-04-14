@@ -219,6 +219,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    // Explicitly watch settings provider to ensure instant UI updates for language/theme
+    context.watch<AppSettingsProvider>();
+    
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
