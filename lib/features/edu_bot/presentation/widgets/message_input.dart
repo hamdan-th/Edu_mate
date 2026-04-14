@@ -101,7 +101,7 @@ class _MessageInputState extends State<MessageInput> {
                     boxShadow: [
                       if (hasText && !widget.isSending)
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
+                          color: const Color(0xFFD4AF37).withOpacity(0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),

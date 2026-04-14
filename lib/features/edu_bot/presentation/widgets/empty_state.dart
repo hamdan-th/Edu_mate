@@ -137,24 +137,21 @@ class _EmptyStateState extends State<EmptyState> with SingleTickerProviderStateM
                   animation: _pulseController,
                   builder: (context, child) {
                      return Container(
-                       padding: const EdgeInsets.all(28),
+                       padding: const EdgeInsets.all(24),
                        decoration: BoxDecoration(
-                         gradient: const LinearGradient(
-                           colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
-                           begin: Alignment.topLeft,
-                           end: Alignment.bottomRight,
-                         ),
+                         color: const Color(0xFF16161A),
                          shape: BoxShape.circle,
+                         border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.5), width: 1.5),
                          boxShadow: [
                            BoxShadow(
-                             color: const Color(0xFFD4AF37).withOpacity(0.3 + (_pulseController.value * 0.3)),
-                             blurRadius: 30 + (_pulseController.value * 20),
-                             spreadRadius: _pulseController.value * 8,
-                             offset: const Offset(0, 10),
+                             color: const Color(0xFFD4AF37).withOpacity(0.1 + (_pulseController.value * 0.15)),
+                             blurRadius: 20 + (_pulseController.value * 15),
+                             spreadRadius: 2 + (_pulseController.value * 4),
+                             offset: const Offset(0, 8),
                            ),
                          ],
                        ),
-                       child: const Icon(Icons.auto_awesome_rounded, size: 50, color: Colors.white),
+                       child: const Icon(Icons.smart_toy_outlined, size: 48, color: Color(0xFFD4AF37)),
                      );
                   }
                 ),

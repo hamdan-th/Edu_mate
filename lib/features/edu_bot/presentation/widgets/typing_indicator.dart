@@ -47,17 +47,14 @@ class _TypingIndicatorState extends State<TypingIndicator>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.blueGlow],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: const Color(0xFF16161A),
                   shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.4), width: 1),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4)),
+                    BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.1), blurRadius: 6, offset: const Offset(0, 2)),
                   ],
                 ),
-                child: const Icon(Icons.auto_awesome_rounded, size: 16, color: Colors.white),
+                child: const Icon(Icons.smart_toy_outlined, size: 14, color: Color(0xFFD4AF37)),
               ),
               const SizedBox(width: 12),
               Container(

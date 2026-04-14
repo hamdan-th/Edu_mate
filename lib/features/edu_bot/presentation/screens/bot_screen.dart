@@ -74,12 +74,13 @@ class _BotScreenState extends State<BotScreen> {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFFFD700)]),
+                color: const Color(0xFF16161A),
+                border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.5), width: 1.0),
                 boxShadow: [
-                  BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 2)),
+                  BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 2)),
                 ],
               ),
-              child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 16),
+              child: const Icon(Icons.smart_toy_outlined, color: Color(0xFFD4AF37), size: 18),
             ),
             const SizedBox(width: 12),
             const Column(

@@ -60,27 +60,27 @@ class _FloatingBotButtonState extends State<FloatingBotButton> with SingleTicker
           animation: _controller,
           builder: (context, child) {
             return Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: const Color(0xFF16161A), // Dark charcoal base
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withOpacity(0.4 + (_controller.value * 0.4)),
-                  width: 1.5,
+                  color: const Color(0xFFD4AF37).withOpacity(0.3 + (_controller.value * 0.2)),
+                  width: 1.0,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFD4AF37).withOpacity(0.15 + (_controller.value * 0.2)),
-                    blurRadius: 12 + (_controller.value * 8),
-                    spreadRadius: 2 + (_controller.value * 3),
+                    color: const Color(0xFFD4AF37).withOpacity(0.08 + (_controller.value * 0.05)),
+                    blurRadius: 8 + (_controller.value * 4),
+                    spreadRadius: 1 + (_controller.value * 2),
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: const Icon(
-                Icons.auto_awesome_rounded, // Premium AI icon
+                Icons.smart_toy_outlined, // Minimal AI icon
                 color: Color(0xFFD4AF37), // Gold accent
-                size: 26,
+                size: 24, // Smaller and sleeker
               ),
             );
           }
