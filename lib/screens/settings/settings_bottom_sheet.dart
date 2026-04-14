@@ -8,26 +8,28 @@ class SettingsBottomSheet extends StatelessWidget {
   const SettingsBottomSheet({super.key});
 
   static void show(BuildContext context) {
-    final settingsProvider = Provider.of<AppSettingsProvider>(context, listen: false);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (sheetContext) => ChangeNotifierProvider.value(
-        value: settingsProvider,
-        child: const SettingsBottomSheet(),
-      ),
+      backgroundColor: Colors.transparent,
+      builder: (context) => const SettingsBottomSheet(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Use listen: true (watch) to ensure the sheet itself updates visually
     final settingsProvider = context.watch<AppSettingsProvider>();
-    final currentLocale = settingsProvider.locale ?? Localizations.localeOf(context);
+    final currentLocale = settingsProvider.locale ?? const Locale('ar');
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
     return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       padding: const EdgeInsets.only(top: 16, bottom: 32, left: 24, right: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -38,7 +40,7 @@ class SettingsBottomSheet extends StatelessWidget {
               width: 48,
               height: 6,
               decoration: BoxDecoration(
-                color: theme.dividerTheme.color,
+                color: theme.dividerTheme.color ?? Colors.grey.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -46,14 +48,14 @@ class SettingsBottomSheet extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             l10n.settings,
-            style: textTheme.headlineMedium,
+            style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           
           // Language Setting
           Text(
             l10n.language,
-            style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
           Row(
@@ -62,7 +64,10 @@ class SettingsBottomSheet extends StatelessWidget {
                 child: _OptionButton(
                   title: 'English',
                   isSelected: currentLocale.languageCode == 'en',
-                  onTap: () => settingsProvider.setLocale(const Locale('en')),
+                  onTap: () {
+                    settingsProvider.setLocale(const Locale('en'));
+                    Navigator.pop(context);
+                  },
                 ),
               ),
               const SizedBox(width: 12),
@@ -70,7 +75,10 @@ class SettingsBottomSheet extends StatelessWidget {
                 child: _OptionButton(
                   title: 'العربية',
                   isSelected: currentLocale.languageCode == 'ar',
-                  onTap: () => settingsProvider.setLocale(const Locale('ar')),
+                  onTap: () {
+                    settingsProvider.setLocale(const Locale('ar'));
+                    Navigator.pop(context);
+                  },
                 ),
               ),
             ],
@@ -80,7 +88,7 @@ class SettingsBottomSheet extends StatelessWidget {
           // Theme Setting
           Text(
             l10n.theme,
-            style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
           Row(
@@ -89,7 +97,10 @@ class SettingsBottomSheet extends StatelessWidget {
                 child: _OptionButton(
                   title: l10n.themeSystem,
                   isSelected: settingsProvider.themeMode == ThemeMode.system,
-                  onTap: () => settingsProvider.setThemeMode(ThemeMode.system),
+                  onTap: () {
+                    settingsProvider.setThemeMode(ThemeMode.system);
+                    Navigator.pop(context);
+                  },
                 ),
               ),
               const SizedBox(width: 8),
@@ -97,7 +108,10 @@ class SettingsBottomSheet extends StatelessWidget {
                 child: _OptionButton(
                   title: l10n.themeLight,
                   isSelected: settingsProvider.themeMode == ThemeMode.light,
-                  onTap: () => settingsProvider.setThemeMode(ThemeMode.light),
+                  onTap: () {
+                    settingsProvider.setThemeMode(ThemeMode.light);
+                    Navigator.pop(context);
+                  },
                 ),
               ),
               const SizedBox(width: 8),
@@ -105,7 +119,10 @@ class SettingsBottomSheet extends StatelessWidget {
                 child: _OptionButton(
                   title: l10n.themeDark,
                   isSelected: settingsProvider.themeMode == ThemeMode.dark,
-                  onTap: () => settingsProvider.setThemeMode(ThemeMode.dark),
+                  onTap: () {
+                    settingsProvider.setThemeMode(ThemeMode.dark);
+                    Navigator.pop(context);
+                  },
                 ),
               ),
             ],
@@ -135,6 +152,7 @@ class _OptionButton extends StatelessWidget {
     
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 14),

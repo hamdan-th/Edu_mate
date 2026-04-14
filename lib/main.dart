@@ -64,6 +64,7 @@ class EduApp extends StatelessWidget {
         Locale('ar'),
       ],
       home: const SplashScreen(),
+      initialRoute: '/authGate',
       routes: {
         '/authGate': (_) => const AuthGate(),
         '/login': (_) => const LoginScreen(),
