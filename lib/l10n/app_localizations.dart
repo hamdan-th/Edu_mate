@@ -308,6 +308,12 @@ abstract class AppLocalizations {
   /// **'Sign up'**
   String get loginSignupAction;
 
+  /// No description provided for @loginGuestAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse as Guest'**
+  String get loginGuestAction;
+
   /// No description provided for @resetEnterEmailFirst.
   ///
   /// In en, this message translates to:

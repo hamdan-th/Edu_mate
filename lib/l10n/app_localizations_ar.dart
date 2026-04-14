@@ -114,6 +114,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginSignupAction => 'إنشاء حساب';
 
   @override
+  String get loginGuestAction => 'تصفح كضيف';
+
+  @override
   String get resetEnterEmailFirst => 'من فضلك أدخل بريدك الإلكتروني أولاً';
 
   @override

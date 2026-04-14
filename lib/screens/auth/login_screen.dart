@@ -227,7 +227,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // 1. Premium Radial Gradient Background
           Container(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
@@ -252,7 +251,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     children: [
                       const SizedBox(height: 12),
                       
-                      // 1. Header Section - Logo with Glow
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -294,7 +292,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       
                       const SizedBox(height: 32),
                         
-                        // 3. Login Card with Entrance Animation
                         SlideTransition(
                           position: _cardSlide,
                           child: FadeTransition(
@@ -339,7 +336,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     ),
                                     const SizedBox(height: 32),
                                     
-                                    // 4. Input Fields
                                     Column(
                                       children: [
                                         TextFormField(
@@ -375,7 +371,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     
                                     const SizedBox(height: 12),
                                     
-                                    // Secondary Elements -> Forgot Password
                                     Align(
                                       alignment: Alignment.centerLeft,
                                       child: ScaleOnPress(
@@ -395,7 +390,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     
                                     const SizedBox(height: 32),
                                     
-                                    // 5. Login Button
                                     SizedBox(
                                       width: double.infinity,
                                       height: 54,
@@ -466,7 +460,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     
                                     const SizedBox(height: 12),
                                     
-                                    // Browse as Guest button
                                     SizedBox(
                                       width: double.infinity,
                                       child: ScaleOnPress(

@@ -114,6 +114,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginSignupAction => 'Sign up';
 
   @override
+  String get loginGuestAction => 'Browse as Guest';
+
+  @override
   String get resetEnterEmailFirst => 'Please enter your email first';
 
   @override
