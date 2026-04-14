@@ -6,21 +6,12 @@ import '../../l10n/app_localizations.dart';
 import '../notifications/notifications_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/providers/guest_provider.dart';
-import '../../widgets/guest_action_dialog.dart';
-import '../../services/feed_reactions_service.dart';
 import '../../services/feed_service.dart';
-import '../../services/feed_share_service.dart';
 import '../../models/feed_post_model.dart';
-import 'widgets/post_comments_sheet.dart';
-import '../../services/group_service.dart';
 import '../profile/profile_screen.dart';
 import '../settings/settings_bottom_sheet.dart';
-import '../../features/edu_bot/presentation/screens/bot_screen.dart';
 import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 import '../../services/notifications_service.dart';
-import '../../models/group_model.dart';
-import '../../models/feed_post_model.dart';
-import '../groups/group_chat_screen.dart';
 import '../../widgets/feed/post_card_wrapper.dart';
 import '../../widgets/common/premium_transitions.dart';
 
@@ -78,14 +69,7 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  void _openBot() {
-    Navigator.push(
-      context,
-      PremiumPageRoute(
-        page: const BotScreen(sourceScreen: 'feed_screen'),
-      ),
-    );
-  }
+
 
   String _formatTime(dynamic value, AppLocalizations l10n) {
     if (value == null) return '';
@@ -120,10 +104,12 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: const SafeArea(
         child: Padding(
@@ -133,79 +119,90 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
       body: Stack(
         children: [
+          // Subtle top gradient accent — mirrors login/signup premium depth
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 200,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    colorScheme.surface.withValues(alpha: isDark ? 0.55 : 0.25),
+                    theme.scaffoldBackgroundColor.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           SafeArea(
             child: Column(
               children: [
+                // ── Top bar ──────────────────────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 16, 8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // Brand title + subtitle
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               l10n.app_name,
-                              style: TextStyle(
-                                color:
-                                isDark ? AppColors.textPrimary : Colors.black87,
-                                fontSize: 26,
+                              style: theme.textTheme.headlineLarge?.copyWith(
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.8,
+                                fontSize: 26,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               l10n.filterForYou,
-                              style: TextStyle(
-                                color: isDark
-                                    ? AppColors.textSecondary
-                                    : Colors.black54,
-                                fontSize: 13,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurface.withValues(alpha: 0.5),
                                 fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                                letterSpacing: 0.1,
                               ),
                             ),
                           ],
                         ),
                       ),
+
+                      // Action icons (guest login + settings + bell + profile)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (context.watch<GuestProvider>().isGuest)
                             Padding(
-                              padding: const EdgeInsetsDirectional.only(end: 4),
-                              child: ElevatedButton(
-                                onPressed: () async {
+                              padding:
+                                  const EdgeInsetsDirectional.only(end: 6),
+                              child: _GuestLoginPill(
+                                onTap: () async {
+                                  final nav = Navigator.of(context);
                                   await FirebaseAuth.instance.signOut();
                                   if (!mounted) return;
-                                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                                  nav.pushNamedAndRemoveUntil(
+                                      '/login', (route) => false);
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: Colors.white,
-                                  minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                                child: const Text(
-                                  'دخول',
-                                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
-                                ),
                               ),
                             ),
                           FeedTopActionButton(
                             icon: Icons.settings_rounded,
                             onTap: () => SettingsBottomSheet.show(context),
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 6),
                           StreamBuilder<int>(
                             stream: NotificationsService.streamUnreadCount(),
                             builder: (context, snapshot) {
                               final unreadCount = snapshot.data ?? 0;
-
                               return FeedTopActionButton(
                                 icon: Icons.notifications_none_rounded,
                                 hasBadge: unreadCount > 0,
@@ -213,7 +210,7 @@ class _FeedScreenState extends State<FeedScreen> {
                               );
                             },
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           FeedTopActionButton(
                             icon: Icons.person_outline_rounded,
                             onTap: _openProfile,
@@ -223,24 +220,24 @@ class _FeedScreenState extends State<FeedScreen> {
                     ],
                   ),
                 ),
+
+                // ── Search bar ───────────────────────────────────────────
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                   child: Container(
-                    height: 42,
+                    height: 44,
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.surface.withOpacity(0.92)
-                          : Colors.white,
+                      color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isDark
-                            ? AppColors.border.withOpacity(0.45)
-                            : Colors.black12,
+                        color: colorScheme.outline.withValues(alpha: 
+                          isDark ? 0.45 : 0.20,
+                        ),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(isDark ? 0.10 : 0.04),
+                          color: Colors.black.withValues(alpha: isDark ? 0.10 : 0.04),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
@@ -248,35 +245,34 @@ class _FeedScreenState extends State<FeedScreen> {
                     ),
                     child: TextField(
                       controller: _searchController,
-                      style: TextStyle(
-                        color: isDark ? AppColors.textPrimary : Colors.black87,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: theme.textTheme.bodyLarge?.copyWith(fontSize: 14),
                       decoration: InputDecoration(
                         border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
                         hintText: l10n.feedSearchHint,
-                        hintStyle: TextStyle(
-                          color: isDark
-                              ? AppColors.textSecondary
-                              : Colors.black45,
-                          fontWeight: FontWeight.w500,
+                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
                           fontSize: 14,
+                          color: colorScheme.onSurface.withValues(alpha: 0.4),
                         ),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search_rounded,
-                          color: AppColors.textSecondary,
+                          color: colorScheme.onSurface.withValues(alpha: 0.4),
                           size: 20,
                         ),
                         contentPadding:
-                        const EdgeInsets.symmetric(vertical: 10),
+                            const EdgeInsets.symmetric(vertical: 11),
+                        filled: false,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+
+                const SizedBox(height: 8),
+
+                // ── Filter chips ──────────────────────────────────────────
                 SizedBox(
-                  height: 36,
+                  height: 38,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -311,12 +307,15 @@ class _FeedScreenState extends State<FeedScreen> {
                     },
                   ),
                 ),
+
                 const SizedBox(height: 12),
+
+                // ── Post feed ─────────────────────────────────────────────
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: _refresh,
-                    color: AppColors.primary,
-                    backgroundColor: AppColors.surface,
+                    color: colorScheme.primary,
+                    backgroundColor: colorScheme.surface,
                     child: StreamBuilder<List<FeedPostModel>>(
                       stream: _postsStream(),
                       builder: (context, snapshot) {
@@ -324,17 +323,16 @@ class _FeedScreenState extends State<FeedScreen> {
                             ConnectionState.waiting) {
                           return ListView.builder(
                             padding:
-                            const EdgeInsets.fromLTRB(16, 0, 16, 110),
+                                const EdgeInsets.fromLTRB(16, 0, 16, 110),
                             itemCount: 3,
-                            itemBuilder: (_, __) =>
-                            const SkeletonPostCard(),
+                            itemBuilder: (_, __) => const SkeletonPostCard(),
                           );
                         }
 
                         if (snapshot.hasError) {
                           return ListView(
                             padding:
-                            const EdgeInsets.fromLTRB(20, 30, 20, 110),
+                                const EdgeInsets.fromLTRB(20, 30, 20, 110),
                             children: [
                               EmptyStateCard(
                                 icon: Icons.error_outline_rounded,
@@ -350,7 +348,7 @@ class _FeedScreenState extends State<FeedScreen> {
                         if (docs.isEmpty) {
                           return ListView(
                             padding:
-                            const EdgeInsets.fromLTRB(20, 30, 20, 110),
+                                const EdgeInsets.fromLTRB(20, 30, 20, 110),
                             children: [
                               EmptyStateCard(
                                 icon: Icons.feed_outlined,
@@ -402,7 +400,47 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 }
 
-  class FeedTopActionButton extends StatelessWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// Guest login pill  (compact, branded)
+// ─────────────────────────────────────────────────────────────────────────────
+class _GuestLoginPill extends StatelessWidget {
+  final VoidCallback onTap;
+  const _GuestLoginPill({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: isDark ? 0.35 : 0.25),
+          ),
+        ),
+        child: Text(
+          'دخول',
+          style: TextStyle(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w800,
+            fontSize: 12,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Top action button  (settings / notifications / profile)
+// ─────────────────────────────────────────────────────────────────────────────
+class FeedTopActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool hasBadge;
@@ -416,6 +454,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Stack(
@@ -428,14 +467,14 @@ class _FeedScreenState extends State<FeedScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surface.withOpacity(0.98) : Colors.white,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isDark ? AppColors.border : Colors.black12,
+                color: colorScheme.outline.withValues(alpha: isDark ? 0.55 : 0.18),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.05),
+                  color: colorScheme.primary.withValues(alpha: 0.04),
                   blurRadius: 6,
                   offset: const Offset(0, 3),
                 ),
@@ -443,7 +482,7 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
             child: Icon(
               icon,
-              color: isDark ? AppColors.textPrimary : Colors.black87,
+              color: colorScheme.onSurface.withValues(alpha: 0.75),
               size: 20,
             ),
           ),
@@ -458,7 +497,10 @@ class _FeedScreenState extends State<FeedScreen> {
               decoration: BoxDecoration(
                 color: AppColors.error,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  width: 2,
+                ),
               ),
             ),
           ),
@@ -467,6 +509,9 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Filter chip
+// ─────────────────────────────────────────────────────────────────────────────
 class ModernChip extends StatelessWidget {
   final String label;
   final String? originalValue;
@@ -492,45 +537,57 @@ class ModernChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
       margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 0),
       decoration: BoxDecoration(
         color: active
-            ? AppColors.primary.withOpacity(0.12)
-            : (isDark
-            ? AppColors.surface.withOpacity(0.4)
-            : Colors.white.withOpacity(0.75)),
+            ? colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.12)
+            : colorScheme.surface.withValues(alpha: isDark ? 0.60 : 0.85),
         borderRadius: BorderRadius.circular(14),
-        border: active
-            ? Border.all(color: AppColors.primary.withOpacity(0.30))
-            : Border.all(
-          color: isDark
-              ? AppColors.border.withOpacity(0.35)
-              : Colors.black12,
+        border: Border.all(
+          color: active
+              ? colorScheme.primary.withValues(alpha: isDark ? 0.45 : 0.30)
+              : colorScheme.outline.withValues(alpha: isDark ? 0.30 : 0.18),
+          width: active ? 1.3 : 1.0,
         ),
+        boxShadow: active
+            ? [
+                BoxShadow(
+                  color: colorScheme.primary.withValues(alpha: 0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             _getIcon(),
-            size: 14,
+            size: 13,
             color: active
-                ? AppColors.primary
-                : AppColors.textSecondary.withOpacity(0.85),
+                ? colorScheme.primary
+                : colorScheme.onSurface.withValues(alpha: 0.45),
           ),
           const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
               color: active
-                  ? AppColors.primary
-                  : (isDark ? AppColors.textSecondary : Colors.black54),
+                  ? colorScheme.primary
+                  : colorScheme.onSurface.withValues(alpha: 
+                      isDark ? 0.55 : 0.60,
+                    ),
               fontSize: 13,
               fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+              letterSpacing: active ? 0.1 : 0,
             ),
           ),
         ],
@@ -539,6 +596,9 @@ class ModernChip extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Staggered post entrance animation
+// ─────────────────────────────────────────────────────────────────────────────
 class AnimatedPostWrapper extends StatefulWidget {
   final Widget child;
   final Duration delay;
@@ -599,6 +659,9 @@ class _AnimatedPostWrapperState extends State<AnimatedPostWrapper>
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Skeleton post card  (loading placeholder)
+// ─────────────────────────────────────────────────────────────────────────────
 class SkeletonPostCard extends StatefulWidget {
   const SkeletonPostCard({super.key});
 
@@ -629,14 +692,15 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    const baseLight = Color(0xFFF1F4FA);
-    const highlightLight = Color(0xFFF8FAFE);
-    const baseDark = AppColors.surface;
-    final highlightDark = AppColors.surface.withOpacity(0.5);
 
-    final base = isDark ? baseDark : baseLight;
-    final highlight = isDark ? highlightDark : highlightLight;
+    final base = isDark
+        ? colorScheme.surface
+        : const Color(0xFFF1F4FA);
+    final highlight = isDark
+        ? colorScheme.surface.withValues(alpha: 0.45)
+        : const Color(0xFFF8FAFE);
 
     return AnimatedBuilder(
       animation: _controller,
@@ -646,10 +710,10 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surface : Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isDark ? AppColors.border : Colors.black12,
+              color: colorScheme.outline.withValues(alpha: isDark ? 0.45 : 0.18),
             ),
           ),
           child: Column(
@@ -708,10 +772,10 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
                 radius: 14,
               ),
               const SizedBox(height: 14),
-              const Divider(
+              Divider(
                 height: 1,
                 thickness: 1,
-                color: AppColors.border,
+                color: colorScheme.outline.withValues(alpha: 0.25),
               ),
               const SizedBox(height: 12),
               Row(
@@ -731,6 +795,9 @@ class _SkeletonPostCardState extends State<SkeletonPostCard>
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Skeleton box primitive
+// ─────────────────────────────────────────────────────────────────────────────
 class SkeletonBox extends StatelessWidget {
   final double width;
   final double height;
@@ -761,6 +828,9 @@ class SkeletonBox extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Empty / error state card
+// ─────────────────────────────────────────────────────────────────────────────
 class EmptyStateCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -775,53 +845,58 @@ class EmptyStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surface : Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? AppColors.border : Colors.black12,
+          color: colorScheme.outline.withValues(alpha: isDark ? 0.40 : 0.16),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.14 : 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.14 : 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: AppColors.primary.withOpacity(0.08),
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colorScheme.primary.withValues(alpha: 0.08),
+            ),
             child: Icon(
               icon,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               size: 28,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Text(
             title,
-            style: TextStyle(
-              color: isDark ? AppColors.textPrimary : Colors.black87,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isDark ? AppColors.textSecondary : Colors.black54,
-              fontSize: 13.5,
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.55),
+                  height: 1.5,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),
