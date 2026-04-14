@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _logoScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(
         parent: _mainController,
-        curve: const Interval(0.1, 0.6, curve: Curves.outBack),
+        curve: const Interval(0.1, 0.6, curve: Curves.easeOutBack),
       ),
     );
     _logoOpacity = CurvedAnimation(

@@ -224,53 +224,75 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 12),
-                  
-                  // 1. Header Section - Logo
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.08),
-                          blurRadius: 30,
-                          spreadRadius: 4,
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // 1. Premium Radial Gradient Background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.topCenter,
+                radius: 1.5,
+                colors: [
+                  AppColors.surface,
+                  AppColors.background,
+                ],
+              ),
+            ),
+          ),
+          
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 12),
+                      
+                      // 1. Header Section - Logo with Glow
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withOpacity(0.12),
+                              blurRadius: 40,
+                              spreadRadius: 8,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      'assets/images/university_logo.png',
-                      width: 84,
-                      height: 84,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                        
-                  const SizedBox(height: 20),
-                        
-                        Text(
-                          l10n.app_name,
-                          style: textTheme.headlineLarge,
+                        child: Image.asset(
+                          'assets/images/university_logo.png',
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.loginWelcomeBack,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
-                          ),
+                      ),
+                            
+                      const SizedBox(height: 24),
+                            
+                      Text(
+                        l10n.app_name,
+                        style: textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
                         ),
-                        
-                        const SizedBox(height: 24),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        l10n.loginWelcomeBack,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
                         
                         // 3. Login Card with Entrance Animation
                         SlideTransition(
@@ -279,46 +301,45 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             opacity: _cardOpacity,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: colorScheme.surface,
-                                borderRadius: BorderRadius.circular(16),
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
-                                  color: isDark ? AppColors.border.withOpacity(0.5) : Colors.black12,
-                                  width: 1,
+                                  color: AppColors.border.withOpacity(0.5),
+                                  width: 1.2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: (isDark ? Colors.black : AppColors.lightShadow).withOpacity(isDark ? 0.16 : 0.8),
-                                    blurRadius: isDark ? 12 : 20,
-                                    offset: const Offset(0, 4),
+                                    color: Colors.black.withOpacity(0.4),
+                                    blurRadius: 30,
+                                    offset: const Offset(0, 15),
                                   ),
                                 ],
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+                                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       l10n.loginTitle,
-                                      style: TextStyle(
-                                        color: isDark ? AppColors.textPrimary : Colors.black87,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: -0.3,
+                                      style: textTheme.headlineSmall?.copyWith(
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.5,
                                       ),
                                     ),
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: 8),
                                     Text(
                                       l10n.loginSubtitle,
-                                      style: TextStyle(
-                                        color: isDark ? AppColors.textSecondary : Colors.black54,
-                                        fontSize: 13,
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: AppColors.textSecondary,
+                                        height: 1.4,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    const SizedBox(height: 28),
+                                    const SizedBox(height: 32),
                                     
-                                    // 4. Input Fields — inherit global AppTheme.inputDecorationTheme
+                                    // 4. Input Fields
                                     Column(
                                       children: [
                                         TextFormField(
@@ -356,35 +377,56 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     
                                     // Secondary Elements -> Forgot Password
                                     Align(
-                                      alignment: Alignment.centerRight,
-                                      child: TextButton(
-                                        onPressed: _isLoading ? null : _resetPassword,
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: isDark ? AppColors.textSecondary : Colors.black54,
+                                      alignment: Alignment.centerLeft,
+                                      child: ScaleOnPress(
+                                        child: TextButton(
+                                          onPressed: _isLoading ? null : _resetPassword,
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: AppColors.primary,
+                                            padding: EdgeInsets.zero,
+                                          ),
+                                          child: Text(
+                                            l10n.loginForgotPassword, 
+                                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                                          ),
                                         ),
-                                        child: Text(l10n.loginForgotPassword, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                                       ),
                                     ),
                                     
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 32),
                                     
                                     // 5. Login Button
                                     SizedBox(
                                       width: double.infinity,
+                                      height: 54,
                                       child: ScaleOnPress(
                                         onTap: _isLoading ? null : _handleLogin,
                                         child: ElevatedButton(
-                                          onPressed: _isLoading ? null : () {}, // GestureDetector handles tap
+                                          onPressed: _isLoading ? null : _handleLogin,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primary,
+                                            foregroundColor: Colors.black,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),
+                                            ),
+                                          ),
                                           child: _isLoading
                                               ? const SizedBox(
                                                   width: 22,
                                                   height: 22,
                                                   child: CircularProgressIndicator(
                                                     strokeWidth: 2.5,
-                                                    color: Colors.white,
+                                                    color: Colors.black,
                                                   ),
                                                 )
-                                              : Text(l10n.loginTitle),
+                                              : Text(
+                                                  l10n.loginTitle,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
                                         ),
                                       ),
                                     ),
@@ -397,53 +439,61 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                         Text(
                                           l10n.loginNoAccount,
                                           style: textTheme.bodyMedium?.copyWith(
-                                            color: isDark ? AppColors.textSecondary : Colors.black54,
-                                            fontSize: 13,
+                                            color: AppColors.textSecondary,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
-                                        TextButton(
-                                          onPressed: _goToSignup,
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: AppColors.primary,
-                                          ),
-                                          child: Text(
-                                            l10n.loginSignupAction,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 13,
+                                        const SizedBox(width: 4),
+                                        ScaleOnPress(
+                                          child: TextButton(
+                                            onPressed: _goToSignup,
+                                            style: TextButton.styleFrom(
+                                              foregroundColor: AppColors.primary,
+                                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                                            ),
+                                            child: Text(
+                                              l10n.loginSignupAction,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w900,
+                                                fontSize: 14,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 4),
+                                    
+                                    const SizedBox(height: 12),
+                                    
                                     // Browse as Guest button
                                     SizedBox(
                                       width: double.infinity,
-                                      child: TextButton(
-                                        onPressed: (_isLoading || _isGuestLoading)
-                                            ? null
-                                            : _browseAsGuest,
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: isDark
-                                              ? AppColors.textSecondary
-                                              : AppColors.lightTextSecondary,
+                                      child: ScaleOnPress(
+                                        child: TextButton(
+                                          onPressed: (_isLoading || _isGuestLoading)
+                                              ? null
+                                              : _browseAsGuest,
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: AppColors.textSecondary,
+                                          ),
+                                          child: _isGuestLoading
+                                              ? const SizedBox(
+                                                  width: 18,
+                                                  height: 18,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                  ),
+                                                )
+                                              : Text(
+                                                  l10n.loginGuestAction,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w700,
+                                                    fontSize: 14,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                                ),
                                         ),
-                                        child: _isGuestLoading
-                                            ? const SizedBox(
-                                                width: 18,
-                                                height: 18,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                ),
-                                              )
-                                            : const Text(
-                                                'تصفح كضيف',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 13.5,
-                                                ),
-                                              ),
                                       ),
                                     ),
                                   ],
@@ -452,13 +502,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),
                 ),
               ),
+            ),
           ),
-        );
+        ],
+      ),
+    );
   }
 }

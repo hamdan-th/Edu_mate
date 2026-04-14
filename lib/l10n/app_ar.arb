@@ -35,6 +35,7 @@
   "loginForgotPassword": "نسيت كلمة المرور؟",
   "loginNoAccount": "ليس لديك حساب؟",
   "loginSignupAction": "إنشاء حساب",
+  "loginGuestAction": "تصفح كضيف",
   "resetEnterEmailFirst": "من فضلك أدخل بريدك الإلكتروني أولاً",
   "resetLinkSent": "تم إرسال رابط إعادة تعيين كلمة المرور لبريدك",
   "resetFailedSend": "فشل في إرسال رابط إعادة التعيين",

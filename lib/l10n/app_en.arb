@@ -35,6 +35,7 @@
   "loginForgotPassword": "Forgot password?",
   "loginNoAccount": "Don't have an account?",
   "loginSignupAction": "Sign up",
+  "loginGuestAction": "Browse as Guest",
   "resetEnterEmailFirst": "Please enter your email first",
   "resetLinkSent": "Password reset link sent to your email",
   "resetFailedSend": "Failed to send reset link",
