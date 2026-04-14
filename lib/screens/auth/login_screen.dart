@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../core/providers/guest_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/common/premium_feedback.dart';
+import '../settings/settings_bottom_sheet.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -236,6 +237,31 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   AppColors.surface,
                   AppColors.background,
                 ],
+              ),
+            ),
+          ),
+          
+          // 2. Settings Toggle (Top Corner)
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ScaleOnPress(
+                  child: IconButton(
+                    onPressed: () => SettingsBottomSheet.show(context),
+                    icon: const Icon(
+                      Icons.translate_rounded, // or language_rounded
+                      color: AppColors.textSecondary,
+                      size: 24,
+                    ),
+                    tooltip: l10n.settings,
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.surface.withOpacity(0.5),
+                      padding: const EdgeInsets.all(12),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
