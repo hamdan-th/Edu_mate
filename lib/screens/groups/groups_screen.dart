@@ -39,16 +39,15 @@ class _GroupsScreenState extends State<GroupsScreen>
   bool _publicOnly = false;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+  ColorScheme get _colorScheme => Theme.of(context).colorScheme;
   Color get _pageBg => Theme.of(context).scaffoldBackgroundColor;
-  Color get _cardBg => _isDark ? AppColors.surface : Colors.white;
-  Color get _softBg =>
-      _isDark ? AppColors.background.withOpacity(0.6) : const Color(0xFFF7F8FB);
-  Color get _text =>
-      _isDark ? AppColors.textPrimary : Colors.black87;
-  Color get _muted =>
-      _isDark ? AppColors.textSecondary : Colors.black54;
-  Color get _border =>
-      _isDark ? AppColors.border : Colors.black12;
+  Color get _cardBg => _colorScheme.surface;
+  Color get _softBg => _isDark
+      ? _pageBg.withValues(alpha: 0.6)
+      : _colorScheme.onSurface.withValues(alpha: 0.04);
+  Color get _text => _colorScheme.onSurface;
+  Color get _muted => _colorScheme.onSurface.withValues(alpha: 0.6);
+  Color get _border => _colorScheme.outline.withValues(alpha: _isDark ? 0.45 : 0.20);
 
   @override
   void initState() {
@@ -136,7 +135,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                   Row(
                     children: [
                       Icon(Icons.tune_rounded,
-                          color: AppColors.primary.withOpacity(0.95), size: 20),
+                          color: AppColors.primary.withValues(alpha: 0.95), size: 20),
                       const SizedBox(width: 8),
                       Text(
                         AppLocalizations.of(context)!.groupsFilterTitle,
@@ -368,7 +367,19 @@ class _GroupsScreenState extends State<GroupsScreen>
     return Scaffold(
       backgroundColor: _pageBg,
       appBar: AppBar(
-        backgroundColor: _cardBg,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                _colorScheme.surface.withValues(alpha: _isDark ? 0.55 : 0.25),
+                _pageBg.withValues(alpha: 0.0),
+              ],
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: !_isSearching,
         toolbarHeight: 66,
@@ -377,7 +388,7 @@ class _GroupsScreenState extends State<GroupsScreen>
           height: 46,
           decoration: BoxDecoration(
             color: _softBg,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: _border),
           ),
           child: TextField(
@@ -385,13 +396,13 @@ class _GroupsScreenState extends State<GroupsScreen>
             autofocus: true,
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: _text,
             ),
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context)!.groupsSearchFieldHint,
               hintStyle: TextStyle(
-                color: _isDark ? _muted.withOpacity(0.7) : const Color(0xFF9CA3AF),
+                color: _muted.withValues(alpha: 0.6),
                 fontWeight: FontWeight.w500,
               ),
               border: InputBorder.none,
@@ -402,6 +413,7 @@ class _GroupsScreenState extends State<GroupsScreen>
               prefixIcon: Icon(
                 Icons.search_rounded,
                 color: _muted,
+                size: 20,
               ),
             ),
           ),
@@ -411,12 +423,13 @@ class _GroupsScreenState extends State<GroupsScreen>
           style: TextStyle(
             color: _text,
             fontWeight: FontWeight.w900,
-            fontSize: 22,
+            fontSize: 24,
+            letterSpacing: -0.5,
           ),
         ),
         actions: [
           Padding(
-            padding: const EdgeInsetsDirectional.only(end: 6),
+            padding: const EdgeInsetsDirectional.only(end: 16),
             child: Row(
               children: [
                 _TopActionButton(
@@ -444,36 +457,37 @@ class _GroupsScreenState extends State<GroupsScreen>
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(68),
           child: Container(
-            color: _cardBg,
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Container(
-              height: 46,
+              height: 48,
               decoration: BoxDecoration(
                 color: _softBg,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: _border),
               ),
               child: TabBar(
                 controller: _tabController,
                 indicator: BoxDecoration(
-                  color: _isDark
-                      ? AppColors.primary.withOpacity(0.16)
-                      : AppColors.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  color: _colorScheme.primary.withValues(alpha: _isDark ? 0.18 : 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: _colorScheme.primary.withValues(alpha: _isDark ? 0.35 : 0.25),
+                  ),
                 ),
                 dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
-                labelColor: AppColors.primary,
-                unselectedLabelColor: _isDark ? _muted : const Color(0xFF4B5563),
+                labelColor: _colorScheme.primary,
+                unselectedLabelColor: _muted,
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  letterSpacing: 0.2,
                 ),
                 unselectedLabelStyle: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
                 tabs: [
                   Tab(text: AppLocalizations.of(context)!.groupsTabDiscover),
@@ -605,8 +619,8 @@ class _GroupsScreenState extends State<GroupsScreen>
             boxShadow: [
               BoxShadow(
                 color: _isDark
-                    ? Colors.black.withOpacity(0.22)
-                    : Colors.black.withOpacity(0.04),
+                    ? Colors.black.withValues(alpha: 0.22)
+                    : Colors.black.withValues(alpha: 0.04),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -619,7 +633,7 @@ class _GroupsScreenState extends State<GroupsScreen>
                 width: 82,
                 height: 82,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(_isDark ? 0.10 : 0.15),
+                  color: AppColors.primary.withValues(alpha: _isDark ? 0.10 : 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -668,7 +682,9 @@ class _TopActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -676,17 +692,22 @@ class _TopActionButton extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surface.withOpacity(0.98) : Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isDark
-                ? AppColors.border
-                : Colors.black12,
+            color: colorScheme.outline.withValues(alpha: isDark ? 0.55 : 0.18),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withValues(alpha: 0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Icon(
           icon,
-          color: isDark ? Colors.white : const Color(0xFF374151),
+          color: colorScheme.onSurface.withValues(alpha: 0.75),
           size: 20,
         ),
       ),
@@ -717,8 +738,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
     super.initState();
     if (!widget.isDiscover) {
       _unreadSub = GroupService.streamUnreadCount(widget.group.id)
-          .listen((count) {
-        if (mounted) setState(() => _unreadCount = count);
+          .listen((val) {
+        if (mounted) setState(() => _unreadCount = val);
       });
     }
   }
@@ -730,15 +751,14 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
   }
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-  Color get _cardBg => _isDark ? AppColors.surface : Colors.white;
-  Color get _softBg =>
-      _isDark ? AppColors.background.withOpacity(0.6) : const Color(0xFFF8FAFD);
-  Color get _text =>
-      _isDark ? AppColors.textPrimary : Colors.black87;
-  Color get _muted =>
-      _isDark ? AppColors.textSecondary : Colors.black54;
-  Color get _border =>
-      _isDark ? AppColors.border : Colors.black12;
+  ColorScheme get _colorScheme => Theme.of(context).colorScheme;
+  Color get _cardBg => _colorScheme.surface;
+  Color get _softBg => _isDark
+      ? Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.6)
+      : _colorScheme.onSurface.withValues(alpha: 0.04);
+  Color get _text => _colorScheme.onSurface;
+  Color get _muted => _colorScheme.onSurface.withValues(alpha: 0.6);
+  Color get _border => _colorScheme.outline.withValues(alpha: _isDark ? 0.45 : 0.20);
 
   void _openGroupDetails() {
     Navigator.push(
@@ -839,8 +859,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
             boxShadow: [
               BoxShadow(
                 color: _isDark
-                    ? Colors.black.withOpacity(0.20)
-                    : Colors.black.withOpacity(0.04),
+                    ? Colors.black.withValues(alpha: 0.20)
+                    : Colors.black.withValues(alpha: 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -881,8 +901,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                                   : Icons.lock_rounded,
                               text: group.isPublic ? AppLocalizations.of(context)!.groupsPillPublic : AppLocalizations.of(context)!.groupsPillPrivate,
                               bg: group.isPublic
-                                  ? AppColors.success.withOpacity(_isDark ? 0.10 : 0.18)
-                                  : AppColors.warning.withOpacity(_isDark ? 0.10 : 0.18),
+                                  ? AppColors.success.withValues(alpha: _isDark ? 0.10 : 0.18)
+                                  : AppColors.warning.withValues(alpha: _isDark ? 0.10 : 0.18),
                               fg: group.isPublic
                                   ? (_isDark ? AppColors.success : const Color(0xFF059669))
                                   : (_isDark ? AppColors.warning : const Color(0xFFD97706)),
@@ -897,7 +917,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                           Icon(
                             Icons.school_rounded,
                             size: 14,
-                            color: AppColors.primary.withOpacity(0.85),
+                            color: AppColors.primary.withValues(alpha: 0.85),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
@@ -924,7 +944,7 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 13.4,
-                              color: _muted.withOpacity(0.95),
+                              color: _muted.withValues(alpha: 0.95),
                               fontWeight: FontWeight.w500,
                               height: 1.45,
                             ),
@@ -1046,7 +1066,7 @@ class _GroupAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -1154,14 +1174,14 @@ class _UnreadBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         color: isDark
-            ? AppColors.error.withOpacity(0.18)
-            : AppColors.error.withOpacity(0.12),
+            ? AppColors.error.withValues(alpha: 0.18)
+            : AppColors.error.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.mark_chat_unread_rounded,
             size: 11,
             color: AppColors.error,
