@@ -715,11 +715,14 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                         ]
                       ),
                     )
-                        : Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 4,
-                      ),
+                        : InkWell(
+                      onTap: _openDetails, // Restore navigation to details for all groups
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 4,
+                        ),
                       child: Row(
                         children: [
                           _GroupHeaderAvatar(group: widget.group),
@@ -762,10 +765,11 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                ),
+                const SizedBox(width: 10),
                   if (!_isSearching) ...[
                     if (widget.group.isPublic)
-                      TextButton(
+                      TextButton.icon(
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -773,12 +777,15 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                           );
                         },
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          foregroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                          foregroundColor: AppColors.primary.withOpacity(0.85),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text(
-                          'المجموعة',
-                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                        icon: const Icon(Icons.arrow_circle_left_outlined, size: 18),
+                        label: const Text(
+                          'صفحة المجموعة',
+                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                         ),
                       ),
                     const SizedBox(width: 4),
