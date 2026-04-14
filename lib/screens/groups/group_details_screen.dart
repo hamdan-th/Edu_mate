@@ -18,6 +18,7 @@ import 'group_chat_screen.dart';
 import 'create_group_feed_post_screen.dart';
 import 'invite_group_screen.dart';
 import '../../l10n/app_localizations.dart';
+import 'group_profile_screen.dart';
 import '../../widgets/feed/post_card_wrapper.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
@@ -737,11 +738,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
   Widget _buildMemberView() {
     return DefaultTabController(
-      length: widget.group.isPublic ? 5 : 4,
+      length: 4,
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
           elevation: 0,
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -753,6 +753,27 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               ),
             ),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.remove_red_eye_outlined, size: 16),
+                label: const Text('الملف الشخصي', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.black.withOpacity(0.3),
+                  side: BorderSide.none,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => GroupProfileScreen(group: widget.group)),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -954,8 +975,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                       unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       tabs: [
-                        if (widget.group.isPublic)
-                          const Tab(text: 'المنشورات'),
                         Tab(text: AppLocalizations.of(context)!.groupsTabMembers),
                         Tab(text: AppLocalizations.of(context)!.groupsTabMedia),
                         Tab(text: AppLocalizations.of(context)!.groupsTabLinks),
@@ -971,8 +990,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             color: Theme.of(context).scaffoldBackgroundColor,
             child: TabBarView(
               children: [
-                if (widget.group.isPublic)
-                  _KeepAlivePage(child: _buildAnnouncementsTab()),
                 _KeepAlivePage(child: _buildMembersTab()),
                 _KeepAlivePage(child: _buildMediaTab()),
                 _KeepAlivePage(child: _buildLinksTab()),
@@ -1319,73 +1336,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     }
                   }
                 }
-                // Future enhancement: launchUrl(Uri.parse(  Widget _buildAnnouncementsTab() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('posts')
-          .where('groupId', isEqualTo: widget.group.id)
-          .where('visibility', isEqualTo: 'public')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-        }
-        if (snapshot.hasError) {
-          return _buildEmptyState(Icons.error_outline_rounded, 'تعذّر تحميل المنشورات');
-        }
-
-        final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) {
-          return _buildEmptyState(Icons.campaign_rounded, 'لا توجد منشورات في هذه المجموعة بعد');
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          itemCount: docs.length,
-          itemBuilder: (context, index) {
-            final doc = docs[index];
-            final data = doc.data() as Map<String, dynamic>;
-            
-            // Map data to match PostCardWrapper/PostCard expectations
-            final post = {
-              'postId': doc.id,
-              'authorId': data['authorId'] ?? '',
-              'authorName': data['authorName'] ?? '',
-              'groupName': data['groupName'] ?? widget.group.name,
-              'groupImageUrl': data['groupImageUrl'] ?? widget.group.imageUrl,
-              'time': '', // Wrapper will handle formatting or we can pass a formatted time
-              'createdAt': data['createdAt'],
-              'contentText': data['contentText'] ?? '',
-              'contentImageUrl': data['contentImageUrl'] ?? '',
-              'likesCount': data['likesCount'] ?? 0,
-              'commentsCount': data['commentsCount'] ?? 0,
-              'groupId': widget.group.id,
-              'tag': 'Public',
-            };
-
-            return PostCardWrapper(post: post);
-          },
-        );
-      },
-    );
-  }
-double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+                // Future enhancement: await launchUrl(Uri.parse(url));
+              },
             );
           },
         );
       },
     );
   }
-
 }
 
 class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {

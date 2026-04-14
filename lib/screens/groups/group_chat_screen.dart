@@ -16,6 +16,7 @@ import '../../services/group_service.dart';
 import '../library/file_details_screen.dart';
 import '../library/file_model.dart';
 import 'group_details_screen.dart';
+import 'group_profile_screen.dart';
 import 'invite_group_screen.dart';
 import 'package:flutter/gestures.dart';
 import '../../l10n/app_localizations.dart';
@@ -756,11 +757,22 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     ),
                   ),
                   const SizedBox(width: 10),
-                  if (!_isSearching)
+                  if (!_isSearching) ...[
+                    _TopIconButton(
+                      icon: Icons.remove_red_eye_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => GroupProfileScreen(group: widget.group)),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 10),
                     _TopIconButton(
                       icon: Icons.search_rounded,
                       onTap: () => setState(() => _isSearching = true),
                     ),
+                  ],
                 ],
               ),
             ),

@@ -296,7 +296,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
         ),
         _ActionItem(
           icon: Icons.share_rounded,
-          label: l10n.feedShareAction,
+          label: l10n.shareAction,
           color: isDark ? AppColors.textSecondary : Colors.black54,
           onTap: widget.onShare,
         ),

@@ -19,6 +19,7 @@ import '../../features/edu_bot/presentation/screens/bot_screen.dart';
 import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 import '../../services/notifications_service.dart';
 import '../../models/group_model.dart';
+import '../../models/feed_post_model.dart';
 import '../groups/group_chat_screen.dart';
 import '../../widgets/feed/post_card_wrapper.dart';
 
@@ -597,24 +598,7 @@ class _AnimatedPostWrapperState extends State<AnimatedPostWrapper>
       ),
     );
   }
-} FeedPostModel.fromMap(
-                          widget.post,
-                          widget.post['postId']?.toString() ?? '',
-                        );
-                        FeedShareService.sharePost(context, feedPost);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
-
 
 class SkeletonPostCard extends StatefulWidget {
   const SkeletonPostCard({super.key});

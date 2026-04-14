@@ -11,8 +11,7 @@ import '../../core/providers/guest_provider.dart';
 import '../../widgets/guest_action_dialog.dart';
 import '../../screens/home/widgets/post_comments_sheet.dart';
 import '../../screens/groups/group_chat_screen.dart';
-import '../../screens/groups/group_details_screen.dart';
-import '../../screens/profile/profile_screen.dart';
+import '../../screens/groups/group_profile_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
@@ -177,16 +176,13 @@ class _PostCardWrapperState extends State<PostCardWrapper> {
     final groupId = widget.post['groupId']?.toString() ?? '';
     if (groupId.isEmpty) return;
 
-    // We can directly open the group profile now as per requirements
-    // Wait, let's keep the logic consistent with what's expected for "restructuring"
-    // Requirement says clicking group leads to profile
     try {
       final group = await GroupService.getGroupById(groupId);
       if (group != null && mounted) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => GroupDetailsScreen(group: group),
+            builder: (_) => GroupProfileScreen(group: group),
           ),
         );
       }
@@ -255,7 +251,7 @@ class _PostCardWrapperState extends State<PostCardWrapper> {
       onShare: _handleShare,
       onJoinGroup: _joinGroup,
       onGroupTap: _handleGroupTap,
-      onAuthorTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())), // Simplified
+      onAuthorTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen())), // Simplified
       onMoreMenu: _handleMoreMenu,
     );
   }
