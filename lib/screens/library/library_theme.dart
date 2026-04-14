@@ -15,21 +15,21 @@ class LibraryTheme {
 
   static Color text(BuildContext context) {
     if (Theme.of(context).brightness == Brightness.dark) {
-      return Colors.white.withOpacity(0.92);
+      return Colors.white.withValues(alpha: 0.92);
     }
     return Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
   }
 
   static Color muted(BuildContext context) {
     if (Theme.of(context).brightness == Brightness.dark) {
-      return Colors.white.withOpacity(0.55);
+      return Colors.white.withValues(alpha: 0.55);
     }
-    return Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
+    return Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6) ?? Colors.grey;
   }
 
   static Color border(BuildContext context) {
     if (Theme.of(context).brightness == Brightness.dark) {
-      return Colors.white.withOpacity(0.08);
+      return Colors.white.withValues(alpha: 0.08);
     }
     return Theme.of(context).dividerColor;
   }

@@ -190,10 +190,10 @@ class MyFilesListScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: LibraryTheme.surface(context),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+              border: Border.all(color: LibraryTheme.border(context).withValues(alpha: 0.3), width: 0.5),
               boxShadow: [
                 BoxShadow(
-                  color: LibraryTheme.primary(context).withOpacity(0.04),
+                  color: LibraryTheme.primary(context).withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -206,7 +206,7 @@ class MyFilesListScreen extends StatelessWidget {
                 height: 52,
                 decoration: BoxDecoration(
                   color: (isPdf ? LibraryTheme.danger(context) : LibraryTheme.primary(context))
-                      .withOpacity(0.10),
+                      .withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
@@ -517,7 +517,7 @@ class MyFilesListScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: LibraryTheme.surface(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                  border: Border.all(color: LibraryTheme.border(context).withValues(alpha: 0.3), width: 0.5),
                 ),
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -525,7 +525,7 @@ class MyFilesListScreen extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: LibraryTheme.primary(context).withOpacity(0.10),
+                      color: LibraryTheme.primary(context).withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
@@ -631,7 +631,7 @@ class MyFilesListScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: LibraryTheme.surface(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                  border: Border.all(color: LibraryTheme.border(context).withValues(alpha: 0.3), width: 0.5),
                 ),
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -639,7 +639,7 @@ class MyFilesListScreen extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: LibraryTheme.primary(context).withOpacity(0.10),
+                      color: LibraryTheme.primary(context).withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(

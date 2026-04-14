@@ -204,7 +204,7 @@ class _UploadScreenState extends State<UploadScreen> {
               height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: LibraryTheme.primary(context).withOpacity(0.07),
+                color: LibraryTheme.primary(context).withValues(alpha: 0.07),
               ),
             ),
           ),
@@ -216,7 +216,7 @@ class _UploadScreenState extends State<UploadScreen> {
               height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: LibraryTheme.secondary(context).withOpacity(0.05),
+                color: LibraryTheme.secondary(context).withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -335,7 +335,7 @@ class _UploadScreenState extends State<UploadScreen> {
                           backgroundColor: LibraryTheme.primary(context),
                           foregroundColor: Colors.white,
                           disabledBackgroundColor:
-                          LibraryTheme.primary(context).withOpacity(0.55),
+                          LibraryTheme.primary(context).withValues(alpha: 0.55),
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 17),
                           shape: RoundedRectangleBorder(
@@ -411,15 +411,15 @@ class _TopBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withOpacity(0.10)
-                    : LibraryTheme.border(context).withOpacity(0.3),
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : LibraryTheme.border(context).withValues(alpha: 0.3),
                 width: isDark ? 1.0 : 0.5,
               ),
               boxShadow: isDark
                   ? null
                   : [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
+                        color: Colors.black.withValues(alpha: 0.03),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -427,7 +427,7 @@ class _TopBar extends StatelessWidget {
             ),
             child: Icon(
               Icons.arrow_back_rounded,
-              color: isDark ? Colors.white.withOpacity(0.85) : null,
+              color: isDark ? Colors.white.withValues(alpha: 0.85) : null,
             ),
           ),
         ),
@@ -466,7 +466,7 @@ class _HeroUploadCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7B61FF).withOpacity(
+            color: const Color(0xFF7B61FF).withValues(alpha: 
                 Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.22),
             blurRadius: Theme.of(context).brightness == Brightness.dark ? 24 : 18,
             offset: const Offset(0, 10),
@@ -517,9 +517,9 @@ class _HeroIconBox extends StatelessWidget {
       width: 52,
       height: 52,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
+        color: Colors.white.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.18)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: const Icon(
         Icons.upload_file_rounded,
@@ -561,7 +561,7 @@ class _FilePickerCard extends StatelessWidget {
           radius: const Radius.circular(22),
           dashPattern: const [8, 5],
           color: hasFile
-              ? LibraryTheme.primary(context).withOpacity(0.45)
+              ? LibraryTheme.primary(context).withValues(alpha: 0.45)
               : LibraryTheme.border(context),
           strokeWidth: 1.5,
           child: Container(
@@ -582,8 +582,8 @@ class _FilePickerCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        LibraryTheme.primary(context).withOpacity(0.16),
-                        LibraryTheme.secondary(context).withOpacity(0.12),
+                        LibraryTheme.primary(context).withValues(alpha: 0.16),
+                        LibraryTheme.secondary(context).withValues(alpha: 0.12),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(20),
@@ -602,7 +602,7 @@ class _FilePickerCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color:
-                    LibraryTheme.primary(context).withOpacity(0.08),
+                    LibraryTheme.primary(context).withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -646,13 +646,13 @@ class _FilePickerCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? LibraryTheme.primary(context).withOpacity(0.12)
+                          ? LibraryTheme.primary(context).withValues(alpha: 0.12)
                           : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isDark
-                            ? LibraryTheme.primary(context).withOpacity(0.35)
-                            : LibraryTheme.border(context).withOpacity(0.3),
+                            ? LibraryTheme.primary(context).withValues(alpha: 0.35)
+                            : LibraryTheme.border(context).withValues(alpha: 0.3),
                         width: isDark ? 1.0 : 0.5,
                       ),
                     ),
@@ -676,8 +676,8 @@ class _FilePickerCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.grey.withOpacity(0.08),
-                        Colors.grey.withOpacity(0.04),
+                        Colors.grey.withValues(alpha: 0.08),
+                        Colors.grey.withValues(alpha: 0.04),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(18),
@@ -718,13 +718,13 @@ class _FilePickerCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? LibraryTheme.primary(context).withOpacity(0.12)
+                          ? LibraryTheme.primary(context).withValues(alpha: 0.12)
                           : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isDark
-                            ? LibraryTheme.primary(context).withOpacity(0.35)
-                            : LibraryTheme.border(context).withOpacity(0.3),
+                            ? LibraryTheme.primary(context).withValues(alpha: 0.35)
+                            : LibraryTheme.border(context).withValues(alpha: 0.3),
                         width: isDark ? 1.0 : 0.5,
                       ),
                     ),
@@ -768,15 +768,15 @@ class _SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.07)
-              : LibraryTheme.border(context).withOpacity(0.3),
+              ? Colors.white.withValues(alpha: 0.07)
+              : LibraryTheme.border(context).withValues(alpha: 0.3),
           width: isDark ? 1.0 : 0.5,
         ),
         boxShadow: isDark
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   blurRadius: 14,
                   offset: const Offset(0, 8),
                 ),

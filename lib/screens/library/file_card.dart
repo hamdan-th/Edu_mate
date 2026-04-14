@@ -47,13 +47,13 @@ class _FileCardState extends State<FileCard> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.14),
+                    color: isDark ? LibraryTheme.border(context) : Colors.grey.withValues(alpha: 0.14),
                     width: 1,
                   ),
                   gradient: LinearGradient(
                     colors: [
                       LibraryTheme.surface(context),
-                      isDark ? LibraryTheme.surface(context) : primary.withOpacity(0.025),
+                      isDark ? LibraryTheme.surface(context) : primary.withValues(alpha: 0.025),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -61,7 +61,7 @@ class _FileCardState extends State<FileCard> {
                     boxShadow: [
                       if (!_isPressed)
                         BoxShadow(
-                          color: (isDark ? Colors.black : AppColors.lightShadow).withOpacity(isDark ? 0.25 : 0.8),
+                          color: (isDark ? Colors.black : AppColors.lightShadow).withValues(alpha: isDark ? 0.25 : 0.8),
                           blurRadius: _isHovering ? 15 : 10,
                           offset: Offset(0, _isHovering ? 6 : 3),
                         ),
@@ -72,8 +72,8 @@ class _FileCardState extends State<FileCard> {
                   child: InkWell(
                     onTap: widget.onTap,
                     borderRadius: BorderRadius.circular(14),
-                    highlightColor: primary.withOpacity(0.05),
-                    splashColor: primary.withOpacity(0.10),
+                    highlightColor: primary.withValues(alpha: 0.05),
+                    splashColor: primary.withValues(alpha: 0.10),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -148,7 +148,7 @@ class _FileCardState extends State<FileCard> {
                 child: Container(
                   width: 4,
                   decoration: BoxDecoration(
-                    color: primary.withOpacity(0.85),
+                    color: primary.withValues(alpha: 0.85),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(14),
                       bottomLeft: Radius.circular(14),
@@ -190,10 +190,10 @@ class _FileCardState extends State<FileCard> {
         height: 40,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.withOpacity(0.14)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.14)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -223,15 +223,15 @@ class _FileCardState extends State<FileCard> {
       height: 40,
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: color.withOpacity(0.20),
+          color: color.withValues(alpha: 0.20),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.04),
+            color: color.withValues(alpha: 0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -342,13 +342,13 @@ class _GridFileCardState extends State<GridFileCard> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.14),
+                    color: isDark ? LibraryTheme.border(context) : Colors.grey.withValues(alpha: 0.14),
                     width: 1,
                   ),
                   gradient: LinearGradient(
                     colors: [
                       LibraryTheme.surface(context),
-                      isDark ? LibraryTheme.surface(context) : primary.withOpacity(0.025),
+                      isDark ? LibraryTheme.surface(context) : primary.withValues(alpha: 0.025),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -356,7 +356,7 @@ class _GridFileCardState extends State<GridFileCard> {
                   boxShadow: [
                     if (!_isPressed)
                       BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.25 : 0.04),
+                        color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
                         blurRadius: _isHovering ? 12 : 8,
                         offset: Offset(0, _isHovering ? 4 : 2),
                       ),
@@ -367,8 +367,8 @@ class _GridFileCardState extends State<GridFileCard> {
                   child: InkWell(
                     onTap: widget.onTap,
                     borderRadius: BorderRadius.circular(14),
-                    highlightColor: primary.withOpacity(0.05),
-                    splashColor: primary.withOpacity(0.10),
+                    highlightColor: primary.withValues(alpha: 0.05),
+                    splashColor: primary.withValues(alpha: 0.10),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Column(
@@ -434,7 +434,7 @@ class _GridFileCardState extends State<GridFileCard> {
                 child: Container(
                   width: 4,
                   decoration: BoxDecoration(
-                    color: primary.withOpacity(0.85),
+                    color: primary.withValues(alpha: 0.85),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(14),
                       bottomLeft: Radius.circular(14),
@@ -460,10 +460,10 @@ class _GridFileCardState extends State<GridFileCard> {
         height: 36,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.withOpacity(0.14)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.14)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -488,9 +488,9 @@ class _GridFileCardState extends State<GridFileCard> {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.20)),
+        border: Border.all(color: color.withValues(alpha: 0.20)),
       ),
       child: Center(
         child: Icon(icon, color: color, size: 17),
@@ -585,7 +585,7 @@ class _ActionButtonState extends State<_ActionButton> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  LibraryTheme.primary(context).withOpacity(0.85),
+                  LibraryTheme.primary(context).withValues(alpha: 0.85),
                   LibraryTheme.primary(context),
                 ],
                 begin: Alignment.topLeft,
@@ -595,7 +595,7 @@ class _ActionButtonState extends State<_ActionButton> {
               boxShadow: [
                 BoxShadow(
                   color: LibraryTheme.primary(context)
-                      .withOpacity(_isHovering ? 0.40 : 0.24),
+                      .withValues(alpha: _isHovering ? 0.40 : 0.24),
                   blurRadius: _isHovering ? 14 : 10,
                   offset: const Offset(0, 4),
                 ),
@@ -645,10 +645,10 @@ class _MetricChip extends StatelessWidget {
       height: 24,
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: isDark ? LibraryTheme.surface(context) : AppColors.lightPrimary.withOpacity(0.06),
+        color: isDark ? LibraryTheme.surface(context) : AppColors.lightPrimary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? LibraryTheme.border(context) : AppColors.lightPrimary.withOpacity(0.12),
+          color: isDark ? LibraryTheme.border(context) : AppColors.lightPrimary.withValues(alpha: 0.12),
           width: 0.5,
         ),
       ),

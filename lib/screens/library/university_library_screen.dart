@@ -200,7 +200,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                   decoration: BoxDecoration(
                     color: LibraryTheme.surface(context),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                    border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withValues(alpha: 0.3), width: 0.5),
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -228,7 +228,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                         decoration: BoxDecoration(
                           color: LibraryTheme.surface(context),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withValues(alpha: 0.3), width: 0.5),
                         ),
                         child: Text(
                           '${AppLocalizations.of(context)!.libSortPrefix} ${_getLocalizedSort(context, _sortOrder)}',
@@ -248,7 +248,7 @@ class _UniversityLibraryScreenState extends State<UniversityLibraryScreen> {
                         decoration: BoxDecoration(
                           color: LibraryTheme.surface(context),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withOpacity(0.3), width: 0.5),
+                          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? LibraryTheme.border(context) : LibraryTheme.border(context).withValues(alpha: 0.3), width: 0.5),
                         ),
                         child: Icon(
                           _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
@@ -342,7 +342,7 @@ class _EmptyLibraryState extends StatelessWidget {
               width: 84,
               height: 84,
               decoration: BoxDecoration(
-                color: LibraryTheme.primary(context).withOpacity(0.10),
+                color: LibraryTheme.primary(context).withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(26),
               ),
               child: Icon(Icons.library_books_rounded, size: 42, color: LibraryTheme.primary(context)),

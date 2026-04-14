@@ -128,7 +128,7 @@ class _ModernHeader extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             LibraryTheme.primary(context),
-            LibraryTheme.primary(context).withOpacity(0.85),
+            LibraryTheme.primary(context).withValues(alpha: 0.85),
           ],
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.bottomEnd,
@@ -136,7 +136,7 @@ class _ModernHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: (Theme.of(context).brightness == Brightness.dark ? LibraryTheme.primary(context) : AppColors.lightShadow).withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.05 : 0.8),
+            color: (Theme.of(context).brightness == Brightness.dark ? LibraryTheme.primary(context) : AppColors.lightShadow).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.05 : 0.8),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -156,21 +156,21 @@ class _ModernHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   gradient: LinearGradient(
                     colors: [
-                      Colors.white.withOpacity(0.25),
-                      Colors.white.withOpacity(0.05),
+                      Colors.white.withValues(alpha: 0.25),
+                      Colors.white.withValues(alpha: 0.05),
                     ],
                   ),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Colors.white.withValues(alpha: 0.25),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       blurRadius: 20,
                       spreadRadius: 2,
                     ),
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -201,7 +201,7 @@ class _ModernHeader extends StatelessWidget {
                     Text(
                       AppLocalizations.of(context)!.libraryHeaderSubtitle,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 13,
                       ),
                     ),
@@ -217,7 +217,7 @@ class _ModernHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
@@ -244,7 +244,7 @@ class _ModernHeader extends StatelessWidget {
                           boxShadow: active
                               ? [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha: 0.08),
                               blurRadius: 10,
                             )
                           ]

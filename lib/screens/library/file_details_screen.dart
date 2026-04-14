@@ -38,7 +38,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
   Color get _text => _isDark ? AppColors.textPrimary : Colors.black87;
   Color get _muted => _isDark ? AppColors.textSecondary : Colors.black54;
   Color get _border =>
-      _isDark ? Colors.white.withOpacity(0.07) : Colors.black12;
+      _isDark ? Colors.white.withValues(alpha: 0.07) : Colors.black12;
   Color get _heroPink =>
       _isDark ? const Color(0xFF2A1E24) : const Color(0xFFF8DDE1);
 
@@ -121,7 +121,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: LibraryTheme.primary(context).withOpacity(0.08),
+                  color: LibraryTheme.primary(context).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Icon(
@@ -310,7 +310,7 @@ class _FileDetailsScreenState extends State<FileDetailsScreen> {
                               CircleAvatar(
                                 radius: 24,
                                 backgroundColor:
-                                LibraryTheme.primary(context).withOpacity(0.1),
+                                LibraryTheme.primary(context).withValues(alpha: 0.1),
                                 backgroundImage: group.imageUrl.isNotEmpty
                                     ? NetworkImage(group.imageUrl)
                                     : null,
@@ -814,7 +814,7 @@ $url
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: LibraryTheme.primary(context).withOpacity(0.08),
+              color: LibraryTheme.primary(context).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -986,7 +986,7 @@ $url
                   height: 220,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: fileColor.withOpacity(_isDark ? 0.05 : 0.06),
+                    color: fileColor.withValues(alpha: _isDark ? 0.05 : 0.06),
                   ),
                 ),
               ),
@@ -1040,7 +1040,7 @@ $url
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black
-                                  .withOpacity(_isDark ? 0.14 : 0.03),
+                                  .withValues(alpha: _isDark ? 0.14 : 0.03),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),
@@ -1058,8 +1058,8 @@ $url
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        fileColor.withOpacity(0.16),
-                                        fileColor.withOpacity(0.08),
+                                        fileColor.withValues(alpha: 0.16),
+                                        fileColor.withValues(alpha: 0.08),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(16),
@@ -1084,7 +1084,7 @@ $url
                                           vertical: 5,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: fileColor.withOpacity(0.08),
+                                          color: fileColor.withValues(alpha: 0.08),
                                           borderRadius:
                                           BorderRadius.circular(999),
                                         ),
@@ -1516,12 +1516,12 @@ class _ReactionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: active
               ? LibraryTheme.primary(context)
-              .withOpacity(isDark ? 0.16 : 0.08)
+              .withValues(alpha: isDark ? 0.16 : 0.08)
               : surfaceColor,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: active
-                ? LibraryTheme.primary(context).withOpacity(0.25)
+                ? LibraryTheme.primary(context).withValues(alpha: 0.25)
                 : borderColor,
           ),
         ),

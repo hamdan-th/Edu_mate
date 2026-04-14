@@ -247,7 +247,7 @@ class _MyLibraryHeroCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             LibraryTheme.surface(context),
-            isDark ? LibraryTheme.surface(context) : gold.withOpacity(0.015),
+            isDark ? LibraryTheme.surface(context) : gold.withValues(alpha: 0.015),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -256,12 +256,12 @@ class _MyLibraryHeroCard extends StatelessWidget {
         border: Border.all(
           color: isDark
               ? LibraryTheme.border(context)
-              : LibraryTheme.border(context).withOpacity(0.65),
+              : LibraryTheme.border(context).withValues(alpha: 0.65),
           width: 0.8,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.22 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.05),
             blurRadius: 18,
             offset: const Offset(0, 6),
           ),
@@ -276,10 +276,10 @@ class _MyLibraryHeroCard extends StatelessWidget {
                 height: 48,
                 width: 48,
                 decoration: BoxDecoration(
-                  color: gold.withOpacity(0.12),
+                  color: gold.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: gold.withOpacity(0.18),
+                    color: gold.withValues(alpha: 0.18),
                   ),
                 ),
                 child: Icon(
@@ -320,10 +320,10 @@ class _MyLibraryHeroCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: LibraryTheme.bg(context).withOpacity(isDark ? 0.45 : 0.75),
+              color: LibraryTheme.bg(context).withValues(alpha: isDark ? 0.45 : 0.75),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: LibraryTheme.border(context).withOpacity(0.45),
+                color: LibraryTheme.border(context).withValues(alpha: 0.45),
               ),
             ),
             child: Row(
@@ -427,14 +427,14 @@ class _PrimaryStatCard extends StatelessWidget {
           color: LibraryTheme.surface(context),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: gold.withOpacity(isDark ? 0.18 : 0.65),
+            color: gold.withValues(alpha: isDark ? 0.18 : 0.65),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.black.withOpacity(0.20)
-                  : gold.withOpacity(0.07),
+                  ? Colors.black.withValues(alpha: 0.20)
+                  : gold.withValues(alpha: 0.07),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -445,7 +445,7 @@ class _PrimaryStatCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: gold.withOpacity(0.12),
+                color: gold.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
@@ -526,12 +526,12 @@ class _SecondaryStatCard extends StatelessWidget {
           border: Border.all(
             color: isDark
                 ? LibraryTheme.border(context)
-                : LibraryTheme.border(context).withOpacity(0.55),
+                : LibraryTheme.border(context).withValues(alpha: 0.55),
             width: 0.8,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.18 : 0.035),
+              color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.035),
               blurRadius: 12,
               offset: const Offset(0, 5),
             ),

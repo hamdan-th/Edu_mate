@@ -235,7 +235,7 @@ class CoreResultDetailsScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 height: 1.5,
-                color: LibraryTheme.text(context).withOpacity(0.72),
+                color: LibraryTheme.text(context).withValues(alpha: 0.72),
               ),
             ),
           ],
