@@ -874,6 +874,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupsActionTransferOwnership => 'Transfer Ownership';
 
   @override
+  String get groupsActionDeleteGroup => 'Delete Group';
+
+  @override
+  String get groupsDeleteConfirmTitle => 'Permanently Delete Group';
+
+  @override
+  String get groupsDeleteConfirmMsg =>
+      'Are you sure you want to delete this group? All messages, members, and associated posts will be permanently removed. This action cannot be undone.';
+
+  @override
+  String get groupsDeleteSuccess => 'Group deleted successfully';
+
+  @override
+  String get groupsDeleteError => 'Error deleting group';
+
+  @override
   String get libraryTabUniversity => 'University Library';
 
   @override

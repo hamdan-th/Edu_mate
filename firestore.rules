@@ -126,6 +126,17 @@ service cloud.firestore {
       allow write: if isRealUser();
     }
 
+    match /reports/{reportId} {
+      allow create: if isRealUser();
+      allow read, update, delete: if false;
+    }
+
+    match /reports/group_reports/reports/{reportId} {
+      allow create: if isRealUser();
+      allow read, update, delete: if false;
+    }
+
+
     match /library_files/{fileId} {
       allow read: if isAuthenticated();
       allow write: if isRealUser();

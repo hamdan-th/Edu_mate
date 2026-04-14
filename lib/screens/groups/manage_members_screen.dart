@@ -71,8 +71,8 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsTransferOwnershipError)));
+        final errorMsg = e.toString().replaceAll('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMsg)));
       }
     }
   }
@@ -140,83 +140,94 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
               children: [
                 _buildSearchBar(),
                 Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
+                  child: StreamBuilder<DocumentSnapshot>(
                     stream: _firestore
                         .collection('groups')
                         .doc(widget.group.id)
-                        .collection('members')
                         .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+                    builder: (context, groupDocSnap) {
+                      final liveOwnerId = (groupDocSnap.data?.data() as Map<String, dynamic>?)?['ownerId'] ?? widget.group.ownerId;
 
-                      if (snapshot.hasError) {
-                        return Center(child: Text(l10n.groupsLoadMembersError));
-                      }
+                      return StreamBuilder<QuerySnapshot>(
+                        stream: _firestore
+                            .collection('groups')
+                            .doc(widget.group.id)
+                            .collection('members')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting && !groupDocSnap.hasData) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
 
-                      final docs = snapshot.data?.docs ?? [];
-                      
-                      // Categorize members
-                      final List<DocumentSnapshot> owners = [];
-                      final List<DocumentSnapshot> admins = [];
-                      final List<DocumentSnapshot> members = [];
+                          if (snapshot.hasError) {
+                            return Center(child: Text(l10n.groupsLoadMembersError));
+                          }
 
-                      for (var doc in docs) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        
-                        // Local search filter
-                        if (_searchQuery.isNotEmpty) {
-                          String searchableName = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? l10n.groupsDefaultMemberName).trim();
-                          if (searchableName.contains('@')) searchableName = searchableName.split('@').first;
-                          if (!searchableName.toLowerCase().contains(_searchQuery)) continue;
-                        }
+                          final docs = snapshot.data?.docs ?? [];
+                          
+                          // Categorize members
+                          final List<DocumentSnapshot> owners = [];
+                          final List<DocumentSnapshot> admins = [];
+                          final List<DocumentSnapshot> members = [];
 
-                        final role = data['role'] ?? 'member';
-                        final isTrueOwner = doc.id == widget.group.ownerId;
-                        
-                        if (isTrueOwner) {
-                          owners.add(doc);
-                        } else if (role == 'admin' || role == 'owner') {
-                          // if they have 'owner' but aren't the group ownerId, treat as admin
-                          admins.add(doc);
-                        } else {
-                          members.add(doc);
-                        }
-                      }
+                          for (var doc in docs) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            
+                            // Local search filter
+                            if (_searchQuery.isNotEmpty) {
+                              String searchableName = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? l10n.groupsDefaultMemberName).trim();
+                              if (searchableName.contains('@')) searchableName = searchableName.split('@').first;
+                              if (!searchableName.toLowerCase().contains(_searchQuery)) continue;
+                            }
 
-                      final itemsList = <Widget>[];
+                            final role = data['role'] ?? 'member';
+                            final isTrueOwner = doc.id == liveOwnerId;
+                            
+                            if (isTrueOwner) {
+                              owners.add(doc);
+                            } else if (role == 'admin' || role == 'owner') {
+                              // if they have 'owner' but aren't the group ownerId, treat as admin
+                              admins.add(doc);
+                            } else {
+                              members.add(doc);
+                            }
+                          }
 
-                      if (owners.isNotEmpty) {
-                        itemsList.add(_buildSectionTitle(l10n.groupsRoleOwnerTitle));
-                        itemsList.addAll(owners.map((doc) => _buildMemberItem(doc)));
-                      }
-                      if (admins.isNotEmpty) {
-                        itemsList.add(_buildSectionTitle(l10n.groupsRoleAdminsTitle));
-                        itemsList.addAll(admins.map((doc) => _buildMemberItem(doc)));
-                      }
-                      if (members.isNotEmpty) {
-                        itemsList.add(_buildSectionTitle(l10n.groupsRoleMembersTitle));
-                        itemsList.addAll(members.map((doc) => _buildMemberItem(doc)));
-                      }
+                          final itemsList = <Widget>[];
 
-                      if (itemsList.isEmpty) {
-                        return _buildEmptyState();
-                      }
+                          if (owners.isNotEmpty) {
+                            itemsList.add(_buildSectionTitle(l10n.groupsRoleOwnerTitle));
+                            itemsList.addAll(owners.map((doc) => _buildMemberItem(doc, liveOwnerId)));
+                          }
+                          if (admins.isNotEmpty) {
+                            itemsList.add(_buildSectionTitle(l10n.groupsRoleAdminsTitle));
+                            itemsList.addAll(admins.map((doc) => _buildMemberItem(doc, liveOwnerId)));
+                          }
+                          if (members.isNotEmpty) {
+                            itemsList.add(_buildSectionTitle(l10n.groupsRoleMembersTitle));
+                            itemsList.addAll(members.map((doc) => _buildMemberItem(doc, liveOwnerId)));
+                          }
 
-                      return ListView.separated(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        itemCount: itemsList.length,
-                        separatorBuilder: (context, index) {
-                           return const Divider(height: 1, indent: 64);
-                        },
-                        itemBuilder: (context, index) {
-                          return itemsList[index];
+                          if (itemsList.isEmpty) {
+                            return _buildEmptyState();
+                          }
+
+                          return ListView.separated(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            itemCount: itemsList.length,
+                            separatorBuilder: (context, index) {
+                               return const Divider(height: 1, indent: 64);
+                            },
+                            itemBuilder: (context, index) {
+                              return itemsList[index];
+                            },
+                          );
                         },
                       );
-                    },
+                    }
                   ),
                 ),
+
               ],
             ),
     );
@@ -275,7 +286,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     );
   }
 
-  Widget _buildMemberItem(DocumentSnapshot doc) {
+  Widget _buildMemberItem(DocumentSnapshot doc, String liveOwnerId) {
     final l10n = AppLocalizations.of(context)!;
     final data = doc.data() as Map<String, dynamic>;
     final memberId = doc.id;
@@ -285,7 +296,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     final imageUrl = data['imageUrl'] as String?;
 
     final bool isMe = memberId == _auth.currentUser?.uid;
-    final bool isTargetOwner = memberId == widget.group.ownerId;
+    final bool isTargetOwner = memberId == liveOwnerId;
     final bool isTargetAdmin = role == 'admin' || (role == 'owner' && !isTargetOwner);
 
     String roleLabel = l10n.groupsRoleMember;
@@ -424,6 +435,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       },
     );
   }
+
 
   Widget _buildEmptyState() {
     final l10n = AppLocalizations.of(context)!;

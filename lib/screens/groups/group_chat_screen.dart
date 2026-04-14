@@ -715,75 +715,72 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                         ]
                       ),
                     )
-                        : InkWell(
-                      onTap: _openDetails,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 4,
-                          horizontal: 4,
-                        ),
-                        child: Row(
-                          children: [
-                            _GroupHeaderAvatar(group: widget.group),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    widget.group.name.isEmpty
-                                        ? AppLocalizations.of(context)!.groupsChatFallbackName
-                                        : widget.group.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 20,
-                                      color: _text,
-                                      height: 1.15,
-                                    ),
+                        : Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 4,
+                      ),
+                      child: Row(
+                        children: [
+                          _GroupHeaderAvatar(group: widget.group),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              mainAxisAlignment:
+                              MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  widget.group.name.isEmpty
+                                      ? AppLocalizations.of(context)!.groupsChatFallbackName
+                                      : widget.group.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 20,
+                                    color: _text,
+                                    height: 1.15,
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${_membersCount > 0 ? '$_membersCount ${AppLocalizations.of(context)!.groupsChatMembersPluralSuffix}' : AppLocalizations.of(context)!.groupsChatDefaultCountName} • ${widget.group.specializationName}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 12.8,
-                                      fontWeight: FontWeight.w600,
-                                      color: _muted,
-                                    ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${_membersCount > 0 ? '$_membersCount ${AppLocalizations.of(context)!.groupsChatMembersPluralSuffix}' : AppLocalizations.of(context)!.groupsChatDefaultCountName} • ${widget.group.specializationName}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12.8,
+                                    fontWeight: FontWeight.w600,
+                                    color: _muted,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   if (!_isSearching) ...[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => GroupProfileScreen(group: widget.group)),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        foregroundColor: AppColors.primary,
+                    if (widget.group.isPublic)
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => GroupProfileScreen(group: widget.group)),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          foregroundColor: AppColors.primary,
+                        ),
+                        child: const Text(
+                          'المجموعة',
+                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                        ),
                       ),
-                      child: const Text(
-                        'معلومات المجموعة',
-                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
-                      ),
-                    ),
                     const SizedBox(width: 4),
                     _TopIconButton(
                       icon: Icons.search_rounded,

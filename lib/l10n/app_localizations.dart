@@ -1778,6 +1778,36 @@ abstract class AppLocalizations {
   /// **'Transfer Ownership'**
   String get groupsActionTransferOwnership;
 
+  /// No description provided for @groupsActionDeleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get groupsActionDeleteGroup;
+
+  /// No description provided for @groupsDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently Delete Group'**
+  String get groupsDeleteConfirmTitle;
+
+  /// No description provided for @groupsDeleteConfirmMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this group? All messages, members, and associated posts will be permanently removed. This action cannot be undone.'**
+  String get groupsDeleteConfirmMsg;
+
+  /// No description provided for @groupsDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Group deleted successfully'**
+  String get groupsDeleteSuccess;
+
+  /// No description provided for @groupsDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting group'**
+  String get groupsDeleteError;
+
   /// No description provided for @libraryTabUniversity.
   ///
   /// In en, this message translates to:

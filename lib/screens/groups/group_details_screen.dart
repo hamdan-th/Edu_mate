@@ -384,6 +384,28 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     }
   }
 
+  Future<void> _clearChatHistory() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(l10n.groupsActionClearChat, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(l10n.groupsClearChatConfirmMsg),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.profileCancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), 
+            child: Text(l10n.groupsClearChatSubmit, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))
+          ),
+        ],
+      )
+    ) ?? false;
+
+    if (!confirmed) return;
+
+    try {
+      await GroupService.clearGroupChat(widget.group.id);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsClearChatSuccess)));
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsClearChatError)));
     }
@@ -449,65 +471,70 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             color: Theme.of(context).bottomSheetTheme.backgroundColor ?? (Theme.of(context).brightness == Brightness.dark ? AppColors.surface : Colors.white),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(width: 48, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))),
-              const SizedBox(height: 16),
-              
-              ListTile(
-                leading: const Icon(Icons.report_problem_rounded, color: AppColors.textPrimary),
-                title: Text(l10n.groupsActionReport, style: const TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _reportGroup();
-                },
+          child: SafeArea(
+            bottom: true,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(width: 48, height: 5, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))),
+                  const SizedBox(height: 16),
+                  
+                  ListTile(
+                    leading: const Icon(Icons.report_problem_rounded, color: AppColors.textPrimary),
+                    title: Text(l10n.groupsActionReport, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _reportGroup();
+                    },
+                  ),
+                  if (_isOwner) ...[
+                    ListTile(
+                      leading: const Icon(Icons.cleaning_services_rounded, color: AppColors.error),
+                      title: Text(l10n.groupsActionClearChat, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _clearChatHistory();
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.delete_forever_rounded, color: AppColors.error),
+                      title: Text(l10n.groupsActionDeleteGroup, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _confirmDeleteGroup();
+                      },
+                    ),
+                  ],
+                  ListTile(
+                    leading: const Icon(Icons.link_rounded, color: AppColors.textPrimary),
+                    title: Text(l10n.groupsActionCopyLink, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      String link = widget.group.inviteLink.isEmpty 
+                          ? GroupService.buildInviteLink(groupId: widget.group.id, inviteCode: widget.group.inviteCode) 
+                          : widget.group.inviteLink;
+                      Clipboard.setData(ClipboardData(text: link));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsCopyLinkSuccess)));
+                    },
+                  ),
+                  
+                  if (_isOwner || _isAdmin) ...[
+                    const Divider(color: AppColors.background, thickness: 8),
+                    ListTile(
+                      leading: const Icon(Icons.edit_rounded, color: AppColors.textPrimary),
+                      title: Text(l10n.groupsActionEditGroup, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        setState(() => _isEditing = true);
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                ],
               ),
-              if (_isOwner) ...[
-                ListTile(
-                  leading: const Icon(Icons.cleaning_services_rounded, color: AppColors.error),
-                  title: Text(l10n.groupsActionClearChat, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _clearChatHistory();
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.delete_forever_rounded, color: AppColors.error),
-                  title: Text(l10n.groupsActionDeleteGroup, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _confirmDeleteGroup();
-                  },
-                ),
-              ],
-              ListTile(
-                leading: const Icon(Icons.link_rounded, color: AppColors.textPrimary),
-                title: Text(l10n.groupsActionCopyLink, style: const TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  Navigator.pop(context);
-                  String link = widget.group.inviteLink.isEmpty 
-                      ? GroupService.buildInviteLink(groupId: widget.group.id, inviteCode: widget.group.inviteCode) 
-                      : widget.group.inviteLink;
-                  Clipboard.setData(ClipboardData(text: link));
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.groupsCopyLinkSuccess)));
-                },
-              ),
-              
-              if (_isOwner || _isAdmin) ...[
-                const Divider(color: AppColors.background, thickness: 8),
-                ListTile(
-                  leading: const Icon(Icons.edit_rounded, color: AppColors.textPrimary),
-                  title: Text(l10n.groupsActionEditGroup, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    setState(() => _isEditing = true);
-                  },
-                ),
-              ],
-              const SizedBox(height: 16),
-            ],
+            ),
           ),
         );
       },
@@ -606,12 +633,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   labelText: l10n.groupsDescLabel,
                   filled: true,
                   fillColor: Theme.of(context).inputDecorationTheme.fillColor,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                 ),
               ),
             ],
           ),
-    ));
+        ),
+      );
     }
 
     if (_isLoadingRole) {

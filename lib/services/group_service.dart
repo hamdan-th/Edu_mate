@@ -982,62 +982,92 @@ class GroupService {
     }
 
     final groupRef = _groups.doc(groupId);
-    final newOwnerUserRef = await _userRefByUid(newOwnerId);
 
+    // 1. Pre-fetch metadata (Outside transaction)
+    final groupSnap = await groupRef.get();
+    if (!groupSnap.exists) {
+      throw Exception('المجموعة غير موجودة');
+    }
+
+    final groupData = groupSnap.data() ?? {};
+    final initialOwnerId = (groupData['ownerId'] ?? '').toString();
+    final gName = (groupData['name'] ?? groupData['groupName'] ?? '').toString();
+
+    // 2. Initial Permission Check
+    if (initialOwnerId != currentUid) {
+      throw Exception('المالك الحالي فقط يمكنه نقل الملكية');
+    }
+
+    if (newOwnerId == initialOwnerId) {
+      throw Exception('هذا العضو هو المالك بالفعل');
+    }
+
+    // 3. Resolve user references (Outside transaction)
+    final newOwnerUserRef = await _userRefByUid(newOwnerId);
+    final oldOwnerUserRef = await _userRefByUid(initialOwnerId);
+
+    // 4. Cleanup legacy/duplicate owner roles (Outside transaction query)
+    final duplicateOwnersSnap = await groupRef.collection('members')
+        .where('role', isEqualTo: 'owner')
+        .get();
+
+    // 5. Atomic Transaction
     final String groupName = await _db.runTransaction((tx) async {
-      final groupSnap = await tx.get(groupRef);
-      if (!groupSnap.exists) {
+      final txGroupSnap = await tx.get(groupRef);
+      if (!txGroupSnap.exists) {
         throw Exception('المجموعة غير موجودة');
       }
 
-      final groupData = groupSnap.data() ?? {};
-      final currentOwnerId = (groupData['ownerId'] ?? '').toString();
-      final gName = (groupData['name'] ?? groupData['groupName'] ?? '').toString();
+      final txGroupData = txGroupSnap.data() ?? {};
+      final currentOwnerId = (txGroupData['ownerId'] ?? '').toString();
 
-      if (currentOwnerId != currentUid) {
-        throw Exception('المالك الحالي فقط يمكنه نقل الملكية');
+      // Final lock verification
+      if (currentOwnerId != initialOwnerId) {
+        throw Exception('حدث تغيير في الحالة أثناء العملية، يرجى المحاولة مرة أخرى');
       }
 
-      if (newOwnerId == currentOwnerId) {
-        throw Exception('هذا العضو هو المالك بالفعل');
-      }
-
+      // ─── 1. ALL READS FIRST ───
       final newOwnerMemberRef = groupRef.collection('members').doc(newOwnerId);
+      final oldOwnerMemberRef = groupRef.collection('members').doc(currentOwnerId);
+
       final newOwnerMemberSnap = await tx.get(newOwnerMemberRef);
+      final oldOwnerMemberSnap = await tx.get(oldOwnerMemberRef);
 
       if (!newOwnerMemberSnap.exists) {
         throw Exception('العضو المحدد ليس عضوًا في المجموعة');
       }
 
-      final duplicateOwnersSnap =
-          await groupRef.collection('members').where('role', isEqualTo: 'owner').get();
+      // ─── 2. ALL WRITES AFTER ───
 
+      // Cleanup duplicate owners via the pre-fetched query references
       for (final memberDoc in duplicateOwnersSnap.docs) {
-        tx.update(memberDoc.reference, {'role': 'admin'});
+        if (memberDoc.id != newOwnerId) {
+          tx.update(memberDoc.reference, {'role': 'admin'});
+        }
       }
 
-      final oldOwnerMemberRef = groupRef.collection('members').doc(currentOwnerId);
-      final oldOwnerMemberSnap = await tx.get(oldOwnerMemberRef);
+      // Explicitly demote old owner
       if (oldOwnerMemberSnap.exists) {
         tx.update(oldOwnerMemberRef, {'role': 'admin'});
       }
 
+
+      // Promote new owner
       tx.update(newOwnerMemberRef, {'role': 'owner'});
 
+      // Update the golden source of truth on group doc
       tx.update(groupRef, {
         'ownerId': newOwnerId,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      final oldOwnerUserRef = await _userRefByUid(currentOwnerId);
+      // Update user-side join records
       tx.set(
         oldOwnerUserRef.collection('joined_groups').doc(groupId),
         {
-          'groupId': groupId,
-          'groupName': gName,
           'roleInGroup': 'admin',
           'joinedAt': FieldValue.serverTimestamp(),
-          'type': (groupData['type'] ?? 'public').toString(),
+          'type': (txGroupData['type'] ?? 'public').toString(),
         },
         SetOptions(merge: true),
       );
@@ -1045,11 +1075,9 @@ class GroupService {
       tx.set(
         newOwnerUserRef.collection('joined_groups').doc(groupId),
         {
-          'groupId': groupId,
-          'groupName': gName,
           'roleInGroup': 'owner',
           'joinedAt': FieldValue.serverTimestamp(),
-          'type': (groupData['type'] ?? 'public').toString(),
+          'type': (txGroupData['type'] ?? 'public').toString(),
         },
         SetOptions(merge: true),
       );
@@ -1057,6 +1085,7 @@ class GroupService {
       return gName;
     });
 
+    // 6. Push Notification
     await NotificationsService.createNotification(
       userId: newOwnerId,
       title: 'تم نقل ملكية المجموعة إليك',

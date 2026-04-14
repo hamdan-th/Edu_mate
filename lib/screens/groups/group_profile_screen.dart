@@ -187,6 +187,31 @@ class _GroupProfileScreenState extends State<GroupProfileScreen>
     );
   }
 
+  void _confirmLeave() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('مغادرة المجموعة', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('هل أنت متأكد من رغبتك في مغادرة هذه المجموعة؟'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('إلغاء')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), 
+            child: const Text('مغادرة', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      if (!mounted) return;
+      try {
+        await GroupService.leaveGroup(widget.group.id);
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
   }
 

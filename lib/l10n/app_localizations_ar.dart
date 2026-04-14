@@ -866,6 +866,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groupsActionTransferOwnership => 'نقل الملكية';
 
   @override
+  String get groupsActionDeleteGroup => 'حذف المجموعة';
+
+  @override
+  String get groupsDeleteConfirmTitle => 'حذف المجموعة نهائياً';
+
+  @override
+  String get groupsDeleteConfirmMsg =>
+      'هل أنت متأكد من حذف هذه المجموعة؟ سيتم حذف جميع الرسائل، الأعضاء، والمنشورات المرتبطة بها نهائياً. هذا الإجراء لا يمكن التراجع عنه.';
+
+  @override
+  String get groupsDeleteSuccess => 'تم حذف المجموعة بنجاح';
+
+  @override
+  String get groupsDeleteError => 'حدث خطأ أثناء حذف المجموعة';
+
+  @override
   String get libraryTabUniversity => 'مكتبة الجامعة';
 
   @override
