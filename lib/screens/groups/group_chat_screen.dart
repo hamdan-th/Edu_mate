@@ -22,6 +22,7 @@ import 'package:flutter/gestures.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../services/upload_screening_service.dart';
+import '../../core/utils/user_utils.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final GroupModel group;
@@ -1327,6 +1328,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     _fetchUserIfNeeded(senderId);
     final cachedUser = _userCache[senderId];
 
+    bool isSenderVerifiedDoctor = false;
     String senderName = data['senderName']?.toString() ?? AppLocalizations.of(context)!.groupsChatMemberFallback;
     String senderAvatarUrl = data['senderAvatar'] as String? ??
         data['senderImageUrl'] as String? ??
@@ -1334,12 +1336,10 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         '';
 
     if (cachedUser != null && cachedUser.isNotEmpty) {
-      senderName = (cachedUser['username']?.toString() ??
-          cachedUser['fullName']?.toString() ??
-          cachedUser['displayName']?.toString() ??
-          cachedUser['name']?.toString() ??
-          senderName)
-          .trim();
+      senderName = UserUtils.getDisplayName(cachedUser);
+      isSenderVerifiedDoctor = (cachedUser['role'] == 'doctor' &&
+          cachedUser['isDoctorVerified'] == true);
+      
       senderAvatarUrl =
           (cachedUser['photoUrl']?.toString() ??
               cachedUser['imageUrl']?.toString() ??
@@ -1476,13 +1476,25 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                     if (!isMe)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 5),
-                        child: Text(
-                          senderName,
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            color: senderColor,
-                            fontWeight: FontWeight.w900,
-                          ),
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 4,
+                          children: [
+                            Text(
+                              senderName,
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                color: senderColor,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            if (isSenderVerifiedDoctor)
+                              const Icon(
+                                Icons.verified_rounded,
+                                color: AppColors.success,
+                                size: 13,
+                              ),
+                          ],
                         ),
                       ),
                     if (replyToText != null) ...[

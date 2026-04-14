@@ -305,6 +305,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileDelete => 'حذف';
 
   @override
+  String get profileSave => 'حفظ';
+
+  @override
+  String get profileUpdateSuccess => 'تم تحديث الملف الشخصي بنجاح';
+
+  @override
+  String get profileUpdateFailed => 'فشل في تحديث الملف الشخصي';
+
+  @override
   String get profileDeleteConfirm =>
       'هل أنت متأكد؟ سيتم حذف الحساب كاملًا من التطبيق.';
 
@@ -1493,4 +1502,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get upFileTypeGeneric => 'ملف';
+
+  @override
+  String get errIdentifierNotFound => 'الرقم المدخل غير موجود في سجلات الجامعة';
+
+  @override
+  String get errIdentifierInactive => 'هذا السجل الجامعي غير نشط حالياً';
+
+  @override
+  String get signupIdentifierStudentHint => 'الرقم الأكاديمي';
+
+  @override
+  String get signupIdentifierDoctorHint => 'الرقم الوظيفي';
+
+  @override
+  String get signupRegistryGuidance =>
+      'بياناتك مؤمنة؛ يتم جلب اسمك وتخصصك تلقائياً من سجلات الجامعة الرسمية.';
+
+  @override
+  String get signupIdentifierUnifiedLabel => 'الرقم الجامعي / الوظيفي';
+
+  @override
+  String get signupIdentifierHelper =>
+      'أدخل الرقم الأكاديمي (للطلاب) أو الرقم الوظيفي (للأساتذة)';
 }

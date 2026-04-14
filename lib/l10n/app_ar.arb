@@ -98,6 +98,9 @@
   "profileDeleteAccount": "حذف الحساب",
   "profileCancel": "إلغاء",
   "profileDelete": "حذف",
+  "profileSave": "حفظ",
+  "profileUpdateSuccess": "تم تحديث الملف الشخصي بنجاح",
+  "profileUpdateFailed": "فشل في تحديث الملف الشخصي",
   "profileDeleteConfirm": "هل أنت متأكد؟ سيتم حذف الحساب كاملًا من التطبيق.",
   "libFilterSortTitle": "فلترة وترتيب",
   "libFilterReset": "إعادة ضبط",
@@ -554,5 +557,12 @@
   "upFileTypePdf": "بي دي اف",
   "upFileTypeWord": "وورد",
   "upFileTypeImage": "صورة",
-  "upFileTypeGeneric": "ملف"
+  "upFileTypeGeneric": "ملف",
+  "errIdentifierNotFound": "الرقم المدخل غير موجود في سجلات الجامعة",
+  "errIdentifierInactive": "هذا السجل الجامعي غير نشط حالياً",
+  "signupIdentifierStudentHint": "الرقم الأكاديمي",
+  "signupIdentifierDoctorHint": "الرقم الوظيفي",
+  "signupRegistryGuidance": "بياناتك مؤمنة؛ يتم جلب اسمك وتخصصك تلقائياً من سجلات الجامعة الرسمية.",
+  "signupIdentifierUnifiedLabel": "الرقم الجامعي / الوظيفي",
+  "signupIdentifierHelper": "أدخل الرقم الأكاديمي (للطلاب) أو الرقم الوظيفي (للأساتذة)"
 }

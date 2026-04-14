@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:async';
 import 'notifications_service.dart';
+import '../core/utils/user_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -53,13 +54,7 @@ class GroupService {
     final snap = await ref.get();
     final data = snap.data() ?? {};
 
-    return (data['displayName'] ??
-        data['fullName'] ??
-        data['username'] ??
-        _auth.currentUser?.displayName ??
-        _auth.currentUser?.email ??
-        'User')
-        .toString();
+    return UserUtils.getDisplayName(data);
   }
 
   /// Returns true if the currently-signed-in user has role == 'doctor'

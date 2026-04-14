@@ -10,6 +10,9 @@ import '../../core/theme/app_colors.dart';
 import '../../core/providers/guest_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/upload_screening_service.dart';
+import '../../services/registry_service.dart';
+import '../../core/utils/user_utils.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -21,34 +24,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User? get currentUser => FirebaseAuth.instance.currentUser;
 
   bool _isUploadingImage = false;
-  bool _isSendingVerification = false;
   bool _isDeleting = false;
   bool _isLoggingOut = false;
-  bool _isVerificationPending = false;
 
   @override
   void initState() {
     super.initState();
-    _checkPendingVerification();
   }
 
-  Future<void> _checkPendingVerification() async {
-    final user = currentUser;
-    if (user == null) return;
-    try {
-      final existing = await FirebaseFirestore.instance
-          .collection('doctor_verification_request')
-          .where('userId', isEqualTo: user.uid)
-          .where('status', isEqualTo: 'pending')
-          .limit(1)
-          .get();
-      if (existing.docs.isNotEmpty && mounted) {
-        setState(() {
-          _isVerificationPending = true;
-        });
-      }
-    } catch (_) {}
-  }
 
   Future<void> _pickAndUploadProfileImage() async {
     final user = currentUser;
@@ -97,59 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _sendDoctorVerificationRequest(
-      Map<String, dynamic> userData,
-      ) async {
-    final user = currentUser;
-    if (user == null) return;
-
-    try {
-      setState(() {
-        _isSendingVerification = true;
-      });
-
-      final existing = await FirebaseFirestore.instance
-          .collection('doctor_verification_request')
-          .where('userId', isEqualTo: user.uid)
-          .where('status', isEqualTo: 'pending')
-          .limit(1)
-          .get();
-
-      if (existing.docs.isNotEmpty) {
-        final l10n = AppLocalizations.of(context)!;
-        _showMessage(l10n.profileVerificationPending);
-        return;
-      }
-
-      await FirebaseFirestore.instance
-          .collection('doctor_verification_request')
-          .add({
-        'userId': user.uid,
-        'username': userData['username'] ?? '',
-        'fullName': userData['fullName'] ?? '',
-        'email': userData['email'] ?? '',
-        'photoUrl': userData['photoUrl'] ?? '',
-        'college': userData['college'] ?? '',
-        'specializationName': userData['specializationName'] ?? '',
-        'status': 'pending',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-      final l10n = AppLocalizations.of(context)!;
-      _showMessage(l10n.profileVerificationSent);
-      setState(() {
-        _isVerificationPending = true;
-      });
-    } catch (e) {
-      final l10n = AppLocalizations.of(context)!;
-      _showMessage(l10n.profileVerificationFailed);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSendingVerification = false;
-        });
-      }
-    }
-  }
 
   Future<void> _logout() async {
     try {
@@ -259,6 +189,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
   }
 
+  Future<void> _editBio(String currentBio) async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(text: currentBio);
+    
+    final newBio = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.profileBioLabel),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          maxLength: 150,
+          decoration: InputDecoration(
+            hintText: l10n.profileBioLabel,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.profileCancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: Text(l10n.profileSave),
+          ),
+        ],
+      ),
+    );
+
+    if (newBio != null && newBio != currentBio) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser?.uid)
+            .update({'bio': newBio});
+        _showMessage(l10n.profileUpdateSuccess);
+      } catch (e) {
+        _showMessage(l10n.profileUpdateFailed);
+      }
+    }
+  }
+
   Widget _buildInfoTile({
     required IconData icon,
     required String label,
@@ -320,6 +293,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+          if (label == AppLocalizations.of(context)!.profileBioLabel)
+            IconButton(
+              onPressed: () => _editBio(value),
+              icon: Icon(Icons.edit_outlined, color: colorScheme.primary, size: 20),
+            ),
         ],
       ),
     );
@@ -508,6 +486,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final photoUrl = data['photoUrl'] ?? '';
           final isDoctorVerified = data['isDoctorVerified'] == true;
           final role = data['role'] ?? 'student';
+          final displayName = data['displayName'] ?? '';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -537,28 +516,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         spacing: 8,
                         children: [
                           Text(
-                            fullName.isEmpty ? username : fullName,
+                            UserUtils.getDisplayName(data),
                             style: TextStyle(
                               color: Theme.of(context).textTheme.titleLarge?.color,
                               fontSize: 22,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.5,
                             ),
                           ),
                           if (isDoctorVerified)
-                            const Icon(
-                              Icons.verified,
-                              color: AppColors.success,
-                              size: 22,
+                            Container(
+                              margin: const EdgeInsets.only(left: 4),
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: AppColors.success.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.verified_rounded,
+                                color: AppColors.success,
+                                size: 20,
+                              ),
                             ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '@$username',
+                        role.toUpperCase(),
                         style: TextStyle(
                           color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -616,39 +605,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
                 const SizedBox(height: 10),
-                if (role == 'doctor' && !isDoctorVerified)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _isVerificationPending || _isSendingVerification
-                          ? null
-                          : () => _sendDoctorVerificationRequest(data),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        backgroundColor: _isVerificationPending ? Colors.grey.shade400 : AppColors.primary,
-                        elevation: 0,
-                      ),
-                      icon: _isVerificationPending 
-                          ? const Icon(Icons.hourglass_empty_rounded, color: Colors.white, size: 20)
-                          : _isSendingVerification
-                          ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                          : const Icon(Icons.verified_outlined, size: 20, color: Colors.white),
-                      label: Text(
-                        _isVerificationPending
-                            ? l10n.profileVerificationPending
-                            : l10n.profileReqDocVerification,
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                    ),
-                  ),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,

@@ -187,6 +187,11 @@ service cloud.firestore {
       allow write: if isRealUser();
     }
 
+    match /university_registry/{identifier} {
+      allow get: if true;
+      allow list, write: if false;
+    }
+
     match /doctor_verification/{requestId} {
       allow read: if isAuthenticated();
       allow write: if isRealUser();

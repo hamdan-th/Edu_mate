@@ -686,6 +686,24 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get profileDelete;
 
+  /// No description provided for @profileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get profileSave;
+
+  /// No description provided for @profileUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdateSuccess;
+
+  /// No description provided for @profileUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profile'**
+  String get profileUpdateFailed;
+
   /// No description provided for @profileDeleteConfirm.
   ///
   /// In en, this message translates to:
@@ -2881,6 +2899,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'File'**
   String get upFileTypeGeneric;
+
+  /// No description provided for @errIdentifierNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'The identifier entered was not found in university records'**
+  String get errIdentifierNotFound;
+
+  /// No description provided for @errIdentifierInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'This university record is currently inactive'**
+  String get errIdentifierInactive;
+
+  /// No description provided for @signupIdentifierStudentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Number'**
+  String get signupIdentifierStudentHint;
+
+  /// No description provided for @signupIdentifierDoctorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee Number'**
+  String get signupIdentifierDoctorHint;
+
+  /// No description provided for @signupRegistryGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is secure; your name and specialization are automatically fetched from official university records.'**
+  String get signupRegistryGuidance;
+
+  /// No description provided for @signupIdentifierUnifiedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'University Identifier / Employee ID'**
+  String get signupIdentifierUnifiedLabel;
+
+  /// No description provided for @signupIdentifierHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Academic Number (Students) or Employee ID (Staff)'**
+  String get signupIdentifierHelper;
 }
 
 class _AppLocalizationsDelegate

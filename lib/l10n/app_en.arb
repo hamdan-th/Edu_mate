@@ -98,6 +98,9 @@
   "profileDeleteAccount": "Delete Account",
   "profileCancel": "Cancel",
   "profileDelete": "Delete",
+  "profileSave": "Save",
+  "profileUpdateSuccess": "Profile updated successfully",
+  "profileUpdateFailed": "Failed to update profile",
   "profileDeleteConfirm": "Are you sure? Your account will be permanently deleted.",
   "libFilterSortTitle": "Filter and Sort",
   "libFilterReset": "Reset",
@@ -690,5 +693,12 @@
   "upFileTypePdf": "PDF",
   "upFileTypeWord": "Word",
   "upFileTypeImage": "Image",
-  "upFileTypeGeneric": "File"
+  "upFileTypeGeneric": "File",
+  "errIdentifierNotFound": "The identifier entered was not found in university records",
+  "errIdentifierInactive": "This university record is currently inactive",
+  "signupIdentifierStudentHint": "Academic Number",
+  "signupIdentifierDoctorHint": "Employee Number",
+  "signupRegistryGuidance": "Your data is secure; your name and specialization are automatically fetched from official university records.",
+  "signupIdentifierUnifiedLabel": "University Identifier / Employee ID",
+  "signupIdentifierHelper": "Enter Academic Number (Students) or Employee ID (Staff)"
 }

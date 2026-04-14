@@ -80,6 +80,7 @@ Current Screen: ${userContext.sourceScreen || "Unknown"}
 }
 
 export const eduBot = functions
+  .runWith({ secrets: ["GEMINI_API_KEY"] })
   .https.onCall(async (data, context) => {
     const rawMessage = data.message;
     const message = typeof rawMessage === "string" ? rawMessage.trim() : "";
@@ -145,10 +146,10 @@ export const eduBot = functions
 
       const apiKey = process.env.GEMINI_API_KEY || "";
       if (!apiKey) {
-        console.error("Missing GEMINI_API_KEY in environment variables.");
+        console.error("Missing GEMINI_API_KEY. Ensure secret is set via 'firebase functions:secrets:set'.");
         throw new functions.https.HttpsError(
           "internal",
-          "عذراً، أواجه مشكلة في الاتصال حالياً. يرجى المحاولة لاحقاً."
+          "نعتذر، هناك خلل في إعدادات النظام. يرجى مراجعة المسؤول."
         );
       }
       
@@ -157,7 +158,6 @@ export const eduBot = functions
       const contentsPayload: any[] = [];
       const history = data.history;
       if (Array.isArray(history)) {
-        // Safe iterate avoiding enormous arrays
         const safeHistory = history.slice(-6); 
         for (const msg of safeHistory) {
           if (msg && typeof msg.text === "string" && msg.text.trim().length > 0) {
@@ -174,24 +174,25 @@ export const eduBot = functions
         parts: [{ text: message }]
       });
       
-      console.log("EduBot: model call start");
+      console.log("EduBot: model call start (gemini-1.5-flash)");
       const dynamicInstruction = getSystemInstruction(userContext);
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: "gemini-1.5-flash",
         contents: contentsPayload,
         config: {
           systemInstruction: dynamicInstruction,
         }
       });
-      console.log("EduBot: model call success");
-
+      
       const text = response.text || "عذراً، لم أتمكن من إنشاء رد في الوقت الحالي.";
+      
+      console.log("EduBot: model call success");
 
       return {
         reply: text,
       };
     } catch (error: any) {
-      console.error("EduBot: model call error:", error);
+      console.error("EduBot: critical error:", error);
 
       const errorMessage = String(error?.message || error).toLowerCase();
       const status = error?.status || error?.response?.status;
@@ -203,8 +204,14 @@ export const eduBot = functions
         );
       }
 
+      const isModelError = errorMessage.includes("model") || errorMessage.includes("not found");
+      const isAuthError = errorMessage.includes("api key") || errorMessage.includes("auth") || errorMessage.includes("401");
+
       return {
-        reply: "عذراً، أواجه مشكلة في الاتصال حالياً. يرجى المحاولة لاحقاً."
+        reply: "عذراً، أواجه مشكلة في الاتصال حالياً. يرجى المحاولة لاحقاً.",
+        debug: {
+          errorType: isModelError ? "model_config_error" : isAuthError ? "auth_wiring_error" : "generic_service_error"
+        }
       };
     }
   });

@@ -8,6 +8,8 @@ import '../../core/theme/app_colors.dart';
 import '../../widgets/common/premium_feedback.dart';
 import '../../data/specializations_data.dart';
 import '../settings/settings_bottom_sheet.dart';
+import '../../services/registry_service.dart';
+import '../../core/utils/user_utils.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -20,14 +22,12 @@ class _SignupScreenState extends State<SignupScreen>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  String _selectedCollege = collegesList.first;
-  String _specializationId = '';
+  final RegistryService _registryService = RegistryService();
+
   String _accountType = 'student';
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -47,24 +47,13 @@ class _SignupScreenState extends State<SignupScreen>
     _floatAnimation = Tween<double>(begin: -3, end: 3).animate(
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
-
-    _specializationId = specializationsList
-        .firstWhere((item) => item.college == _selectedCollege)
-        .id;
   }
 
-  List<SpecializationItem> get _filteredSpecializations {
-    return specializationsList
-        .where((item) => item.college == _selectedCollege)
-        .toList();
-  }
 
   @override
   void dispose() {
-    _usernameController.dispose();
-    _fullNameController.dispose();
+    _identifierController.dispose();
     _emailController.dispose();
-    _bioController.dispose();
     _passwordController.dispose();
     _floatController.dispose();
     super.dispose();
@@ -107,82 +96,116 @@ class _SignupScreenState extends State<SignupScreen>
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final username = _usernameController.text.trim();
-    final fullName = _fullNameController.text.trim();
+    final identifier = _identifierController.text.trim();
     final email = _emailController.text.trim();
-    final bio = _bioController.text.trim();
     final password = _passwordController.text.trim();
-
-    SpecializationItem? selectedItem;
-    if (_accountType == 'student') {
-      selectedItem = specializationsList.firstWhere(
-            (item) => item.id == _specializationId,
-        orElse: () => specializationsList.first,
-      );
-    }
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final isTaken = await _isUsernameTaken(username);
       final l10n = AppLocalizations.of(context)!;
 
-      if (isTaken) {
-        _showMessage(l10n.errUsernameTaken);
-        setState(() {
-          _isLoading = false;
-        });
+      // 1. Registry Lookup
+      final registryData = await _registryService.lookup(identifier);
+
+      if (registryData == null) {
+        _showMessage(l10n.errIdentifierNotFound);
+        setState(() => _isLoading = false);
         return;
       }
 
-      final credential =
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      if (registryData['isActive'] == false) {
+        _showMessage(l10n.errIdentifierInactive);
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final String registryRole = registryData['role'] ?? 'student';
+      final String fullName = registryData['fullName'] ?? '';
+      
+      // 2. Generate and Verify Unique Username (First + Last)
+      String baseName = UserUtils.deriveDisplayName(fullName);
+      if (baseName.isEmpty) baseName = 'User';
+      
+      String targetUsername = baseName;
+      int counter = 2;
+      
+      // Look up uniqueness in the 'usernames' collection
+      while (await _isUsernameTaken(targetUsername)) {
+        targetUsername = '$baseName $counter';
+        counter++;
+      }
+      
+      final username = targetUsername;
+
+      // 3. Firebase Auth
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       final uid = credential.user!.uid;
 
+      // 4. Registry-Driven User Data
       final userData = <String, dynamic>{
         'uid': uid,
         'username': username,
         'username_lowercase': username.toLowerCase(),
         'fullName': fullName,
         'email': email,
-        'bio': bio,
-        'role': _accountType,
-        'isDoctorVerified': false,
+        'bio': '', // Default empty, can be edited later
+        'role': registryRole,
         'photoUrl': '',
         'createdAt': FieldValue.serverTimestamp(),
+        
+        // Identity Refinement
+        'displayName': username, // For consistency, mirror username
+        'identifier': identifier,
+        
+        // Registry Fields
+        'collegeName': registryData['collegeName'] ?? '',
+        'departmentName': registryData['departmentName'] ?? '',
+        'specializationName': registryData['specializationName'] ?? '',
+        'identifierType': registryData['identifierType'] ?? '',
+        
+        // Map specializationId for downstream services (Feed, Groups)
+        'specializationId': specializationsList
+            .firstWhere(
+              (s) => s.name == registryData['specializationName'],
+              orElse: () => const SpecializationItem(id: '', name: '', college: ''),
+            )
+            .id,
+        
+        // Compatibility Fields
+        'college': registryData['collegeName'] ?? '', // legacy mapping
       };
 
-      if (_accountType == 'student' && selectedItem != null) {
-        userData['college'] = _selectedCollege;
-        userData['specializationId'] = selectedItem.id;
-        userData['specializationName'] = selectedItem.name;
+      // Doctor Auto-Verification
+      if (registryRole == 'doctor') {
+        userData['isDoctorVerified'] = true;
+        userData['verificationType'] = 'doctor';
+      } else {
+        userData['isDoctorVerified'] = false;
+        userData['isStudentVerified'] = registryData['isStudentVerified'] ?? false;
       }
 
+      // Save to users/{uid}
       await FirebaseFirestore.instance.collection('users').doc(uid).set(userData);
 
-      final usernameRef = FirebaseFirestore.instance
+      // Reserve Username
+      await FirebaseFirestore.instance
           .collection('usernames')
-          .doc(username.toLowerCase());
-
-      final usernameSnap = await usernameRef.get();
-      if (usernameSnap.exists) {
-        throw Exception('Username already taken');
-      }
-
-      await usernameRef.set({'uid': uid});
+          .doc(username.toLowerCase())
+          .set({'uid': uid});
 
       _showMessage(l10n.signupSuccess);
 
       if (!mounted) return;
       Navigator.of(context).pushNamedAndRemoveUntil(
         '/mainNav',
-            (route) => false,
+        (route) => false,
       );
     } on FirebaseAuthException catch (e) {
       final l10n = AppLocalizations.of(context)!;
@@ -309,11 +332,12 @@ class _SignupScreenState extends State<SignupScreen>
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          l10n.signupSubtitle,
+                          l10n.signupRegistryGuidance,
+                          textAlign: TextAlign.center,
                           style: textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurface.withOpacity(0.6),
                             fontWeight: FontWeight.w500,
-                            letterSpacing: 0.2,
+                            height: 1.5,
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -340,68 +364,7 @@ class _SignupScreenState extends State<SignupScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                TextFormField(
-                                  controller: _usernameController,
-                                  style: textTheme.bodyLarge,
-                                  decoration: _inputDecoration(
-                                    label: l10n.signupUsernameHint,
-                                    icon: Icons.alternate_email_rounded,
-                                    colorScheme: colorScheme,
-                                  ),
-                                  validator: (value) {
-                                    final text = value?.trim() ?? '';
-                                    if (text.isEmpty) {
-                                      return l10n.errEmptyUsername;
-                                    }
-                                    if (text.length < 3) {
-                                      return l10n.errShortUsername;
-                                    }
-                                    if (!RegExp(r'^[a-zA-Z0-9._]+$').hasMatch(text)) {
-                                      return l10n.errInvalidUsername;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 18),
-                                TextFormField(
-                                  controller: _fullNameController,
-                                  style: textTheme.bodyLarge,
-                                  decoration: _inputDecoration(
-                                    label: l10n.signupFullNameHint,
-                                    icon: Icons.person_outline,
-                                    colorScheme: colorScheme,
-                                  ),
-                                  validator: (value) {
-                                    if ((value?.trim() ?? '').isEmpty) {
-                                      return l10n.errEmptyName;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 18),
-                                TextFormField(
-                                  controller: _emailController,
-                                  keyboardType: TextInputType.emailAddress,
-                                  style: textTheme.bodyLarge,
-                                  decoration: _inputDecoration(
-                                    label: l10n.loginEmailHint,
-                                    icon: Icons.email_outlined,
-                                    colorScheme: colorScheme,
-                                  ),
-                                  validator: (value) {
-                                    final text = value?.trim() ?? '';
-                                    if (text.isEmpty) {
-                                      return l10n.errEmptyEmail;
-                                    }
-                                    if (!text.contains('@')) {
-                                      return l10n.errInvalidEmail;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 12),
-                                
-                                // Account Type Switcher
+                                // 1. Account Type Selection (Primary Context)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
@@ -427,70 +390,59 @@ class _SignupScreenState extends State<SignupScreen>
                                     ],
                                   ),
                                 ),
-                                
-                                if (_accountType == 'student') ...[
-                                  const SizedBox(height: 18),
-                                  DropdownButtonFormField<String>(
-                                    value: _selectedCollege,
-                                    dropdownColor: colorScheme.surface,
-                                    style: textTheme.bodyLarge,
-                                    decoration: _inputDecoration(
-                                      label: l10n.signupCollegeHint,
-                                      icon: Icons.account_balance_outlined,
-                                      colorScheme: colorScheme,
-                                    ),
-                                    items: collegesList.map((college) {
-                                      return DropdownMenuItem<String>(
-                                        value: college,
-                                        child: Text(college),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      if (value == null) return;
-                                      setState(() {
-                                        _selectedCollege = value;
-                                        _specializationId = specializationsList
-                                            .firstWhere((item) => item.college == _selectedCollege)
-                                            .id;
-                                      });
-                                    },
-                                  ),
-                                  const SizedBox(height: 18),
-                                  DropdownButtonFormField<String>(
-                                    value: _specializationId,
-                                    dropdownColor: colorScheme.surface,
-                                    style: textTheme.bodyLarge,
-                                    decoration: _inputDecoration(
-                                      label: l10n.signupMajorHint,
-                                      icon: Icons.school_outlined,
-                                      colorScheme: colorScheme,
-                                    ),
-                                    items: _filteredSpecializations.map((item) {
-                                      return DropdownMenuItem<String>(
-                                        value: item.id,
-                                        child: Text(item.name),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      if (value == null) return;
-                                      setState(() {
-                                        _specializationId = value;
-                                      });
-                                    },
-                                  ),
-                                ],
-                                const SizedBox(height: 18),
+                                const SizedBox(height: 24),
+
+                                // 2. Unified Identifier Field
                                 TextFormField(
-                                  controller: _bioController,
-                                  maxLines: 2,
+                                  controller: _identifierController,
                                   style: textTheme.bodyLarge,
+                                  keyboardType: TextInputType.number,
                                   decoration: _inputDecoration(
-                                    label: l10n.signupBioHint,
-                                    icon: Icons.info_outline,
+                                    label: l10n.signupIdentifierUnifiedLabel,
+                                    icon: Icons.badge_outlined,
                                     colorScheme: colorScheme,
+                                  ).copyWith(
+                                    helperText: l10n.signupIdentifierHelper,
+                                    helperStyle: TextStyle(
+                                      color: colorScheme.primary.withOpacity(0.8),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                    helperMaxLines: 2,
                                   ),
+                                  validator: (value) {
+                                    if ((value?.trim() ?? '').isEmpty) {
+                                      return l10n.signupIdentifierHelper;
+                                    }
+                                    return null;
+                                  },
                                 ),
                                 const SizedBox(height: 18),
+
+                                // 3. Email Field
+                                TextFormField(
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  style: textTheme.bodyLarge,
+                                  decoration: _inputDecoration(
+                                    label: l10n.loginEmailHint,
+                                    icon: Icons.email_outlined,
+                                    colorScheme: colorScheme,
+                                  ),
+                                  validator: (value) {
+                                    final text = value?.trim() ?? '';
+                                    if (text.isEmpty) {
+                                      return l10n.errEmptyEmail;
+                                    }
+                                    if (!text.contains('@')) {
+                                      return l10n.errInvalidEmail;
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 18),
+
+                                // 4. Password Field
                                 TextFormField(
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,

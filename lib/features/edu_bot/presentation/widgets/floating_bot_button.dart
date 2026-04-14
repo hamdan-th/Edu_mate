@@ -22,7 +22,10 @@ class _FloatingBotButtonState extends State<FloatingBotButton> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -59,28 +62,35 @@ class _FloatingBotButtonState extends State<FloatingBotButton> with SingleTicker
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-            return Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF16161A), // Dark charcoal base
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFD4AF37).withOpacity(0.3 + (_controller.value * 0.2)),
-                  width: 1.0,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFD4AF37).withOpacity(0.08 + (_controller.value * 0.05)),
-                    blurRadius: 8 + (_controller.value * 4),
-                    spreadRadius: 1 + (_controller.value * 2),
-                    offset: const Offset(0, 2),
+            final pulse = CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine).value;
+            return Transform.scale(
+              scale: 1.0 + (pulse * 0.03),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF1C1C21), Color(0xFF050608)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.smart_toy_outlined, // Minimal AI icon
-                color: Color(0xFFD4AF37), // Gold accent
-                size: 24, // Smaller and sleeker
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.2 + (pulse * 0.15)),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.05 + (pulse * 0.05)),
+                      blurRadius: 10 + (pulse * 6),
+                      spreadRadius: pulse * 2,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
               ),
             );
           }

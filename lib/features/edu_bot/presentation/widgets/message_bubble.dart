@@ -65,14 +65,14 @@ class MessageBubble extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF16161A),
+                        color: const Color(0xFF0C0D11),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.4), width: 1),
+                        border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1),
                         boxShadow: [
-                          BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.1), blurRadius: 6, offset: const Offset(0, 2)),
+                          BoxShadow(color: AppColors.primary.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 2)),
                         ],
                       ),
-                      child: const Icon(Icons.smart_toy_outlined, size: 14, color: Color(0xFFD4AF37)),
+                      child: const Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.primary),
                     ),
                     const SizedBox(width: 12),
                   ],
@@ -83,9 +83,9 @@ class MessageBubble extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
-                        color: isUser ? null : AppColors.surface,
+                        color: isUser ? null : const Color(0xFF0C0D11),
                         gradient: isUser 
-                             ? const LinearGradient(colors: [Color(0xFFD4AF37), Color(0xFFFFD700)], begin: Alignment.topLeft, end: Alignment.bottomRight) 
+                             ? const LinearGradient(colors: [AppColors.primary, AppColors.primaryDark], begin: Alignment.topLeft, end: Alignment.bottomRight) 
                              : null,
                         borderRadius: BorderRadius.only(
                           topLeft: const Radius.circular(20),
@@ -95,18 +95,18 @@ class MessageBubble extends StatelessWidget {
                         ),
                         border: isUser 
                            ? null 
-                           : Border.all(color: AppColors.border.withOpacity(0.3)),
+                           : Border.all(color: AppColors.primary.withOpacity(0.15), width: 1),
                         boxShadow: [
                           if (isUser)
                              BoxShadow(
-                                color: const Color(0xFFD4AF37).withOpacity(0.2),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
+                                color: AppColors.primary.withOpacity(0.15),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
                              )
                           else
                              BoxShadow(
-                                color: AppColors.textPrimary.withOpacity(0.04),
-                                blurRadius: 10,
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 8,
                                 offset: const Offset(0, 2),
                              ),
                         ],
@@ -226,14 +226,14 @@ class MessageBubble extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.copy_rounded, size: 13, color: AppColors.textSecondary.withOpacity(0.6)),
+                          Icon(Icons.copy_rounded, size: 13, color: AppColors.primary.withOpacity(0.7)),
                           const SizedBox(width: 6),
                           Text(
-                            'نسخ',
+                            'نسخ الرد',
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textSecondary.withOpacity(0.6),
-                              fontWeight: FontWeight.w500,
+                              color: AppColors.primary.withOpacity(0.8),
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],

@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/utils/user_utils.dart';
 
 class ManageMembersScreen extends StatefulWidget {
   final GroupModel group;
@@ -175,9 +176,8 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
                             
                             // Local search filter
                             if (_searchQuery.isNotEmpty) {
-                              String searchableName = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? l10n.groupsDefaultMemberName).trim();
-                              if (searchableName.contains('@')) searchableName = searchableName.split('@').first;
-                              if (!searchableName.toLowerCase().contains(_searchQuery)) continue;
+                              String searchableName = UserUtils.getDisplayName(data).toLowerCase();
+                              if (!searchableName.contains(_searchQuery)) continue;
                             }
 
                             final role = data['role'] ?? 'member';
@@ -290,8 +290,7 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
     final l10n = AppLocalizations.of(context)!;
     final data = doc.data() as Map<String, dynamic>;
     final memberId = doc.id;
-    String name = (data['username']?.toString() ?? data['fullName']?.toString() ?? data['displayName']?.toString() ?? data['name']?.toString() ?? l10n.groupsDefaultMemberName).trim();
-    if (name.contains('@')) name = name.split('@').first;
+    String name = UserUtils.getDisplayName(data);
     final role = data['role'] ?? 'member';
     final imageUrl = data['imageUrl'] as String?;
 

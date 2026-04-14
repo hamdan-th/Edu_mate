@@ -306,6 +306,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileDelete => 'Delete';
 
   @override
+  String get profileSave => 'Save';
+
+  @override
+  String get profileUpdateSuccess => 'Profile updated successfully';
+
+  @override
+  String get profileUpdateFailed => 'Failed to update profile';
+
+  @override
   String get profileDeleteConfirm =>
       'Are you sure? Your account will be permanently deleted.';
 
@@ -1508,4 +1517,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get upFileTypeGeneric => 'File';
+
+  @override
+  String get errIdentifierNotFound =>
+      'The identifier entered was not found in university records';
+
+  @override
+  String get errIdentifierInactive =>
+      'This university record is currently inactive';
+
+  @override
+  String get signupIdentifierStudentHint => 'Academic Number';
+
+  @override
+  String get signupIdentifierDoctorHint => 'Employee Number';
+
+  @override
+  String get signupRegistryGuidance =>
+      'Your data is secure; your name and specialization are automatically fetched from official university records.';
+
+  @override
+  String get signupIdentifierUnifiedLabel =>
+      'University Identifier / Employee ID';
+
+  @override
+  String get signupIdentifierHelper =>
+      'Enter Academic Number (Students) or Employee ID (Staff)';
 }

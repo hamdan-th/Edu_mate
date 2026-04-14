@@ -47,30 +47,31 @@ class _TypingIndicatorState extends State<TypingIndicator>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF16161A),
+                  color: const Color(0xFF0C0D11),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.4), width: 1),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1),
                   boxShadow: [
-                    BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.1), blurRadius: 6, offset: const Offset(0, 2)),
+                    BoxShadow(color: AppColors.primary.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 2)),
                   ],
                 ),
-                child: const Icon(Icons.smart_toy_outlined, size: 14, color: Color(0xFFD4AF37)),
+                child: const Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.primary),
               ),
               const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0C0D11),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                     bottomLeft: Radius.circular(20),
                     bottomRight: Radius.circular(4),
                   ),
-                  border: Border.all(color: AppColors.border.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.15)),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.textPrimary.withOpacity(0.04),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
