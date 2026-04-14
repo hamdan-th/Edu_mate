@@ -9,11 +9,12 @@ class AppColors {
   static const Color secondary = Color(0xFF111111);
 
   // Light theme identity
-  static const Color lightPrimary = Color(0xFF1E4C7A); // Fresher, more visible academic blue
-  static const Color lightBackground = Color(0xFFF0F4F8); // Cleaner, brighter blue-tinted base
-  static const Color lightSurface = Color(0xFFFFFFFF); // Maximum clarity
-  static const Color lightBorder = Color(0xFFCFD6E2); // Slightly stronger border distinction
-  static const Color lightGoldAccent = Color(0xFFF8EEDC); // Elegantly visible light gold highlight
+  static const Color lightPrimary = Color(0xFF1E4C7A); // Academic Blue
+  static const Color lightBackground = Color(0xFFF1F5F9); // Crisp grey-blue base
+  static const Color lightSurface = Color(0xFFFFFFFF); // Pure clarity
+  static const Color lightBorder = Color(0xFFE2E8F0); // Subtle separation
+  static const Color lightGoldAccent = Color(0xFFF8EEDC); // Premium gold highlight
+  static const Color lightShadow = Color(0x0F1E4C7A); // Extremely subtle blue-tinted shadow
 
   // Backgrounds - Structured Charcoal
   static const Color background = Color(0xFF050608); // Deeper, luxurious pure near-black
@@ -24,7 +25,8 @@ class AppColors {
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFF9CA3AF);
   static const Color textOnDark = Color(0xFFFFFFFF);
-  static const Color textOnLight = Color(0xFF1A1D23);
+  static const Color textOnLight = Color(0xFF111827); // High contrast near-black
+  static const Color lightTextSecondary = Color(0xFF4B5563); // Confident secondary grey
 
   // Inputs / borders
   static const Color inputFill = Color(0xFF1B1E24); // Clear contrast against surface

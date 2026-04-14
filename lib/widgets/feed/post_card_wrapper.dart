@@ -12,6 +12,7 @@ import '../../widgets/guest_action_dialog.dart';
 import '../../screens/home/widgets/post_comments_sheet.dart';
 import '../../screens/groups/group_chat_screen.dart';
 import '../../screens/groups/group_profile_screen.dart';
+import '../common/premium_transitions.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
@@ -182,8 +183,8 @@ class _PostCardWrapperState extends State<PostCardWrapper> {
       if (group != null && mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => GroupProfileScreen(group: group),
+          PremiumPageRoute(
+            page: GroupProfileScreen(group: group),
           ),
         );
       }

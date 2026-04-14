@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/theme/app_colors.dart';
 
 import '../../core/providers/guest_provider.dart';
 import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
@@ -135,9 +136,9 @@ class _ModernHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: LibraryTheme.primary(context).withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.05 : 0.15),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
+            color: (Theme.of(context).brightness == Brightness.dark ? LibraryTheme.primary(context) : AppColors.lightShadow).withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.05 : 0.8),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),

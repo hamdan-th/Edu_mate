@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
+import '../../services/upload_screening_service.dart';
 
 class CreateGroupFeedPostScreen extends StatefulWidget {
   final GroupModel group;
@@ -56,6 +57,10 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
             .child('global_feed')
             .child(uid)
             .child('$timestamp.jpg');
+
+        // Perform pre-upload screening
+        await UploadScreeningService.validate(_selectedImage!, isImage: true);
+
         final uploadTask = await ref.putFile(_selectedImage!);
         imageUrl = await uploadTask.ref.getDownloadURL();
       }
@@ -71,7 +76,11 @@ class _CreateGroupFeedPostScreenState extends State<CreateGroupFeedPostScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+        if (e is ScreeningException) {
+          UploadScreeningService.showScanError(context, e);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+        }
         setState(() => _isPublishing = false);
       }
     }

@@ -8,6 +8,7 @@ import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/academic_structure.dart';
 import '../../services/group_service.dart';
+import '../../services/upload_screening_service.dart';
 
 class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
@@ -78,6 +79,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         .child('group_covers')
         .child(fileName);
 
+    // Perform pre-upload screening
+    await UploadScreeningService.validate(file, isImage: true);
+
     await ref.putFile(file);
     return await ref.getDownloadURL();
   }
@@ -124,7 +128,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
-      _showMessage(e.toString().replaceFirst('Exception: ', ''));
+      if (mounted && e is ScreeningException) {
+        UploadScreeningService.showScanError(context, e);
+      } else {
+        _showMessage(e.toString().replaceFirst('Exception: ', ''));
+      }
     } finally {
       if (mounted) {
         setState(() {

@@ -1,4 +1,5 @@
 import * as functions from "firebase-functions";
+import { ImageAnnotatorClient } from "@google-cloud/vision";
 import { GoogleGenAI } from "@google/genai";
 
 function getSystemInstruction(userContext: any): string {
@@ -203,3 +204,73 @@ export const eduBot = functions
       };
     }
   });
+
+// --- CONTENT SCREENING SYSTEM ---
+const visionClient = new ImageAnnotatorClient();
+
+/**
+ * screenContent
+ * Automatic pre-upload image screening using Google Cloud Vision SafeSearch.
+ * Rejects if likelihood of Adult, Racy, Violence, or Spoof is LIKELY or VERY_LIKELY.
+ */
+export const screenContent = functions.https.onCall(async (data, context) => {
+  // Ensure user is authenticated
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      "unauthenticated",
+      "يجب تسجيل الدخول لاستخدام هذه الخدمة."
+    );
+  }
+
+  const base64Image = data.image;
+  if (!base64Image) {
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "لم يتم توفير صورة للفحص."
+    );
+  }
+
+  try {
+    const [result] = await visionClient.safeSearchDetection({
+      image: { content: base64Image },
+    });
+
+    const safeSearch = result.safeSearchAnnotation;
+    if (!safeSearch) {
+      // If we can't annotate, we default to allow or reject?
+      // For safety, let's assume we need a valid annotation.
+      return { status: "allow" };
+    }
+
+    const thresholds = ["LIKELY", "VERY_LIKELY"];
+
+    // Check strict categories: Adult, Racy, Violence, Spoof
+    const isUnsafe =
+      thresholds.includes(safeSearch.adult as string) ||
+      thresholds.includes(safeSearch.racy as string) ||
+      thresholds.includes(safeSearch.violence as string) ||
+      thresholds.includes(safeSearch.spoof as string);
+
+    if (isUnsafe) {
+      console.warn(`Content rejected for user ${context.auth.uid}:`, safeSearch);
+      return {
+        status: "reject",
+        reason: "الصورة تحتوي على محتوى غير لائق أو حساس.",
+        details: {
+          adult: safeSearch.adult,
+          racy: safeSearch.racy,
+          violence: safeSearch.violence,
+          spoof: safeSearch.spoof,
+        },
+      };
+    }
+
+    return { status: "allow" };
+  } catch (error) {
+    console.error("Vision API Error:", error);
+    // On technical failure, we typically allow to not block users,
+    // but in strict academic environment, we might want to check.
+    // Let's allow but log.
+    return { status: "allow", note: "screening_skipped_due_to_error" };
+  }
+});

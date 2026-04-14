@@ -20,6 +20,8 @@ import 'invite_group_screen.dart';
 import '../../l10n/app_localizations.dart';
 import 'group_profile_screen.dart';
 import '../../widgets/feed/post_card_wrapper.dart';
+import '../../widgets/common/premium_transitions.dart';
+import '../../services/upload_screening_service.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final GroupModel group;
@@ -107,7 +109,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       await GroupService.joinPublicGroup(widget.group.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsJoinSuccess)));
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)));
+        Navigator.pushReplacement(context, PremiumPageRoute(page: GroupChatScreen(group: widget.group)));
       }
     } catch (e) {
       if (mounted) {
@@ -148,6 +150,10 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         // Case 1: new image selected
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${_pickedImage!.path.split('/').last}';
         final ref = FirebaseStorage.instance.ref().child('group_covers').child(fileName);
+        
+        // Perform pre-upload screening
+        await UploadScreeningService.validate(_pickedImage!, isImage: true);
+
         await ref.putFile(_pickedImage!);
         newImageUrl = await ref.getDownloadURL();
         backfillUrl = newImageUrl;
@@ -194,7 +200,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsSaveSuccess)));
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && e is ScreeningException) {
+        UploadScreeningService.showScanError(context, e);
+      } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.groupsSaveError)));
       }
     }
@@ -647,7 +655,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 "$_membersCount ${AppLocalizations.of(context)!.groupsMemberCountSuffix}",
                 style: TextStyle(
                   fontSize: 16, 
-                  color: _isDark ? AppColors.textSecondary : const Color(0xFF4B5563), 
+                  color: _isDark ? AppColors.textSecondary : AppColors.lightTextSecondary, 
                   fontWeight: FontWeight.w600
                 ),
               ),
@@ -661,7 +669,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                     "${widget.group.collegeName} • ${widget.group.specializationName}",
                     style: TextStyle(
                       fontSize: 14, 
-                      color: _isDark ? AppColors.textSecondary : const Color(0xFF6B7280), 
+                      color: _isDark ? AppColors.textSecondary : AppColors.lightTextSecondary.withOpacity(0.8), 
                       fontWeight: FontWeight.bold
                     ),
                   ),
@@ -717,7 +725,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: _isDark ? AppColors.primary : AppColors.lightPrimary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

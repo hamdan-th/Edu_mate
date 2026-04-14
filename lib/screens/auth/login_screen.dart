@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/providers/guest_provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../widgets/common/premium_feedback.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -264,7 +265,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         const SizedBox(height: 8),
                         Text(
                           l10n.loginWelcomeBack,
-                          style: textTheme.bodyMedium,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+                          ),
                         ),
                         
                         const SizedBox(height: 24),
@@ -284,8 +287,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(isDark ? 0.16 : 0.05),
-                                    blurRadius: 12,
+                                    color: (isDark ? Colors.black : AppColors.lightShadow).withOpacity(isDark ? 0.16 : 0.8),
+                                    blurRadius: isDark ? 12 : 20,
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
@@ -368,18 +371,21 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     // 5. Login Button
                                     SizedBox(
                                       width: double.infinity,
-                                      child: ElevatedButton(
-                                        onPressed: _isLoading ? null : _handleLogin,
-                                        child: _isLoading
-                                            ? const SizedBox(
-                                                width: 22,
-                                                height: 22,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2.5,
-                                                  color: Colors.white,
-                                                ),
-                                              )
-                                            : Text(l10n.loginTitle),
+                                      child: ScaleOnPress(
+                                        onTap: _isLoading ? null : _handleLogin,
+                                        child: ElevatedButton(
+                                          onPressed: _isLoading ? null : () {}, // GestureDetector handles tap
+                                          child: _isLoading
+                                              ? const SizedBox(
+                                                  width: 22,
+                                                  height: 22,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2.5,
+                                                    color: Colors.white,
+                                                  ),
+                                                )
+                                              : Text(l10n.loginTitle),
+                                        ),
                                       ),
                                     ),
                                     
@@ -421,7 +427,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                         style: TextButton.styleFrom(
                                           foregroundColor: isDark
                                               ? AppColors.textSecondary
-                                              : Colors.black54,
+                                              : AppColors.lightTextSecondary,
                                         ),
                                         child: _isGuestLoading
                                             ? const SizedBox(

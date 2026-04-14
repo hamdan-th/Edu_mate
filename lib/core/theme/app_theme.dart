@@ -75,15 +75,15 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          minimumSize: const Size.fromHeight(46),
+          minimumSize: const Size.fromHeight(52),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.3,
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.2,
           ),
         ),
       ),
@@ -133,6 +133,8 @@ class AppTheme {
           foregroundColor: AppColors.textSecondary,
         ),
       ),
+      splashColor: AppColors.primary.withOpacity(0.04),
+      highlightColor: AppColors.primary.withOpacity(0.02),
       listTileTheme: const ListTileThemeData(
         iconColor: AppColors.textSecondary,
         textColor: AppColors.textPrimary,
@@ -145,6 +147,8 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: AppColors.lightBackground,
+      splashColor: AppColors.lightPrimary.withOpacity(0.04),
+      highlightColor: AppColors.lightPrimary.withOpacity(0.02),
       colorScheme: const ColorScheme.light(
         primary: AppColors.lightPrimary,
         secondary: AppColors.primary,
@@ -181,7 +185,7 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
         bodyMedium: TextStyle(
-          color: Color(0xFF4B5563),
+          color: AppColors.lightTextSecondary,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
@@ -206,31 +210,33 @@ class AppTheme {
             width: 1.8,
           ),
         ),
-        labelStyle: const TextStyle(color: Color(0xFF4B5563)),
+        labelStyle: const TextStyle(color: AppColors.lightTextSecondary),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.lightPrimary,
           foregroundColor: Colors.white,
-          minimumSize: const Size.fromHeight(46),
+          minimumSize: const Size.fromHeight(52),
           elevation: 0,
+          shadowColor: AppColors.lightShadow.withOpacity(0.8),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.3,
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.2,
           ),
         ),
       ),
       cardTheme: const CardThemeData(
         color: AppColors.lightSurface,
-        elevation: 0,
+        elevation: 4,
+        shadowColor: AppColors.lightShadow,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),
-          side: BorderSide(color: AppColors.lightBorder),
+          side: BorderSide(color: AppColors.lightBorder, width: 0.8),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
@@ -267,11 +273,11 @@ class AppTheme {
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-          foregroundColor: const Color(0xFF4B5563),
+          foregroundColor: AppColors.lightTextSecondary,
         ),
       ),
       listTileTheme: const ListTileThemeData(
-        iconColor: Color(0xFF4B5563),
+        iconColor: AppColors.lightTextSecondary,
         textColor: Colors.black87,
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       ),

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import '../../services/notifications_service.dart';
+import '../../services/upload_screening_service.dart';
 class LibraryUploadService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -54,6 +55,10 @@ class LibraryUploadService {
           'doctorName': doctorName.trim(),
         },
       );
+
+      // Perform pre-upload screening
+      // Library allows both images and other files, we screen images specifically.
+      await UploadScreeningService.validate(file, isImage: extension == 'jpg' || extension == 'jpeg' || extension == 'png');
 
       final snapshot = await ref.putFile(file, metadata);
       final fileUrl = await snapshot.ref.getDownloadURL();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme/app_colors.dart';
+import '../../widgets/common/premium_feedback.dart';
 import '../../l10n/app_localizations.dart';
 
 class PostCard extends StatefulWidget {
@@ -207,9 +208,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 child: Text(
                   authorName,
                   style: TextStyle(
-                    color: isDark ? AppColors.textPrimary : Colors.black87,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                    color: isDark ? AppColors.textPrimary : AppColors.textOnLight,
+                    fontSize: 14.5,
+                    height: 1.5,
                   ),
                 ),
               ),
@@ -222,14 +223,14 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.groups_rounded, size: 14, color: AppColors.primary.withOpacity(0.8)),
+                          Icon(Icons.groups_rounded, size: 14, color: AppColors.primary),
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
                               groupName,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: AppColors.primary.withOpacity(0.9),
+                                color: AppColors.primary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -240,14 +241,14 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Icon(Icons.circle, size: 3, color: AppColors.textSecondary.withOpacity(0.5)),
+                  Icon(Icons.circle, size: 3, color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary),
                   const SizedBox(width: 6),
                   Text(
                     timeStr,
                     style: TextStyle(
                       color: isDark 
                           ? AppColors.textSecondary.withOpacity(0.7)
-                          : Colors.black.withOpacity(0.5),
+                          : AppColors.lightTextSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -329,16 +330,23 @@ class _ActionItem extends StatelessWidget {
       iconWidget = ScaleTransition(scale: scale!, child: iconWidget);
     }
 
-    return InkWell(
+    return ScaleOnPress(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      scale: 0.95,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Row(
           children: [
             iconWidget,
             const SizedBox(width: 6),
-            Text(label, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ),
       ),

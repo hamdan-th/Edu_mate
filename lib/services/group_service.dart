@@ -9,6 +9,7 @@ import '../models/group_message_model.dart';
 import '../models/group_membership_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'upload_screening_service.dart';
 
 class GroupService {
   GroupService._();
@@ -646,6 +647,10 @@ class GroupService {
           .child('groups_chat')
           .child(groupId)
           .child('${DateTime.now().millisecondsSinceEpoch}_$currentUid.jpg');
+      
+      // Perform pre-upload screening
+      await UploadScreeningService.validate(imageFile, isImage: true);
+
       final uploadTask = await ref.putFile(imageFile);
       imageUrl = await uploadTask.ref.getDownloadURL();
     }

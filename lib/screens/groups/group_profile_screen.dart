@@ -14,6 +14,8 @@ import 'group_details_screen.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
+import '../../widgets/common/premium_feedback.dart';
+import '../../widgets/common/premium_transitions.dart';
 
 class GroupProfileScreen extends StatefulWidget {
   final GroupModel group;
@@ -24,7 +26,11 @@ class GroupProfileScreen extends StatefulWidget {
   State<GroupProfileScreen> createState() => _GroupProfileScreenState();
 }
 
-class _GroupProfileScreenState extends State<GroupProfileScreen> {
+class _GroupProfileScreenState extends State<GroupProfileScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _entranceController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
@@ -35,12 +41,36 @@ class _GroupProfileScreenState extends State<GroupProfileScreen> {
   bool _isNotificationMuted = false;
   int _membersCount = 0;
   bool _isJoining = false;
-  double _ctaScale = 1.0;
 
   @override
   void initState() {
     super.initState();
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.03),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _entranceController,
+      curve: const Interval(0.0, 1.0, curve: Curves.easeOutCubic),
+    ));
+
     _loadGroupState();
+    _entranceController.forward();
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadGroupState() async {
@@ -126,7 +156,7 @@ class _GroupProfileScreenState extends State<GroupProfileScreen> {
                   title: 'تعديل المجموعة',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => GroupDetailsScreen(group: widget.group, startEditing: true)));
+                    Navigator.push(context, PremiumPageRoute(page: GroupDetailsScreen(group: widget.group, startEditing: true)));
                   },
                 ),
                 _buildMenuItem(
@@ -134,7 +164,7 @@ class _GroupProfileScreenState extends State<GroupProfileScreen> {
                   title: 'إدارة الأعضاء',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => GroupDetailsScreen(group: widget.group)));
+                    Navigator.push(context, PremiumPageRoute(page: GroupDetailsScreen(group: widget.group)));
                   },
                 ),
               ],
@@ -186,7 +216,7 @@ class _GroupProfileScreenState extends State<GroupProfileScreen> {
     if (_isMember) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => GroupChatScreen(group: widget.group)),
+        PremiumPageRoute(page: GroupChatScreen(group: widget.group)),
       );
       return;
     }
@@ -349,36 +379,41 @@ class _GroupProfileScreenState extends State<GroupProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Hero Action Button
-                  GestureDetector(
-                    onTapDown: (_) => setState(() => _ctaScale = 0.96),
-                    onTapUp: (_) => setState(() => _ctaScale = 1.0),
-                    onTapCancel: () => setState(() => _ctaScale = 1.0),
-                    child: AnimatedScale(
-                      scale: _ctaScale,
-                      duration: const Duration(milliseconds: 100),
-                      curve: Curves.easeOut,
-                      child: SizedBox(
+                  ScaleOnPress(
+                    onTap: _isLoading ? null : _handleAction,
+                    child: Semantics(
+                      button: true,
+                      label: _isMember ? 'فتح الدردشة' : l10n.feedJoinAction,
+                      enabled: !_isLoading,
+                      child: Container(
                         width: double.infinity,
                         height: 52,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleAction,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: (_isMember && isDark) ? Colors.transparent : AppColors.primary,
-                            foregroundColor: (_isMember && isDark) ? AppColors.primary : Colors.white,
-                            elevation: isDark ? 0 : 2,
-                            shadowColor: AppColors.primary.withOpacity(0.2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              side: (_isMember && isDark) ? const BorderSide(color: AppColors.primary, width: 2) : BorderSide.none,
+                        decoration: BoxDecoration(
+                          color: isDark 
+                              ? (_isMember ? Colors.transparent : AppColors.primary)
+                              : AppColors.lightPrimary,
+                          borderRadius: BorderRadius.circular(14),
+                          border: (isDark && _isMember) ? Border.all(color: AppColors.primary, width: 2) : null,
+                          boxShadow: isDark ? null : [
+                            BoxShadow(
+                              color: AppColors.lightShadow.withOpacity(0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                          ),
-                          child: _isJoining
-                              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
-                              : Text(
-                                  _isMember ? 'فتح الدردشة' : l10n.feedJoinAction,
-                                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.2),
-                                ),
+                          ],
                         ),
+                        alignment: Alignment.center,
+                        child: _isJoining
+                            ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white))
+                            : Text(
+                                _isMember ? 'فتح الدردشة' : l10n.feedJoinAction,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900, 
+                                  fontSize: 16, 
+                                  letterSpacing: 0.2,
+                                  color: (isDark && _isMember) ? AppColors.primary : Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -401,7 +436,7 @@ class _GroupProfileScreenState extends State<GroupProfileScreen> {
                     style: TextStyle(
                       fontSize: 15,
                       height: 1.7,
-                      color: isDark ? AppColors.textSecondary : Colors.black.withOpacity(0.7),
+                      color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -423,7 +458,7 @@ class _GroupProfileScreenState extends State<GroupProfileScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
-                          color: isDark ? AppColors.textPrimary : Colors.black87,
+                          color: isDark ? AppColors.textPrimary : AppColors.textOnLight,
                           letterSpacing: -0.3,
                         ),
                       ),

@@ -13,6 +13,7 @@ import '../../services/group_service.dart';
 import 'create_group_screen.dart';
 import 'group_details_screen.dart';
 import 'group_chat_screen.dart';
+import '../../widgets/common/premium_transitions.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/edu_bot/presentation/widgets/floating_bot_button.dart';
 
@@ -742,8 +743,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
   void _openGroupDetails() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => GroupDetailsScreen(group: widget.group),
+      PremiumPageRoute(
+        page: GroupDetailsScreen(group: widget.group),
       ),
     );
   }
@@ -751,8 +752,8 @@ class _PremiumGroupCardState extends State<_PremiumGroupCard> {
   void _openGroupChat() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => GroupChatScreen(group: widget.group),
+      PremiumPageRoute(
+        page: GroupChatScreen(group: widget.group),
       ),
     );
   }

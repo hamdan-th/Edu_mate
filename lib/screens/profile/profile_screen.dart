@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/providers/guest_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/upload_screening_service.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -69,6 +70,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .child('profile_images')
           .child('${user.uid}.jpg');
 
+      // Perform pre-upload screening
+      await UploadScreeningService.validate(file, isImage: true);
+
       await ref.putFile(file);
       final imageUrl = await ref.getDownloadURL();
 
@@ -78,8 +82,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final l10n = AppLocalizations.of(context)!;
       _showMessage(l10n.profileUpdatePhotoSuccess);
     } catch (e) {
-      final l10n = AppLocalizations.of(context)!;
-      _showMessage(l10n.profileUpdatePhotoFailed);
+      if (mounted && e is ScreeningException) {
+        UploadScreeningService.showScanError(context, e);
+      } else {
+        final l10n = AppLocalizations.of(context)!;
+        _showMessage(l10n.profileUpdatePhotoFailed);
+      }
     } finally {
       if (mounted) {
         setState(() {

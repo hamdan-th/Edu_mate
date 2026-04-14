@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 import 'file_model.dart';
 import 'library_theme.dart';
@@ -57,14 +58,14 @@ class _FileCardState extends State<FileCard> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  boxShadow: [
-                    if (!_isPressed)
-                      BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.25 : 0.045),
-                        blurRadius: _isHovering ? 12 : 8,
-                        offset: Offset(0, _isHovering ? 4 : 2),
-                      ),
-                  ],
+                    boxShadow: [
+                      if (!_isPressed)
+                        BoxShadow(
+                          color: (isDark ? Colors.black : AppColors.lightShadow).withOpacity(isDark ? 0.25 : 0.8),
+                          blurRadius: _isHovering ? 15 : 10,
+                          offset: Offset(0, _isHovering ? 6 : 3),
+                        ),
+                    ],
                 ),
                 child: Material(
                   color: Colors.transparent,
@@ -644,10 +645,10 @@ class _MetricChip extends StatelessWidget {
       height: 24,
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: isDark ? LibraryTheme.surface(context) : Colors.grey[100],
+        color: isDark ? LibraryTheme.surface(context) : AppColors.lightPrimary.withOpacity(0.06),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? LibraryTheme.border(context) : Colors.grey.withOpacity(0.18),
+          color: isDark ? LibraryTheme.border(context) : AppColors.lightPrimary.withOpacity(0.12),
           width: 0.5,
         ),
       ),

@@ -22,6 +22,7 @@ import '../../models/group_model.dart';
 import '../../models/feed_post_model.dart';
 import '../groups/group_chat_screen.dart';
 import '../../widgets/feed/post_card_wrapper.dart';
+import '../../widgets/common/premium_transitions.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -66,24 +67,22 @@ class _FeedScreenState extends State<FeedScreen> {
   void _openProfile() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+      PremiumPageRoute(page: const ProfileScreen()),
     );
   }
 
   void _openNotifications() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const NotificationsScreen(),
-      ),
+      PremiumPageRoute(page: const NotificationsScreen()),
     );
   }
 
   void _openBot() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const BotScreen(sourceScreen: 'feed_screen'),
+      PremiumPageRoute(
+        page: const BotScreen(sourceScreen: 'feed_screen'),
       ),
     );
   }

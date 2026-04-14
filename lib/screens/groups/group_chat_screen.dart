@@ -21,6 +21,7 @@ import 'invite_group_screen.dart';
 import 'package:flutter/gestures.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../services/upload_screening_service.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final GroupModel group;
@@ -388,17 +389,26 @@ class _GroupChatScreenState extends State<GroupChatScreen>
         imageQuality: 80,
       );
       if (image != null) {
+        final file = File(image.path);
+        
+        // Immediate pre-selection screening for fast feedback
+        await UploadScreeningService.validate(file, isImage: true);
+
         setState(() {
-          _selectedImage = File(image.path);
+          _selectedImage = file;
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.groupsChatImageError),
-          ),
-        );
+        if (e is ScreeningException) {
+          UploadScreeningService.showScanError(context, e);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.groupsChatImageError),
+            ),
+          );
+        }
       }
     }
   }

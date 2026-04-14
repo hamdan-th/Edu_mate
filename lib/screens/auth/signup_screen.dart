@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../l10n/app_localizations.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../widgets/common/premium_feedback.dart';
 import '../../data/specializations_data.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -248,7 +249,9 @@ class _SignupScreenState extends State<SignupScreen>
                           const SizedBox(height: 8),
                           Text(
                             l10n.signupSubtitle,
-                            style: textTheme.bodyMedium,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+                            ),
                           ),
                           const SizedBox(height: 24),
                           Card(
@@ -419,7 +422,7 @@ class _SignupScreenState extends State<SignupScreen>
                                         },
                                         icon: Icon(
                                           _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                          color: isDark ? AppColors.textSecondary : Colors.black54,
+                                          color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
                                         ),
                                       ),
                                     ),
@@ -437,18 +440,21 @@ class _SignupScreenState extends State<SignupScreen>
                                   const SizedBox(height: 20),
                                   SizedBox(
                                     width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: _isLoading ? null : _handleSignup,
-                                      child: _isLoading
-                                          ? const SizedBox(
-                                              width: 22,
-                                              height: 22,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2.5,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : Text(l10n.signupBtn),
+                                    child: ScaleOnPress(
+                                      onTap: _isLoading ? null : _handleSignup,
+                                      child: ElevatedButton(
+                                        onPressed: _isLoading ? null : () {},
+                                        child: _isLoading
+                                            ? const SizedBox(
+                                                width: 22,
+                                                height: 22,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2.5,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            : Text(l10n.signupBtn),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 16),

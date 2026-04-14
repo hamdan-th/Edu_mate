@@ -159,7 +159,7 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          color: isDark ? AppColors.textPrimary : Colors.black87,
+          color: isDark ? AppColors.textPrimary : AppColors.textOnLight,
           fontSize: 16,
           fontWeight: FontWeight.w800,
         ),
@@ -205,16 +205,14 @@ class _NotificationTile extends StatelessWidget {
                 color: item.isRead
                     ? (isDark
                     ? AppColors.border.withOpacity(0.45)
-                    : Colors.black12)
+                    : AppColors.lightBorder)
                     : accent.withOpacity(0.30),
                 width: item.isRead ? 1 : 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isDark
-                      ? Colors.black.withOpacity(0.14)
-                      : Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
+                  color: (isDark ? Colors.black : AppColors.lightShadow).withOpacity(isDark ? 0.14 : 0.8),
+                  blurRadius: isDark ? 8 : 15,
                   offset: const Offset(0, 3),
                 ),
               ],
@@ -269,7 +267,7 @@ class _NotificationTile extends StatelessWidget {
                                         style: TextStyle(
                                           color: isDark
                                               ? AppColors.textPrimary
-                                              : Colors.black87,
+                                              : AppColors.textOnLight,
                                           fontSize: 15,
                                           fontWeight: item.isRead
                                               ? FontWeight.w700
@@ -286,7 +284,7 @@ class _NotificationTile extends StatelessWidget {
                                         style: TextStyle(
                                           color: isDark
                                               ? AppColors.textSecondary
-                                              : Colors.black45,
+                                              : AppColors.lightTextSecondary.withOpacity(0.8),
                                           fontSize: 11.5,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -300,7 +298,7 @@ class _NotificationTile extends StatelessWidget {
                                   style: TextStyle(
                                     color: isDark
                                         ? AppColors.textSecondary
-                                        : Colors.black54,
+                                        : AppColors.lightTextSecondary,
                                     fontSize: 13.2,
                                     fontWeight: FontWeight.w500,
                                     height: 1.5,
