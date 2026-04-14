@@ -244,19 +244,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
           ),
           
-          // 2. Settings Toggle (Top Corner)
-          SafeArea(
-            child: Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: LoginTopActionButton(
-                  icon: Icons.translate_rounded,
-                  onTap: () => SettingsBottomSheet.show(context),
-                ),
-              ),
-            ),
-          ),
           
           SafeArea(
             child: Center(
@@ -523,6 +510,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       const SizedBox(height: 32),
                     ],
                   ),
+                ),
+              ),
+            ),
+          ),
+
+          // 2. Settings Toggle (Top Corner Layered over content)
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: LoginTopActionButton(
+                  icon: Icons.translate_rounded,
+                  onTap: () => SettingsBottomSheet.show(context),
                 ),
               ),
             ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
-
+import '../../core/providers/app_settings_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/common/premium_feedback.dart';
 import '../../data/specializations_data.dart';
+import '../settings/settings_bottom_sheet.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -209,153 +211,233 @@ class _SignupScreenState extends State<SignupScreen>
   InputDecoration _inputDecoration({
     required String label,
     required IconData icon,
+    required ColorScheme colorScheme,
     Widget? suffixIcon,
   }) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon),
+      labelStyle: TextStyle(
+        color: colorScheme.onSurface.withOpacity(0.5),
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+      ),
+      prefixIcon: Icon(icon, color: colorScheme.primary, size: 20),
       suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: colorScheme.primary.withOpacity(0.5), width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Stack(
-          children: [
-              SingleChildScrollView(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 460),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          _buildLogo(),
-                          const SizedBox(height: 20),
-                          Text(
-                            l10n.signupTitle,
-                            style: textTheme.headlineLarge,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Stack(
+        children: [
+          // 1. Premium Reactive Radial Gradient Background
+          Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.topCenter,
+                radius: 1.5,
+                colors: [
+                  colorScheme.surface,
+                  theme.scaffoldBackgroundColor,
+                ],
+              ),
+            ),
+          ),
+
+          // 2. Main Content
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 460),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 12),
+                        
+                        // Header Section - Logo with Reactive Glow
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: colorScheme.primary.withOpacity(0.12),
+                                blurRadius: 40,
+                                spreadRadius: 8,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.signupSubtitle,
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+                          child: _buildLogo(),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        Text(
+                          l10n.signupTitle,
+                          style: textTheme.headlineLarge?.copyWith(
+                            color: colorScheme.onBackground,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          l10n.signupSubtitle,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.6),
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        
+                        // 3. Signup Card
+                        Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: colorScheme.outline.withOpacity(0.2),
+                              width: 1.2,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(isDark ? 0.4 : 0.08),
+                                blurRadius: 30,
+                                offset: const Offset(0, 15),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 24),
-                          Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: _usernameController,
-                                    style: textTheme.bodyLarge,
-                                    decoration: _inputDecoration(
-                                      label: l10n.signupUsernameHint,
-                                      icon: Icons.alternate_email_rounded,
-                                    ),
-                                    validator: (value) {
-                                      final text = value?.trim() ?? '';
-                                      if (text.isEmpty) {
-                                        return l10n.errEmptyUsername;
-                                      }
-                                      if (text.length < 3) {
-                                        return l10n.errShortUsername;
-                                      }
-                                      if (!RegExp(r'^[a-zA-Z0-9._]+$')
-                                          .hasMatch(text)) {
-                                        return l10n.errInvalidUsername;
-                                      }
-                                      return null;
-                                    },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  controller: _usernameController,
+                                  style: textTheme.bodyLarge,
+                                  decoration: _inputDecoration(
+                                    label: l10n.signupUsernameHint,
+                                    icon: Icons.alternate_email_rounded,
+                                    colorScheme: colorScheme,
                                   ),
-                                  const SizedBox(height: 14),
-                                  TextFormField(
-                                    controller: _fullNameController,
-                                    style: textTheme.bodyLarge,
-                                    decoration: _inputDecoration(
-                                      label: l10n.signupFullNameHint,
-                                      icon: Icons.person_outline,
-                                    ),
-                                    validator: (value) {
-                                      if ((value?.trim() ?? '').isEmpty) {
-                                        return l10n.errEmptyName;
-                                      }
-                                      return null;
-                                    },
+                                  validator: (value) {
+                                    final text = value?.trim() ?? '';
+                                    if (text.isEmpty) {
+                                      return l10n.errEmptyUsername;
+                                    }
+                                    if (text.length < 3) {
+                                      return l10n.errShortUsername;
+                                    }
+                                    if (!RegExp(r'^[a-zA-Z0-9._]+$').hasMatch(text)) {
+                                      return l10n.errInvalidUsername;
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 18),
+                                TextFormField(
+                                  controller: _fullNameController,
+                                  style: textTheme.bodyLarge,
+                                  decoration: _inputDecoration(
+                                    label: l10n.signupFullNameHint,
+                                    icon: Icons.person_outline,
+                                    colorScheme: colorScheme,
                                   ),
-                                  const SizedBox(height: 14),
-                                  TextFormField(
-                                    controller: _emailController,
-                                    keyboardType: TextInputType.emailAddress,
-                                    style: textTheme.bodyLarge,
-                                    decoration: _inputDecoration(
-                                      label: l10n.loginEmailHint,
-                                      icon: Icons.email_outlined,
-                                    ),
-                                    validator: (value) {
-                                      final text = value?.trim() ?? '';
-                                      if (text.isEmpty) {
-                                        return l10n.errEmptyEmail;
-                                      }
-                                      if (!text.contains('@')) {
-                                        return l10n.errInvalidEmail;
-                                      }
-                                      return null;
-                                    },
+                                  validator: (value) {
+                                    if ((value?.trim() ?? '').isEmpty) {
+                                      return l10n.errEmptyName;
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 18),
+                                TextFormField(
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  style: textTheme.bodyLarge,
+                                  decoration: _inputDecoration(
+                                    label: l10n.loginEmailHint,
+                                    icon: Icons.email_outlined,
+                                    colorScheme: colorScheme,
                                   ),
-                                  const SizedBox(height: 14),
-                                  Row(
+                                  validator: (value) {
+                                    final text = value?.trim() ?? '';
+                                    if (text.isEmpty) {
+                                      return l10n.errEmptyEmail;
+                                    }
+                                    if (!text.contains('@')) {
+                                      return l10n.errInvalidEmail;
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                
+                                // Account Type Switcher
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surfaceVariant.withOpacity(isDark ? 0.3 : 0.5),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Row(
                                     children: [
                                       Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(l10n.signupRoleStudent, style: textTheme.bodyMedium),
-                                          value: 'student',
-                                          groupValue: _accountType,
-                                          activeColor: AppColors.primary,
-                                          contentPadding: EdgeInsets.zero,
-                                          dense: true,
-                                          onChanged: (val) {
-                                            if (val != null) setState(() => _accountType = val);
-                                          },
+                                        child: _AccountTypeOption(
+                                          title: l10n.signupRoleStudent,
+                                          isSelected: _accountType == 'student',
+                                          onTap: () => setState(() => _accountType = 'student'),
                                         ),
                                       ),
                                       Expanded(
-                                        child: RadioListTile<String>(
-                                          title: Text(l10n.signupRoleDoctor, style: textTheme.bodyMedium),
-                                          value: 'doctor',
-                                          groupValue: _accountType,
-                                          activeColor: AppColors.primary,
-                                          contentPadding: EdgeInsets.zero,
-                                          dense: true,
-                                          onChanged: (val) {
-                                            if (val != null) setState(() => _accountType = val);
-                                          },
+                                        child: _AccountTypeOption(
+                                          title: l10n.signupRoleDoctor,
+                                          isSelected: _accountType == 'doctor',
+                                          onTap: () => setState(() => _accountType = 'doctor'),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  if (_accountType == 'student') ...[
-                                    const SizedBox(height: 14),
-                                    DropdownButtonFormField<String>(
-                                      initialValue: _selectedCollege,
-                                    dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
+                                ),
+                                
+                                if (_accountType == 'student') ...[
+                                  const SizedBox(height: 18),
+                                  DropdownButtonFormField<String>(
+                                    value: _selectedCollege,
+                                    dropdownColor: colorScheme.surface,
                                     style: textTheme.bodyLarge,
                                     decoration: _inputDecoration(
                                       label: l10n.signupCollegeHint,
                                       icon: Icons.account_balance_outlined,
+                                      colorScheme: colorScheme,
                                     ),
                                     items: collegesList.map((college) {
                                       return DropdownMenuItem<String>(
@@ -373,116 +455,243 @@ class _SignupScreenState extends State<SignupScreen>
                                       });
                                     },
                                   ),
-                                  ],
-                                  if (_accountType == 'student') ...[
-                                    const SizedBox(height: 14),
-                                    DropdownButtonFormField<String>(
-                                      initialValue: _specializationId,
-                                      dropdownColor: isDark ? AppColors.inputDarkFill : Colors.white,
-                                      style: textTheme.bodyLarge,
-                                      decoration: _inputDecoration(
-                                        label: l10n.signupMajorHint,
-                                        icon: Icons.school_outlined,
-                                      ),
-                                      items: _filteredSpecializations.map((item) {
-                                        return DropdownMenuItem<String>(
-                                          value: item.id,
-                                          child: Text(item.name),
-                                        );
-                                      }).toList(),
-                                      onChanged: (value) {
-                                        if (value == null) return;
-                                        setState(() {
-                                          _specializationId = value;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                  const SizedBox(height: 14),
-                                  TextFormField(
-                                    controller: _bioController,
-                                    maxLines: 2,
+                                  const SizedBox(height: 18),
+                                  DropdownButtonFormField<String>(
+                                    value: _specializationId,
+                                    dropdownColor: colorScheme.surface,
                                     style: textTheme.bodyLarge,
                                     decoration: _inputDecoration(
-                                      label: l10n.signupBioHint,
-                                      icon: Icons.info_outline,
+                                      label: l10n.signupMajorHint,
+                                      icon: Icons.school_outlined,
+                                      colorScheme: colorScheme,
                                     ),
-                                  ),
-                                  const SizedBox(height: 14),
-                                  TextFormField(
-                                    controller: _passwordController,
-                                    obscureText: _obscurePassword,
-                                    style: textTheme.bodyLarge,
-                                    decoration: _inputDecoration(
-                                      label: l10n.loginPasswordHint,
-                                      icon: Icons.lock_outline,
-                                      suffixIcon: IconButton(
-                                        onPressed: () {
-                                          setState(() => _obscurePassword = !_obscurePassword);
-                                        },
-                                        icon: Icon(
-                                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                          color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
-                                        ),
-                                      ),
-                                    ),
-                                    validator: (value) {
-                                      final text = value?.trim() ?? '';
-                                      if (text.isEmpty) {
-                                        return l10n.errEmptyPassword;
-                                      }
-                                      if (text.length < 6) {
-                                        return l10n.errShortPassword;
-                                      }
-                                      return null;
+                                    items: _filteredSpecializations.map((item) {
+                                      return DropdownMenuItem<String>(
+                                        value: item.id,
+                                        child: Text(item.name),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      if (value == null) return;
+                                      setState(() {
+                                        _specializationId = value;
+                                      });
                                     },
                                   ),
-                                  const SizedBox(height: 20),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ScaleOnPress(
-                                      onTap: _isLoading ? null : _handleSignup,
-                                      child: ElevatedButton(
-                                        onPressed: _isLoading ? null : () {},
-                                        child: _isLoading
-                                            ? const SizedBox(
-                                                width: 22,
-                                                height: 22,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2.5,
-                                                  color: Colors.white,
-                                                ),
-                                              )
-                                            : Text(l10n.signupBtn),
+                                ],
+                                const SizedBox(height: 18),
+                                TextFormField(
+                                  controller: _bioController,
+                                  maxLines: 2,
+                                  style: textTheme.bodyLarge,
+                                  decoration: _inputDecoration(
+                                    label: l10n.signupBioHint,
+                                    icon: Icons.info_outline,
+                                    colorScheme: colorScheme,
+                                  ),
+                                ),
+                                const SizedBox(height: 18),
+                                TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: _obscurePassword,
+                                  style: textTheme.bodyLarge,
+                                  decoration: _inputDecoration(
+                                    label: l10n.loginPasswordHint,
+                                    icon: Icons.lock_outline,
+                                    colorScheme: colorScheme,
+                                    suffixIcon: IconButton(
+                                      onPressed: () {
+                                        setState(() => _obscurePassword = !_obscurePassword);
+                                      },
+                                      icon: Icon(
+                                        _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                        color: colorScheme.onSurface.withOpacity(0.5),
+                                        size: 20,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
-                                  TextButton(
+                                  validator: (value) {
+                                    final text = value?.trim() ?? '';
+                                    if (text.isEmpty) {
+                                      return l10n.errEmptyPassword;
+                                    }
+                                    if (text.length < 6) {
+                                      return l10n.errShortPassword;
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 32),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ScaleOnPress(
+                                    child: ElevatedButton(
+                                      onPressed: _isLoading ? null : _handleSignup,
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                      ),
+                                      child: _isLoading
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.5,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : Text(
+                                              l10n.signupBtn,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 16,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Center(
+                                  child: TextButton(
                                     onPressed: () => Navigator.of(context).pushReplacementNamed('/login'),
                                     style: TextButton.styleFrom(
-                                      foregroundColor: AppColors.primary,
+                                      foregroundColor: colorScheme.primary,
                                     ),
                                     child: Text(
                                       l10n.signupAlreadyHaveAccount,
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+
+          // 3. Settings Toggle (Top Corner - Layered over content for hit-testing)
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SignupTopActionButton(
+                  icon: Icons.translate_rounded,
+                  onTap: () => SettingsBottomSheet.show(context),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
+/// Reused proven account type option widget
+class _AccountTypeOption extends StatelessWidget {
+  final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _AccountTypeOption({
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? colorScheme.primary 
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: colorScheme.primary.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            )
+          ] : null,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          title,
+          style: TextStyle(
+            color: isSelected 
+                ? Colors.white 
+                : colorScheme.onSurface.withOpacity(0.6),
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Reused proven action button implementation from feed_screen.dart
+class SignupTopActionButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const SignupTopActionButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surface.withOpacity(0.98) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? AppColors.border : Colors.black12,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          color: isDark ? AppColors.textPrimary : Colors.black87,
+          size: 20,
+        ),
+      ),
+    );
+  }
+}
